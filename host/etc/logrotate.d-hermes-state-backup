@@ -1,0 +1,10 @@
+/var/log/hermes-state-backup.log {
+    weekly
+    rotate 4
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+    su root root
+}

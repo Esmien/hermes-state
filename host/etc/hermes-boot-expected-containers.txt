@@ -1,0 +1,12 @@
+open-webui
+searxng
+edge-tts
+open-terminal
+lyria-generation-worker
+lyria-enricher-worker
+lyria-bot
+lyria-postgres
+lyria-redis
+lyria-rabbitmq
+litellm
+litellm-redis

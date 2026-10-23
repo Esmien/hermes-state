@@ -1,0 +1,117 @@
+{
+  "jobs": [
+    {
+      "id": "3378eb7271b7",
+      "name": "Проверка ночного бэкапа PostgreSQL",
+      "prompt": "Ты — VPS-админ этого сервера (Ubuntu, хост-рут доступен напрямую как /).\n\nПРОВЕРКА НОЧНОГО БЭКАПА УЖЕ ВЫПОЛНЕНА до этого запуска предпроверочным скриптом backup-verify.sh: он запустил `monitor.py verify` (журнал бэкапа, свежесть дампов, восстановление последнего дампа каждой БД во временную БД, статусы systemd-юнитов postgres-backup.service / -notify.service) и отчёт уже ушёл владельцу в бот уведомлений (@esmien_vps_notificator_bot). Вывод скрипта — в блоке PRE-RUN SCRIPT OUTPUT выше в этом промпте.\n\nСТРОГОЕ ПРАВИЛО: НЕ запускай `/home/ai_service/notifications/monitor.py verify` (или любой эквивалент проверки) повторно и вообще не запускай никаких проверок бэкапа. Каждый лишний запуск отправляет владельцу дубликат отчёта — именно это и нужно исключить. Нужные данные уже есть в промпте; при нехватке деталей читай логи, но не перезапускай verify.\n\nТвоя задача — проанализировать уже полученный вывод:\n1. Если проблем нет — ответь одной строкой: «Ночной бэкап PostgreSQL проверен, проблем нет».\n2. Если проблемы есть (verify вернул не 0, ошибки в журнале, несвежие дампы, сбой восстановления, Result!=success у юнитов) — разберись в причине (journalctl -u postgres-backup.service -n 50 --no-pager; tail -n 30 /home/ai_service/ai-stack/backups/postgres/backup.log; journalctl -u postgres-backup-notify.service -n 50 --no-pager) и отправь РОВНО ОДНО дополнительное сообщение:\n   /usr/bin/python3 /home/ai_service/notifications/monitor.py send \"<кратко: проблема и что сделано>\"\n\nНикогда не выводи содержимое .env, токены и пароли. Не удаляй бэкапы. Не меняй состояние системы (systemctl, правки юнитов) без явного подтверждения владельца.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": "backup-verify.sh",
+      "no_agent": false,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "cron",
+        "expr": "15 3 * * *",
+        "display": "15 3 * * *"
+      },
+      "schedule_display": "15 3 * * *",
+      "repeat": {
+        "times": null,
+        "completed": 12
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-10-11T21:18:03.196945+00:00",
+      "next_run_at": "2026-10-24T03:15:00+00:00",
+      "last_run_at": "2026-10-23T03:16:02.126609+00:00",
+      "last_status": "ok",
+      "last_error": null,
+      "last_delivery_error": null,
+      "last_delivery_unverified": null,
+      "last_failure": null,
+      "failure_streak": 0,
+      "deliver": "local",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "214062001",
+        "chat_name": "Владислав",
+        "thread_id": null,
+        "user_id": "214062001",
+        "scope_id": null
+      },
+      "enabled_toolsets": [
+        "terminal"
+      ],
+      "workdir": null,
+      "failure_deliver": "origin",
+      "last_dispatch": {
+        "scheduled_at": "2026-10-23T03:15:00+00:00",
+        "dispatched_at": "2026-10-23T03:15:20.308576+00:00",
+        "lateness_seconds": 20.3,
+        "kind": "on_time"
+      },
+      "fire_claim": null
+    },
+    {
+      "id": "2d8e56bb43ff",
+      "name": "Напоминание: переделать маршрутизацию LLM-трафика",
+      "prompt": "Отправь пользователю Владиславу напоминание в чат:\n\"⏰ Напоминание: переделать маршрутизацию LLM-трафика (llm0traffic).\"\nНикаких других действий не выполняй, просто выведи это напоминание.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": null,
+      "no_agent": false,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "once",
+        "run_at": "2026-10-17T19:00:00+00:00",
+        "display": "once at 2026-10-17 19:00"
+      },
+      "schedule_display": "once at 2026-10-17 19:00",
+      "repeat": {
+        "times": 1,
+        "completed": 1
+      },
+      "enabled": false,
+      "state": "completed",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-10-16T20:29:21.903466+00:00",
+      "next_run_at": null,
+      "last_run_at": "2026-10-17T19:00:29.359013+00:00",
+      "last_status": "ok",
+      "last_error": null,
+      "last_delivery_error": null,
+      "last_delivery_unverified": null,
+      "last_failure": null,
+      "failure_streak": 0,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "214062001",
+        "chat_name": "Владислав",
+        "thread_id": null,
+        "user_id": "214062001",
+        "scope_id": null
+      },
+      "enabled_toolsets": null,
+      "workdir": null,
+      "run_claim": null,
+      "fire_claim": null
+    }
+  ],
+  "updated_at": "2026-10-23T03:16:02.166334+00:00"
+}
