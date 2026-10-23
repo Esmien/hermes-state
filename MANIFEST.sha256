@@ -4,6 +4,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 0971a9db45fbd6ca17e9195b93311404803054a2e29d8fbbbe7b6c1b71007a3c  ./hermes/cron/jobs.json
 d5c043c0394c740ec7ac3af83c14c92ec78f52a66a3d6fb1fb79ceabe5bf8157  ./hermes/memories/MEMORY.md
 b9d3f9071cac054be65e1f35b0018efa706e85e9970a89e8b15d33ae201ad377  ./hermes/memories/USER.md
+552b1ead436b240bdbfb435851811e00d66c4d7dd21623b70a0c52d361fa3eb4  ./hermes/plugins/._state_backup_test.txt
 9547927170b127aac36ed4d208fbc6e6149ad4cc52457a018f16471f8161297e  ./hermes/scripts/backup-verify.sh
 49a899583a852d558603d43b969fbdf788e372a70cb6ec86c73c4af08dd22049  ./hermes/skills/.bundled_manifest
 ed781d08827db19424b593c0910fb1e44c70ae81a32d7cb0177caf728cc9ce40  ./hermes/skills/.curator_state
