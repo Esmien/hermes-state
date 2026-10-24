@@ -216,7 +216,7 @@ d9e4db9382798c22c1fde741a13e83d62229901211356cea266a2b7e3883eebf  ./hermes/skill
 67fe918651475beb7efd3c5f09150e6c11a99ad467b64f0c559e2b58437cb203  ./hermes/skills/devops/credential-login-verification/SKILL.md
 da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skills/devops/credential-login-verification/scripts/login-path-audit.sh
 0d34ac6cfb19b56de1ac65048445cf6e20ab1246fa84a8eefde749ca1bb31a74  ./hermes/skills/devops/docker-compose-traps/SKILL.md
-3ec7b1a44e28619e25be612cbe8889aafe5579e1818bac9fc719112116557efa  ./hermes/skills/devops/hermes-state-backup/SKILL.md
+d939ff8253f8da166a191a033898aa8c6ce5f5fd2f4760d7d996015081dcb7f6  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 ce90e8a3e145cce69c62880dc85921700110879f9290952d6cec28218503155f  ./hermes/skills/devops/sdlc-review/SKILL.md
 f47c7a7b7fa25b188a35cc5d0e1a2db381ed446b1fdf98001e77f06b850af34d  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
 5ca62040ffd05e4e95bdf7105ba920edf37f6ed698b49a5540f109ee69cf2480  ./hermes/skills/devops/vps-network-exposure/SKILL.md

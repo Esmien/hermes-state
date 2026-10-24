@@ -15,8 +15,8 @@ metadata:
 ## When to Use
 
 - The user asks where the agent's own settings/skills/runbooks are backed up, or wants a restore drill.
-- `hermes-state-backup.timer` failed, the GitHub repo is stale, or the secret guard aborted a commit.
-- A new runbook/unit/systemd script must be pulled into the daily snapshot.
+- `hermes-state-watch.service` is dead, the GitHub repo is stale, or the secret guard aborted a commit.
+- A new runbook/unit/systemd script must be pulled into the snapshot.
 
 ## What exists
 
@@ -56,6 +56,8 @@ Backups fire **when the state changes**, not on a clock. `hermes-state-watch.ser
 - `inotify-tools` is required (`inotifywait 3.22` present). systemd `.path` units are **not** recursive — they would miss `skills/<name>/SKILL.md`.
 - The watcher also runs one snapshot at service start, which covers edits made while it was down (host rebooted, unit stopped).
 - A `flock` on `/var/lib/hermes-state/.snapshot.lock` (fd 9, `-w 900`) serialises the watcher and manual runs; without it a manual `systemctl start` during a debounce window produced interleaved commits.
+- **Every path in `WATCH` must also be snapshotted.** Watching a file that no `install`/`rsync` line copies produces runs that commit nothing — that is how `runbook-containers.md` was watched but absent from the repo until it was added to the snapshot loop. Add both sides in the same edit.
+- Watch files, not whole directories, when the directory carries runtime churn: `cron/` contains `deliveries.db-wal` that is written continuously and reset the debounce forever (no snapshot ever fired). The watcher therefore watches `cron/jobs.json` and excludes `-wal$|-shm$|\.db$|\.usage\.json`.
 - After editing the watcher itself: `systemctl restart hermes-state-watch` — that restart triggers a catch-up snapshot, which is the fastest self-test.
 
 ## Verify / operate
@@ -71,17 +73,21 @@ Expected idle output in the backup log: `no changes since last snapshot — noth
 
 ## Adding a new runbook/script to the backup
 
-Append the filename to `HOST_BIN`, `HOST_UNITS` or `HOST_ETC` in the script. Missing files are skipped
-silently (`[[ -f ... ]] && ...`), so the arrays can list units that do not exist on every host.
+Append the filename to `HOST_BIN`, `HOST_UNITS` or `HOST_ETC` in the script (the stack runbooks are copied by a loop into `host/ai-stack/`). Missing files are skipped silently (`[[ -f ... ]] && ...`), so the arrays can list units that do not exist on every host. Foreign files that live outside those arrays (e.g. `/etc/hosts`, nginx configs) are **not** backed up — say so instead of promising a full-host snapshot.
 
 ## Retry after a failed push
 
-A push that fails (GitHub unreachable, token revoked) leaves the commit on the host only. Two mechanisms close that hole:
+A push that fails (GitHub unreachable, token revoked) leaves the commit on the host only. Three mechanisms close that hole:
 
 - the snapshot script compares `git ls-remote origin refs/heads/main` with the local HEAD on **every** run and pushes when they differ (catch-up), so a commit stranded by an outage goes up with the next tick;
-- the watcher retries a failed snapshot with exponential backoff (`RETRY_MIN=60` → `RETRY_MAX=300`) instead of waiting for the next edit.
+- the watcher retries a failed snapshot with exponential backoff (`RETRY_MIN=60` → `RETRY_MAX=300`) instead of waiting for the next edit;
+- push failures alert through `hermes send`, throttled to **one message per 30 minutes** (stamp `/var/lib/hermes-state/.last-push-alert`): with retries every 60-300 s an unthrottled alert means a dozen identical messages per outage.
 
-Drill without touching GitHub: `BACKUP=/tmp/failing.sh WATCH_LOG=/tmp/watch.log QUIET=5 CYCLE=2 RETRY_MIN=3 RETRY_MAX=6 /usr/local/bin/hermes-state-watch.sh` (the watcher reads those overrides from the environment) — the log must show `snapshot FAILED … повтор через 3s`, then `retry after failure`, then `snapshot ok` once the stub starts exiting 0.
+Drills, from cheap to conclusive — `references/push-outage-drill.md`:
+
+- stub: `BACKUP=/tmp/failing.sh WATCH_LOG=/tmp/watch.log QUIET=5 RETRY_MIN=3 RETRY_MAX=6 /usr/local/bin/hermes-state-watch.sh` (the watcher reads those overrides from the environment) — proves backoff only;
+- sandbox: copy the repo plus a local bare remote — proves the catch-up branch without touching GitHub;
+- live: block `github.com` in `/etc/hosts` (leave `api.github.com` reachable) — proves the whole chain on the real remote; the owner asks for this level of proof.
 
 ## Gotchas
 
