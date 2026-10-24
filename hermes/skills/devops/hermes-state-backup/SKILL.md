@@ -74,6 +74,15 @@ Expected idle output in the backup log: `no changes since last snapshot — noth
 Append the filename to `HOST_BIN`, `HOST_UNITS` or `HOST_ETC` in the script. Missing files are skipped
 silently (`[[ -f ... ]] && ...`), so the arrays can list units that do not exist on every host.
 
+## Retry after a failed push
+
+A push that fails (GitHub unreachable, token revoked) leaves the commit on the host only. Two mechanisms close that hole:
+
+- the snapshot script compares `git ls-remote origin refs/heads/main` with the local HEAD on **every** run and pushes when they differ (catch-up), so a commit stranded by an outage goes up with the next tick;
+- the watcher retries a failed snapshot with exponential backoff (`RETRY_MIN=60` → `RETRY_MAX=300`) instead of waiting for the next edit.
+
+Drill without touching GitHub: `BACKUP=/tmp/failing.sh WATCH_LOG=/tmp/watch.log QUIET=5 CYCLE=2 RETRY_MIN=3 RETRY_MAX=6 /usr/local/bin/hermes-state-watch.sh` (the watcher reads those overrides from the environment) — the log must show `snapshot FAILED … повтор через 3s`, then `retry after failure`, then `snapshot ok` once the stub starts exiting 0.
+
 ## Gotchas
 
 - **Do not re-enable `hermes-state-backup.timer`.** The owner replaced the schedule with change-triggered snapshots on 2026-10-24; a timer means duplicate commits and a second source of truth. The unit stays on disk only as a manual fallback.

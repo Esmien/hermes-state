@@ -10,8 +10,8 @@
 # изменения приходят из подпапок skills/*/ и memories/.
 set -uo pipefail
 
-BACKUP=/usr/local/bin/hermes-state-backup.sh
-LOG=/var/log/hermes-state-watch.log
+BACKUP=${BACKUP:-/usr/local/bin/hermes-state-backup.sh}
+LOG=${WATCH_LOG:-/var/log/hermes-state-watch.log}
 QUIET=${QUIET:-90}        # тишина после последнего события, сек
 MAXDELAY=${MAXDELAY:-900} # максимум от первого события до коммита, сек
 RETRY_MIN=${RETRY_MIN:-60}   # первая пауза перед повтором упавшего снапшота
