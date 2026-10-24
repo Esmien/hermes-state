@@ -231,8 +231,30 @@ fi
 # ---------------------------------------------------------------- commit + push
 git -C "$REPO_DIR" add -A
 
+push_remote() {
+    if GIT_ASKPASS="$ASKPASS" GIT_TERMINAL_PROMPT=0 \
+            git -C "$REPO_DIR" push -q origin main 2>>"$LOG_FILE"; then
+        log "✓ pushed $(git -C "$REPO_DIR" rev-parse --short HEAD) to $GIT_REMOTE"
+        return 0
+    fi
+    return 1
+}
+
+remote_head() {
+    GIT_ASKPASS="$ASKPASS" GIT_TERMINAL_PROMPT=0 \
+        git -C "$REPO_DIR" ls-remote origin refs/heads/main 2>/dev/null | awk '{print $1}' | head -n1
+}
+
 if git -C "$REPO_DIR" diff --cached --quiet; then
-    log "no changes since last snapshot — nothing to commit"
+    # Новых правок нет, но предыдущий push мог не пройти: локальный HEAD
+    # опережает origin. Догоняем, иначе коммит висит на хосте навсегда.
+    LOCAL_HEAD="$(git -C "$REPO_DIR" rev-parse HEAD)"
+    if [[ "$(remote_head)" != "$LOCAL_HEAD" ]]; then
+        log "local HEAD $LOCAL_HEAD missing on remote — catch-up push"
+        push_remote || die "git push to $GIT_REMOTE failed (catch-up)"
+    else
+        log "no changes since last snapshot — nothing to commit"
+    fi
     exit 0
 fi
 
@@ -244,12 +266,7 @@ git -C "$REPO_DIR" commit -q -m "state snapshot $(date -u '+%Y-%m-%d %H:%M UTC')
 COMMIT="$(git -C "$REPO_DIR" rev-parse --short HEAD)"
 log "✓ committed $COMMIT ($STAT)"
 
-if GIT_ASKPASS="$ASKPASS" GIT_TERMINAL_PROMPT=0 \
-        git -C "$REPO_DIR" push -q origin main 2>>"$LOG_FILE"; then
-    log "✓ pushed $COMMIT to $GIT_REMOTE"
-else
-    die "git push to $GIT_REMOTE failed"
-fi
+push_remote || die "git push to $GIT_REMOTE failed (commit $COMMIT stays local, watcher retries)"
 
 git -C "$REPO_DIR" gc --auto -q >/dev/null 2>&1 || true
 log "=== snapshot complete: $(du -sh "$REPO_DIR" | cut -f1) repo, $(git -C "$REPO_DIR" rev-list --count HEAD) commits ==="

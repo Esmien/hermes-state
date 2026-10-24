@@ -14,6 +14,8 @@ BACKUP=/usr/local/bin/hermes-state-backup.sh
 LOG=/var/log/hermes-state-watch.log
 QUIET=${QUIET:-90}        # тишина после последнего события, сек
 MAXDELAY=${MAXDELAY:-900} # максимум от первого события до коммита, сек
+RETRY_MIN=${RETRY_MIN:-60}   # первая пауза перед повтором упавшего снапшота
+RETRY_MAX=${RETRY_MAX:-300}  # потолок бэкоффа
 CYCLE=15                  # окно ожидания событий в inotifywait, сек
 
 HERMES=${HERMES_HOME:-/root/.hermes}
@@ -41,12 +43,23 @@ EXCLUDE='(\.hub/|\.git/|__pycache__/|\.locks/|\.lock$|\.tmp$|hermes-state/repo|\
 
 log() { echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*" >>"$LOG"; }
 
+retry_at=0
+retry_delay=$RETRY_MIN
+
 run_backup() {
-    log "changes detected → snapshot"
-    if "$BACKUP" >>"$LOG" 2>&1; then
+    local why="${1:-changes detected}"
+    log "$why → snapshot"
+    local rc=0
+    "$BACKUP" >>"$LOG" 2>&1 || rc=$?
+    if [[ "$rc" -eq 0 ]]; then
         log "snapshot ok"
+        retry_at=0
+        retry_delay=$RETRY_MIN
     else
-        log "snapshot FAILED rc=$?"
+        retry_at=$(( $(date +%s) + retry_delay ))
+        log "snapshot FAILED rc=$rc, повтор через ${retry_delay}s"
+        retry_delay=$(( retry_delay * 2 ))
+        (( retry_delay > RETRY_MAX )) && retry_delay=$RETRY_MAX
     fi
 }
 
@@ -62,6 +75,10 @@ first=0
 last=0
 
 while true; do
+    # добиваем упавший снапшот, не дожидаясь следующей правки
+    if [[ "$retry_at" -gt 0 ]] && [[ "$(date +%s)" -ge "$retry_at" ]]; then
+        run_backup "retry after failure"
+    fi
     if ev=$(inotifywait -r -q -t "$CYCLE" \
             -e modify,create,delete,move,moved_to,moved_from,attrib,close_write \
             --format '%e %w%f' --exclude "$EXCLUDE" "${WATCH[@]}" 2>&1); then

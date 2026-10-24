@@ -368,8 +368,8 @@ df8b07b07e5a51df7e28294323319ca4e945fa3a2e7d6291b24957f74109c937  ./host/bin/doc
 807d90d5d8a0cb39287d6ee65c87f116eb18c3ab0b3e4ad25849ce1fcb046d9f  ./host/bin/docker-incident-detector.py
 f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-guard-postgres.sh
 c146da46593b866352bc6bc439ee1e1cd21754c8818af7993ab140ea011f0954  ./host/bin/hermes-boot-notify.sh
-c9a030a12e209dd4bff89a018bb96cb8811176ab6ce61bc87a2ba6894df6dae3  ./host/bin/hermes-state-backup.sh
-8388a1397754f9a7afc58754d2eecc311a595a94f3759b8e57a458351bc8e2c4  ./host/bin/hermes-state-watch.sh
+189226a713eba2dd356e03f095f7ddbf15c185b8958f1c74924db835f32eb800  ./host/bin/hermes-state-backup.sh
+0eab3f2eaff7da42406f754529ccf559926d492edae898fbdf001acc0fb950a0  ./host/bin/hermes-state-watch.sh
 22ba3afdadc842431f74993b46827aa9513433b82e27810fba6be2304d2e45ff  ./host/bin/litellm-spend-retention.sh
 95655be1c140ce102c02ba9cb73bfea09457869d62419f64ef9677efc48ab087  ./host/bin/litellm-watchdog.py
 fc417a20d0e10496c62ca005d4b06bdc0aa778cf82b02617538a6987ce02d9d8  ./host/bin/owui-signup-approver.py
