@@ -1,4 +1,4 @@
-Отключение навыков в Hermes: config-ключ skills.disabled — список имён-навыков (load_name). Правка: hermes config set skills.disabled '["name1","name2"]' (ключ не в DEFAULT_CONFIG, CLI выдаёт ложное предупреждение о неопознанном ключе, но читатели её читают). Платформенный вариант: skills.platform_disabled.<platform>. Нельзя отключить ESSENTIAL_SKILLS = {hermes-agent}. Применяется при сборке агента → нужно /reload-skills, /new или /restart гейтвея.
+Отключение навыков в Hermes: skills.disabled — JSON-список имён (hermes config set skills.disabled '["a","b"]'; ключа нет в DEFAULT_CONFIG → ложное предупреждение CLI). Платформенно: skills.platform_disabled.<platform>. ESSENTIAL_SKILLS={hermes-agent} отключить нельзя. Читается при сборке агента → /reload-skills или /new.
 §
 Хост-рут этого VPS доступен напрямую как `/` — агент работает на корне хоста, НЕ в контейнере с bind-маунтом. `/mnt/host` НЕ существует; хостовые пути использовать как есть (/home/..., /etc/...). AI-стек: /home/ai_service/ai-stack (детали — skill ai-stack).
 §
@@ -9,3 +9,5 @@ Telegram-боты (владелец 214062001): @esmien_vps_notificator_bot (н�
 Разбор падений: docker-autorecover.timer (60с) → /usr/local/bin/docker-incident-detector.py (детект+улики в /var/lib/docker-incidents/, контейнеры не трогает) → Hermes-агент через systemd-run (docker-incident-agent.sh, отчёт в TG). Allowlist /etc/docker-autorecover.conf, лог /var/log/docker-autorecover.log, сторож docker-detector-liveness.timer. Перед ручными работами с контейнерами — touch /var/lib/docker-autorecover/pause, после снять.
 §
 Бэкап состояния Hermes: коммит в приватный GitHub Esmien/hermes-state ПО ФАКТУ ИЗМЕНЕНИЙ (с 24.10.2026, не по таймеру): hermes-state-watch.service (inotify, debounce 90с) → hermes-state-backup.sh (flock, GITHUB_KEY из ai-stack/ai/.env, GIT_ASKPASS) → /var/lib/hermes-state/repo. Таймер отключён. Логи /var/log/hermes-state-watch.log и -backup.log. Детали — skill hermes-state-backup.
+§
+Инфраструктура ставится из github.com/Esmien/vps-infra (bootstrap | bash → install.py), копия /root/vps-infra; ai-stack/deploy.sh исторический. Детали — skill vps-infra-installer.

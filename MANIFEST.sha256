@@ -2,7 +2,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
 38f9b44b413459a1370f4945e6b6af130decc73170d68abd859f2945de487972  ./hermes/config.yaml
 add1cc6b3b38ebb3456c584de42009a48357532455df1d91628b5dfac9e265b9  ./hermes/cron/jobs.json
-18d57d7277a3db0cb77f38be10ea8cec49fbb838a808e40263c5ad3d1c2b6652  ./hermes/memories/MEMORY.md
+66dcce4ec8ae329e520070d2e839673df00370fda211f16bc2df9b9e9bafbadf  ./hermes/memories/MEMORY.md
 e2a55886086cb3d59dcb223161c7638e5c8be71e6e103299de4ddc503577e905  ./hermes/memories/USER.md
 9547927170b127aac36ed4d208fbc6e6149ad4cc52457a018f16471f8161297e  ./hermes/scripts/backup-verify.sh
 49a899583a852d558603d43b969fbdf788e372a70cb6ec86c73c4af08dd22049  ./hermes/skills/.bundled_manifest
@@ -220,6 +220,7 @@ d939ff8253f8da166a191a033898aa8c6ce5f5fd2f4760d7d996015081dcb7f6  ./hermes/skill
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
 ce90e8a3e145cce69c62880dc85921700110879f9290952d6cec28218503155f  ./hermes/skills/devops/sdlc-review/SKILL.md
 f47c7a7b7fa25b188a35cc5d0e1a2db381ed446b1fdf98001e77f06b850af34d  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
+feda3b0871eb9de003695ff895d4b8d19a212b949c7df11d4d2e62cd7b58f820  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 5ca62040ffd05e4e95bdf7105ba920edf37f6ed698b49a5540f109ee69cf2480  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
 918971595010770b622cd8cd01580d166146ce98f021a66960e49f7b4ba09b37  ./hermes/skills/devops/webui-ios-icons/SKILL.md
