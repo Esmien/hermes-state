@@ -2,8 +2,6 @@
 Description=Commit Hermes state to GitHub on change (inotify watcher)
 After=network-online.target
 Wants=network-online.target
-# Один экземпляр: второй watcher = двойные коммиты
-Conflicts=hermes-state-watch.service
 
 [Service]
 Type=simple
