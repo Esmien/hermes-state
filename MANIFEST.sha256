@@ -210,13 +210,14 @@ c2fc4ce4b63f576ee21f3a0065f03f45b85b702159e047fd18083ae345eb0f49  ./hermes/skill
 534cac14e01a8c2bbbaaae3614e06ab3b07ded048521d69176d1a46fdf0bbf56  ./hermes/skills/devops/ai-stack/scripts/compact-webui-images.py
 36432d6a9677006a068a5ceefbc2e9995a298d98576e58372b92173b77126f44  ./hermes/skills/devops/ai-stack/scripts/probe-approval-guardian.py
 57a2a5e8f2f2395dfb18a9a37ebed061a5272f43b7737f966462483ea4e03f2a  ./hermes/skills/devops/ai-stack/scripts/probe-media-endpoints.py
-d9e4db9382798c22c1fde741a13e83d62229901211356cea266a2b7e3883eebf  ./hermes/skills/devops/container-incident-response/SKILL.md
+5c31d33cb0c6bf6a6eb911e6419abf3e48f785e0083b50e273b7fdfd97da8c5e  ./hermes/skills/devops/container-incident-response/SKILL.md
 244093d67fc1c519a82fe5fbd107a2cea7b8127de5d5e030001163f9bae0c53f  ./hermes/skills/devops/container-incident-response/references/agent-wakeup.md
 891b02a8d8af2ff6fe959e205bcb8a343270686135367050b673524c31c304e7  ./hermes/skills/devops/container-incident-response/references/detector-and-thresholds.md
 67fe918651475beb7efd3c5f09150e6c11a99ad467b64f0c559e2b58437cb203  ./hermes/skills/devops/credential-login-verification/SKILL.md
 da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skills/devops/credential-login-verification/scripts/login-path-audit.sh
-0d34ac6cfb19b56de1ac65048445cf6e20ab1246fa84a8eefde749ca1bb31a74  ./hermes/skills/devops/docker-compose-traps/SKILL.md
+4937df16fe180e56bf6d400beddba446d86ca07c8faf2c6751e34d07dbe13524  ./hermes/skills/devops/docker-compose-traps/SKILL.md
 d939ff8253f8da166a191a033898aa8c6ce5f5fd2f4760d7d996015081dcb7f6  ./hermes/skills/devops/hermes-state-backup/SKILL.md
+55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
 ce90e8a3e145cce69c62880dc85921700110879f9290952d6cec28218503155f  ./hermes/skills/devops/sdlc-review/SKILL.md
 f47c7a7b7fa25b188a35cc5d0e1a2db381ed446b1fdf98001e77f06b850af34d  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
 5ca62040ffd05e4e95bdf7105ba920edf37f6ed698b49a5540f109ee69cf2480  ./hermes/skills/devops/vps-network-exposure/SKILL.md
