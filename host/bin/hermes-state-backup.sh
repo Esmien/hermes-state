@@ -167,6 +167,12 @@ done
 [[ -f /home/ai_service/ai-stack/ai/backup-databases.sh ]] && \
     install -m 644 -D /home/ai_service/ai-stack/ai/backup-databases.sh "$REPO_DIR/host/ai-stack/backup-databases.sh"
 
+# runbook-и стека: единственный документ «что делать в 3 часа ночи» — держим в бэкапе
+for rb in runbook-containers.md runbook.md; do
+    [[ -f "/home/ai_service/ai-stack/$rb" ]] && \
+        install -m 644 -D "/home/ai_service/ai-stack/$rb" "$REPO_DIR/host/ai-stack/$rb"
+done
+
 # README (first run only — afterwards it is user-editable)
 if [[ ! -f "$REPO_DIR/README.md" ]]; then
     cat > "$REPO_DIR/README.md" <<'EOF'

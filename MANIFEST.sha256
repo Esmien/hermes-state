@@ -363,12 +363,14 @@ bd480f51a2e9969c88544003c30b7539b7df0b7358703f99b0495514c2dd878a  ./hermes/skill
 6caf6cd781dd3a2e19a1501a619803776dfb0a2a2e00f770c4a9e97755b46026  ./hermes/skills/web/blocked-page-recovery/SKILL.md
 22b996996ae2bf252b31cfd2636231f08936729a381dce7ba8bfa4afb8ffe8c6  ./hermes/skills/web/blocked-page-recovery/scripts/recover_page.py
 f3ca9e5152d2ccdda1de46baf415df59ae3b5abd560704d10296579035a8ffe6  ./host/ai-stack/backup-databases.sh
+d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md
+6518ee29303b0e5ffdf86eb9091d17e44fe1d2fe6a9ebc20b1ac3caf5b7f18fe  ./host/ai-stack/runbook.md
 7cac890fcc48be6cfc3efe302dbab2d018074c270a15481e99b2c464be278184  ./host/bin/docker-detector-liveness.sh
 df8b07b07e5a51df7e28294323319ca4e945fa3a2e7d6291b24957f74109c937  ./host/bin/docker-incident-agent.sh
 807d90d5d8a0cb39287d6ee65c87f116eb18c3ab0b3e4ad25849ce1fcb046d9f  ./host/bin/docker-incident-detector.py
 f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-guard-postgres.sh
 c146da46593b866352bc6bc439ee1e1cd21754c8818af7993ab140ea011f0954  ./host/bin/hermes-boot-notify.sh
-189226a713eba2dd356e03f095f7ddbf15c185b8958f1c74924db835f32eb800  ./host/bin/hermes-state-backup.sh
+01958d214134917f5f33c4abce8286860908041f0f21438fbb1ab4d45080c9f3  ./host/bin/hermes-state-backup.sh
 63aa9049393d5904d86b1a343fb9e57ebe2d01771b6df314282440bfdc2b3149  ./host/bin/hermes-state-watch.sh
 22ba3afdadc842431f74993b46827aa9513433b82e27810fba6be2304d2e45ff  ./host/bin/litellm-spend-retention.sh
 95655be1c140ce102c02ba9cb73bfea09457869d62419f64ef9677efc48ab087  ./host/bin/litellm-watchdog.py
