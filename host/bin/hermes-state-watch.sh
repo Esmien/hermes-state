@@ -23,7 +23,7 @@ WATCH=(
     "$HERMES/plugins"
     "$HERMES/hooks"
     "$HERMES/scripts"
-    "$HERMES/cron"
+    "$HERMES/cron/jobs.json"
     "$HERMES/config.yaml"
     "$HERMES/SOUL.md"
     /usr/local/bin
@@ -35,7 +35,9 @@ WATCH=(
     /home/ai_service/ai-stack/ai/backup-databases.sh
 )
 # .hub — 51 МБ клон хаба, в снапшот не идёт; .git/__pycache__/локи — шум
-EXCLUDE='(\.hub/|\.git/|__pycache__/|\.locks/|\.lock$|\.tmp$|hermes-state/repo|\.curator_backups/)'
+# cron deliveries.db-wal пишется постоянно и сбрасывал бы debounce бесконечно;
+# поэтому в cron следим только за jobs.json, а sqlite-мусор режем по маске
+EXCLUDE='(\.hub/|\.git/|__pycache__/|\.locks/|\.lock$|\.tmp$|hermes-state/repo|\.curator_backups/|-wal$|-shm$|\.db$|\.usage\.json)'
 
 log() { echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*" >>"$LOG"; }
 

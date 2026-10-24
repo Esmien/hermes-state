@@ -217,7 +217,6 @@ d9e4db9382798c22c1fde741a13e83d62229901211356cea266a2b7e3883eebf  ./hermes/skill
 da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skills/devops/credential-login-verification/scripts/login-path-audit.sh
 0d34ac6cfb19b56de1ac65048445cf6e20ab1246fa84a8eefde749ca1bb31a74  ./hermes/skills/devops/docker-compose-traps/SKILL.md
 951fea4ff3242a89e27c2f775a9b844b42bf6a99e8862526ced7b0149596349e  ./hermes/skills/devops/hermes-state-backup/SKILL.md
-ce6f676e6ebc938b2ab9c8161557faf20cea1ead0efa04cb353b35e91e6f3bb4  ./hermes/skills/devops/hermes-state-backup/references/.probe.md
 ce90e8a3e145cce69c62880dc85921700110879f9290952d6cec28218503155f  ./hermes/skills/devops/sdlc-review/SKILL.md
 f47c7a7b7fa25b188a35cc5d0e1a2db381ed446b1fdf98001e77f06b850af34d  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
 5ca62040ffd05e4e95bdf7105ba920edf37f6ed698b49a5540f109ee69cf2480  ./hermes/skills/devops/vps-network-exposure/SKILL.md
@@ -370,7 +369,7 @@ df8b07b07e5a51df7e28294323319ca4e945fa3a2e7d6291b24957f74109c937  ./host/bin/doc
 f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-guard-postgres.sh
 c146da46593b866352bc6bc439ee1e1cd21754c8818af7993ab140ea011f0954  ./host/bin/hermes-boot-notify.sh
 c9a030a12e209dd4bff89a018bb96cb8811176ab6ce61bc87a2ba6894df6dae3  ./host/bin/hermes-state-backup.sh
-730c45d5863581868abcaa780a9f09625f1423053eddc75983626f43dd839641  ./host/bin/hermes-state-watch.sh
+8388a1397754f9a7afc58754d2eecc311a595a94f3759b8e57a458351bc8e2c4  ./host/bin/hermes-state-watch.sh
 22ba3afdadc842431f74993b46827aa9513433b82e27810fba6be2304d2e45ff  ./host/bin/litellm-spend-retention.sh
 95655be1c140ce102c02ba9cb73bfea09457869d62419f64ef9677efc48ab087  ./host/bin/litellm-watchdog.py
 fc417a20d0e10496c62ca005d4b06bdc0aa778cf82b02617538a6987ce02d9d8  ./host/bin/owui-signup-approver.py
