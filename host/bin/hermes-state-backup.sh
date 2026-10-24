@@ -251,13 +251,30 @@ remote_head() {
         git -C "$REPO_DIR" ls-remote origin refs/heads/main 2>/dev/null | awk '{print $1}' | head -n1
 }
 
+# Алерт о неудачном пуше — не чаще раза в 30 минут: вотчер ретраит каждые
+# 60→300 с, иначе владелец получает десяток одинаковых сообщений за аварию.
+push_fail() {
+    local msg="$1" stamp="$STATE_DIR/.last-push-alert" now last=0
+    now=$(date +%s)
+    [[ -f "$stamp" ]] && last=$(cat "$stamp" 2>/dev/null || echo 0)
+    [[ -z "$last" ]] && last=0
+    log "ERROR: $msg"
+    if (( now - last >= 1800 )); then
+        printf '%s\n' "$now" >"$stamp"
+        notify_fail "$msg"
+    else
+        log "push-failure alert throttled ($(( (now - last) / 60 )) min since last alert)"
+    fi
+    exit 1
+}
+
 if git -C "$REPO_DIR" diff --cached --quiet; then
     # Новых правок нет, но предыдущий push мог не пройти: локальный HEAD
     # опережает origin. Догоняем, иначе коммит висит на хосте навсегда.
     LOCAL_HEAD="$(git -C "$REPO_DIR" rev-parse HEAD)"
     if [[ "$(remote_head)" != "$LOCAL_HEAD" ]]; then
         log "local HEAD $LOCAL_HEAD missing on remote — catch-up push"
-        push_remote || die "git push to $GIT_REMOTE failed (catch-up)"
+        push_remote || push_fail "git push to $GIT_REMOTE failed (catch-up)"
     else
         log "no changes since last snapshot — nothing to commit"
     fi
@@ -272,7 +289,7 @@ git -C "$REPO_DIR" commit -q -m "state snapshot $(date -u '+%Y-%m-%d %H:%M UTC')
 COMMIT="$(git -C "$REPO_DIR" rev-parse --short HEAD)"
 log "✓ committed $COMMIT ($STAT)"
 
-push_remote || die "git push to $GIT_REMOTE failed (commit $COMMIT stays local, watcher retries)"
+push_remote || push_fail "git push to $GIT_REMOTE failed (commit $COMMIT stays local, watcher retries)"
 
 git -C "$REPO_DIR" gc --auto -q >/dev/null 2>&1 || true
 log "=== snapshot complete: $(du -sh "$REPO_DIR" | cut -f1) repo, $(git -C "$REPO_DIR" rev-list --count HEAD) commits ==="

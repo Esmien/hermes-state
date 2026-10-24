@@ -370,7 +370,7 @@ df8b07b07e5a51df7e28294323319ca4e945fa3a2e7d6291b24957f74109c937  ./host/bin/doc
 807d90d5d8a0cb39287d6ee65c87f116eb18c3ab0b3e4ad25849ce1fcb046d9f  ./host/bin/docker-incident-detector.py
 f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-guard-postgres.sh
 c146da46593b866352bc6bc439ee1e1cd21754c8818af7993ab140ea011f0954  ./host/bin/hermes-boot-notify.sh
-01958d214134917f5f33c4abce8286860908041f0f21438fbb1ab4d45080c9f3  ./host/bin/hermes-state-backup.sh
+ece7eeb6a3ae474c5b32cc6b3c5245118ec3df2c8998317a9566d68a2a045ff0  ./host/bin/hermes-state-backup.sh
 63aa9049393d5904d86b1a343fb9e57ebe2d01771b6df314282440bfdc2b3149  ./host/bin/hermes-state-watch.sh
 22ba3afdadc842431f74993b46827aa9513433b82e27810fba6be2304d2e45ff  ./host/bin/litellm-spend-retention.sh
 95655be1c140ce102c02ba9cb73bfea09457869d62419f64ef9677efc48ab087  ./host/bin/litellm-watchdog.py
