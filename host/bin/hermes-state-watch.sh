@@ -60,13 +60,14 @@ first=0
 last=0
 
 while true; do
-    if inotifywait -r -q -t "$CYCLE" \
+    if ev=$(inotifywait -r -q -t "$CYCLE" \
             -e modify,create,delete,move,moved_to,moved_from,attrib,close_write \
-            --exclude "$EXCLUDE" "${WATCH[@]}" >/dev/null 2>&1; then
+            --format '%e %w%f' --exclude "$EXCLUDE" "${WATCH[@]}" 2>&1); then
         now=$(date +%s)
         [[ "$pending" -eq 0 ]] && first=$now
         pending=1
         last=$now
+        log "event: $ev"
     else
         rc=$?
         if [[ "$pending" -eq 1 && "$rc" -eq 2 ]]; then

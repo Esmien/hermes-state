@@ -23,7 +23,9 @@ metadata:
 | item | path |
 |---|---|
 | snapshot script | `/usr/local/bin/hermes-state-backup.sh` |
-| units | `hermes-state-backup.service` / `.timer` (daily **02:30 UTC**, same schedule as `postgres-backup.timer`, `Persistent=true`) |
+| **trigger: inotify watcher** | `/usr/local/bin/hermes-state-watch.sh` + `hermes-state-watch.service` (inotify, debounce 90 s, max delay 15 min) |
+| run-on-demand unit | `hermes-state-backup.service` (oneshot, used by the watcher and manually) |
+| legacy timer (**disabled**) | `hermes-state-backup.timer` — kept on disk only as a fallback, must stay disabled |
 | working git repo | `/var/lib/hermes-state/repo` (root, 0700) |
 | remote | `https://github.com/Esmien/hermes-state` (private, auto-created via API on first run) |
 | credentials | `GITHUB_KEY` in `/home/ai_service/ai-stack/ai/.env` → git asks via `GIT_ASKPASS=/var/lib/hermes-state/git-askpass.sh`, so the token never lands in `.git/config` or argv |
@@ -47,15 +49,25 @@ Secrets inside `config.yaml` are `${ENV_VAR}` references only — that is why th
 - Commit only when the tree actually changed (`git diff --cached --quiet`), so quiet days create no noise.
 - Deletions propagate: skills/scripts are synced with `rsync --delete`, so removing a skill locally also removes it from the repo.
 
+## Change-driven, not scheduled (owner's rule since 2026-10-24)
+
+Backups fire **when the state changes**, not on a clock. `hermes-state-watch.service` runs `inotifywait -r -t 15` over the snapshot inputs (`/root/.hermes/{skills,memories,plugins,hooks,scripts,cron,config.yaml,SOUL.md}`, `/usr/local/bin`, `/etc/systemd/system`, the runbook and the stack backup script), waits for `QUIET=90` seconds without events (`MAXDELAY=900` if changes never stop), then calls the snapshot script. The script itself already no-ops when the tree is unchanged, so a burst of edits produces exactly one commit.
+
+- `inotify-tools` is required (`inotifywait 3.22` present). systemd `.path` units are **not** recursive — they would miss `skills/<name>/SKILL.md`.
+- The watcher also runs one snapshot at service start, which covers edits made while it was down (host rebooted, unit stopped).
+- A `flock` on `/var/lib/hermes-state/.snapshot.lock` (fd 9, `-w 900`) serialises the watcher and manual runs; without it a manual `systemctl start` during a debounce window produced interleaved commits.
+- After editing the watcher itself: `systemctl restart hermes-state-watch` — that restart triggers a catch-up snapshot, which is the fastest self-test.
+
 ## Verify / operate
 
 ```bash
-systemctl start hermes-state-backup.service          # run now
-systemctl list-timers hermes-state-backup.timer      # schedule
-tail -n 20 /var/log/hermes-state-backup.log          # outcome
-systemctl status hermes-state-backup.service         # exit code of the last run
+systemctl is-active hermes-state-watch.service        # должно быть active (running)
+systemctl start hermes-state-backup.service          # принудительный снапшот сейчас
+tail -n 20 /var/log/hermes-state-watch.log           # watcher: старт, «changes detected», результат
+tail -n 20 /var/log/hermes-state-backup.log          # сам снапшот: commit + push
+git -C /var/lib/hermes-state/repo log --oneline -3    # что уже уехало
 ```
-Expected idle output: `no changes since last snapshot — nothing to commit`.
+Expected idle output in the backup log: `no changes since last snapshot — nothing to commit`.
 
 ## Adding a new runbook/script to the backup
 
@@ -64,6 +76,8 @@ silently (`[[ -f ... ]] && ...`), so the arrays can list units that do not exist
 
 ## Gotchas
 
+- **Do not re-enable `hermes-state-backup.timer`.** The owner replaced the schedule with change-triggered snapshots on 2026-10-24; a timer means duplicate commits and a second source of truth. The unit stays on disk only as a manual fallback.
+- `Conflicts=` pointing at the unit itself is dropped by systemd with a warning (`Dependency Conflicts=… is dropped`) — do not “guard” a singleton service that way.
 - `write_file` refuses paths under `/etc`; stage the unit in `/root/.hermes/cache/scratch/` and
   `install -m 644` it into place, then `systemctl daemon-reload`.
 - The script must run as **root** (`User=root` in the unit) — `/root/.hermes` and the units are root-owned.
@@ -71,4 +85,5 @@ silently (`[[ -f ... ]] && ...`), so the arrays can list units that do not exist
   `host/systemd/*` → `/etc/systemd/system`, `host/etc/*` → `/etc/`; then `daemon-reload`, re-create the
   `.env` files with real secrets, restart the gateway user service.
 - `postgres-backup.service` runs as `ai_service` and cannot reach `/root/.hermes`, which is why the state
-  snapshot is a separate root unit on the same `OnCalendar` instead of an `ExecStartPost` hook.
+  snapshot is a separate root unit rather than an `ExecStartPost` hook of the DB backup.
+- Related watcher for search quality (different subsystem, same principle of not trusting healthchecks): the SearXNG section of the `ai-stack` skill.
