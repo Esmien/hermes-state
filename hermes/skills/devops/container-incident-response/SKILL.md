@@ -73,6 +73,7 @@ Full recipe in `references/detector-and-thresholds.md`. Short form: throwaway co
 - **The agent's output is buffered**: `agent.log` stays 0 bytes until the nested `hermes chat` exits. Poll the systemd unit state, not the file size.
 - **A nested agent needs `/bin/bash script` under `systemd-run`** — the launcher is deliberately not `chmod +x` (no permission changes on this host), so invoking the path directly fails.
 - **When the gateway itself is the patient** (`litellm`, `litellm-redis`), pass `-m emergency` so diagnosis does not depend on the broken component; the alias lives in `/root/.hermes/config.yaml`.
+- **Pause flag vs liveness timer is a false-alarm trap.** The detector returned before `write_state()` on the pause branch, so a manual maintenance window >10 min left `state.json` stale; the moment the pause file was removed, the next 10-minute liveness tick read an age over 600 s and paged the owner «детектор не работает». Fixed by a `write_state(state)` heartbeat right after `read_state()` (covers both the pause and the `docker not active` early returns). Rule: any early return in the detector must still refresh `state.json`, because the liveness script's only signal is file age.
 - **The detector is silent when healthy by design** — `--dry-run` printing nothing means no anomaly, not a broken script; confirm liveness via `state.json` age (<3 min).
 - **A failure shorter than two detector ticks can pass unnoticed** if the container self-heals; acceptable, not a gap to engineer around.
 

@@ -20,6 +20,10 @@ ASKPASS="$STATE_DIR/git-askpass.sh"
 mkdir -p "$STATE_DIR"
 chmod 700 "$STATE_DIR"
 
+# один снапшот за раз: вотчер и ручной запуск не должны переплетаться
+exec 9>"$STATE_DIR/.snapshot.lock"
+flock -w 900 9 || { echo "another snapshot is already running" >&2; exit 1; }
+
 log() { echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] $*" | tee -a "$LOG_FILE"; }
 
 notify_fail() {
@@ -124,6 +128,8 @@ HOST_BIN=(
     docker-detector-liveness.sh
     hermes-boot-notify.sh
     hermes-state-backup.sh
+    hermes-state-watch.sh
+    searxng-quality-check.py
     litellm-watchdog.py
     litellm-spend-retention.sh
     webui-compact-images.sh
@@ -137,7 +143,8 @@ for f in "${HOST_BIN[@]}"; do
 done
 
 HOST_UNITS=(
-    hermes-state-backup.service hermes-state-backup.timer
+    hermes-state-backup.service hermes-state-backup.timer hermes-state-watch.service
+    searxng-quality.service searxng-quality.timer
     hermes-boot-notify.service
     docker-autorecover.service docker-autorecover.timer
     docker-detector-liveness.service docker-detector-liveness.timer
@@ -166,8 +173,9 @@ if [[ ! -f "$REPO_DIR/README.md" ]]; then
 # Hermes agent state (private)
 
 Automatic snapshot of everything that differs from a stock Hermes install on the VPS.
-Written by `/usr/local/bin/hermes-state-backup.sh` (systemd timer `hermes-state-backup.timer`,
-daily at 02:30 UTC together with the PostgreSQL backup), committed only when something changed.
+Written by `/usr/local/bin/hermes-state-backup.sh`, triggered by
+`hermes-state-watch.service` (inotify on config/skills/memories/units) a couple of
+minutes after something actually changed — not on a schedule. Committed only when something changed.
 
 ## Layout
 

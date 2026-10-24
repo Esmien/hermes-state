@@ -236,6 +236,12 @@ def main() -> int:
         print("pause:", PAUSE_FILE.exists(), "| agent_busy:", agent_busy())
         return 0
 
+    # Heartbeat: писать state.json на каждом тике, в том числе когда детектор
+    # ничего не делает. Иначе ветки ниже (pause / docker not active) выходят,
+    # не обновив файл, и docker-detector-liveness.sh после снятия паузы видит
+    # возраст > 600 с и шлёт ложное «детектор мёртв».
+    write_state(state)
+
     if PAUSE_FILE.exists():
         log("paused by flag file — nothing done")
         return 0
