@@ -4,8 +4,8 @@
 §
 Telegram-боты (владелец 214062001): @esmien_vps_notificator_bot (нотификации) и @esmien_ai_backups_bot (файлы/бэкапы). Токены в /home/ai_service/notifications/.env (BOT_TOKEN, FILE_BOT_TOKEN), в чат не выводить.
 §
-Автозагрузка Hermes: гейтвей — systemd USER-сервис /root/.config/systemd/user/hermes-gateway.service (enabled, Linger=yes, Restart=always). Boot-уведомление в TG: /usr/local/bin/hermes-boot-notify.sh + hermes-boot-notify.service (oneshot, ждёт сеть→гейтвей→контейнеры из /etc/hermes-boot-expected-containers.txt, шлёт через `hermes send -t telegram`). Лог /var/log/hermes-boot-notify.log.
+Автозагрузка Hermes: гейтвей — systemd USER-сервис /root/.config/systemd/user/hermes-gateway.service (enabled, Linger=yes). Boot-уведомление в TG: /usr/local/bin/hermes-boot-notify.sh + hermes-boot-notify.service (oneshot, ждёт сеть→гейтвей→контейнеры из /etc/hermes-boot-expected-containers.txt, шлёт через `hermes send -t telegram`). Лог /var/log/hermes-boot-notify.log.
 §
 Разбор падений: docker-autorecover.timer (60с) → /usr/local/bin/docker-incident-detector.py (детект+улики в /var/lib/docker-incidents/, контейнеры не трогает) → Hermes-агент через systemd-run (docker-incident-agent.sh, отчёт в TG). Allowlist /etc/docker-autorecover.conf, лог /var/log/docker-autorecover.log, сторож docker-detector-liveness.timer. Перед ручными работами с контейнерами — touch /var/lib/docker-autorecover/pause, после снять.
 §
-Бэкап состояния Hermes: /usr/local/bin/hermes-state-backup.sh + hermes-state-backup.timer (02:30 UTC, вместе с postgres-backup) → /var/lib/hermes-state/repo → приватный GitHub Esmien/hermes-state (GITHUB_KEY из ai-stack/ai/.env, через GIT_ASKPASS). .env/state.db/сессии/.hub исключены. Лог /var/log/hermes-state-backup.log. Детали — skill hermes-state-backup.
+Бэкап состояния Hermes: коммит в приватный GitHub Esmien/hermes-state ПО ФАКТУ ИЗМЕНЕНИЙ (с 24.10.2026, не по таймеру): hermes-state-watch.service (inotify, debounce 90с) → hermes-state-backup.sh (flock, GITHUB_KEY из ai-stack/ai/.env, GIT_ASKPASS) → /var/lib/hermes-state/repo. Таймер отключён. Логи /var/log/hermes-state-watch.log и -backup.log. Детали — skill hermes-state-backup.
