@@ -1,7 +1,7 @@
 c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
 38f9b44b413459a1370f4945e6b6af130decc73170d68abd859f2945de487972  ./hermes/config.yaml
-db29028e1a85ef6b108f094aaeed44c403d4cadb4791dc23200872a1770627eb  ./hermes/cron/jobs.json
+add1cc6b3b38ebb3456c584de42009a48357532455df1d91628b5dfac9e265b9  ./hermes/cron/jobs.json
 18d57d7277a3db0cb77f38be10ea8cec49fbb838a808e40263c5ad3d1c2b6652  ./hermes/memories/MEMORY.md
 b9d3f9071cac054be65e1f35b0018efa706e85e9970a89e8b15d33ae201ad377  ./hermes/memories/USER.md
 9547927170b127aac36ed4d208fbc6e6149ad4cc52457a018f16471f8161297e  ./hermes/scripts/backup-verify.sh
