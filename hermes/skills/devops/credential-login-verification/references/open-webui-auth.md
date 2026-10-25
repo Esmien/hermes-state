@@ -44,7 +44,7 @@ docker exec open-webui python -c \
 
 ## The signup approver bot
 
-- Script `/usr/local/bin/owui-signup-approver.py`, service `owui-signup-approver.service`, config `/etc/owui-signup-approver.env`-style file holding `TG_TOKEN`/`TG_OWNER`/`OWUI_BASE`, log `/var/log/owui-signup-approver.log` (rotated daily).
+- Script `/usr/local/bin/owui-signup-approver.py`, service `owui-signup-approver.service`, config `/root/.config/owui-signup-approver/env` (600 root) holding `TG_TOKEN`/`TG_OWNER`/`OWUI_BASE` and — since the decoupling fix — `OWUI_ADMIN_PASSWORD`, log `/var/log/owui-signup-approver.log` (rotated daily). The script reads `OWUI_ADMIN_PASSWORD` first and only falls back to `UI_PASSWORD` (with a warning in the log) when it is missing.
 - Loop: every ~2 min it scans `role = 'pending'` rows → sends a Telegram card with approve/reject buttons → handles callbacks.
 - **Approve** is a direct DB role update (no API token needed). **Reject** calls the Open WebUI delete-user API, which requires an admin token → `admin_token()` → password signin → the drift shows up here as `action r2 … failed: signin failed: HTTP 400` while approve still works.
 - Symptom shape: `scan: N pending, 1 new` then repeated `action r2 … failed: signin failed: HTTP 400`, one per confirm tap. The pending row is left untouched, so the spam signup keeps being offered.

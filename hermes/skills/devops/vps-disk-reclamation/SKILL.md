@@ -54,4 +54,4 @@ journalctl --vacuum-size=100M
 
 ## Related
 
-- Disk growth caused by Open WebUI ingest (document_chunk, needs VACUUM FULL): ai-stack skill, «Memory & disk headroom».
+- Disk growth caused by Open WebUI ingest (document_chunk, needs VACUUM FULL): `ai-stack` skill, disk-and-memory reference (`disk-and-memory.md`).

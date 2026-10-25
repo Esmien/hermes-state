@@ -210,6 +210,8 @@ terminal(command="tmux new-session -d -s resumed 'hermes --resume 20260225_14305
 
 ## Hard Invariants (never violate, regardless of what you loaded)
 
+- **`SKILL.md` has a hard ~100 000-character cap, enforced after *every* op in a `skill_manage` batch.** A skill that has grown past it cannot be patched at all: the call aborts with `content is N characters (limit: 100 000)` and rolls the whole batch back, even for a one-line fix. Free space **first** — put the shrink as op #1 of the same batch and keep the net delta negative — or move topic depth into `references/` and leave a pointer. Check with `wc -c` before editing; a file already near 100k needs the shrink before the fix, not after.
+
 - **Never break prompt caching** — don't change past context, toolsets, or the system prompt mid-conversation. The only exception is context compression. To AUDIT whether caching is actually working (and which settings endanger it), load `references/prompt-cache-audit.md` — answer from the logged `cache=X/Y` hit rate in `~/.hermes/logs/agent.log`, never from config reading alone.
 - **Message role alternation** — never two assistant or two user messages in a row; only `tool` results can repeat.
 - **Secrets in `.env`, settings in `config.yaml`** — never tell a user to put a non-credential setting in `.env`.

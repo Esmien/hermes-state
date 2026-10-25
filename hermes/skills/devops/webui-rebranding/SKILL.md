@@ -66,7 +66,7 @@ docker inspect open-webui --format '{{.State.Health.Status}} restarts={{.Restart
 docker logs open-webui --since 5m 2>&1 | grep -iE 'alembic|migrat|error' | tail -n 10
 ```
 
-Screenshot proof (login page, light/dark, sidebar at 100 %): the Playwright recipe lives in `ai-stack` → Branding section (`~/.hermes/cache/scratch/shot/`). Take screenshots instead of describing the result — visual verdicts are what the owner judges.
+Screenshot proof (login page, light/dark, sidebar at 100 %): the Playwright recipe lives in the `ai-stack` skill, Branding reference file (`branding.md`) (`~/.hermes/cache/scratch/shot/`). Take screenshots instead of describing the result — visual verdicts are what the owner judges.
 
 ## Rollback
 
