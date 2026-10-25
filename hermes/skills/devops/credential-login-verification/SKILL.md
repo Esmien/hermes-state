@@ -18,6 +18,8 @@ The owner says any of: «со слабым паролем торчит», «я �
 
 Core insight: **«пароль поменян» and «дверь закрыта» are different claims.** A service can have several independent authentication paths, each with its own credential store. Rotating one leaves the others exactly as they were.
 
+The same drift bites automations. Any bot that signs in with a password from `.env` — the Open WebUI signup approver is one — starts failing the moment that password is changed through the UI. Open WebUI auth model, status codes and the offline bcrypt check: `references/open-webui-auth.md`.
+
 ## Answer shape (owner preference)
 
 **Verdict first**, then the evidence that decided it, then the gated fix. «Вход по новому паролю работает, старая дверь в БД осталась» before any command output. Never open with the investigation.
@@ -54,6 +56,7 @@ Core insight: **«пароль поменян» and «дверь закрыта�
    salt, digest = raw[:16], raw[16:]
    ok = hashlib.scrypt(candidate.encode(), salt=salt, n=16384, r=8, p=1, dklen=32) == digest
    ```
+   Open WebUI instead stores a plain `$2b$12$` bcrypt hash in `auth.password`; verify it the same way, offline, with `bcrypt.checkpw`. See `references/open-webui-auth.md` for the exact command and the admin-identity rules.
 
 6. **Grade strength without printing the secret.** Length, character classes, Shannon entropy per char × length. A 64-char hex string ≈ 238 bits — call it a key, not a password, and say so.
 
@@ -66,7 +69,10 @@ Core insight: **«пароль поменян» and «дверь закрыта�
 - **A `401` is not proof the password is wrong.** Wrong endpoint, wrong body schema, or a dead legacy route all return `401`. Establish the endpoint from logs first.
 - **`login: None` in a JSON response is not a failed login** if `token` is present — v2 changed the shape. Check the raw body before concluding.
 - **Editing `.env` without recreating the container changes nothing.** Compare `.env` mtime against `State.StartedAt`; if the file is newer, the running process still holds the old value.
-- **The reverse trap:** if the password was ever changed through the UI, it lives in the DB and the `.env` value becomes dead. Rotating `.env` then restarting produces a confusing state where the operator believes they changed the password but still logs in with the old one.
+- **The reverse trap:** if the password was ever changed through the UI, it lives in the DB and the `.env` value becomes dead. Rotating `.env` then restarting produces a confusing state where the operator believes they changed the password but still logs in with the old one. Prove it, do not assume it: verify the `.env` candidate against the stored hash (step 5). A `NO-MATCH` settles which side of the drift is stale in one command.
+- **A failing automation is the earliest drift detector — and its error text names the emitter.** `signin failed: HTTP 400` from a bot means the credential *that script* reads has drifted; it says nothing about whether the web UI login is broken. `grep -rl "signin failed" /usr/local/bin /home/ai_service` locates the emitter; read its credential loader (`stack_secret(...)`, `admin_email()`) to learn exactly which email and which `.env` key it uses. Then present the two fixes as a choice — sync `.env` to the live password (ask the owner for it) or reset the account to the `.env` value — because both mutate a credential and neither is safe to pick silently.
+- **Open WebUI answers `400`, not `401`, to a bad signin.** Do not map HTTP status to meaning by habit across services: a `401` on Open WebUI means a blocked or missing route, while the wrong-password signal is `POST /api/v1/auths/signin → 400`.
+- **SQL composed inline in a shell string silently loses `"` quoting.** `psql -c 'select … from "user"'` spliced into a double-quoted shell command arrives as `from user` → `relation "user" does not exist` / `column "email" does not exist`. Pass the statement as its own `argv` element from a Python `subprocess` list, never interpolated into a shell command string.
 - **Never print secrets into tool output.** Report length, `sha256[:8]`, character classes, entropy. Real values leak into logs, scrollback and transcripts.
 - **Do not burn the throttle during verification.** Failed attempts count against the source address; a careless brute-force check can lock the owner out for the cooldown window. Use a throwaway username and a handful of tries.
 - **`trusted_proxy_ranges` unset breaks per-IP throttling.** Behind nginx every request arrives from the proxy address (`172.18.0.1`), so the limiter sees one client for the whole internet:

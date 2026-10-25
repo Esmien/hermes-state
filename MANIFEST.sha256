@@ -213,7 +213,8 @@ c2fc4ce4b63f576ee21f3a0065f03f45b85b702159e047fd18083ae345eb0f49  ./hermes/skill
 5c31d33cb0c6bf6a6eb911e6419abf3e48f785e0083b50e273b7fdfd97da8c5e  ./hermes/skills/devops/container-incident-response/SKILL.md
 244093d67fc1c519a82fe5fbd107a2cea7b8127de5d5e030001163f9bae0c53f  ./hermes/skills/devops/container-incident-response/references/agent-wakeup.md
 891b02a8d8af2ff6fe959e205bcb8a343270686135367050b673524c31c304e7  ./hermes/skills/devops/container-incident-response/references/detector-and-thresholds.md
-67fe918651475beb7efd3c5f09150e6c11a99ad467b64f0c559e2b58437cb203  ./hermes/skills/devops/credential-login-verification/SKILL.md
+9904f61ed873842a378e81ad4648a481cbbcd2f13740f27fb0b36e4e6e76f327  ./hermes/skills/devops/credential-login-verification/SKILL.md
+fa6f14ce59ce03b398a05bc1128136785601ad5a5f9200e1d5861a3ec0521815  ./hermes/skills/devops/credential-login-verification/references/open-webui-auth.md
 da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skills/devops/credential-login-verification/scripts/login-path-audit.sh
 4937df16fe180e56bf6d400beddba446d86ca07c8faf2c6751e34d07dbe13524  ./hermes/skills/devops/docker-compose-traps/SKILL.md
 d939ff8253f8da166a191a033898aa8c6ce5f5fd2f4760d7d996015081dcb7f6  ./hermes/skills/devops/hermes-state-backup/SKILL.md
