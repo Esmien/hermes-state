@@ -3,7 +3,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 38f9b44b413459a1370f4945e6b6af130decc73170d68abd859f2945de487972  ./hermes/config.yaml
 6facd85b2693dce669b8776126c5889a9b1cf6c00c19764802f053d0d8abb6bb  ./hermes/cron/jobs.json
 66dcce4ec8ae329e520070d2e839673df00370fda211f16bc2df9b9e9bafbadf  ./hermes/memories/MEMORY.md
-5ccbfbb71eeb76ede056e2848149c23a8dca472f32e2ef39caa7a7457bf67dfd  ./hermes/memories/USER.md
+1994a24536e05c418d8680fe02655a16665baf3452dc7e650849ca43d6069210  ./hermes/memories/USER.md
 9547927170b127aac36ed4d208fbc6e6149ad4cc52457a018f16471f8161297e  ./hermes/scripts/backup-verify.sh
 49a899583a852d558603d43b969fbdf788e372a70cb6ec86c73c4af08dd22049  ./hermes/skills/.bundled_manifest
 ed781d08827db19424b593c0910fb1e44c70ae81a32d7cb0177caf728cc9ce40  ./hermes/skills/.curator_state
