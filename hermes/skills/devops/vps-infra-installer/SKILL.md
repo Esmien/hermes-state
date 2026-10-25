@@ -49,6 +49,14 @@ install.py --skip tls,restore --only verify
    (`token_hex(32)`) и спрашивает внешние (OpenRouter, Telegram, GitHub).
    Существующие значения переиспользуются: повторный запуск не меняет
    пароли и не разлогинивает. `install.json` токенов не содержит.
+   **Исключение — `UI_PASSWORD`:** прогон установщика заменил его на
+   сгенерированное значение (8 → 64 символа), остальные секреты остались
+   прежними. `UI_PASSWORD` — пароль админа **LiteLLM**, а не Open WebUI;
+   бот `owui-signup-approver` читает его для входа в WebUI, поэтому после
+   любого прогона проверяй, что «отклонить» в боте работает: `signin failed:
+   HTTP 400` в `/var/log/owui-signup-approver.log` = рассинхрон пароля
+   (разбор и починка — skill `credential-login-verification`,
+   `references/open-webui-auth.md`).
 2. **БД восстанавливаются только в пустые базы** или с явным `--restore`.
    Дамп старше 72 ч требует `--force-stale`. Bundle кладёт дампы в
    `backups/postgres/`, свежесть — по mtime.
@@ -122,3 +130,9 @@ https-коды доменов и число активных таймеров, �
 - Compose читает `ai/.env`; `WEBUI_URL` теперь оттуда, домен в compose не хардкодить.
 - Тестовый `pg_dump` при каждом запуске не гонять: если свежий дамп < 1 ч — пропуск.
 - `docker compose config -q` — дешёвая проверка интерполяции перед `up -d`.
+- **Прогон `install.py` перезаписывает `ai/.env` своим набором ключей:**
+  старые ключи (`DOMAIN`, `POSTGRES_ADMIN_PASSWORD`, `BOT_DB_PASSWORD`)
+  исчезают, новые (`WEBUI_URL`, `LITELLM_REDIS_PASSWORD`, `GITHUB_KEY`)
+  появляются. Перед прогоном на живом сервере убедись, что рядом лежит
+  снапшот `.env` (`backups/env.bak-<ts>`) — только сравнив с ним, потом
+  докажешь, какой ключ ротировался и какой нет.

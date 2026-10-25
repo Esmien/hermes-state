@@ -213,15 +213,15 @@ c2fc4ce4b63f576ee21f3a0065f03f45b85b702159e047fd18083ae345eb0f49  ./hermes/skill
 5c31d33cb0c6bf6a6eb911e6419abf3e48f785e0083b50e273b7fdfd97da8c5e  ./hermes/skills/devops/container-incident-response/SKILL.md
 244093d67fc1c519a82fe5fbd107a2cea7b8127de5d5e030001163f9bae0c53f  ./hermes/skills/devops/container-incident-response/references/agent-wakeup.md
 891b02a8d8af2ff6fe959e205bcb8a343270686135367050b673524c31c304e7  ./hermes/skills/devops/container-incident-response/references/detector-and-thresholds.md
-9904f61ed873842a378e81ad4648a481cbbcd2f13740f27fb0b36e4e6e76f327  ./hermes/skills/devops/credential-login-verification/SKILL.md
-fa6f14ce59ce03b398a05bc1128136785601ad5a5f9200e1d5861a3ec0521815  ./hermes/skills/devops/credential-login-verification/references/open-webui-auth.md
+8961af69cd965f93da08e815167b5ed77332ca99d17b288645dadc9872218d84  ./hermes/skills/devops/credential-login-verification/SKILL.md
+4b7fc1d7cdd7618025139ac1eaea6cd52ce1dd3087a51fa3024517b7ed88443d  ./hermes/skills/devops/credential-login-verification/references/open-webui-auth.md
 da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skills/devops/credential-login-verification/scripts/login-path-audit.sh
 4937df16fe180e56bf6d400beddba446d86ca07c8faf2c6751e34d07dbe13524  ./hermes/skills/devops/docker-compose-traps/SKILL.md
 d939ff8253f8da166a191a033898aa8c6ce5f5fd2f4760d7d996015081dcb7f6  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
 ce90e8a3e145cce69c62880dc85921700110879f9290952d6cec28218503155f  ./hermes/skills/devops/sdlc-review/SKILL.md
 f47c7a7b7fa25b188a35cc5d0e1a2db381ed446b1fdf98001e77f06b850af34d  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
-d6b8cba9db31e2a42e0dbc51ca5be7edf0e1efd6ebd47a691daaf1a83d7ab6e9  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+bb5e76173364b35136d8cfef19f6ded2787252e447bfa9bd23abd02763a3120b  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 5ca62040ffd05e4e95bdf7105ba920edf37f6ed698b49a5540f109ee69cf2480  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
 918971595010770b622cd8cd01580d166146ce98f021a66960e49f7b4ba09b37  ./hermes/skills/devops/webui-ios-icons/SKILL.md
@@ -377,7 +377,7 @@ ece7eeb6a3ae474c5b32cc6b3c5245118ec3df2c8998317a9566d68a2a045ff0  ./host/bin/her
 63aa9049393d5904d86b1a343fb9e57ebe2d01771b6df314282440bfdc2b3149  ./host/bin/hermes-state-watch.sh
 22ba3afdadc842431f74993b46827aa9513433b82e27810fba6be2304d2e45ff  ./host/bin/litellm-spend-retention.sh
 95655be1c140ce102c02ba9cb73bfea09457869d62419f64ef9677efc48ab087  ./host/bin/litellm-watchdog.py
-fc417a20d0e10496c62ca005d4b06bdc0aa778cf82b02617538a6987ce02d9d8  ./host/bin/owui-signup-approver.py
+a87e4db1c389f6fb3c41b1dc4dfd0b08e9a969db61e6a2bae46e23cfc4a0f316  ./host/bin/owui-signup-approver.py
 7128ae03df8813658538e9ba264f8e30ab1899b067591eb7df7ddb405a4b4420  ./host/bin/searxng-quality-check.py
 42d76cebc17fefeb9e49a7b007e11aa7a538a359ffdbdcf08585a8c069c8dab6  ./host/bin/tor-rotate.sh
 20ff03e6cf44682eb7cad75deee62e4dc66fe8d981a3ee1d06d3800fab714e04  ./host/bin/webui-compact-images.sh
