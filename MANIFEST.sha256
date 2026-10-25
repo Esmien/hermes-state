@@ -1,9 +1,9 @@
 c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
 38f9b44b413459a1370f4945e6b6af130decc73170d68abd859f2945de487972  ./hermes/config.yaml
-e3421b3986ab27f74637c19c4f3d0f992600c62abcbee8161775950a8a9dc5a4  ./hermes/cron/jobs.json
+f27a2217bc3e37a9d5dbbb66b559b8abee9919d4517faac60099a86b25cbad62  ./hermes/cron/jobs.json
 66dcce4ec8ae329e520070d2e839673df00370fda211f16bc2df9b9e9bafbadf  ./hermes/memories/MEMORY.md
-e2a55886086cb3d59dcb223161c7638e5c8be71e6e103299de4ddc503577e905  ./hermes/memories/USER.md
+5ccbfbb71eeb76ede056e2848149c23a8dca472f32e2ef39caa7a7457bf67dfd  ./hermes/memories/USER.md
 9547927170b127aac36ed4d208fbc6e6149ad4cc52457a018f16471f8161297e  ./hermes/scripts/backup-verify.sh
 49a899583a852d558603d43b969fbdf788e372a70cb6ec86c73c4af08dd22049  ./hermes/skills/.bundled_manifest
 ed781d08827db19424b593c0910fb1e44c70ae81a32d7cb0177caf728cc9ce40  ./hermes/skills/.curator_state

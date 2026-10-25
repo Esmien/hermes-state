@@ -59,7 +59,60 @@
         "kind": "on_time"
       },
       "fire_claim": null
+    },
+    {
+      "id": "0c55743f5826",
+      "name": "Аудит самописных скиллов",
+      "prompt": "Ты — VPS_ADMIN на этом хосте. Задача: еженедельный аудит САМОПИСНЫХ скиллов Hermes (только авторства `VPS Admin`; стоковые скиллы не трогать) — с доказательствами актуальности, а не «на глаз».\n\nВремя: сейчас 12:00 по Москве (09:00 UTC — сервер живёт в UTC, отчёт для владельца пиши в МСК).\n\nСОСТАВ. Определи список сам: `grep -rl \"author: VPS Admin\" /root/.hermes/skills --include=SKILL.md`. На момент создания задачи это 10 каталогов: devops/ai-stack, devops/vps-network-exposure, devops/credential-login-verification, devops/docker-compose-traps, devops/container-incident-response, devops/hermes-state-backup, career/job-application-review, devops/vps-infra-installer, devops/vps-disk-reclamation, devops/webui-rebranding. Новые самописные скиллы включай автоматически.\n\nДЛЯ КАЖДОГО СКИЛЛА проверь ФАКТАМИ (выполняя команды) и сохрани вывод как доказательство:\n1. Пути: все абсолютные пути из текста (`/home`, `/root`, `/etc`, `/usr`, `/var`, `/opt`, `/srv`) существуют. Исключай API-роуты (`/v1/...`), пути внутри контейнеров (`/app/...`), исторически удалённые пути и шаблоны со звёздочкой.\n2. systemd-юниты: упомянутые `*.service` / `*.timer` установлены (`systemctl list-unit-files`); таймеры enabled; oneshot-сервисы в состоянии inactive — это норма, не дефект.\n3. Расписания: `OnCalendar` / `OnUnitActiveSec` из юнит-файлов совпадают с тем, что написано в тексте скилла.\n4. Контейнеры и образы: имена из `docker ps -a` и теги из `docker inspect -f '{{.Config.Image}}'` совпадают с таблицами скиллов.\n5. Ключи `.env`: список имён в скилле == фактический набор имён в `/home/ai_service/ai-stack/ai/.env`. Только имена, значения не читать и не выводить.\n6. Скрипты `/usr/local/bin/*.py|*.sh`: существуют и исполняемы.\n7. Ссылки: каждый `references/*.md` и `scripts/*` из текста существует — в своём скилле или в том скилле, на который текст ссылается.\n8. Размер: `SKILL.md` < 15 000 символов. Больше — предложи разгрузку в `references/` (лимит инструмента — 100 000 символов на SKILL.md, при его превышении правки вообще перестают проходить).\n9. Дубли: одна тема двумя документами в разных скиллах — дефект (так уже было с авторизацией Open WebUI). Ищи пересечения по заголовкам reference-файлов.\n\nПРАВИЛА:\n- НИЧЕГО не меняй без подтверждения владельца. Это аудит и отчёт, не починка.\n- Секреты не выводить никогда: только имена ключей, длины, хеши.\n- На каждый найденный дефект — конкретная команда и её вывод как доказательство.\n- Не выдавай сырые логи: `tail -n 20`, `grep -c`, только релевантные строки.\n\nОТЧЁТ (по-русски, простым языком, для Телеграма):\n1. Одна строка вердикта: сколько скиллов проверено, сколько проверок прошло, сколько расхождений.\n2. Список расхождений: скилл → что не так → доказательство (команда + вывод) → предлагаемая правка.\n3. Явный вопрос «чиним?» по каждому пункту.\n4. Если всё чисто — одна короткая строка «аудит N скиллов, все проверки прошли», без воды и без пересказа процесса.\n5. Если с прошлого запуска состав скиллов изменился (появился/удалён) — отметь отдельно.",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": null,
+      "no_agent": false,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": [
+        "self"
+      ],
+      "schedule": {
+        "kind": "cron",
+        "expr": "0 9 * * 0",
+        "display": "0 9 * * 0"
+      },
+      "schedule_display": "0 9 * * 0",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-10-25T09:09:19.824413+00:00",
+      "next_run_at": "2026-11-01T09:00:00+00:00",
+      "last_run_at": null,
+      "last_status": null,
+      "last_error": null,
+      "last_delivery_error": null,
+      "last_delivery_unverified": null,
+      "last_failure": null,
+      "failure_streak": 0,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "214062001",
+        "chat_name": "Владислав",
+        "thread_id": null,
+        "user_id": "214062001",
+        "scope_id": null
+      },
+      "enabled_toolsets": null,
+      "workdir": null,
+      "attach_to_session": true
     }
   ],
-  "updated_at": "2026-10-25T03:18:46.362951+00:00"
+  "updated_at": "2026-10-25T09:09:19.850945+00:00"
 }
