@@ -81,6 +81,37 @@ https-коды доменов и число активных таймеров, �
 и укладываться в ~15 с; если он что-то «синхронизирует» — расхождение
 репозитория и хоста.
 
+## Авто-коммит и пуш (копия логики hermes-state)
+
+Репозиторий обновляется сам по факту правки, без таймера:
+
+| item | path |
+|---|---|
+| watcher | `maintainer/vps-infra-watch.sh` → `/usr/local/bin/`, unit `vps-infra-watch.service` |
+| one-shot | `maintainer/vps-infra-push.sh` → `/usr/local/bin/`, unit `vps-infra-push.service` |
+| sync хоста → assets | `maintainer/sync_assets.py` (без `.env`, тестов, `__pycache__`, `_state_snapshot`, `out`) |
+| lock / лог | `/var/lib/vps-infra-autopush/push.lock`, `/var/log/vps-infra-autopush.log` |
+
+Перед коммитом push-скрипт **валидирует** дерево (`py_compile install.py`,
+`bash -n bootstrap.sh`, `docker compose config -q` на фиктивных секретах) и
+сканирует на секреты — при находке коммит отменяется. Коммит — только при
+реальных изменениях; push с catch-up и алертом в TG (троттлинг 30 мин).
+
+- Правка `maintainer/*.sh|service` в репо не действует, пока не сделан
+  `install -m 755 … /usr/local/bin/` + `systemctl daemon-reload` (сами себя
+  скрипты не копируют).
+- После установки — `systemctl enable --now vps-infra-watch`; старт сервиса
+  делает догоняющий пуш.
+- Быстрый тест без 90-секундного дебаунса:
+  `QUIET=5 WATCH_LOG=/tmp/w.log /usr/local/bin/vps-infra-watch.sh &`, затем
+  тронуть любой файл, подождать ~10 с и проверить `git -C /root/vps-infra log`.
+- Синхронизация идёт только host → repo. Обратно (repo → живой стек) —
+  только через `install.py`; не путать.
+- Манифест синхронизации — сами файлы в `assets/host/{bin,systemd}` и
+  `assets/host/open-terminal-config`. Новый скрипт/юнит появляется в репо
+  только после того, как его туда положили; удалённый с хоста файл из репо
+  не исчезает (удаления не пропагируются сознательно).
+
 ## Подводные камни, найденные при сборке
 
 - `curl | bash` забирает stdin: bootstrap делает `exec </dev/tty` последней
