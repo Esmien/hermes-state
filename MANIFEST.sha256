@@ -199,9 +199,10 @@ e73d9409a63d157774528b260b3249fb52745e6b242efe8bc1ae2e9f04b08827  ./hermes/skill
 5454af16b5f3daee9a2f05658d267bb0bd8a025e1870bad996a85677a091d284  ./hermes/skills/creative/popular-web-designs/templates/x.ai.md
 9aac8e73a4a471fecb2d252afead66c82436e7525e7f9d1e6bbe64e375c65160  ./hermes/skills/creative/popular-web-designs/templates/zapier.md
 5dbf92dc336e9b17be45c35c92a5bb307e4655e39a86617f07b7654678f92583  ./hermes/skills/creative/songwriting-and-ai-music/SKILL.md
-8779bab0ee7f8c102c634ca5a51fe02140152f8c27d1fb5f8be4eee242a604d0  ./hermes/skills/devops/ai-stack/SKILL.md
+02e79ab227bfc5d7b498edd3019926aa16dd543bf690e71c107d44b6e45aae45  ./hermes/skills/devops/ai-stack/SKILL.md
 0b52c29ceefcf76976a04ca3b8436525a3c65a203615f93f0bdcc29241b5962b  ./hermes/skills/devops/ai-stack/references/memory-troubleshooting.md
 9e9ccc47eca53127d1e0bc915b2dbc74c1c6a01704991b6b44be484bd0106af8  ./hermes/skills/devops/ai-stack/references/operations.md
+3fb6ffdb6fb634086f7f0ad8c5665c44b095fa131a96f41cef62e8aa2b9d282e  ./hermes/skills/devops/ai-stack/references/owui-admin-auth.md
 cbb06f14ec073a2b9436c977cd60cd31f8e7bb3de6ee7fc7c127454dcedaecc5  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
 ed07f0188d3a2dbe27c3f4b4a2966ae423f28bf2450ec8a040bd2cbc4c6ec0bf  ./hermes/skills/devops/ai-stack/references/searxng.md
 c4258ef26861d1b6f66553631c3f28be328cf50ef589631572818dc7eb354449  ./hermes/skills/devops/ai-stack/references/upstream-release-review.md
