@@ -1,6 +1,6 @@
 ---
 name: job-application-review
-description: "Use when a vacancy or resume is sent for a verdict."
+description: "Use when a vacancy, resume, or take-home needs a verdict."
 version: 1.0.0
 author: VPS Admin
 license: MIT
@@ -14,6 +14,8 @@ metadata:
 ## When to use
 
 The user drops an hh.ru (or any) vacancy link and asks «как это ложится на мой стек?» / «а это?» / «це шо за хуйня?», or sends his resume / «легенду» / a Google Doc and asks what is wrong with it or what to fix. This is advisory work, not engineering: the deliverable is a verdict he can act on, not research volume.
+
+Same umbrella covers his **test assignments (take-home)**: he links a repo (usually `Esmien/...` with a ТЗ document) and asks «посмотри, как сделано». That is a code review for a hiring funnel, and the verdict decides whether it gets sent — see the take-home section below.
 
 ## Answer shape — verdict first
 
@@ -68,6 +70,20 @@ Then grep only for the claim under review: the RBAC cache decorator and its TTL,
 Deliver in this order: what the code proves (state plainly whether it is confident middle), then **3–6 questions an interviewer would land on, taken from his own code** — never generic theory. Per-repo findings and the legend↔code contradictions are in `references/repo-review.md`; re-read it before reviewing again so the same weak points are not rediscovered.
 
 He has decided the repos are **not shown to employers** («коммерческий код» по легенде), so the useful deliverable is oral: three stories he can tell in depth without artefacts — очереди и DLQ с идемпотентностью, PostgreSQL под нагрузкой с цифрами, event loop и вынос CPU-bound работы. When he waves off depth («тонкие нюансы не спросят»), answer once with the posting's own checklist (if the ad names event loop/GIL, EXPLAIN, at-least-once vs exactly-once, DLQ, then that is the screen) and move on to the stories.
+
+## Reviewing a test assignment (take-home)
+
+A ТЗ plus a repo is not a reading exercise: the grading criterion is «работоспособность Docker-окружения», so **clone it and actually run it** before saying anything about quality. Reading alone produces opinions; a run produces facts he can quote to the interviewer.
+
+1. Clone into the scratch dir, map files, read only the load-bearing ones (models, outbox/relay, consumer, broker topology, compose, migration, README, pyproject). Never paste code into chat.
+2. Bring the stack up **isolated**: own compose project name, non-default host ports, `.env` written by you and never printed, `touch /var/lib/docker-autorecover/pause` first (снять после) so the incident detector does not treat the test containers as production.
+3. Exercise the contract with curl: create → poll to final status → webhook delivery → idempotent replay → conflicting replay → missing key → missing API key → concurrent same-key burst (one row in DB?) → failing webhook (attempts + DLQ message count).
+4. Run the project's own suite against a real DB in a throwaway container — «113 passed» is a fact, «тесты есть» is not.
+5. Tear down (`compose down -v`), kill the probe servers, unpause.
+
+Full command recipe, the network/`xargs` traps and the reporting shape are in `references/test-assignment-review.md` — read it before the next take-home.
+
+Deliver: what you ran and what it returned, then strengths, then **ranked holes each phrased as the question an interviewer will ask**, then one-line fixes for the outright bugs, then the verdict («крепко, но…» / «отправлять нельзя»). Finish with an offer to fix the top bug as a PR.
 
 ## Resume review checklist
 
