@@ -50,7 +50,9 @@ def _read_persona() -> str:
 
 def _render(session_info) -> str:
     model = str(session_info.get("model") or "").strip().lower()
-    if not model or not any(model.startswith(p) for p in _model_prefixes()):
+    # Substring match: the same model arrives as ``muse`` (alias), ``muse-spark-1.3-contributor``
+    # (OpenCode) or ``meta/muse-spark-1.3-contributor`` (OpenRouter fallback).
+    if not model or not any(p in model for p in _model_prefixes()):
         return ""
     return _read_persona()
 
