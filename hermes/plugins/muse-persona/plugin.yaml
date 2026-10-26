@@ -1,0 +1,5 @@
+name: muse-persona
+version: "1.0.0"
+description: "Attach a dedicated system prompt to specific models (default: muse-spark*) without touching the global agent.system_prompt. The prompt text lives in persona.md next to this plugin; unset/empty file = the plugin is inert."
+author: "VPS Admin"
+provides_hooks: []

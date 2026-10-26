@@ -72,6 +72,11 @@ An alias with its own `base_url` authenticates with its own credential
 neither set the key is resolved from the alias HOST, never carried over from
 the provider that was active before the switch.
 
+An alias carries no prompt: a persona bound to one model is a plugin
+(`ctx.register_system_prompt_section` filtered on `session_info["model"]`), not
+an alias field and **not** a global `agent.system_prompt` — see
+`references/per-model-system-prompts.md`.
+
 Built-in aliases (catalog-resolved against the active provider): `sonnet`,
 `opus`, `haiku`, `claude`, `gpt5`, `gpt`, `codex`, `o3`, `o4`, `gemini`,
 `deepseek`, `grok`, `llama`, `qwen`, `minimax`, `nemotron`, `kimi`, `glm`,

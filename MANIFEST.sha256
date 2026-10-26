@@ -1,9 +1,13 @@
 c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
-5c002fa4b3e4b229579a82b2bf2653d68dc3ba8cfc86cdaf65b24c8c80d14fc9  ./hermes/config.yaml
+8215315802f5d1620fdc8ce5eca5895d3dacbd56ea137aa9c5e9f30bcf228858  ./hermes/config.yaml
 8e960658e865ba97113ac24197836dcdb4b153cda4a05ffdae6de55309895e2c  ./hermes/cron/jobs.json
 66dcce4ec8ae329e520070d2e839673df00370fda211f16bc2df9b9e9bafbadf  ./hermes/memories/MEMORY.md
 1994a24536e05c418d8680fe02655a16665baf3452dc7e650849ca43d6069210  ./hermes/memories/USER.md
+fbb6d46b03ad31d0d5ebb3c615a2d7816f32f285105f8c015ccd1d999764c693  ./hermes/plugins/muse-persona/__init__.py
+36c5f113ada8f4720067d2e90e28df7372352ddbc4be2934346a871e9fe2909e  ./hermes/plugins/muse-persona/__pycache__/__init__.cpython-314.pyc
+e192a0881a87b24d55161cdc1ee075291f19592316ed88d5a770773ace175718  ./hermes/plugins/muse-persona/persona.md
+b900857a741b20fdc37399ed8eb71191eccec8b0013ed0f2c37a8827342e8fd8  ./hermes/plugins/muse-persona/plugin.yaml
 9547927170b127aac36ed4d208fbc6e6149ad4cc52457a018f16471f8161297e  ./hermes/scripts/backup-verify.sh
 49a899583a852d558603d43b969fbdf788e372a70cb6ec86c73c4af08dd22049  ./hermes/skills/.bundled_manifest
 ba57818e9e9312e50ec03d0c26cbc3c1c37fac3425f7406893179c8c327f03af  ./hermes/skills/.curator_state
@@ -16,7 +20,7 @@ bc68b1648e301409bc25b1084ec26766213ca9f3c1b2fd3d3d6ebe3dbde9e967  ./hermes/skill
 9cf9b448e9272335d90dc8552126b4d82022ae0cdc783a6d206a657c7254ae54  ./hermes/skills/autonomous-ai-agents/claude-code/SKILL.md
 1b15b57bcaba128b83ebe9f050b6873958198a1570bc801d4ca0406fb7e3271d  ./hermes/skills/autonomous-ai-agents/codex/SKILL.md
 778833ecfea4385cab79ec4dda0ffe956e3f4bf9231eb80e52c5d113ee4e6cdf  ./hermes/skills/autonomous-ai-agents/computer-use/SKILL.md
-0481a0770c7dbbe615be0d20b334e3a754a3109a043b2a82bc8265bf61211127  ./hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md
+14f2d3cff608a778488d5e3465da8213d873bdece47216e044324889f1a55be3  ./hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md
 70099ca64774cc7e70a33330d180f862cf19a02c0f936dc4c50d51c6d0b73556  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/background-systems.md
 a15c6838f9ac1e35b0e113a66738b3ce27bb6500d31218797467a2f8691341b5  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/cli-reference.md
 890cd0169309a03e51ac234d667e26c2934d8de20ed67bac36d0e26983943f2f  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/configuration.md
@@ -27,11 +31,12 @@ ee6ca1a172ecb61554248d25e97155c38c8dd18d45ee6bdd7f02f5c88bd69f54  ./hermes/skill
 1d04f52db86ec5f2315414fa4d9d5da0f6ff2d333252e6f55a812a770e7d538c  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/external-coding-agents.md
 2f7d11ebe963a83a4e9478c7e7b7d02c1a02e08916eac1d6cd757ba1211d7a2c  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/model-fallback-diagnosis.md
 ded08718d2eb141262a31b323f8e66eeb40f35e074e1f0e70abb76860891ec92  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/native-mcp.md
+9b41c3a92743c10295ad22038f446b0af30d750a7960bc97ba8524794f4cae64  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/per-model-system-prompts.md
 2254eabf40c360efb54e4df482f3b84820b54a15e6954c4a7e9e7fee4eb90f77  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/petdex.md
 4890617a80d8c70fc388a49201d5a718049a64c0ddd5fac3f35754641f063b99  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/portal-auth-for-third-party-apps.md
 20b51406102e6498f62ed837978e5c67ebd91a917b985de7bbddfaaf23c1f593  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/project-context-files.md
 7e76cff514f5a2e1879e8fa9a5a0da6c3024eeec9c9a20a380a89c5703b53f3a  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/prompt-cache-audit.md
-3eef9b4bbbf1a17d085a5fb67312cd3c66e217de41651a703e5cb209ea7d9e65  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/providers-and-models.md
+744436eeb11d6d870667c827a5cf631ec94d371f22b3093c46f68ef9ed415847  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/providers-and-models.md
 f27913f7775915d8065b2dea782197907ff90cf37f07b865135c7f61aee98e83  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/security-privacy.md
 4442c7bbd1e68b4b55292d0b455505ad0733883dc8acebd3188a6b6bdf089b2b  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/slash-commands.md
 f5a8269a7312173f0caa6736156a3f76d32e56b4e15511e84dc2e902f48e8157  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/themes.md
@@ -204,7 +209,7 @@ e73d9409a63d157774528b260b3249fb52745e6b242efe8bc1ae2e9f04b08827  ./hermes/skill
 ec7b64ab5878677bceb62942c1c5affe3dd6ba1493c37dfd8c5c5c38a4cc14b6  ./hermes/skills/devops/ai-stack/SKILL.md
 3388313337747fa2338c4834da2ae7f5cd50a15a2315b0325d48298da18e65f9  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
-e2c4f2055a3e5194b39255722bacdefb9c0285d5ac052bef62541e58ab0bb177  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
+81babc7468bf6f07194f4de6f6bd9d913b52ed404ba20718b56e56e04ec72f38  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
 4899c677e4fab9179ac1009d0c75b7cced3e7b40e485d81694b4a94f830e1bfa  ./hermes/skills/devops/ai-stack/references/disk-and-memory.md
 ab95b4ac1ada135d305e22e973f2db9fb96e8be86549eca51bb3c7d1c649d066  ./hermes/skills/devops/ai-stack/references/media-pipeline.md
 0b52c29ceefcf76976a04ca3b8436525a3c65a203615f93f0bdcc29241b5962b  ./hermes/skills/devops/ai-stack/references/memory-troubleshooting.md

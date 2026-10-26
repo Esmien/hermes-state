@@ -93,6 +93,7 @@ Profiles use `~/.hermes/profiles/<name>/` with the same layout. When a profile i
 | CLI commands, subcommands, flags, "how do I run X" | `references/cli-reference.md` |
 | In-session slash commands | `references/slash-commands.md` |
 | Provider setup, API keys, OAuth | `references/providers-and-models.md` |
+| A prompt/persona that must apply to ONE model only, "промпт к отдельной модели" | `references/per-model-system-prompts.md` |
 | config.yaml sections, skills enable/disable, toolsets, voice/STT/TTS | `references/configuration.md` |
 | AGENTS.md / .hermes.md / CLAUDE.md project rules | `references/project-context-files.md` |
 | Secret redaction, PII, approval modes, "reset permissions" | `references/security-privacy.md` |
