@@ -112,6 +112,7 @@ Changing limits requires a recreate (or `docker update --memory-swap` live).
 
 ## Other footguns that cost time here
 
+- **A scratch stack beside production**: a second compose project (`docker compose -p <name> up`) is safe only if *every* published host port is overridden through the file's own `${VAR:-default}` env vars — 5432, 5672 and 8000 are already owned by the host Postgres and the `ai` stack. Ports published as `127.0.0.1:<port>:<port>` are reachable from the host but **not** from another container via the bridge gateway (`172.x.0.1:<port>` refuses); a helper container that needs them must join `<project>_default` and use the compose service name (`postgres:5432`).
 - `docker exec` with a heredoc **needs `-i`** — without it the command exits 0 with empty output (looks like a silent success).
 - Images pinned only by tag (`:main`, `:latest`) move under you. `webui-branding` and `litellm` are pinned deliberately (digest / `vX.Y.Z`) — keep it that way and read the release before pulling.
 - `docker compose up -d --force-recreate` is required after an **image rebuild**, otherwise a stale container keeps the old image layer.

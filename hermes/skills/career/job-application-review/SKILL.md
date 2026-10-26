@@ -83,6 +83,8 @@ A ТЗ plus a repo is not a reading exercise: the grading criterion is «раб�
 
 Full command recipe, the network/`xargs` traps and the reporting shape are in `references/test-assignment-review.md` — read it before the next take-home.
 
+When he comes back with a PR link («проверь»), it is the same class of work, not a new one: rebuild the PR branch, re-run the contract probes on it, and add the check that actually catches regressions — the migration applied as an **upgrade over a populated volume**, not on an empty database. Round-2 recipe and critique lens: `references/test-assignment-review.md` §8.
+
 Deliver: what you ran and what it returned, then strengths, then **ranked holes each phrased as the question an interviewer will ask**, then one-line fixes for the outright bugs, then the verdict («крепко, но…» / «отправлять нельзя»). Finish with an offer to fix the top bug as a PR.
 
 ## Resume review checklist
