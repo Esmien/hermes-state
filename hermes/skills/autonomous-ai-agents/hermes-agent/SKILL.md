@@ -105,6 +105,7 @@ Profiles use `~/.hermes/profiles/<name>/` with the same layout. When a profile i
 | Pet mascots — install, select, scale, diagnose | `references/petdex.md` |
 | Windows-specific issues (keybinds, WinError 10106, BOM) | `references/windows-quirks.md` |
 | Debugging: voice, tools missing, gateway, aux models | `references/troubleshooting.md` |
+| "Wrong model answered", «Fallback activated» in the log, provider streams nothing usable | `references/model-fallback-diagnosis.md` |
 | Prefix/KV cache health: "what settings break prompt caching?", timestamps in requests, dynamic tool loading | `references/prompt-cache-audit.md` |
 | Root-causing a user-visible Hermes error message (any locale) | `references/error-message-diagnosis.md` |
 | Contributing code: adding tools, slash commands, tests | `references/contributor-guide.md` |

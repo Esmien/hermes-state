@@ -87,6 +87,8 @@ When he comes back with a PR link («проверь»), it is the same class of 
 
 Deliver: what you ran and what it returned, then strengths, then **ranked holes each phrased as the question an interviewer will ask**, then one-line fixes for the outright bugs, then the verdict («крепко, но…» / «отправлять нельзя»). Finish with an offer to fix the top bug as a PR.
 
+Design questions about his own code («а есть практический, а не косметический смысл в X вместо Y?») get a practical-vs-cosmetic answer, not a survey of trade-offs. Name the mechanism in *his* code that would make the alternative matter — an import chain that drags infra, an `isinstance`, a second implementation, a test double that must subclass, a lock or a transaction boundary — and when none of them is present say plainly «менять не надо» and point at what is actually worth changing instead. A recommendation whose only argument is style reads to him as cosmetic advice, and he will call it out.
+
 ## Resume review checklist
 
 - **Claimed total experience vs date arithmetic.** He under-claimed 3.5 years against dates that span 4 — a filter he fails for free.
