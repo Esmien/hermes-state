@@ -199,7 +199,7 @@ e73d9409a63d157774528b260b3249fb52745e6b242efe8bc1ae2e9f04b08827  ./hermes/skill
 5454af16b5f3daee9a2f05658d267bb0bd8a025e1870bad996a85677a091d284  ./hermes/skills/creative/popular-web-designs/templates/x.ai.md
 9aac8e73a4a471fecb2d252afead66c82436e7525e7f9d1e6bbe64e375c65160  ./hermes/skills/creative/popular-web-designs/templates/zapier.md
 5dbf92dc336e9b17be45c35c92a5bb307e4655e39a86617f07b7654678f92583  ./hermes/skills/creative/songwriting-and-ai-music/SKILL.md
-c04c0f9483cbbdc312babe045006261706c393fd72657a1c2bfb1768d31c2cae  ./hermes/skills/devops/ai-stack/SKILL.md
+ec7b64ab5878677bceb62942c1c5affe3dd6ba1493c37dfd8c5c5c38a4cc14b6  ./hermes/skills/devops/ai-stack/SKILL.md
 3388313337747fa2338c4834da2ae7f5cd50a15a2315b0325d48298da18e65f9  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 fafca5fad15595a4f878b2301eb411773ca1f4c0ea71c5b10741a18e536ff64a  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
@@ -214,13 +214,14 @@ f1014497186cbfd96ea54d6b4b82bac6714bea3218ac82e260f66b836d9d14e0  ./hermes/skill
 cbb06f14ec073a2b9436c977cd60cd31f8e7bb3de6ee7fc7c127454dcedaecc5  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
 ed07f0188d3a2dbe27c3f4b4a2966ae423f28bf2450ec8a040bd2cbc4c6ec0bf  ./hermes/skills/devops/ai-stack/references/searxng.md
 9cfae7089c96dcb5efc4d9a7a09f9f7e71059dcd92ae5ba59e560e3af6ed4767  ./hermes/skills/devops/ai-stack/references/signup-approval.md
-f7fcab9d700af08bd2b6407b3007fc0cb34a97109fe4d4c7ec4d4f55443c34bb  ./hermes/skills/devops/ai-stack/references/updates.md
+db532fc169be82afe6e51b5fd444ee7c021a650fbe0c635e1dfac327cf8104c2  ./hermes/skills/devops/ai-stack/references/updates.md
 c4258ef26861d1b6f66553631c3f28be328cf50ef589631572818dc7eb354449  ./hermes/skills/devops/ai-stack/references/upstream-release-review.md
 80ffd361b1c5f46f0006193a623ec4ff84c62eff2b4f2195adb5cc13a10e0a82  ./hermes/skills/devops/ai-stack/scripts/audit-dead-models.py
 c2fc4ce4b63f576ee21f3a0065f03f45b85b702159e047fd18083ae345eb0f49  ./hermes/skills/devops/ai-stack/scripts/check-env-parity.sh
 534cac14e01a8c2bbbaaae3614e06ab3b07ded048521d69176d1a46fdf0bbf56  ./hermes/skills/devops/ai-stack/scripts/compact-webui-images.py
 36432d6a9677006a068a5ceefbc2e9995a298d98576e58372b92173b77126f44  ./hermes/skills/devops/ai-stack/scripts/probe-approval-guardian.py
 57a2a5e8f2f2395dfb18a9a37ebed061a5272f43b7737f966462483ea4e03f2a  ./hermes/skills/devops/ai-stack/scripts/probe-media-endpoints.py
+5f28a41cf05b85f901f2eceb62a441d72fd71042ea7e992a578d2a8192e72982  ./hermes/skills/devops/ai-stack/scripts/probe-owui-terminal.py
 5c31d33cb0c6bf6a6eb911e6419abf3e48f785e0083b50e273b7fdfd97da8c5e  ./hermes/skills/devops/container-incident-response/SKILL.md
 244093d67fc1c519a82fe5fbd107a2cea7b8127de5d5e030001163f9bae0c53f  ./hermes/skills/devops/container-incident-response/references/agent-wakeup.md
 891b02a8d8af2ff6fe959e205bcb8a343270686135367050b673524c31c304e7  ./hermes/skills/devops/container-incident-response/references/detector-and-thresholds.md
