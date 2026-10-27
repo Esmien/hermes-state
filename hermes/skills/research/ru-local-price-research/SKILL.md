@@ -39,6 +39,11 @@ The answer is a verdict with named places and a number, not a list of links.
    - For other domains use the exchange/regulator/tariff source of that market, never a
      seller's own "от".
 
+   Then fix which question it is — **сдать** (scrap) or **купить** (retail). Scrap anchors on
+   melt and shop buy rates; retail anchors on melt × retail multiple + stones + work and
+   never on scrap rates. Retail procedure and source list:
+   `references/jewelry-retail-ru.md`.
+
 2. **Pull real local vendors from Yandex Maps.** Its search pages are server-rendered:
    plain curl + tag stripping returns shop names, ratings, addresses AND the promo price
    snippets (e.g. `Special offer: Увеличили оценку золота 585 до 6 200 ₽/г`).
@@ -66,6 +71,8 @@ The answer is a verdict with named places and a number, not a list of links.
    then anchor price + math; then 3-5 concrete places with address and the number each
    advertises, marked published vs expected; expected net range; one short script of what
    to ask on the phone. Plain Russian, no jargon, date every price.
+   Follow-ups inside the same topic ("а крестик возьмут?", "а сколько это в розницу") get a
+   short direct answer from data already gathered — do not restart the research pipeline.
 
 ## Pitfalls
 
@@ -88,3 +95,5 @@ The answer is a verdict with named places and a number, not a list of links.
 
 - `references/gold-scrap-ru.md` — pawn-shop mechanics for gold/silver in Russia: melt
   math, залог vs скупка, white-gold deductions, hallmark/weight checks.
+- `references/jewelry-retail-ru.md` — what new jewelry costs to BUY: price model
+  (melt × multiple + melee + work), segment ladder, producer sites whose prices parse.

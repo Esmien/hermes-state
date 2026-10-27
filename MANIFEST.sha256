@@ -349,8 +349,9 @@ d8fd2a3a26ff45455709595132a092825a48f6c9dd3bcc98b06c1a43eaa7fcca  ./hermes/skill
 e2fba7b30ee22afdb21e8411b6a18431da6efc9ec3ef55e2223481bf906f4376  ./hermes/skills/research/grounded-citations/scripts/_hermes_home.py
 0c216e29e092faedcaa1ebae129db15dfc100465169490704b3628446db96788  ./hermes/skills/research/grounded-citations/scripts/sources.py
 0229e37c1783fcac5b77cfb3242703666cf4aa472d2ae85b6bd5279756b515b6  ./hermes/skills/research/llm-wiki/SKILL.md
-564832400bb555d62640749d5a1882bc02366975d6cd71efa156561e85ce7ae2  ./hermes/skills/research/ru-local-price-research/SKILL.md
+97851b1cfdc821e172331d3096cded8faa78e100bdbbd6f30d8de84c406fd44a  ./hermes/skills/research/ru-local-price-research/SKILL.md
 41505a885896c5b9372fca8be635b2fbf2c42e4083b870a6f4cff63d84ac7229  ./hermes/skills/research/ru-local-price-research/references/gold-scrap-ru.md
+cfa6128ed67a0224981a2c384ce188bd037e898a95c432465873306b6edb7349  ./hermes/skills/research/ru-local-price-research/references/jewelry-retail-ru.md
 2ea0d50444337de4809a62dc618d6d9c35bd2ba30f17ec6a138a20f53f9974a7  ./hermes/skills/social-media/DESCRIPTION.md
 5457319ee337284b1152dc9f60146c72685ade489299afed08e0b46ca5a97080  ./hermes/skills/social-media/xurl/SKILL.md
 d62554263461919dff7d77c3c0c284c2190c894f312a84d7a770a030dab642dc  ./hermes/skills/software-development/codebase-inspection/SKILL.md
