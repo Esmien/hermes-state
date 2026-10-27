@@ -82,12 +82,12 @@ b201d073a6374940cc7a90bf418f3af9f7d5315c67f3f633edcea78012fb8fed  ./hermes/skill
 65af83d2307a43298474305685d6a0eec08114dfcc0e9ff299ea4c5735bccac9  ./hermes/skills/devops/credential-login-verification/references/open-webui-auth.md
 da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skills/devops/credential-login-verification/scripts/login-path-audit.sh
 ee146464fb8b4fcf0272dff5912d82ef6d29ad8dcd5a8e7510de6266af1481b0  ./hermes/skills/devops/docker-compose-traps/SKILL.md
-d939ff8253f8da166a191a033898aa8c6ce5f5fd2f4760d7d996015081dcb7f6  ./hermes/skills/devops/hermes-state-backup/SKILL.md
+ed20fcd212379a0d96f986f5bc32a44579a1d6fb0a369f6e4b3e51de994318c7  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
 84feede765923dc361ed88fbef4a733a6f87fe23c60a4b409ab4d045d4de2849  ./hermes/skills/devops/llm-route-bench/SKILL.md
 f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skills/devops/llm-route-bench/scripts/ab_bench.py
 fa37fc898923e0cac0eaadf2bbe4dbd4ec863ecf61eac251a7b27b24027e189c  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
-8d193dd7b4baeb19c5e4cb7e8a10f3f9f9ecca52853ddc357cf1c0b62a72338a  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+ff874943b4b95e9276b90d5dd6f2ffc4ab3c8fdcb192b2682c3b73c51e48df23  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 7bb23fbf44d8579fca367d42418ce677ca2b5921573272473022a3cc07c0846f  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
 918971595010770b622cd8cd01580d166146ce98f021a66960e49f7b4ba09b37  ./hermes/skills/devops/webui-ios-icons/SKILL.md

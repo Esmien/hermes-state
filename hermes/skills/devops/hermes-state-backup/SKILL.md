@@ -33,7 +33,12 @@ metadata:
 | failure alert | Telegram via `hermes send -t telegram` (works without the gateway running) |
 
 Snapshot layout inside the repo: `hermes/{config.yaml,SOUL.md,memories/,skills/,cron/jobs.json,plugins/,hooks/,scripts/}`,
-`host/{bin,systemd,etc,ai-stack}/`, `MANIFEST.sha256`, `README.md`.
+`host/{bin,systemd,etc,ai-stack,backups}/`, `MANIFEST.sha256`, `README.md`.
+
+`host/backups/tg-registry.json` — реестр `file_id` частей дампов, которые
+`notifications/monitor.py` отправил в файл-бот. Именно из него `install.py --from-bot`
+берёт последний бэкап БД при восстановлении на новом сервере; без этой строки в
+snapshot-loop реестр остаётся только на умирающем хосте.
 
 ## Deliberately excluded
 
@@ -57,6 +62,7 @@ Backups fire **when the state changes**, not on a clock. `hermes-state-watch.ser
 - The watcher also runs one snapshot at service start, which covers edits made while it was down (host rebooted, unit stopped).
 - A `flock` on `/var/lib/hermes-state/.snapshot.lock` (fd 9, `-w 900`) serialises the watcher and manual runs; without it a manual `systemctl start` during a debounce window produced interleaved commits.
 - **Every path in `WATCH` must also be snapshotted.** Watching a file that no `install`/`rsync` line copies produces runs that commit nothing — that is how `runbook-containers.md` was watched but absent from the repo until it was added to the snapshot loop. Add both sides in the same edit.
+- **Never watch a path that may not exist yet.** `inotifywait` exits `rc=1` on a missing path: the watcher falls into a 10 s retry loop, logs nothing useful, and misses the very `CREATE` event that would have made the file exist (the Telegram `file_id` registry hit exactly this). Watch the parent directory and exclude the churn (`\.dump$|\.dump\.part_|backup\.log$`).
 - Watch files, not whole directories, when the directory carries runtime churn: `cron/` contains `deliveries.db-wal` that is written continuously and reset the debounce forever (no snapshot ever fired). The watcher therefore watches `cron/jobs.json` and excludes `-wal$|-shm$|\.db$|\.usage\.json`.
 - After editing the watcher itself: `systemctl restart hermes-state-watch` — that restart triggers a catch-up snapshot, which is the fastest self-test.
 

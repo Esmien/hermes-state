@@ -162,8 +162,19 @@ https-коды доменов и число активных таймеров, �
   пока `vps-infra-watch.service` активен, изменённый `assets/notifications/monitor.py`
   или `assets/host/bin/*.sh` вернётся к живому файлу через ~90 с. Правьте репозиторий
   при остановленном watcher'е и деплойте живые копии до пуша.
-- **Прогон `install.py` перезаписывает `ai/.env` своим набором ключей:**
-  старые ключи (`DOMAIN`, `POSTGRES_ADMIN_PASSWORD`, `BOT_DB_PASSWORD`)
+- **`--only fetch` без `--infra-dir` шага secrets читает `GITHUB_KEY` из
+  `$INFRA_DIR/ai/.env` каталога-цели (пусто) — нужен fallback на штатный
+  `/home/ai_service/ai-stack/ai/.env`, иначе реестр не находится и уходим в
+  `getUpdates` с пустым результатом. Добавлен в `load_config()`.
+- **`inotifywait` падает с rc=1 на несуществующем пути.** Добавление
+  `.tg-registry.json` в WATCH до его создания оставило watcher в вечном retry и
+  пропустило событие создания — реестр не уехал в снапшот. Следить надо за
+  **каталогом** `backups/postgres`, исключив `\.dump$|\.dump\.part_|backup\.log$`.
+- **Проверенный drill (2026-10-27):** `monitor.py backup` → 7 частей по 16.2 MiB
+  (webui_db 113 MB) + 2 по 14.3 MiB (litellm 28.5 MB), реестр в hermes-state,
+  `install.py --only fetch --from-bot` скачал 9 частей за 18 с, sha256 совпал с
+  живыми дампами байт в байт, `pg_restore --list` читает архив.
+- **Прогон `install.py` перезаписывает `ai/.env` своим набором ключей:**  старые ключи (`DOMAIN`, `POSTGRES_ADMIN_PASSWORD`, `BOT_DB_PASSWORD`)
   исчезают, новые (`WEBUI_URL`, `LITELLM_REDIS_PASSWORD`, `GITHUB_KEY`)
   появляются. Перед прогоном на живом сервере убедись, что рядом лежит
   снапшот `.env` (`backups/env.bak-<ts>`) — только сравнив с ним, потом
