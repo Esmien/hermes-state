@@ -1,11 +1,11 @@
 c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
 71842bfb2cb86d210adfde4d75a6a452ec5f1154bf0c21968eb2086ea806d450  ./hermes/config.yaml
-8e960658e865ba97113ac24197836dcdb4b153cda4a05ffdae6de55309895e2c  ./hermes/cron/jobs.json
+ddb16b1beb4e99156ab4ad166c68c8b6c2e060e3caba61538893503c40c26910  ./hermes/cron/jobs.json
 66dcce4ec8ae329e520070d2e839673df00370fda211f16bc2df9b9e9bafbadf  ./hermes/memories/MEMORY.md
 1994a24536e05c418d8680fe02655a16665baf3452dc7e650849ca43d6069210  ./hermes/memories/USER.md
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
-36c5f113ada8f4720067d2e90e28df7372352ddbc4be2934346a871e9fe2909e  ./hermes/plugins/muse-persona/__pycache__/__init__.cpython-314.pyc
+ace53680230203597ccc98a4e43af7d78ebd79690b210af403cd5e657dbf5513  ./hermes/plugins/muse-persona/__pycache__/__init__.cpython-314.pyc
 e192a0881a87b24d55161cdc1ee075291f19592316ed88d5a770773ace175718  ./hermes/plugins/muse-persona/persona.md
 b900857a741b20fdc37399ed8eb71191eccec8b0013ed0f2c37a8827342e8fd8  ./hermes/plugins/muse-persona/plugin.yaml
 9547927170b127aac36ed4d208fbc6e6149ad4cc52457a018f16471f8161297e  ./hermes/scripts/backup-verify.sh
