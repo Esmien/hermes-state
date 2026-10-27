@@ -1,4 +1,4 @@
-Отключение навыков в Hermes: skills.disabled — JSON-список имён (hermes config set skills.disabled '["a","b"]'; ключа нет в DEFAULT_CONFIG → ложное предупреждение CLI). Платформенно: skills.platform_disabled.<platform>. ESSENTIAL_SKILLS={hermes-agent} отключить нельзя. Читается при сборке агента → /reload-skills или /new.
+Отключение навыков в Hermes: skills.disabled — JSON-список имён; платформенно skills.platform_disabled.<platform>; hermes-agent отключить нельзя; нужен /reload-skills.
 §
 Хост-рут этого VPS доступен напрямую как `/` — агент работает на корне хоста, НЕ в контейнере с bind-маунтом. `/mnt/host` НЕ существует; хостовые пути использовать как есть (/home/..., /etc/...). AI-стек: /home/ai_service/ai-stack (детали — skill ai-stack).
 §
@@ -11,3 +11,5 @@ Telegram-боты (владелец 214062001): @esmien_vps_notificator_bot (н�
 Бэкап состояния Hermes: коммит в приватный GitHub Esmien/hermes-state ПО ФАКТУ ИЗМЕНЕНИЙ (с 24.10.2026, не по таймеру): hermes-state-watch.service (inotify, debounce 90с) → hermes-state-backup.sh (flock, GITHUB_KEY из ai-stack/ai/.env, GIT_ASKPASS) → /var/lib/hermes-state/repo. Таймер отключён. Логи /var/log/hermes-state-watch.log и -backup.log. Детали — skill hermes-state-backup.
 §
 Инфраструктура ставится из github.com/Esmien/vps-infra (bootstrap | bash → install.py), копия /root/vps-infra; ai-stack/deploy.sh исторический. Детали — skill vps-infra-installer.
+§
+Дорогие LLM-маршруты (opus/gpt-6/sonnet) не трогать и не вызывать без явного указания владельца; DeepSeek-flash — дефолт для тестов.

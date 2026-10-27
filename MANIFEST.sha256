@@ -2,7 +2,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
 71842bfb2cb86d210adfde4d75a6a452ec5f1154bf0c21968eb2086ea806d450  ./hermes/config.yaml
 ddb16b1beb4e99156ab4ad166c68c8b6c2e060e3caba61538893503c40c26910  ./hermes/cron/jobs.json
-66dcce4ec8ae329e520070d2e839673df00370fda211f16bc2df9b9e9bafbadf  ./hermes/memories/MEMORY.md
+12c07e1999cf236f840d44c550323894bdc6aa45d646884a4e3fd13881f5fd5b  ./hermes/memories/MEMORY.md
 1994a24536e05c418d8680fe02655a16665baf3452dc7e650849ca43d6069210  ./hermes/memories/USER.md
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
 ace53680230203597ccc98a4e43af7d78ebd79690b210af403cd5e657dbf5513  ./hermes/plugins/muse-persona/__pycache__/__init__.cpython-314.pyc
@@ -240,6 +240,8 @@ da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skill
 ee146464fb8b4fcf0272dff5912d82ef6d29ad8dcd5a8e7510de6266af1481b0  ./hermes/skills/devops/docker-compose-traps/SKILL.md
 d939ff8253f8da166a191a033898aa8c6ce5f5fd2f4760d7d996015081dcb7f6  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
+842ed1114e9559b5a6b69d27a4978baaed1e510b41d95b52f07fcd7bf28c905b  ./hermes/skills/devops/llm-route-bench/SKILL.md
+bc6f8977d5b618908ab356d2bd766c54493cfebd3513a3092811bf5412c54f7b  ./hermes/skills/devops/llm-route-bench/scripts/ab_bench.py
 ce90e8a3e145cce69c62880dc85921700110879f9290952d6cec28218503155f  ./hermes/skills/devops/sdlc-review/SKILL.md
 fa37fc898923e0cac0eaadf2bbe4dbd4ec863ecf61eac251a7b27b24027e189c  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
 bb5e76173364b35136d8cfef19f6ded2787252e447bfa9bd23abd02763a3120b  ./hermes/skills/devops/vps-infra-installer/SKILL.md
