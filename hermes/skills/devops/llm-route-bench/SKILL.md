@@ -56,8 +56,11 @@ for those tokens. Send `«Скажи одно слово: ок»` with `max_toke
 ## Pitfalls
 
 - `opencode/*` model groups answer `400 MissingSessionID` on a direct call: they need the
-  `x-opencode-session` header (the `aider.*` groups inject it). Without that header such a
-  route is not "slow" — it is dead, and every task fails in 0.2 s.
+  `x-opencode-session` header. Adding a static value (`hermes-session`) clears that error but
+  is **not enough** for every model: `muse-spark-1.3-contributor` then answers
+  `400 Model does not support this protocol`, while `mimo-v2.6-flash` works on the same channel.
+  Conclusion: the channel is fine, that model is simply not served through it — keep it on
+  the OpenRouter route and do not burn time on headers.
 - Meta's `muse-spark-1.3-contributor` via OpenRouter rejects `max_tokens < 16`
   (`max_output_tokens must be >= 16`), so a 5-token probe returns a false 400. The probe uses
   16 and labels unanswered probes `route error`, not `clean`.

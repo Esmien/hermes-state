@@ -240,7 +240,7 @@ da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skill
 ee146464fb8b4fcf0272dff5912d82ef6d29ad8dcd5a8e7510de6266af1481b0  ./hermes/skills/devops/docker-compose-traps/SKILL.md
 d939ff8253f8da166a191a033898aa8c6ce5f5fd2f4760d7d996015081dcb7f6  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
-87a27666f0e1136cc4ab3c1efb6e0862e6056d70ab32b69e678d791c13fd27e1  ./hermes/skills/devops/llm-route-bench/SKILL.md
+d68e79dfd4cbd68334e816d820e77506dde693b9aa4947b6a20f47d6cf7d6d09  ./hermes/skills/devops/llm-route-bench/SKILL.md
 f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skills/devops/llm-route-bench/scripts/ab_bench.py
 ce90e8a3e145cce69c62880dc85921700110879f9290952d6cec28218503155f  ./hermes/skills/devops/sdlc-review/SKILL.md
 fa37fc898923e0cac0eaadf2bbe4dbd4ec863ecf61eac251a7b27b24027e189c  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
