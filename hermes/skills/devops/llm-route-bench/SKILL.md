@@ -55,12 +55,13 @@ for those tokens. Send `«Скажи одно слово: ок»` with `max_toke
 
 ## Pitfalls
 
-- `opencode/*` model groups answer `400 MissingSessionID` on a direct call: they need the
-  `x-opencode-session` header. Adding a static value (`hermes-session`) clears that error but
-  is **not enough** for every model: `muse-spark-1.3-contributor` then answers
-  `400 Model does not support this protocol`, while `mimo-v2.6-flash` works on the same channel.
-  Conclusion: the channel is fine, that model is simply not served through it — keep it on
-  the OpenRouter route and do not burn time on headers.
+- `opencode/*` groups need the `x-opencode-session` header **and** the Responses API: the
+  channel rejects `/chat/completions` (`Model does not support this protocol`) while
+  `/v1/responses` answers fine. Fix in the deployment: `litellm_params.model =
+  "responses/<model>"` — LiteLLM then bridges chat→responses itself and text tasks start
+  passing. Tools survive only on raw `/v1/responses`: through the bridge the model sees them
+  namespaced (`default.get_pawn_rate`) and answers in prose without ever emitting a
+  `function_call`, so every tool task fails. Agentic work stays on the OpenRouter route.
 - Meta's `muse-spark-1.3-contributor` via OpenRouter rejects `max_tokens < 16`
   (`max_output_tokens must be >= 16`), so a 5-token probe returns a false 400. The probe uses
   16 and labels unanswered probes `route error`, not `clean`.
