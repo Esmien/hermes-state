@@ -78,6 +78,16 @@ prices, monthly family budget with a total) → **housing and districts** of the
 
 ## Pitfalls
 
+- **One dataset per axis, same month, and say the date out loud.** Mixing a March Rosstat figure
+  with an October listing figure flips conclusions. Before drafting, build a small table
+  (показатель | значение | источник | дата) and refuse to publish any line that lacks a date.
+- **Regional statistics are not city statistics.** Rosstat housing prices come per region;
+  Краснодарский край includes Сочи, so its regional ₽/м² sits far above the city level. Using it
+  makes Krasnodar look 40 % more expensive than it is and inverts the whole "sell here, buy there"
+  arithmetic. Use listing medians (RealtyMag / RealtyStats / Квадролог) for city comparisons.
+- **Check that a global index still covers the country.** TomTom dropped Russian cities after 2021;
+  quoting "hours lost per year" for 2024–2025 is fabricating a number. If the index stopped, say so
+  and give the last real edition plus a second methodology that disagrees.
 - **Numbers from one site only.** Cross-check; two sources with different methodology that
   agree are what justify a figure in the verdict. Do not average Rosstat deals with listing
   asking prices.

@@ -41,14 +41,35 @@ fact qualitatively instead of inventing a vacancy count.
 
 ## Two price numbers that must not be averaged
 
-- **Rosstat secondary market** = registered-deal averages.
-- **Listing newbuild averages** = asking prices across all classes.
+- **Rosstat secondary market** = registered-deal averages, published **per region**, not per city.
+  Never quote it as a city price: Краснодарский край includes Сочи (2–3× city prices), so the
+  regional figure (167k ₽/м²) is ~40 % above the actual Krasnodar listing level (109–117k).
+  Новосибирская область ≈ Новосибирск, so the same method looks fine there — which is exactly
+  how a bogus city-vs-city inversion gets published. For city-level, use listing medians.
+- **Listing averages** = asking prices; compare only within one methodology and one month.
 
-They diverge by design, and in a heated market the inversion is real and useful to
-report: Krasnodar secondary well above its newbuilds (overheated resale), Novosibirsk
-newbuilds well above its secondary. Quote both, name the methodology, and never blend
-them into one "average city price" — the swap arithmetic (sell here, buy there) depends
-on which of the two you compare.
+City-level sources that render for curl and carry a date:
+
+| Source | URL | Yields |
+|---|---|---|
+| RealtyMag | `realtymag.ru/<region>/<city>/kvartira/prodazha/prices` | secondary ₽/м² + by district, month dynamics |
+| RealtyStats | `realtystats.ru/<city>` | secondary and newbuild ₽/м² by month, yearly series |
+| Квадролог | `kvadrolog.ru/cities/<nsk\|krd>/<N>-komnatnye/` | median flat price, IQR, rent per room, dated "Данные на DD.MM.YYYY" |
+
+Cross-check: if two of these three agree on sign and magnitude (e.g. НСК secondary 128–130k vs
+КРД 109–117k), publish the range and name both. If they disagree by >15 %, the samples differ
+(класс жилья, район, площадь) — say so instead of averaging.
+
+Rent, city-level and dated: local outlets retell Avito/Мир квартир monthly — `ngs.ru` (Novosibirsk),
+`93.ru` (Krasnodar). Small flats and 3-room flats can rank opposite ways: НСК 2-к rents above КРД,
+while 3-к in КРД costs more. Report per room count, not one "average".
+
+ЖКХ: regional indexation comes from Правительство РФ распоряжение (3413-р for 2026, later amendments
+e.g. 2633-р raising Краснодарский край to 13.7 %); absolute tariffs come from local digests
+(`anovosibirsk.com/articles/zkh-tariffs-26-2026`, `akrasnodar.com/articles/zkh-tariffs-26-2026`),
+both dated and listing ₽/Гкал, water, electricity. Do not assume the colder city pays more: НСК heat
+is cheaper per Гкал and its electricity is ~1.8× cheaper, so a modelled annual bill can favour НСК
+despite a heating season twice as long. Model it (area, m³, kWh, Гкал) and label it *(оценка)*.
 
 ## Ratio checks before publishing
 

@@ -39,9 +39,14 @@ if a slug 404s, the city is not covered, don't guess a variant.
 
 ## What the numbers mean
 
+- **Russian cities left the TomTom index after 2021.** The 2025 edition (~500 cities) has none of
+  them; «Коммерсантъ» confirmed it on 21.01.2026. Any "132 vs 117 hours (TomTom 2024/25)" circulating
+  in RU media is a rewrite of an older edition — never cite it, and never let an SEO aggregator
+  (zaimi.ru and clones) date a TomTom table for you.
+- Last TomTom edition with RU cities (2021): Новосибирск 110 h/yr, 3rd in Russia; Краснодар not in
+  the RU top-10. Numbeo today runs the other way (КРД 224 vs НСК 166). Two sources disagreeing on
+  sign means the honest answer is "no current annual measurement", plus the structural reason.
 - Compare **hours lost per year** or **average rush-hour travel time**, not peak score.
-  Краснодар vs Новосибирск: ~132 vs ~117 h/yr (TomTom 2024/25, 3rd vs 5th in RF); Numbeo
-  Traffic Index 224 vs 166. Different methodologies agreeing is what makes the verdict safe.
 - Annual averages hide the shape of the pain: a city can rank lower on average and still
   be brutal at 08:00–09:00 (bridge chokepoints). State the day-shape clause in one sentence.
 - Structural reasons worth one line, because they explain persistence: growth vs road
