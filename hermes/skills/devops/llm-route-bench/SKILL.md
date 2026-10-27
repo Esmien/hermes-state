@@ -55,6 +55,12 @@ for those tokens. Send `«Скажи одно слово: ок»` with `max_toke
 
 ## Pitfalls
 
+- `opencode/*` model groups answer `400 MissingSessionID` on a direct call: they need the
+  `x-opencode-session` header (the `aider.*` groups inject it). Without that header such a
+  route is not "slow" — it is dead, and every task fails in 0.2 s.
+- Meta's `muse-spark-1.3-contributor` via OpenRouter rejects `max_tokens < 16`
+  (`max_output_tokens must be >= 16`), so a 5-token probe returns a false 400. The probe uses
+  16 and labels unanswered probes `route error`, not `clean`.
 - Tool tasks silently become text tasks if `tools=` is not passed to the agent loop — check
   `turns=[...]` in the output; `calls=0` on a tool task means the harness bug, not the model.
 - `/model/info` may report cost 0 for a route (free credits). Cost columns then lie: use the

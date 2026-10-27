@@ -199,13 +199,14 @@ def probe(models):
         toks = []
         for _ in range(3):
             try:
-                d, _, u = chat(m, [{"role": "user", "content": "Скажи одно слово: ок"}], max_tokens=5)
+                d, _, u = chat(m, [{"role": "user", "content": "Скажи одно слово: ок"}], max_tokens=16)
                 toks.append(u.get("prompt_tokens"))
             except Exception as e:
                 toks.append(f"ERR:{str(e)[:30]}")
         ints = [t for t in toks if isinstance(t, int)]
         base = min(ints) if ints else None
-        flag = "INJECTED" if isinstance(base, int) and base > 200 else "clean"
+        flag = ("route error" if not ints else
+                "INJECTED" if base > 200 else "clean")
         print(f"  {m:44s} {toks}  {flag}")
 
 
