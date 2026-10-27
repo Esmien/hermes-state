@@ -20,7 +20,8 @@ bc68b1648e301409bc25b1084ec26766213ca9f3c1b2fd3d3d6ebe3dbde9e967  ./hermes/skill
 9cf9b448e9272335d90dc8552126b4d82022ae0cdc783a6d206a657c7254ae54  ./hermes/skills/autonomous-ai-agents/claude-code/SKILL.md
 1b15b57bcaba128b83ebe9f050b6873958198a1570bc801d4ca0406fb7e3271d  ./hermes/skills/autonomous-ai-agents/codex/SKILL.md
 778833ecfea4385cab79ec4dda0ffe956e3f4bf9231eb80e52c5d113ee4e6cdf  ./hermes/skills/autonomous-ai-agents/computer-use/SKILL.md
-14f2d3cff608a778488d5e3465da8213d873bdece47216e044324889f1a55be3  ./hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md
+ef1eb6f675fb440fe86c676fc992013787d3c891858a0ed8d7e00b02139dd5c6  ./hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md
+b7698ac6da2860a23d7e3bee37f63e0c509a0528ea4b44cd7403e174014da341  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/agent-guardrails.md
 70099ca64774cc7e70a33330d180f862cf19a02c0f936dc4c50d51c6d0b73556  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/background-systems.md
 a15c6838f9ac1e35b0e113a66738b3ce27bb6500d31218797467a2f8691341b5  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/cli-reference.md
 890cd0169309a03e51ac234d667e26c2934d8de20ed67bac36d0e26983943f2f  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/configuration.md
@@ -38,6 +39,7 @@ ded08718d2eb141262a31b323f8e66eeb40f35e074e1f0e70abb76860891ec92  ./hermes/skill
 7e76cff514f5a2e1879e8fa9a5a0da6c3024eeec9c9a20a380a89c5703b53f3a  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/prompt-cache-audit.md
 744436eeb11d6d870667c827a5cf631ec94d371f22b3093c46f68ef9ed415847  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/providers-and-models.md
 f27913f7775915d8065b2dea782197907ff90cf37f07b865135c7f61aee98e83  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/security-privacy.md
+61f694732686b3a8e158996173c9f6bff4034bcf0cbd8ce1933ee8e44dd2107c  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/skills-loading.md
 4442c7bbd1e68b4b55292d0b455505ad0733883dc8acebd3188a6b6bdf089b2b  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/slash-commands.md
 f5a8269a7312173f0caa6736156a3f76d32e56b4e15511e84dc2e902f48e8157  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/themes.md
 70045d9a3dd4f8ff4001b3a7ccfa7f967c130ce89877ee5f052c87752fcd5f5b  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/troubleshooting.md

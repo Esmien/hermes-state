@@ -40,6 +40,8 @@ Good verification targets, cheapest first:
 - CLI commands: `hermes --help`, `hermes <command> --help`, and `hermes_cli/main.py`
 - Source tree: https://github.com/NousResearch/hermes-agent
 
+- Docs pages are HTML: when `web_extract` has no extraction backend, `curl -sL <url> -o /tmp/page.html` and strip tags with `re` inside `execute_code` — do the text processing there, not in a `terminal` heredoc, which the command guards can intercept.
+
 Never answer "Hermes can't do that" from memory. Hermes ships far more than this skill body describes, and the index exists so a negative answer is always checkable.
 
 ## Quick Start
@@ -95,6 +97,8 @@ Profiles use `~/.hermes/profiles/<name>/` with the same layout. When a profile i
 | Provider setup, API keys, OAuth | `references/providers-and-models.md` |
 | A prompt/persona that must apply to ONE model only, "промпт к отдельной модели" | `references/per-model-system-prompts.md` |
 | config.yaml sections, skills enable/disable, toolsets, voice/STT/TTS | `references/configuration.md` |
+| How skills are chosen/loaded, why a skill never fires, catalog vs disk count | `references/skills-loading.md` |
+| Hard gates on dangerous actions: `pre_tool_call` hooks, fail-closed, state that survives `/new` | `references/agent-guardrails.md` |
 | AGENTS.md / .hermes.md / CLAUDE.md project rules | `references/project-context-files.md` |
 | Secret redaction, PII, approval modes, "reset permissions" | `references/security-privacy.md` |
 | Delegation, cron, curator, kanban | `references/background-systems.md` |
