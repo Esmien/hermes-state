@@ -50,8 +50,8 @@ c0f64af2e1b45b36062a341d182ed42fc6f0a334a7b1aa6c30d7b2b7b89dcc55  ./hermes/skill
 acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skills/career/job-application-review/references/repo-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-4ebbed501661a9c5b08e018c8a074928bb7ca181eff8a0c1a0ec5dc820a837d3  ./hermes/skills/devops/ai-stack/SKILL.md
-3388313337747fa2338c4834da2ae7f5cd50a15a2315b0325d48298da18e65f9  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
+f6a0f6291d514aceaf023ea1103915620e7fb4e3bd1c4f9776db96e410a15a4d  ./hermes/skills/devops/ai-stack/SKILL.md
+f02eb4a0ce5aaea4a1e99a44bb7626cb603c39aade5c39b01ec6de054d2e7fe7  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 81babc7468bf6f07194f4de6f6bd9d913b52ed404ba20718b56e56e04ec72f38  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
 4899c677e4fab9179ac1009d0c75b7cced3e7b40e485d81694b4a94f830e1bfa  ./hermes/skills/devops/ai-stack/references/disk-and-memory.md
@@ -70,6 +70,7 @@ db532fc169be82afe6e51b5fd444ee7c021a650fbe0c635e1dfac327cf8104c2  ./hermes/skill
 c4258ef26861d1b6f66553631c3f28be328cf50ef589631572818dc7eb354449  ./hermes/skills/devops/ai-stack/references/upstream-release-review.md
 80ffd361b1c5f46f0006193a623ec4ff84c62eff2b4f2195adb5cc13a10e0a82  ./hermes/skills/devops/ai-stack/scripts/audit-dead-models.py
 c2fc4ce4b63f576ee21f3a0065f03f45b85b702159e047fd18083ae345eb0f49  ./hermes/skills/devops/ai-stack/scripts/check-env-parity.sh
+04aeab158e2b6502a57fe520600e4c37b9ab5e4c44e52bdfa24ae10351782f5f  ./hermes/skills/devops/ai-stack/scripts/check-notification-bots.py
 534cac14e01a8c2bbbaaae3614e06ab3b07ded048521d69176d1a46fdf0bbf56  ./hermes/skills/devops/ai-stack/scripts/compact-webui-images.py
 b201d073a6374940cc7a90bf418f3af9f7d5315c67f3f633edcea78012fb8fed  ./hermes/skills/devops/ai-stack/scripts/model-route-bench.py
 36432d6a9677006a068a5ceefbc2e9995a298d98576e58372b92173b77126f44  ./hermes/skills/devops/ai-stack/scripts/probe-approval-guardian.py
@@ -87,7 +88,7 @@ ed20fcd212379a0d96f986f5bc32a44579a1d6fb0a369f6e4b3e51de994318c7  ./hermes/skill
 84feede765923dc361ed88fbef4a733a6f87fe23c60a4b409ab4d045d4de2849  ./hermes/skills/devops/llm-route-bench/SKILL.md
 f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skills/devops/llm-route-bench/scripts/ab_bench.py
 fa37fc898923e0cac0eaadf2bbe4dbd4ec863ecf61eac251a7b27b24027e189c  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
-ff874943b4b95e9276b90d5dd6f2ffc4ab3c8fdcb192b2682c3b73c51e48df23  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+cd635fcf6d60e1bd4feb894133f0556c6208d2cdb017ede7a2ee4bb217637a69  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 7bb23fbf44d8579fca367d42418ce677ca2b5921573272473022a3cc07c0846f  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
 918971595010770b622cd8cd01580d166146ce98f021a66960e49f7b4ba09b37  ./hermes/skills/devops/webui-ios-icons/SKILL.md

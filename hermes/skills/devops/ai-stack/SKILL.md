@@ -97,6 +97,8 @@ Removed in the `vps-infra` migration and **not** to be reintroduced: `DOMAIN`, `
 
 `UI_PASSWORD` is the **LiteLLM** admin password. The Open WebUI admin password is separate — see `references/owui-admin-auth.md`.
 
+**Two different bots carry the Telegram notifications, and neither implies the other works.** Hermes sends its own messages with `TELEGRAM_BOT_TOKEN` from `/root/.hermes/.env` (`@esmien_vps_admin_bot`); `monitor.py` uses `BOT_TOKEN` / `FILE_BOT_TOKEN` from `/home/ai_service/notifications/.env` (`@esmien_vps_notificator_bot`, `@esmien_ai_backups_bot`). "Уведомления приходят" therefore proves only the Hermes bot. Verify each token on its own with `getMe` (username only, never print the value) before telling the owner a bot is dead — and after editing `notifications/.env`, restart every unit that reads it: the token is copied into the process memory at start, so a service restarted before the edit keeps polling 404 until the next restart (`journalctl -u server-monitor-bot` shows `getUpdates HTTP 404` every 5 s).
+
 ## References (read on demand)
 
 - `references/coupling-hermes.md` — **Hermes ↔ AI stack coupling**. Read when any change touching Hermes config, LiteLLM groups/fallback, the gateway or the emergency route.
@@ -117,3 +119,4 @@ Removed in the `vps-infra` migration and **not** to be reintroduced: `DOMAIN`, `
 - `references/owui-admin-auth.md` — **Open WebUI admin auth** (`UI_PASSWORD` is LiteLLM's, not WebUI's).
 - `references/model-route-benchmark.md` — **Model / route A/B benchmarking**. Read when the owner says a model underperforms, or before switching a LiteLLM group: hidden-prompt probe (injected system prompts show up as thousands of `prompt_tokens` on a one-line request), discriminating task set, cost per success. Run `scripts/model-route-bench.py [model ...]`.
 - `scripts/probe-owui-terminal.py` — **end-to-end terminal probe** (admin login → feature flags → real `run_command` → `/execute` evidence in open-terminal logs, cleans up its chat). Run after any Open WebUI update.
+- `scripts/check-notification-bots.py` — **Telegram notification health** (each bot token via `getMe`, usernames only; plus the `file_id` restore registry with part sizes and age). Run first when the owner says a message never arrived.
