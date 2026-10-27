@@ -1,6 +1,6 @@
 ---
 name: ru-local-price-research
-description: "Use when pricing something in a Russian city."
+description: "Use when pricing or comparing city stats in RU."
 version: 1.0.0
 author: Hermes Agent
 license: MIT
@@ -23,6 +23,9 @@ The answer is a verdict with named places and a number, not a list of links.
 - Comparing local vendors before recommending one, especially when the user wants a
   single pick rather than a survey.
 - Whenever a shop's own advertised price would otherwise be repeated as fact.
+- **Comparing cities by a local metric** ("где пробки злее — Краснодар или Новосибирск?",
+  "где дороже жизнь"). Same shape: verdict first line, one number per side, one reason.
+  Source map and parsing recipes: `references/city-traffic-ru.md`.
 
 ## Procedure
 
@@ -73,6 +76,10 @@ The answer is a verdict with named places and a number, not a list of links.
    to ask on the phone. Plain Russian, no jargon, date every price.
    Follow-ups inside the same topic ("а крестик возьмут?", "а сколько это в розницу") get a
    short direct answer from data already gathered — do not restart the research pipeline.
+   For city-vs-city comparisons: verdict in the FIRST line ("Краснодар злее"), then one
+   annual/sustained metric per city with its source and year, then the structural reason,
+   then one practical clause (where/when the pain actually hits). Two sources with
+   different methodologies beat one ranking — say so if they agree.
    When the owner reacts to the retail-vs-scrap gap ("сдавать за 12 изделие за 50"), answer
    with the decomposition (metal / melee stones / work / brand) in one screen and move
    straight to the urgency question — no defending the shop, no sympathy paragraph. If the
@@ -100,5 +107,7 @@ The answer is a verdict with named places and a number, not a list of links.
 
 - `references/gold-scrap-ru.md` — pawn-shop mechanics for gold/silver in Russia: melt
   math, залог vs скупка, white-gold deductions, hallmark/weight checks.
+- `references/city-traffic-ru.md` — congestion/город metrics: which sources render
+  server-side, what parses, and why TomTom's own site does not.
 - `references/jewelry-retail-ru.md` — what new jewelry costs to BUY: price model
   (melt × multiple + melee + work), segment ladder, producer sites whose prices parse.
