@@ -206,7 +206,7 @@ e73d9409a63d157774528b260b3249fb52745e6b242efe8bc1ae2e9f04b08827  ./hermes/skill
 5454af16b5f3daee9a2f05658d267bb0bd8a025e1870bad996a85677a091d284  ./hermes/skills/creative/popular-web-designs/templates/x.ai.md
 9aac8e73a4a471fecb2d252afead66c82436e7525e7f9d1e6bbe64e375c65160  ./hermes/skills/creative/popular-web-designs/templates/zapier.md
 5dbf92dc336e9b17be45c35c92a5bb307e4655e39a86617f07b7654678f92583  ./hermes/skills/creative/songwriting-and-ai-music/SKILL.md
-ec7b64ab5878677bceb62942c1c5affe3dd6ba1493c37dfd8c5c5c38a4cc14b6  ./hermes/skills/devops/ai-stack/SKILL.md
+4ebbed501661a9c5b08e018c8a074928bb7ca181eff8a0c1a0ec5dc820a837d3  ./hermes/skills/devops/ai-stack/SKILL.md
 3388313337747fa2338c4834da2ae7f5cd50a15a2315b0325d48298da18e65f9  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 81babc7468bf6f07194f4de6f6bd9d913b52ed404ba20718b56e56e04ec72f38  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
@@ -214,6 +214,7 @@ ec7b64ab5878677bceb62942c1c5affe3dd6ba1493c37dfd8c5c5c38a4cc14b6  ./hermes/skill
 ab95b4ac1ada135d305e22e973f2db9fb96e8be86549eca51bb3c7d1c649d066  ./hermes/skills/devops/ai-stack/references/media-pipeline.md
 0b52c29ceefcf76976a04ca3b8436525a3c65a203615f93f0bdcc29241b5962b  ./hermes/skills/devops/ai-stack/references/memory-troubleshooting.md
 2d849578fcc6ed9e9a090915cebe892a884756fdb541e101804f29dfcade5fd9  ./hermes/skills/devops/ai-stack/references/model-provenance.md
+ad042b6fee80f9dde1317d8f976a826abe3f94e539c3577263e53d91cd70efd8  ./hermes/skills/devops/ai-stack/references/model-route-benchmark.md
 f1014497186cbfd96ea54d6b4b82bac6714bea3218ac82e260f66b836d9d14e0  ./hermes/skills/devops/ai-stack/references/music-bot-lyria.md
 9e9ccc47eca53127d1e0bc915b2dbc74c1c6a01704991b6b44be484bd0106af8  ./hermes/skills/devops/ai-stack/references/operations.md
 23681fed79a731f0e5ac3dbf907087700aedc29fa84c1b54872f7694682b3e76  ./hermes/skills/devops/ai-stack/references/owui-admin-auth.md
@@ -226,6 +227,7 @@ c4258ef26861d1b6f66553631c3f28be328cf50ef589631572818dc7eb354449  ./hermes/skill
 80ffd361b1c5f46f0006193a623ec4ff84c62eff2b4f2195adb5cc13a10e0a82  ./hermes/skills/devops/ai-stack/scripts/audit-dead-models.py
 c2fc4ce4b63f576ee21f3a0065f03f45b85b702159e047fd18083ae345eb0f49  ./hermes/skills/devops/ai-stack/scripts/check-env-parity.sh
 534cac14e01a8c2bbbaaae3614e06ab3b07ded048521d69176d1a46fdf0bbf56  ./hermes/skills/devops/ai-stack/scripts/compact-webui-images.py
+b201d073a6374940cc7a90bf418f3af9f7d5315c67f3f633edcea78012fb8fed  ./hermes/skills/devops/ai-stack/scripts/model-route-bench.py
 36432d6a9677006a068a5ceefbc2e9995a298d98576e58372b92173b77126f44  ./hermes/skills/devops/ai-stack/scripts/probe-approval-guardian.py
 57a2a5e8f2f2395dfb18a9a37ebed061a5272f43b7737f966462483ea4e03f2a  ./hermes/skills/devops/ai-stack/scripts/probe-media-endpoints.py
 5f28a41cf05b85f901f2eceb62a441d72fd71042ea7e992a578d2a8192e72982  ./hermes/skills/devops/ai-stack/scripts/probe-owui-terminal.py
@@ -349,8 +351,8 @@ d8fd2a3a26ff45455709595132a092825a48f6c9dd3bcc98b06c1a43eaa7fcca  ./hermes/skill
 e2fba7b30ee22afdb21e8411b6a18431da6efc9ec3ef55e2223481bf906f4376  ./hermes/skills/research/grounded-citations/scripts/_hermes_home.py
 0c216e29e092faedcaa1ebae129db15dfc100465169490704b3628446db96788  ./hermes/skills/research/grounded-citations/scripts/sources.py
 0229e37c1783fcac5b77cfb3242703666cf4aa472d2ae85b6bd5279756b515b6  ./hermes/skills/research/llm-wiki/SKILL.md
-97851b1cfdc821e172331d3096cded8faa78e100bdbbd6f30d8de84c406fd44a  ./hermes/skills/research/ru-local-price-research/SKILL.md
-41505a885896c5b9372fca8be635b2fbf2c42e4083b870a6f4cff63d84ac7229  ./hermes/skills/research/ru-local-price-research/references/gold-scrap-ru.md
+ec0cd8c7c5912a976dc0c0c5abc8ced9506205529babed49dc710b7c51e15d04  ./hermes/skills/research/ru-local-price-research/SKILL.md
+940c24a4ad377299b89f8469ca49427e569ba8ca39e9df62b9d481d25a23a6fe  ./hermes/skills/research/ru-local-price-research/references/gold-scrap-ru.md
 cfa6128ed67a0224981a2c384ce188bd037e898a95c432465873306b6edb7349  ./hermes/skills/research/ru-local-price-research/references/jewelry-retail-ru.md
 2ea0d50444337de4809a62dc618d6d9c35bd2ba30f17ec6a138a20f53f9974a7  ./hermes/skills/social-media/DESCRIPTION.md
 5457319ee337284b1152dc9f60146c72685ade489299afed08e0b46ca5a97080  ./hermes/skills/social-media/xurl/SKILL.md

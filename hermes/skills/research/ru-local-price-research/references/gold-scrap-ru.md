@@ -36,6 +36,25 @@ justified by the metal — do not accept it without a stated per-gram price. Som
 - **Tariff conditions** may exclude religious items, wedding bands, single earrings — a
   plain chain usually qualifies for the top bracket, a cross does not.
 
+## If the client needs money urgently ("нужны, остро нужны")
+
+Do not default to скупка. Rank the options by what lands in hand and what is lost:
+
+1. **Залог** — pays 90-115% of melt vs 65-90% for an outright sale, and the item stays
+   redeemable. At 0.1-0.25%/day the interest on a ~25-30 k₽ ticket is ~850-2 100 ₽/month,
+   i.e. far less than the gap between loan and sale value. Default recommendation for
+   anyone who might want the piece back.
+2. **Обмен в сети** (585 Золотой, SUNLIGHT and similar) — the old item counts as 20-40%
+   off a new purchase, which beats scrap cash *only* if the client was going to buy
+   something anyway. Say that condition out loud.
+3. **Авито / private sale** — a whole, hallmarked piece fetches well above scrap (roughly
+   1.3-2× the pawn offer), but takes weeks and buyers haggle down to the pawn number.
+4. **Скупка (продажа без выкупа)** — today's cash at 65-90% of melt; the right answer only
+   when the money is needed within the day.
+
+Model the whole basket (chain + cross + everything) as one ticket: grams add up, and 4 g
+cross a 3 g minimum that a single 2 g piece falls under.
+
 ## Source hygiene
 
 - CBR XML is the anchor; chain rates (585 Золотой, Ломбард-Л1, Пионер and similar) are the

@@ -73,6 +73,11 @@ The answer is a verdict with named places and a number, not a list of links.
    to ask on the phone. Plain Russian, no jargon, date every price.
    Follow-ups inside the same topic ("а крестик возьмут?", "а сколько это в розницу") get a
    short direct answer from data already gathered — do not restart the research pipeline.
+   When the owner reacts to the retail-vs-scrap gap ("сдавать за 12 изделие за 50"), answer
+   with the decomposition (metal / melee stones / work / brand) in one screen and move
+   straight to the urgency question — no defending the shop, no sympathy paragraph. If the
+   money is needed today, recommend залог over продажа: order of options in
+   `references/gold-scrap-ru.md`.
 
 ## Pitfalls
 
