@@ -87,7 +87,7 @@ d939ff8253f8da166a191a033898aa8c6ce5f5fd2f4760d7d996015081dcb7f6  ./hermes/skill
 84feede765923dc361ed88fbef4a733a6f87fe23c60a4b409ab4d045d4de2849  ./hermes/skills/devops/llm-route-bench/SKILL.md
 f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skills/devops/llm-route-bench/scripts/ab_bench.py
 fa37fc898923e0cac0eaadf2bbe4dbd4ec863ecf61eac251a7b27b24027e189c  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
-bb5e76173364b35136d8cfef19f6ded2787252e447bfa9bd23abd02763a3120b  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+8d193dd7b4baeb19c5e4cb7e8a10f3f9f9ecca52853ddc357cf1c0b62a72338a  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 7bb23fbf44d8579fca367d42418ce677ca2b5921573272473022a3cc07c0846f  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
 918971595010770b622cd8cd01580d166146ce98f021a66960e49f7b4ba09b37  ./hermes/skills/devops/webui-ios-icons/SKILL.md

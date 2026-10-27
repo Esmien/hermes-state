@@ -73,13 +73,30 @@ install.py --skip tls,restore --only verify
 
 ## Переезд (проверенный порядок)
 
-1. На старом: `install.py export --with-data` (дампы + `webui_data`).
-2. Перенести архив (файловый Telegram-бот / scp).
-3. На новом: `bootstrap.sh | bash -s -- --bundle <path> --restore`.
-4. DNS доменов → IP нового сервера **до** шага TLS, иначе certbot пропустит
+1. Одной командой: `bootstrap.sh | bash -s -- --from-bot --restore --hermes --restore-hermes`.
+   `fetch` берёт последний набор дампов из файл-бота (реестр `file_id` → части →
+   склейка → sha256), `hermes` + `--restore-hermes` разворачивает состояние из
+   `Esmien/hermes-state` (config/SOUL/memories/skills/cron, `/usr/local/bin`,
+   юниты, `/etc`, runbooks). Секреты не восстанавливаются — спрашиваются заново.
+2. Ручной путь (fallback): `install.py export --with-data` → перенос →
+   `--bundle <path> --restore`.
+3. DNS доменов → IP нового сервера **до** шага TLS, иначе certbot пропустит
    домен (оставит HTTP-vhost) — это не ошибка.
-5. Первого админа Open WebUI на пустой БД создают через форму регистрации;
+4. Первого админа Open WebUI на пустой БД создают через форму регистрации;
    на восстановленной БД пользователи уже есть.
+
+### Бэкап БД через бота: как устроено и где ломается
+
+- Бот **не читает свою историю чата**, поэтому единственная зацепка для
+  восстановления — `file_id`, который вернул `sendDocument`. `monitor.py backup`
+  пишет его в `backups/postgres/.tg-registry.json` (3 набора на базу), реестр
+  уезжает в `hermes-state` как `host/backups/tg-registry.json`.
+- Части дампа обязаны быть **≤18 МБ**: `getFile` отдаёт не более 20 МБ, части по
+  45 МБ из чата уже не скачать (`TG_DOC_LIMIT` в `monitor.py`).
+- Нет реестра — fallback `getUpdates`: переслать файлы бэкапа самому боту.
+- `--from-bot` игнорирует проверку «дамп старше 72 ч» (источник выбран осознанно).
+- Токен проверяется на форму `123456:AA…`: заглушка из `install.json`
+  (`__stored_in_notifications_env__`) даёт понятную ошибку, а не 404 от Telegram.
 
 ## Проверка
 
@@ -130,6 +147,21 @@ https-коды доменов и число активных таймеров, �
 - Compose читает `ai/.env`; `WEBUI_URL` теперь оттуда, домен в compose не хардкодить.
 - Тестовый `pg_dump` при каждом запуске не гонять: если свежий дамп < 1 ч — пропуск.
 - `docker compose config -q` — дешёвая проверка интерполяции перед `up -d`.
+- **Маска токена не должна возвращаться в `.env`.** `save_config()` пишет в
+  `install.json` заглушку `__stored_in_notifications_env__`, а `prompt()` брал
+  значение из cfg раньше, чем из `notifications/.env` — прогон `--yes` 2026-10-24
+  записал заглушку как BOT_TOKEN/FILE_BOT_TOKEN и убил оба бота до повторного
+  выпуска токенов в BotFather. Исправлено: `load_config()` чистит маску, `prompt`
+  по умолчанию берёт `.env`, `step_secrets` не пишет заглушку.
+- **`notifications/.env` обязан быть `0640 root:ai_service`.** `write_file` без
+  `chown` оставил `root:root`, и юнит `postgres-backup-notify.service`
+  (User=ai_service) падал с `PermissionError` — при этом таймер «успешно» шёл.
+  Проверка: `systemctl status postgres-backup-notify` и
+  `journalctl -u postgres-backup-notify --since -3d`.
+- **Правки `assets/` в репозитории затираются `sync_assets.py`** (host → repo):
+  пока `vps-infra-watch.service` активен, изменённый `assets/notifications/monitor.py`
+  или `assets/host/bin/*.sh` вернётся к живому файлу через ~90 с. Правьте репозиторий
+  при остановленном watcher'е и деплойте живые копии до пуша.
 - **Прогон `install.py` перезаписывает `ai/.env` своим набором ключей:**
   старые ключи (`DOMAIN`, `POSTGRES_ADMIN_PASSWORD`, `BOT_DB_PASSWORD`)
   исчезают, новые (`WEBUI_URL`, `LITELLM_REDIS_PASSWORD`, `GITHUB_KEY`)
