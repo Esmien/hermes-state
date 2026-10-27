@@ -1177,58 +1177,7 @@ skills:
 # =============================================================================
 # Agent Behavior
 # =============================================================================
-  disabled:
-    - claude-code
-    - codex
-    - computer-use
-    - opencode
-    - architecture-diagram
-    - ascii-video
-    - baoyu-infographic
-    - claude-design
-    - design-md
-    - humanizer
-    - manim-video
-    - p5js
-    - popular-web-designs
-    - songwriting-and-ai-music
-    - email-inbox-triage
-    - himalaya
-    - gif-search
-    - songsee
-    - youtube-content
-    - airtable
-    - box
-    - document-to-action-items
-    - docx
-    - google-workspace
-    - maps
-    - meeting-action-items
-    - notion
-    - pdf
-    - powerpoint
-    - product-price-monitor
-    - teams-meeting-pipeline
-    - weekly-review-planning
-    - xlsx
-    - arxiv
-    - competitor-news-monitor
-    - grounded-citations
-    - llm-wiki
-    - xurl
-    - dogfood
-    - inspecting-hermes-desktop-dom
-    - node-inspect-debugger
-    - sdlc-review
-    - codebase-inspection
-    - github
-    - hermes-agent-skill-authoring
-    - python-debugpy
-    - requesting-code-review
-    - simplify-code
-    - spike
-    - systematic-debugging
-    - test-driven-development
+  disabled: []
 agent:
   # Maximum tool-calling iterations per conversation (default: 500)
   # Higher = more room for complex tasks, but costs more tokens
