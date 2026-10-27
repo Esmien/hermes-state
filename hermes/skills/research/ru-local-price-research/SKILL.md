@@ -25,7 +25,10 @@ The answer is a verdict with named places and a number, not a list of links.
 - Whenever a shop's own advertised price would otherwise be repeated as fact.
 - **Comparing cities by a local metric** ("где пробки злее — Краснодар или Новосибирск?",
   "где дороже жизнь"). Same shape: verdict first line, one number per side, one reason.
-  Source map and parsing recipes: `references/city-traffic-ru.md`.
+  Congestion sources: `references/city-traffic-ru.md`. Cost of living, rent, real estate,
+  climate, fares and intercity travel: `references/city-comparison-ru.md`.
+- **Family relocation / long two-city comparison report** — different deliverable, not a
+  verdict line. Load `city-relocation-report`; use this skill only for its numbers.
 
 ## Procedure
 
@@ -102,6 +105,13 @@ The answer is a verdict with named places and a number, not a list of links.
   ("за неделю −7%") instead of reusing week-old scraped figures.
 - Small ticket sizes flip the ranking: first-unit promos and minimum weights beat the
   best per-gram rate. Always model the user's actual quantity.
+- **A city summary card is not a data table.** Skokstoit-style blocks render blanks and
+  placeholder arithmetic ("Аренда 1-к — ₽/мес", "индекс 7 294 ₽") that look like real
+  numbers once the markup is stripped; take each metric from its own section page and
+  sanity-check it against a second source.
+- **Rosstat secondary and listing newbuild prices measure different things** (registered
+  deals vs asking prices). Never average them; report both and say which one the swap
+  arithmetic uses.
 
 ## Reference
 
@@ -109,5 +119,8 @@ The answer is a verdict with named places and a number, not a list of links.
   math, залог vs скупка, white-gold deductions, hallmark/weight checks.
 - `references/city-traffic-ru.md` — congestion/город metrics: which sources render
   server-side, what parses, and why TomTom's own site does not.
+- `references/city-comparison-ru.md` — the rest of a city comparison: rent, real estate
+  (Rosstat vs listings), climate normals, fares, rail/flight between cities, sources that
+  block a datacenter IP.
 - `references/jewelry-retail-ru.md` — what new jewelry costs to BUY: price model
   (melt × multiple + melee + work), segment ladder, producer sites whose prices parse.
