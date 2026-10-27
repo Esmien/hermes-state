@@ -88,6 +88,12 @@ Classify each finding, because the weight differs:
 - **Outright bug** — reproducible status code, one-line fix (missing header length limit → 500 on insert is the archetype).
 - **Design hole** — name the failure mode and the question it invites: crash between gateway call and commit → double charge; webhook lost after 3 attempts → «как доставить через сутки?»; outbox table grows forever; relay inside the consumer process; no row lock when consumers are scaled.
 - **Doc decay** — broken curl examples, port numbers contradicting `.env.example`, healthchecks hardcoding credentials. Cheap to fix, and reviewers notice.
+
+**Before reporting broken examples, verify the raw bytes.** Hermes masks secret-looking values in tool output, so a README line that is really `-H "X-API-Key: ${API_KEY}"` comes back as `-H "X-API-Key: ***` — with the closing quote apparently missing. That looks exactly like a sanitised-broken example and is a false positive. Confirm with `grep -n 'API-Key' README.md | python3 -c '...print(l.encode().hex())'` (hex is never masked) before calling it a defect, and check the same way for `***` in `.env.example`.
+
+**Grade against the ТЗ, not against production.** The assignment is scored on architecture, outbox correctness, idempotency, retry/DLQ and working compose — not on prod readiness. SSRF on `webhook_url`, reconciliation for a lost status write, lock scope around the gateway call, auto-retry out of the DLQ, batching the retention `DELETE`: name them in one line as deliberate YAGNI trade-offs (especially when the README's «Ограничения» section already states them), never in the ranked defect list. Listing them as holes reads as ignoring the scope, and he will say so.
+
+**A feature beyond the ТЗ is not a gap.** Extra endpoints (manual webhook replay, `webhook_status`/`attempts`, retention) count as credit; do not reframe «no automatic redelivery» as a defect when the manual endpoint exists and the ТЗ never asked for a scheduler.
 - **Over-engineering** — 2k LOC of Protocols/UoW for two endpoints is a real remark, phrase it as a trade-off, not a defect.
 
 Verdict wording follows the umbrella's rule: «крепко, но…» with the ranked holes, or «отправлять нельзя» if the top bug is on the happy path. Close with an offer to open a PR for the top one or two fixes.
