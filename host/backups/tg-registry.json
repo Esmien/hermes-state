@@ -1,0 +1,91 @@
+{
+  "updated_at": "2026-10-27T22:24:48Z",
+  "chat_id": "214062001",
+  "sets": [
+    {
+      "db": "litellm_db",
+      "dump": "litellm_db_20261027_023000.dump",
+      "size": 29911609,
+      "sha256": "927e0c5ba9287ead562cd2cf9116b3dea1e006c501ac3889890a5c5ad4589958",
+      "created_at": "2026-10-27T02:30:25Z",
+      "chat_id": "214062001",
+      "complete": true,
+      "parts": [
+        {
+          "name": "litellm_db_20261027_023000.dump.part_00",
+          "size": 14955805,
+          "sha256": "3368553385c1be03d3866e454a06be48d220e90b4cee4e8e59198672e70f418a",
+          "file_id": "BQACAgIAAxkDAAN1auEkry7a71FbiGgt6UkAAX791IlEAAJKpQACsd8RS-LWPolQLb_cPQQ",
+          "message_id": 117
+        },
+        {
+          "name": "litellm_db_20261027_023000.dump.part_01",
+          "size": 14955804,
+          "sha256": "db5b0cd477f8424508495720b3611cd8b24e04cb2642d3b21b1a93b833fc58c7",
+          "file_id": "BQACAgIAAxkDAAN2auEksJoNeDn0m4SuSFRGuG0NC2AAAkulAAKx3xFLihsNGy0-MK49BA",
+          "message_id": 118
+        }
+      ]
+    },
+    {
+      "db": "webui_db",
+      "dump": "webui_db_20261027_023000.dump",
+      "size": 118670660,
+      "sha256": "256d7a307ba52ef55b59ccefb92a64e8bca6cf07eec818b4b81bdb1637ccf8d2",
+      "created_at": "2026-10-27T02:30:20Z",
+      "chat_id": "214062001",
+      "complete": true,
+      "parts": [
+        {
+          "name": "webui_db_20261027_023000.dump.part_00",
+          "size": 16952952,
+          "sha256": "ddc7e657dbc82db6530350ad622174de9f7c51a4c5dfb341cff3876a0ef7fc75",
+          "file_id": "BQACAgIAAxkDAANtauEkp7p9-tMvayjJh-G9OzCQwbYAAkOlAAKx3xFL-cdCQPK6WHU9BA",
+          "message_id": 109
+        },
+        {
+          "name": "webui_db_20261027_023000.dump.part_01",
+          "size": 16952952,
+          "sha256": "558a86731702f3590ba5a66deaded9510857391319ad503d9f773398829bdd88",
+          "file_id": "BQACAgIAAxkDAANuauEkqCVmSKWN4VZLz0WNbTwNxIgAAkSlAAKx3xFLyQM_CqLOufI9BA",
+          "message_id": 110
+        },
+        {
+          "name": "webui_db_20261027_023000.dump.part_02",
+          "size": 16952952,
+          "sha256": "125781cadf5bd92427600b812f41fca5f8add5c755e22216da9b9ae3c69766f9",
+          "file_id": "BQACAgIAAxkDAANvauEkqfWmM7JhMmV2jvwVF9xCxA8AAkWlAAKx3xFLlSgz19dvDv09BA",
+          "message_id": 111
+        },
+        {
+          "name": "webui_db_20261027_023000.dump.part_03",
+          "size": 16952951,
+          "sha256": "12e3c76d780859969aeb1f0dee40ce18353c3d6e676b8a66bb41965b0168ecc9",
+          "file_id": "BQACAgIAAxkDAANwauEkqlc2Y5mOEVhOSY8ro8xnpA4AAkalAAKx3xFLM1T6LmzWHAo9BA",
+          "message_id": 112
+        },
+        {
+          "name": "webui_db_20261027_023000.dump.part_04",
+          "size": 16952951,
+          "sha256": "ae3c52f444801ff1f030881fa7d50730a6f2b782db99e9451ecd992f5e784b0e",
+          "file_id": "BQACAgIAAxkDAANxauEkq-rFMzSW7Bsnn3pP5KxOySkAAkelAAKx3xFL1e1DoNo-Ytg9BA",
+          "message_id": 113
+        },
+        {
+          "name": "webui_db_20261027_023000.dump.part_05",
+          "size": 16952951,
+          "sha256": "43976ed2e94035353548884917043bfa799275b5d829c40abd1967b4ea42b6ac",
+          "file_id": "BQACAgIAAxkDAANyauEkrEzVB5HttWhVl8AbSB6lAAGXAAJIpQACsd8RSysC0Vmv2x3RPQQ",
+          "message_id": 114
+        },
+        {
+          "name": "webui_db_20261027_023000.dump.part_06",
+          "size": 16952951,
+          "sha256": "741821a74ddbf9f04673a395306551a3da248a03d91c1e0be4ff960169492380",
+          "file_id": "BQACAgIAAxkDAANzauEkrQ2Lab6r7ngv8LjkAAHL7ZgEAAJJpQACsd8RS1X3B-bPZiPVPQQ",
+          "message_id": 115
+        }
+      ]
+    }
+  ]
+}
