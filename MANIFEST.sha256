@@ -112,7 +112,7 @@ cfa6128ed67a0224981a2c384ce188bd037e898a95c432465873306b6edb7349  ./hermes/skill
 f3ca9e5152d2ccdda1de46baf415df59ae3b5abd560704d10296579035a8ffe6  ./host/ai-stack/backup-databases.sh
 d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md
 6518ee29303b0e5ffdf86eb9091d17e44fe1d2fe6a9ebc20b1ac3caf5b7f18fe  ./host/ai-stack/runbook.md
-f83eb745f6fc5a803f9e9d011de659c0b1ac1709cc3702f7ea49a188cb941f13  ./host/backups/tg-registry.json
+c17808163e3c9cbf1594fa26e8b949c84dcae093dcf9e4c3c6da0a0d358d9f47  ./host/backups/tg-registry.json
 7cac890fcc48be6cfc3efe302dbab2d018074c270a15481e99b2c464be278184  ./host/bin/docker-detector-liveness.sh
 df8b07b07e5a51df7e28294323319ca4e945fa3a2e7d6291b24957f74109c937  ./host/bin/docker-incident-agent.sh
 807d90d5d8a0cb39287d6ee65c87f116eb18c3ab0b3e4ad25849ce1fcb046d9f  ./host/bin/docker-incident-detector.py
