@@ -25,6 +25,33 @@ A second, self-contained deployment on the same host — aiogram Telegram bot + 
 - **Credits are derived, not counted:** remaining songs = OpenRouter key balance ÷ `SONG_PRICE` (0.08) from `/api/v1/key`. Elegant, but it lies when the model price changes or the key has no spend limit.
 - **Judge this project by its own data, not by vibes.** `docker exec lyria-postgres psql -U lyria -d lyria -tAc "select status, count(*) from generations group by 1"` plus the queue-consumer check above: a deployed-but-idle bot (all rows on one date, `0` messages queued, `1` consumer per queue) is ready, not broken, and "no generations in 72 h" means untested — never present it as a failure or as proof the pipeline works.
 
+## Обогащение промпта (`enricher`): модель, формат Lyria, где править
+
+Обогатитель — **не модель LiteLLM**, а workspace-модель Open WebUI: `webui_db.model`, id=`enricher`, `base_model_id`, `params->>'system'`, `params->>'temperature'`. Бот ходит в неё по `ENRICH_URL=https://ai.esmien.qd.je/api/v1/chat/completions` с `ENRICH_TOKEN` и `ENRICH_MODEL=enricher`.
+
+- **Базовая модель: `chat.google/gemini-4-argon`, temperature 0.85.** На `claude-haiku-5.5` с temperature 0.3 русский стих был пресным и без метра, а ответ шёл ~50 с; gemini даёт ~8 с и заметно лучше держит рифму/слог.
+- `params` — колонка типа **text**, не jsonb: обновлять через `jsonb_set(params::jsonb, …)::text`, иначе `operator does not exist: text ->> unknown`. `updated_at` — epoch bigint, обновлять в том же UPDATE.
+- System-промпт обязывает модель использовать словари Lyria (жанры, инструменты, вокальные профили) и жёсткие правила стиха (куплет 4 строки, 7–10 слогов, ABAB/AABB, без саморифмы, припев меняется, штампы под запретом, блочная разметка `[Verse 1]`/`[Chorus]`). Текущая версия — `references/enricher-system.md`, старая (для отката) — `references/enricher-system-legacy.md`.
+
+**Формат Lyria — главное.** Lyria 3 Pro принимает один английский бриф по формуле Google:
+`[genre and style] + [mood] + [instrumentation] + [tempo and rhythm] + [vocal style & language] + [Lyrics: текст]`, слоты подписаны `Lyrics:` — под ним текст с секциями; бэки в скобках. Отправлять в модель JSON-блоб (как было до 28.10.2026) — потеря формата: модель видит структуру данных, а не музыкальное ТЗ.
+Поэтому в `domains/enricher/handlers.py` есть `_lyria_brief_from_json()`: рендерит бриф из JSON-контракта в правильном порядке (жанр → настроение → инструменты → BPM → вокал/язык → Structure → Arrangement → `Lyrics:`), а `_build_generation_prompt()` сначала пробует его и только потом — старую обёртку. UI-предпросмотр продолжает работать на JSON, контракт валидатора не менялся.
+
+**Правка кода бота = пересборка образа** (код вшит, volume нет):
+
+```bash
+cd /root/deploy/music_bot/infra
+docker tag lyria-bot:latest lyria-bot:rollback-$(date +%Y%m%d)   # откат
+ touch /var/lib/docker-autorecover/pause
+docker compose --env-file ../.env -f docker-compose.yml build bot
+docker compose --env-file ../.env -f docker-compose.yml up -d --no-deps bot
+rm -f /var/lib/docker-autorecover/pause
+```
+
+Compose-переменные `COMPOSE_PROJECT_NAME`, `REDIS_HOST` и прочие лежат в `/root/deploy/music_bot/.env`, а не в `infra/` — без `--env-file ../.env` подстановка молча врёт.
+
+**Проверка промпта без Telegram:** вызвать обогатитель напрямую (`ENRICH_URL` + `ENRICH_TOKEN`, `model: enricher`) и глазами посмотреть JSON; затем проверить, что в `generations.prompt` лежит бриф, а не JSON (`select prompt from generations where id=…`).
+
 ## E2E прогон пользовательских сценариев
 
 `scripts/lyria-e2e.py` — прогон всех юзер-стори без ручных нажатий: `python3 scripts/lyria-e2e.py` (~10 мин, ~$0.32 = 4 генерации; `--no-generate` — только бесплатные сценарии). Апдейты форжатся на `http://127.0.0.1:8000/webhook`, проверки — по БД `lyria-postgres` и логам.
