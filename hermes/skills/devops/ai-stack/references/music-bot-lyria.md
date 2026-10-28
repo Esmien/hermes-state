@@ -47,7 +47,7 @@ A second, self-contained deployment on the same host — aiogram Telegram bot + 
 | Модель для ручных тестов | `sound-producer` (base `other.google/gemini-4-argon`) — в живом пути НЕ участвует |
 | Первый пайп | `lyria_enricher` — `is_active=f` (оставлен как история) |
 | ENRICH_MODEL | `enricher` в `/root/deploy/music_bot/.env`, читают `bot` И `enricher-worker` |
-| Argon | ключ подключения `other` (`openai.api_keys[4]`), модель `google/gemini-4-argon` на `litellm:4000` |
+| Модели пайпа | два valve: `MODEL_POET` (ветка poem) и `MODEL_PRODUCER` (ветка idea), по умолчанию обе `google/gemini-4-argon`; ключ один — `API_KEY` + `API_BASE_URL` |
 | Decider | ключ OpenRouter, `perplexity/pplx-decider-v1.2` |
 | Рендер брифа | `_lyria_brief_from_json` в коде бота (коммит `d80d021`) |
 

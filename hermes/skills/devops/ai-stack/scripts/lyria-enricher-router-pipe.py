@@ -1,9 +1,9 @@
 """
 title: Enricher (router)
 author: Vlad
-version: 2.4.1
+version: 2.5.0
 required_open_webui_version: 0.6.0
-description: Маршрутизатор стихи/идея на pplx-decider + один Argon-вызов с общей JSON-частью. Отдаёт боту готовый JSON контракта.
+description: Маршрутизатор стихи/идея на pplx-decider, две роли (poet/producer) с общей JSON-частью. Отдаёт боту готовый JSON контракта.
 """
 
 import json
@@ -69,9 +69,10 @@ class Pipe:
         DECIDER_MODEL: str = Field(default="perplexity/pplx-decider-v1.2")
         DECIDER_TIMEOUT: int = Field(default=5, description="Таймаут маршрутизации, секунды")
         DECIDER_THRESHOLD: float = Field(default=0.7, description="Ниже порога — безопасный дефолт poem")
-        ARGON_BASE_URL: str = Field(default="http://litellm:4000/v1")
-        ARGON_KEY: str = Field(default="", description="Ключ LiteLLM из подключения Other")
-        ARGON_MODEL: str = Field(default="google/gemini-4-argon")
+        API_BASE_URL: str = Field(default="http://litellm:4000/v1")
+        API_KEY: str = Field(default="", description="Общий ключ LiteLLM для обеих ролей")
+        MODEL_POET: str = Field(default="google/gemini-4-argon", description="Модель для ветки poem (текст автора)")
+        MODEL_PRODUCER: str = Field(default="google/gemini-4-argon", description="Модель для ветки idea (генерация текста)")
         TEMPERATURE: float = Field(default=0.85)
         MAX_TOKENS: int = Field(default=1200)
         TIMEOUT: int = Field(default=110)
@@ -119,9 +120,9 @@ class Pipe:
         except Exception:
             return "poem"
 
-    async def _produce(self, messages: list[dict], rules: str) -> str:
+    async def _produce(self, messages: list[dict], rules: str, model: str) -> str:
         payload = {
-            "model": self.valves.ARGON_MODEL,
+            "model": model,
             "messages": [{"role": "system", "content": f"{SHARED}\n\n{rules}"}] + messages,
             "temperature": self.valves.TEMPERATURE,
             "max_tokens": self.valves.MAX_TOKENS,
@@ -129,8 +130,8 @@ class Pipe:
         }
         async with httpx.AsyncClient(timeout=self.valves.TIMEOUT) as client:
             response = await client.post(
-                f"{self.valves.ARGON_BASE_URL}/chat/completions",
-                headers={"Authorization": f"Bearer {self.valves.ARGON_KEY}", "Content-Type": "application/json"},
+                f"{self.valves.API_BASE_URL}/chat/completions",
+                headers={"Authorization": f"Bearer {self.valves.API_KEY}", "Content-Type": "application/json"},
                 json=payload,
             )
             response.raise_for_status()
@@ -177,6 +178,9 @@ class Pipe:
         task = messages[-1]["content"] if messages else ""
         is_edit = any(m["role"] == "assistant" for m in messages[:-1])
         route = "poem" if is_edit else await self._route(task)
-        rules = POEM_RULES if route == "poem" else IDEA_RULES
-        raw = await self._produce(messages, rules)
+        if route == "poem":
+            rules, model = POEM_RULES, self.valves.MODEL_POET
+        else:
+            rules, model = IDEA_RULES, self.valves.MODEL_PRODUCER
+        raw = await self._produce(messages, rules, model)
         return self._sanitize(raw, task=task, route=route)
