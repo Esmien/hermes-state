@@ -1,7 +1,7 @@
 """
 title: Enricher (router)
 author: Vlad
-version: 2.5.0
+version: 2.5.1
 required_open_webui_version: 0.6.0
 description: Маршрутизатор стихи/идея на pplx-decider, две роли (poet/producer) с общей JSON-частью. Отдаёт боту готовый JSON контракта.
 """
@@ -71,8 +71,8 @@ class Pipe:
         DECIDER_THRESHOLD: float = Field(default=0.7, description="Ниже порога — безопасный дефолт poem")
         API_BASE_URL: str = Field(default="http://litellm:4000/v1")
         API_KEY: str = Field(default="", description="Общий ключ LiteLLM для обеих ролей")
-        MODEL_POET: str = Field(default="google/gemini-4-argon", description="Модель для ветки poem (текст автора)")
-        MODEL_PRODUCER: str = Field(default="google/gemini-4-argon", description="Модель для ветки idea (генерация текста)")
+        MODEL_POET: str = Field(default="google/gemini-4-argon", description="Поэт: пишет текст с нуля (ветка idea)")
+        MODEL_PRODUCER: str = Field(default="google/gemini-4-argon", description="Продюсер: аранжирует готовый текст автора (ветка poem)")
         TEMPERATURE: float = Field(default=0.85)
         MAX_TOKENS: int = Field(default=1200)
         TIMEOUT: int = Field(default=110)
@@ -179,8 +179,10 @@ class Pipe:
         is_edit = any(m["role"] == "assistant" for m in messages[:-1])
         route = "poem" if is_edit else await self._route(task)
         if route == "poem":
-            rules, model = POEM_RULES, self.valves.MODEL_POET
+            # готовый текст: роль — продюсер (аранжировка), текст не трогаем
+            rules, model = POEM_RULES, self.valves.MODEL_PRODUCER
         else:
-            rules, model = IDEA_RULES, self.valves.MODEL_PRODUCER
+            # только идея: роль — поэт, текст пишется с нуля
+            rules, model = IDEA_RULES, self.valves.MODEL_POET
         raw = await self._produce(messages, rules, model)
         return self._sanitize(raw, task=task, route=route)
