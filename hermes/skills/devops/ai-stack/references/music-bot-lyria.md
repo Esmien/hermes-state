@@ -66,6 +66,8 @@ GET  /api/v1/functions/id/<id>/history           # внутренний git OWUI
 
 **Проверка pipe без Telegram:** `POST /api/v1/chat/completions` на `127.0.0.1:8080` с токеном бота (`ENRICH_TOKEN`) и `model=lyria_enricher` — свежий запрос и запрос с историей правок; оба должны дать JSON с 8 полями.
 
+**Смена `ENRICH_MODEL` — это ДВА контейнера.** Обогащение выполняет `lyria-enricher-worker`, а не `lyria-bot`: он читает env один раз при старте. Пересоздал только `bot` — воркер продолжает ходить по старому имени модели и получает `Model not found`, а в логах это выглядит как `Enricher returned None` (сервис возвращает None на любой non-2xx). Пересоздавать оба: `up -d --no-deps bot enricher-worker`.
+
 **Правка кода бота = пересборка образа** (код вшит, volume нет):
 
 ```bash
