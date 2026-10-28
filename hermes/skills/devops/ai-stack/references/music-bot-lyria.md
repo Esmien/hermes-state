@@ -37,6 +37,31 @@ A second, self-contained deployment on the same host — aiogram Telegram bot + 
 `[genre and style] + [mood] + [instrumentation] + [tempo and rhythm] + [vocal style & language] + [Lyrics: текст]`, слоты подписаны `Lyrics:` — под ним текст с секциями; бэки в скобках. Отправлять в модель JSON-блоб (как было до 28.10.2026) — потеря формата: модель видит структуру данных, а не музыкальное ТЗ.
 Поэтому в `domains/enricher/handlers.py` есть `_lyria_brief_from_json()`: рендерит бриф из JSON-контракта в правильном порядке (жанр → настроение → инструменты → BPM → вокал/язык → Structure → Arrangement → `Lyrics:`), а `_build_generation_prompt()` сначала пробует его и только потом — старую обёртку. UI-предпросмотр продолжает работать на JSON, контракт валидатора не менялся.
 
+**С 28.10.2026 бот ходит не в модель, а в OWUI-Pipe** `lyria_enricher` (`ENRICH_MODEL=lyria_enricher` в `/root/deploy/music_bot/.env`). Pipe = два LLM-вызова + детерминированный санитайзер, снаружи тот же OpenAI-контракт и тот же JSON:
+
+1. **Songwriter** (`google/gemini-4-argon`, temp 0.85, max_tokens 900) — пишет текст с тегами секций, 4 строки по 7–10 слогов, без штампов.
+2. **Critic & producer** (та же модель, temp 0.25, max_tokens 1100) — правит метр/рифмы, собирает поля Lyria и отдаёт строгий JSON контракта бота.
+3. **Санитайзер** — режет markdown, `json.loads`, дефолты для недостающих полей; если JSON не собрался — возвращает текст, и бот уходит в фоллбэк raw-строки.
+
+Зачем max_tokens: без потолка Argon иногда генерил 60–90 с и упирался в `REQUEST_TIMEOUT_SECONDS=120` в `domains/enricher/service.py`; с потолком — 12–15 с.
+
+**Управление pipe (API Open WebUI, админ-токен через `POST /api/v1/auths/signin`, пароль `OWUI_ADMIN_PASSWORD` из `/root/.config/owui-signup-approver/env`):**
+
+```bash
+# создание: type определяется автоматически по наличию класса Pipe/Valves
+POST /api/v1/functions/create   {id, name, meta:{description,manifest}, content}
+POST /api/v1/functions/id/<id>/toggle            # активировать — иначе модели не видно
+POST /api/v1/functions/id/<id>/valves/update     # ВАЖНО: тело — ПЛОСКИЙ dict, не {"valves": {...}}
+POST /api/v1/functions/id/<id>/update            # правка кода + commit_message = версия в истории
+GET  /api/v1/functions/id/<id>/history           # внутренний git OWUI: parent_id, commit_message, diff
+```
+
+`valves/update` с обёрткой `{"valves": …}` молча возвращает `{}` и ничего не сохраняет — потом pipe падает с `Illegal header value b'Bearer '` (пустой ключ).
+
+Ключ для pipe — отдельный LiteLLM-ключ, а не мастер: `POST http://127.0.0.1:4000/key/generate {"key_alias":"owui-lyria-enricher","models":["google/gemini-4-argon"]}`. Чужую модель такой ключ отдаёт `403`, что и нужно.
+
+**Проверка pipe без Telegram:** `POST /api/v1/chat/completions` на `127.0.0.1:8080` с токеном бота (`ENRICH_TOKEN`) и `model=lyria_enricher` — свежий запрос и запрос с историей правок; оба должны дать JSON с 8 полями.
+
 **Правка кода бота = пересборка образа** (код вшит, volume нет):
 
 ```bash
