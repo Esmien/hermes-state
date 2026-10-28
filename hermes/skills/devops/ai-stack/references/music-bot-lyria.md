@@ -39,6 +39,29 @@ A second, self-contained deployment on the same host — aiogram Telegram bot + 
 
 **Главный принцип: энричер — аранжировщик, а не поэт.** Бот нужен владельцу, чтобы превращать **готовые стихи** в музыку, поэтому текст автора неприкосновенен: никакой переписи, никаких досозданных или размноженных строк, число строк в `lyrics` = числу строк автора. Припев (`[Chorus]`) — только если автор сам повторил строфу или помечал «припев». Правила стихосложения (слоги, ABAB) включаются только в Сценарии Б — когда на входе одна идея, а не текст.
 
+### Финальная схема (состояние на 28.10.2026, 15:10 UTC)
+
+| Что | Значение |
+|---|---|
+| Живой обогатитель | функция `enricher` (pipe), `is_active=t` |
+| Модель для ручных тестов | `sound-producer` (base `other.google/gemini-4-argon`) — в живом пути НЕ участвует |
+| Первый пайп | `lyria_enricher` — `is_active=f` (оставлен как история) |
+| ENRICH_MODEL | `enricher` в `/root/deploy/music_bot/.env`, читают `bot` И `enricher-worker` |
+| Argon | ключ подключения `other` (`openai.api_keys[4]`), модель `google/gemini-4-argon` на `litellm:4000` |
+| Decider | ключ OpenRouter, `perplexity/pplx-decider-v1.2` |
+| Рендер брифа | `_lyria_brief_from_json` в коде бота (коммит `d80d021`) |
+
+**Бесплатная проверка перед тратой $0.08** (когда пользователь уже в `waiting_for_approval`): взять `enriched_prompt` из Redis FSM и прогнать через валидатор и рендер внутри контейнера — видно все 8 полей, число строк и готовый бриф без запроса в Lyria:
+
+```bash
+docker exec lyria-redis redis-cli get fsm:<uid>:<uid>:data > /tmp/fsm.json   # {"prompt":…,"enriched_prompt":"<json>"}
+docker cp /tmp/fsm.json lyria-bot:/tmp/fsm.json   # затем valide + _build_generation_prompt(text=…)
+```
+
+Ожидаемо: `brief_has_json_leak: False`, `Lyrics:\n` присутствует, число строк lyrics = авторскому (режим poem) или 18–20 (режим idea).
+
+**Быстрая диагностика живого пути** (`docker logs lyria-enricher-worker --since 10m`): строка `POST https://ai.esmien.qd.je/api/v1/chat/completions "HTTP/1.1 200 OK"` + `Enrichment completed` = пайп ответил; `Enricher returned None` = non-2xx (чаще всего воркер смотрит на выключенный/несуществующий id модели), а `Enrichment failure delivered (attempt=1/3)` = уже отдалось пользователю.
+
 **Живой путь (с 28.10.2026, ночь): пайп `enricher`** — бот и воркер не менялись, `ENRICH_MODEL=enricher` теперь резолвится в OWUI-функцию, а не в модель. Схема: pplx-decider → `poem`/`idea` → **один** вызов `google/gemini-4-argon` с общей JSON-частью и одной из двух преамбул → санитайзер. Старая модель `enricher` переименована в `sound-producer` (её промпт — ручной стенд, не в живом пути).
 
 - **Маршрутизация:** `perplexity/pplx-decider-v1.2` через `https://openrouter.ai/api/alpha/decisions` (choice `poem`/`idea`). Замеры на 20 кейсах: явные 14/14, задержка 0.3–0.5 с, цена `$2.2e-06` за вызов, ошибок 0. На реальной неоднозначности модель сама отдаёт низкую вероятность («одна строка» → 0.55) — поэтому в пайпе порог 0.7 и **фоллбэк на `poem`** при любой ошибке/таймауте/низкой уверенности: худший исход — стих приняли за стих, а не переписали.
