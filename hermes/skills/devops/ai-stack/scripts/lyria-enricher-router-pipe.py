@@ -1,7 +1,7 @@
 """
 title: Enricher (router)
 author: Vlad
-version: 2.1.0
+version: 2.2.0
 required_open_webui_version: 0.6.0
 description: Маршрутизатор стихи/идея на pplx-decider + один Argon-вызов с общей JSON-частью. Отдаёт боту готовый JSON контракта.
 """
@@ -29,8 +29,8 @@ SHARED = """ФОРМАТ ОТВЕТА: только один JSON-объект, 
 ПОЛЯ-ПРОДЮСЕР (английский, словарь Lyria):
 - genre_and_style: 1–3 термина + эпоха/регион. Словарь: Acid House, Breakbeat, Chillout, Chiptune, Deep House, Drum & Bass, Dubstep, EDM, Electro Swing, Glitch Hop, Hyperpop, Minimal Techno, Psytrance, Synthpop, Techno, Trance, Trip Hop, Vaporwave, 808 Hip Hop, Boom-Bap, Contemporary R&B, G-funk, Grime, Lo-Fi Hip Hop, Neo-Soul, Trap Beat, Alternative Country, Blues Rock, Classic Rock, Garage Rock, Indie Folk, Indie Pop, Post-Punk, 60s Psychedelic Rock, Shoegaze, Surf Rock, Acid Jazz, Afrobeat, Bossa Nova, Disco Funk, Funk, Jazz Fusion, Latin Jazz, Bluegrass, Celtic Folk, Cumbia, Polka, Reggae, Reggaeton, Salsa, Baroque, Orchestral Score, Piano Ballad, russian chanson, russian bard song, hardbass. Запрещены: cinematic, atmospheric, epic, emotional, vibe, fusion of styles, modern sound.
 - mood: 2–3 слова из Ambient, Bright, Chill, Dark, Dreamy, Emotional, Ethereal, Euphoric, Funky, Groovy, Melancholic, Nostalgic, Ominous, Psychedelic, Relaxed, Soulful, Triumphant, Upbeat, Whimsical.
-- instrumentation: 3–5 конкретных инструментов с характером звучания. Словарь: Buchla Synths, Clavichord, Dirty Synths, Harpsichord, Mellotron, Moog Oscillations, Ragtime Piano, Rhodes Piano, Smooth Pianos, Spacey Synths, Synth Pads, 303 Acid Bass, 808 Hip Hop Beat, Boomy Bass, Conga Drums, Drumline, Funk Drums, Precision Bass, Tabla, TR-909 Drum Machine, Banjo, Balalaika, Bouzouki, Cello, Charango, Dulcimer, Fiddle, Flamenco Guitar, Guitar, Harp, Koto, Lyre, Mandolin, Pipa, Shamisen, Shredding Guitar, Sitar, Slide Guitar, Viola Ensemble, Warm Acoustic Guitar, Alto Saxophone, Bagpipes, Bass Clarinet, Didgeridoo, Harmonica, Ocarina, Trumpet, Tuba, Woodwinds, Bongos, Djembe, Glockenspiel, Hang Drum, Kalimba, Maracas, Marimba, Mbira, Steel Drum, Vibraphone, bayan accordion, balalaika, domra. Запрещено писать просто synths/strings/drums/beats/various instruments.
-- tempo_bpm: целое число. Баллада 60–80, поп и соул 90–110, рок и танцевальное 118–135, панк/хардкор/хардбасс 140–180.
+- instrumentation: 3–5 конкретных инструментов с характером звучания. Барабаны: Drumline — ТОЛЬКО марш/парад/оркестр; Funk Drums — ТОЛЬКО фанк/соул/диско. Для рока, панка, инди и метала не подставляй их в instrumentation: рисунок барабанов описывай в song_structure («driving rock drums, kick-snare-hat», «half-time tom groove», «fast punk beat»), а в instrumentation оставь гитары, бас и клавиши. Словарь: Buchla Synths, Clavichord, Dirty Synths, Harpsichord, Mellotron, Moog Oscillations, Ragtime Piano, Rhodes Piano, Smooth Pianos, Spacey Synths, Synth Pads, 303 Acid Bass, 808 Hip Hop Beat, Boomy Bass, Conga Drums, Drumline, Funk Drums, Precision Bass, Tabla, TR-909 Drum Machine, Banjo, Balalaika, Bouzouki, Cello, Charango, Dulcimer, Fiddle, Flamenco Guitar, Guitar, Harp, Koto, Lyre, Mandolin, Pipa, Shamisen, Shredding Guitar, Sitar, Slide Guitar, Viola Ensemble, Warm Acoustic Guitar, Alto Saxophone, Bagpipes, Bass Clarinet, Didgeridoo, Harmonica, Ocarina, Trumpet, Tuba, Woodwinds, Bongos, Djembe, Glockenspiel, Hang Drum, Kalimba, Maracas, Marimba, Mbira, Steel Drum, Vibraphone, bayan accordion, balalaika, domra. Запрещено писать просто synths/strings/drums/beats/various instruments.
+- tempo_bpm: подбирай под текст и настроение, а не по умолчанию. Меланхолическая лирика и баллады 70–95; средний рок 100–120; энергичный рок и панк-рок 135–155; панк/хардкор/хардбасс 155–180; поп и соул 90–115. Просят «энергично/не растянуто» — не ниже 135; «медленно/проникновенно» — не выше 90.
 - vocal_style: профиль (Female Soprano, Female Alto, Male Tenor, Male Baritone, Weathered Rocker) + подача одной фразой. Инструментал — "instrumental, no vocals".
 - language: язык вокала, по умолчанию "Russian".
 - song_structure: массив английских инструкций по секциям, например "[Intro] Solo balalaika, tape hiss, no vocals." Теги секций должны совпадать с тегами в lyrics.
@@ -43,7 +43,7 @@ POEM_RULES = """РЕЖИМ: ГОТОВЫЙ ТЕКСТ / ПРАВКИ ГОТОВ�
 1. Текст автора — базово неприкосновенен: не переписывай строки, не меняй слова и порядок строк без явной просьбы.
 2. НЕ дублируй и НЕ досоздавай строки, если об этом прямо не попросили. Сколько строк у автора — столько остаётся в lyrics (меняются только теги секций).
 3. Разметь куплеты по 4 строки: [Verse 1], [Verse 2], ... Если строк не кратно 4 — последний куплет короче, это нормально.
-4. [Chorus] — только если автор сам повторил строфу или пометил «припев». Тогда вынеси эту строфу в [Chorus] и повторяй по форме.
+4. [Chorus] — если (а) автор сам повторил строфу или пометил «припев», либо (б) пользователь прямо просит припев/рефрен. В случае (б) вынеси самую сильную авторскую строфу (обычно 3-ю или 4-ю, где смысловой пик) в [Chorus] и повторяй её по форме песни; слова строфы не меняй, в куплетах её не дублируй — она звучит только как припев.
 5. Если автор попросил сменить стиль/жанр/настроение — меняй только поля-продюсера, текст не трогай.
 6. ПРАВКА ТЕКСТА — ИСКЛЮЧЕНИЕ ИЗ П.1–2: если пользователь прямо просит заменить, переписать или дописать конкретную строку/куплет/припев — выполни ровно эту просьбу, держа метр (7–9 слогов) и рифму исходного текста. Остальные строки не трогай, порядок сохраняй. «Допиши куплет» = добавить новый куплет в конец, старые не переписывать.
 7. Если в тексте есть готовые пометки [Verse]/[Chorus]/[Bridge] — сохрани их как есть.
