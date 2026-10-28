@@ -65,15 +65,46 @@ IDEA_RULES = """РЕЖИМ: АВТОР ПРИСЛАЛ ТОЛЬКО ИДЕЮ.
 class Pipe:
     class Valves(BaseModel):
         DECIDER_URL: str = Field(default="https://openrouter.ai/api/alpha/decisions")
-        DECIDER_KEY: str = Field(default="", description="Ключ OpenRouter для decider-модели")
+        DECIDER_KEY: str = Field(
+            default="", description="Ключ OpenRouter для decider-модели"
+        )
         DECIDER_MODEL: str = Field(default="perplexity/pplx-decider-v1.2")
-        DECIDER_TIMEOUT: int = Field(default=5, description="Таймаут маршрутизации, секунды")
-        DECIDER_THRESHOLD: float = Field(default=0.7, description="Ниже порога — безопасный дефолт poem")
+        DECIDER_TIMEOUT: int = Field(
+            default=5, description="Таймаут маршрутизации, секунды"
+        )
+        DECIDER_THRESHOLD: float = Field(
+            default=0.7, description="Ниже порога — безопасный дефолт poem"
+        )
+
         API_BASE_URL: str = Field(default="http://litellm:4000/v1")
-        API_KEY: str = Field(default="", description="Общий ключ LiteLLM для обеих ролей")
-        MODEL_POET: str = Field(default="google/gemini-4-argon", description="Поэт: пишет текст с нуля (ветка idea)")
-        MODEL_PRODUCER: str = Field(default="google/gemini-4-argon", description="Продюсер: аранжирует готовый текст автора (ветка poem)")
-        TEMPERATURE: float = Field(default=0.85)
+        API_KEY: str = Field(
+            default="", description="Общий ключ LiteLLM для обеих ролей"
+        )
+
+        MODEL_POET: str = Field(
+            default="qwen/qwen3-235b-a22b-instruct-2507",
+            description="Поэт: генерация текста с нуля (idea)",
+        )
+        MODEL_PRODUCER: str = Field(
+            default="qwen/qwen3-235b-a22b-instruct-2507",
+            description="Продюсер: аранжировка готовых стихов (poem)",
+        )
+
+        # Тонкие настройки генератора
+        TEMP_POET: float = Field(
+            default=0.82, description="Температура для сочинения стихов"
+        )
+        TEMP_PRODUCER: float = Field(
+            default=0.25, description="Температура для строгого JSON продюсера"
+        )
+        POET_TOP_P: float = Field(
+            default=0.90,
+            description="Top-P для поэта (отсечение мусорного хвоста токенов)",
+        )
+        POET_PRESENCE_PENALTY: float = Field(
+            default=0.20, description="Штраф за повтор слов/образов в стихах"
+        )
+
         MAX_TOKENS: int = Field(default=1200)
         TIMEOUT: int = Field(default=110)
 
@@ -105,7 +136,10 @@ class Pipe:
             async with httpx.AsyncClient(timeout=self.valves.DECIDER_TIMEOUT) as client:
                 response = await client.post(
                     self.valves.DECIDER_URL,
-                    headers={"Authorization": f"Bearer {self.valves.DECIDER_KEY}", "Content-Type": "application/json"},
+                    headers={
+                        "Authorization": f"Bearer {self.valves.DECIDER_KEY}",
+                        "Content-Type": "application/json",
+                    },
                     json=payload,
                 )
             response.raise_for_status()
@@ -120,18 +154,32 @@ class Pipe:
         except Exception:
             return "poem"
 
-    async def _produce(self, messages: list[dict], rules: str, model: str) -> str:
+    async def _produce(
+        self,
+        messages: list[dict],
+        rules: str,
+        model: str,
+        temperature: float,
+        top_p: float = 1.0,
+        presence_penalty: float = 0.0,
+    ) -> str:
         payload = {
             "model": model,
-            "messages": [{"role": "system", "content": f"{SHARED}\n\n{rules}"}] + messages,
-            "temperature": self.valves.TEMPERATURE,
+            "messages": [{"role": "system", "content": f"{SHARED}\n\n{rules}"}]
+            + messages,
+            "temperature": temperature,
+            "top_p": top_p,
+            "presence_penalty": presence_penalty,
             "max_tokens": self.valves.MAX_TOKENS,
             "stream": False,
         }
         async with httpx.AsyncClient(timeout=self.valves.TIMEOUT) as client:
             response = await client.post(
                 f"{self.valves.API_BASE_URL}/chat/completions",
-                headers={"Authorization": f"Bearer {self.valves.API_KEY}", "Content-Type": "application/json"},
+                headers={
+                    "Authorization": f"Bearer {self.valves.API_KEY}",
+                    "Content-Type": "application/json",
+                },
                 json=payload,
             )
             response.raise_for_status()
@@ -158,7 +206,9 @@ class Pipe:
         data.setdefault("vocal_style", "Male Baritone")
         data.setdefault("language", "Russian")
         if not isinstance(data.get("instrumentation"), list):
-            data["instrumentation"] = [str(data.get("instrumentation") or "warm acoustic guitar")]
+            data["instrumentation"] = [
+                str(data.get("instrumentation") or "warm acoustic guitar")
+            ]
         if not isinstance(data.get("song_structure"), list):
             data["song_structure"] = []
         try:
@@ -173,16 +223,35 @@ class Pipe:
                 data["lyrics"] = "[Verse 1]\nТекст не сгенерирован"
         return json.dumps(data, ensure_ascii=False)
 
-    async def pipe(self, body: dict, __user__: dict = None, __event_emitter__=None) -> str:
-        messages = [m for m in body.get("messages", []) if m.get("role") in ("user", "assistant") and m.get("content")]
+    async def pipe(
+        self, body: dict, __user__: dict = None, __event_emitter__=None
+    ) -> str:
+        messages = [
+            m
+            for m in body.get("messages", [])
+            if m.get("role") in ("user", "assistant") and m.get("content")
+        ]
         task = messages[-1]["content"] if messages else ""
         is_edit = any(m["role"] == "assistant" for m in messages[:-1])
         route = "poem" if is_edit else await self._route(task)
+
         if route == "poem":
-            # готовый текст: роль — продюсер (аранжировка), текст не трогаем
-            rules, model = POEM_RULES, self.valves.MODEL_PRODUCER
+            raw = await self._produce(
+                messages=messages,
+                rules=POEM_RULES,
+                model=self.valves.MODEL_PRODUCER,
+                temperature=self.valves.TEMP_PRODUCER,
+                top_p=1.0,
+                presence_penalty=0.0,
+            )
         else:
-            # только идея: роль — поэт, текст пишется с нуля
-            rules, model = IDEA_RULES, self.valves.MODEL_POET
-        raw = await self._produce(messages, rules, model)
+            raw = await self._produce(
+                messages=messages,
+                rules=IDEA_RULES,
+                model=self.valves.MODEL_POET,
+                temperature=self.valves.TEMP_POET,
+                top_p=self.valves.POET_TOP_P,
+                presence_penalty=self.valves.POET_PRESENCE_PENALTY,
+            )
+
         return self._sanitize(raw, task=task, route=route)
