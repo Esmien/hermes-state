@@ -76,6 +76,7 @@ c2fc4ce4b63f576ee21f3a0065f03f45b85b702159e047fd18083ae345eb0f49  ./hermes/skill
 534cac14e01a8c2bbbaaae3614e06ab3b07ded048521d69176d1a46fdf0bbf56  ./hermes/skills/devops/ai-stack/scripts/compact-webui-images.py
 8f748826f64a8e2cb71eca23e1d96b55a4077030e5eaccee0c68e64d8c63b66a  ./hermes/skills/devops/ai-stack/scripts/lyria-e2e.py
 aa533ed2e2e5916be08dc9424a8c5e230b1ba4112e6d533ce1f2c3687f59640c  ./hermes/skills/devops/ai-stack/scripts/lyria-enricher-pipe.py
+bd919090820cef5994eee12dcb95b6b20ba26a9dd721489f393c2504e0f82535  ./hermes/skills/devops/ai-stack/scripts/lyria-enricher-router-pipe.py
 b201d073a6374940cc7a90bf418f3af9f7d5315c67f3f633edcea78012fb8fed  ./hermes/skills/devops/ai-stack/scripts/model-route-bench.py
 36432d6a9677006a068a5ceefbc2e9995a298d98576e58372b92173b77126f44  ./hermes/skills/devops/ai-stack/scripts/probe-approval-guardian.py
 57a2a5e8f2f2395dfb18a9a37ebed061a5272f43b7737f966462483ea4e03f2a  ./hermes/skills/devops/ai-stack/scripts/probe-media-endpoints.py
