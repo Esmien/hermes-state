@@ -2,6 +2,19 @@
 
 > Loaded from the `ai-stack` skill. Read this when backups, restore, timers, Telegram notifications.
 
+## Offsite copy of WebUI user files (`webui_data`)
+
+- **The DB dumps never contained uploads/generated images.** `webui_data/` (uploads 688 MB, generated_images 310 MB, cache 487 MB) is restored only from a bundle unless the weekly archive exists. Since 2026-10 there is one: `webui-data-backup.timer` (Sun 04:00 UTC) runs `/usr/local/bin/webui-data-backup.py`, which tars `uploads` + `generated_images` (**cache excluded — regenerable**), splits at `TG_DOC_LIMIT` and uploads ~55 parts / ~980 MB to the file bot, recording a registry set with `db="webui_data"`.
+- Restore: `/usr/local/bin/webui-data-restore.py [--target DIR] [--force] [--registry URL]` (verified end-to-end: 55 parts, sha256 ok, 860 files, 997 MB). Bootstrap path: `install.py --from-bot` now fetches the set (`RESTORE_DBS` includes `webui_data`) and the new `data` step unpacks it into `WEBUI_DATA` — it skips a non-empty dir unless `--restore`.
+- **Build the registry entry before deleting the split parts.** `backup_registry_entry` hashes every part; deleting them first raises `FileNotFoundError` after the upload already succeeded, leaving 55 orphan files in the chat and no registry.
+- **`build_split_instruction` does not fit 55 parts** (Telegram caps a message at 4096 chars). The script sends the full instruction only for ≤10 parts and otherwise a compact `cat …part_* > …` + sha256 line.
+
+## External uptime watchdog (server offline)
+
+- Local alerts die with the host, so `.github/workflows/uptime.yml` in the private `hermes-state` repo probes `https://ai.esmien.qd.je/` and `https://llm.esmien.qd.je/health/liveliness` every 15 min from a GitHub runner and writes to Telegram via `TG_TOKEN`/`TG_CHAT` repo secrets.
+- **State is an open issue labelled `uptime`, not a repository variable** — `GITHUB_TOKEN` gets `403 Resource not accessible by integration` on `/actions/variables`, while `issues: write` works. The `uptime` label must exist or `gh issue create` fails.
+- Grep `monitor.py` for `alerts` before claiming disk alerts are missing: `/etc/cron.d/server-monitor` already runs `monitor.py alerts` every 10 min with `DISK_WARN_PERCENT=85` (that is why 76% was silent), and `INODE_*` plus `MAX_BACKUP_AGE_HOURS` are checked there too.
+
 ## Backups & notifications
 
 - **`Requires=` in a timer's `[Unit]` makes the timer START its service — including at every boot.** Both backup timers originally carried `Requires=postgres-backup.service` / `Requires=postgres-backup-notify.service`; because `timers.target` starts the timers at boot, systemd pulled the services in too, so every reboot produced a full pg_dump pair (~150 MB, ~13 s CPU) plus a Telegram digest. `Persistent=true` was NOT the cause (stamps were current). Activation is already handled by the implicit `Unit=` (`foo.timer` → `foo.service`); the `Requires=` lines were removed. Symptom to recognise: `journalctl -b | grep postgres-backup` shows `Started postgres-backup.timer` immediately followed by `Starting postgres-backup.service` seconds after boot. Verify a fix with `systemctl show <timer> -p Requires` (must not list the service) and by restarting the timer — the service must stay `inactive`.

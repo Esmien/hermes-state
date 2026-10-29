@@ -54,7 +54,7 @@ acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skill
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
 8c4c75e6719522aa432bf6dd5ff7ec4fdb84b6b60530badc77fbca74be709a13  ./hermes/skills/devops/ai-stack/SKILL.md
-1c1f11ef92d5482a5085069ba53f2e029ab66e45cc10eaf63a2e072818407f2b  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
+748bb7e2addaec3a9228f0d50bee7c3b0d2d4944edc216767d89690659087c51  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 81babc7468bf6f07194f4de6f6bd9d913b52ed404ba20718b56e56e04ec72f38  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
 4899c677e4fab9179ac1009d0c75b7cced3e7b40e485d81694b4a94f830e1bfa  ./hermes/skills/devops/ai-stack/references/disk-and-memory.md
@@ -97,8 +97,8 @@ ed20fcd212379a0d96f986f5bc32a44579a1d6fb0a369f6e4b3e51de994318c7  ./hermes/skill
 f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skills/devops/llm-route-bench/scripts/ab_bench.py
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
-be3879805604a6f8752d1433af8f91f59f2f740c71bd6a70f964d896b4fe4167  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
-8a4f12f613576585992b5ce90b0d22d7fbc224282e71086a823ea938d6ca0548  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+7738db0c4bde71e6280b8c32cb7139e90da18962e2f331cfc1e9fdba51fc6345  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
+d228e7eeec8923cb75dea4df2a2e884275a907f934b85b9235a2da4c567683ba  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
 7bb23fbf44d8579fca367d42418ce677ca2b5921573272473022a3cc07c0846f  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh

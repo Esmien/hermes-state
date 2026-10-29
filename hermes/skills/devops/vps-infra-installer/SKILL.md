@@ -104,6 +104,7 @@ install.py --skip tls,restore --only verify
 - `--from-bot` игнорирует проверку «дамп старше 72 ч» (источник выбран осознанно).
 - Токен проверяется на форму `123456:AA…`: заглушка из `install.json`
   (`__stored_in_notifications_env__`) даёт понятную ошибку, а не 404 от Telegram.
+- **Файлы пользователя едут отдельно от БД.** Псевдо-база `webui_data` в том же реестре — это tar.gz `uploads` + `generated_images` (~980 МБ, 55 частей), её пишет `webui-data-backup.timer` (Sun 04:00 UTC). `RESTORE_DBS` включает её, шаг `data` распаковывает архив в `WEBUI_DATA` (пропускает непустой каталог без `--restore`). Без этого шага bootstrap вернёт БД и конфиги, но не оригиналы файлов Knowledge.
 
 ## Проверка
 

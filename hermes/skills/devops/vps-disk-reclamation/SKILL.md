@@ -19,6 +19,8 @@ User asks «кто сжирает место / что можно удалить�
 
 ## Host facts that change the answer
 
+- **Disk alerts already exist.** `/etc/cron.d/server-monitor` runs `monitor.py alerts` every 10 min: `DISK_WARN_PERCENT=85`, `DISK_CRIT_PERCENT=95`, inode thresholds, and `MAX_BACKUP_AGE_HOURS=26` against `BACKUP_DIR`. A 76 %-full disk is therefore silent by design — check those values before telling the owner nothing watches the disk. State/дедуп: `/var/lib/server-monitor/alerts.json` (root).
+
 - Root FS is /dev/sda1, ~96 GB. **Report % used first** — a large absolute number (40 G) can still be 41% = healthy. Do not alarm before quoting the percentage.
 - **Docker is backed by containerd here, so the real consumer shows up as /var/lib/containerd, not /var/lib/docker.** du on /var/lib/docker massively understates (390 M vs 23 G). The authoritative view of *reclaimable* is `docker system df` against the running daemon — use that, not du, to decide what to clean. Snapshots live under io.containerd.snapshotter.v1.overlayfs/snapshots, layers under io.containerd.content.v1.content; the daemon's namespace is moby (a `ctr -n k8s.io …` probe returns nothing — there is no k8s here).
 - **/root/.hermes (tools/, cache/uv, installs/) is the agent's own runtime, not junk.** tools/ holds ffmpeg, python, node, and the agent's browser (chromium-<ver>). Never prune it as "cache".
@@ -49,6 +51,8 @@ journalctl --vacuum-size=100M
 
 ## Pitfalls
 
+- **`docker builder prune -f` can free far more than the `RECLAIMABLE` line suggests.** Measured on this host: 21.8 GB cache with 1.3 GB "reclaimable" → `prune -f` freed **14.2 GB** because most records were stale build contexts, not live layers. Run it before proposing `--all`, and re-read `docker system df` afterwards (7.6 GB live cache remained).
+- **A fat writable layer hides inside one container, not in images.** `docker ps -s` showed `open-terminal` at virtual 13.2 GB / writable **8.9 GB** — 7.8 GB of it was `/root/.arduino15` installed through the web terminal. Always check `docker ps -s` and `docker exec <c> du -xhd1 /` before blaming images.
 - **Every removal here is destructive — present the plan and WAIT for «Да».** The user's standing rule: «оставляем всё, что хотя бы косвенно может навредить текущим процессам». Remove only clear orphans; anything that merely *looks* unused (a named volume, an install dir, a snap) gets named as uncertain and left until the user decides.
 - **`docker volume ls -qf dangling=true` is the orphan test; a named volume is not automatically disposable.** Confirm a volume is truly unattached before naming it: `docker ps -a --format '{{.Names}}' | while read c; do echo "$c -> $(docker inspect -f '{{range .Mounts}}{{.Name}} {{end}}' \"$c\")"; done`. If a container binds a host path instead of the volume, the volume is an orphan even though its name looks official.
 - **A disabled snap revision is not the snap.** `snap remove <name> --revision=<rev>` frees the old revision and leaves the active install running; `snap remove --purge <name>` removes the whole snap. Choose deliberately — the user may only want the orphan (old revision), not the app.
