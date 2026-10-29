@@ -1,8 +1,8 @@
 c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
-b54e8b2887077e3dd0442065a91e76283bb8939ede6f5ff6de15c434737f9b49  ./hermes/config.yaml
+8c7c9c25f93c408a5db958f26b4012bf1932c25001b12bf7172d249c980366f0  ./hermes/config.yaml
 52704aeda33095fc9ff57beafe7206e3e91889047922612efc8581b82dff06b8  ./hermes/cron/jobs.json
-6715be9f4da9aae56a7261a61ddda30e600ee00209b4e1222503d6cb116065f5  ./hermes/memories/MEMORY.md
+79f3466677a02057f62918017e8c5b6c84101c3dd516cf1bccfa9290f227cdb5  ./hermes/memories/MEMORY.md
 1994a24536e05c418d8680fe02655a16665baf3452dc7e650849ca43d6069210  ./hermes/memories/USER.md
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
 ace53680230203597ccc98a4e43af7d78ebd79690b210af403cd5e657dbf5513  ./hermes/plugins/muse-persona/__pycache__/__init__.cpython-314.pyc
@@ -18,7 +18,7 @@ e35d4d165daadfd066661df59a202a4159c5df41b77642884d3656830054d6bc  ./hermes/skill
 bc68b1648e301409bc25b1084ec26766213ca9f3c1b2fd3d3d6ebe3dbde9e967  ./hermes/skills/apple/imessage/SKILL.md
 7f2427c7112d71235d92f68ba68392a4fed3d28a7636f522deb2748cb44fe7fc  ./hermes/skills/autonomous-ai-agents/DESCRIPTION.md
 851a250fb4b68db10db9112ed3657ee46e7fe05b1607414ac439422b69ca914e  ./hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md
-b7698ac6da2860a23d7e3bee37f63e0c509a0528ea4b44cd7403e174014da341  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/agent-guardrails.md
+cd0b6f0d36322f4a26dd1572bb1e3fa8b5153f1253c1b1d2e21f9475a3d6de88  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/agent-guardrails.md
 70099ca64774cc7e70a33330d180f862cf19a02c0f936dc4c50d51c6d0b73556  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/background-systems.md
 a15c6838f9ac1e35b0e113a66738b3ce27bb6500d31218797467a2f8691341b5  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/cli-reference.md
 890cd0169309a03e51ac234d667e26c2934d8de20ed67bac36d0e26983943f2f  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/configuration.md
@@ -94,7 +94,8 @@ ed20fcd212379a0d96f986f5bc32a44579a1d6fb0a369f6e4b3e51de994318c7  ./hermes/skill
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
 84feede765923dc361ed88fbef4a733a6f87fe23c60a4b409ab4d045d4de2849  ./hermes/skills/devops/llm-route-bench/SKILL.md
 f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skills/devops/llm-route-bench/scripts/ab_bench.py
-dbf2d4709c2d6627a66b9bc9a4c3beaaa4a34f6589fc660814f6cb936cfb44e2  ./hermes/skills/devops/server-connections/SKILL.md
+8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
+d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
 429f86bd6fb45527a3a66da029ce37e02749dc71c0a680254b0691c977cafd2b  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
 8a4f12f613576585992b5ce90b0d22d7fbc224282e71086a823ea938d6ca0548  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
@@ -115,7 +116,7 @@ e5f2f984b0f6fe22509e84f12877713bedfb3630f13271980b4dfb057d023a98  ./hermes/skill
 940c24a4ad377299b89f8469ca49427e569ba8ca39e9df62b9d481d25a23a6fe  ./hermes/skills/research/ru-local-price-research/references/gold-scrap-ru.md
 cfa6128ed67a0224981a2c384ce188bd037e898a95c432465873306b6edb7349  ./hermes/skills/research/ru-local-price-research/references/jewelry-retail-ru.md
 2ea0d50444337de4809a62dc618d6d9c35bd2ba30f17ec6a138a20f53f9974a7  ./hermes/skills/social-media/DESCRIPTION.md
-64ad1dc1850c0bcf53f3cea900baf3dbdd8d38ab58ccdcd2e3f6c69049f4beae  ./hermes/skills/vps-cleanup-audit/SKILL.md
+051cfd884a995f8ee3f10f75adf53b620976d0936e9e7c6eaae368e8a9b31849  ./hermes/skills/vps-cleanup-audit/SKILL.md
 352093bd5d4183591deb13fe0b115f3d561fe7610d63253797f5f603723c2403  ./hermes/skills/vps-cleanup-audit/references/recon-commands.md
 1cee33fe7aaddc9d8ce9319f4452dc9a357952feba049810e392a8ecf67ea28e  ./hermes/skills/web/DESCRIPTION.md
 6caf6cd781dd3a2e19a1501a619803776dfb0a2a2e00f770c4a9e97755b46026  ./hermes/skills/web/blocked-page-recovery/SKILL.md

@@ -48,10 +48,15 @@ The restricted account (Telegram ID 917728475) may run exactly `ssh` and `conn <
 
 **The hook resolves the owner from the internal session id**, not from the payload's `session_id` shape: `hooks.pre_tool_call` payloads carry `20261029_143418_5743154a`-style ids, so the gate looks the id up in `~/.hermes/state.db` (`sessions.id` → `session_key`/`user_id`). Matching the platform key directly in the payload silently never fires — that mistake left the gate a no-op once.
 
+Editing the gate script takes effect on the next tool call (it is re-spawned per
+call); only adding/changing the `hooks:` block in `config.yaml` needs a gateway
+restart. Re-run the allow/block matrix after every edit. Full block list, threat
+model and test cases: `references/ssh-only-gate.md`.
+
 ## Pitfalls
 
 - **`sshpass -p <pass>` puts the password in `ps`.** `conn` uses `SSHPASS` + `sshpass -e`; keep it that way if you ever touch the script.
 - **Password in the chat transcript is unavoidable** at `conn add` time: the user types it, the model passes it as an argv element. Say so once if he asks about security, and offer SSH keys (`ssh-keygen` + `ssh-copy-id` over `conn ssh`) as the stronger option.
 - **Entries are per-host, not per-purpose**: `conn ssh box -- 'sudo ...'` runs as the stored user. If a host needs two accounts, store two names (`box`, `box-root`).
 - **A corrupt store** makes every `conn` call fail loudly with the JSON error; fix it with `python3 -m json.tool` rather than re-adding entries blindly — a bad write loses all saved servers.
-- **The hook only fires once the gateway has been restarted** after the `hooks:` block was added to `config.yaml`; `hermes hooks list` must show `✓ allowed`.
+- **The hook only fires once the gateway has been restarted** after the `hooks:` block was added to `config.yaml`; `hermes hooks list` must show `✓ allowed`. Restart from a chat with `/restart` — the CLI refuses to restart a supervised gateway from inside, by design.

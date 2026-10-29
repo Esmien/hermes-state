@@ -48,9 +48,62 @@ or pre-seed `~/.hermes/shell-hooks-allowlist.json`. A skipped hook fails open an
 is indistinguishable from "no dangerous command was attempted".
 - **Config is read at startup.** Registering a hook does not affect the running
 gateway — restart it (from outside the gateway process) or it never fires.
+  *Editing the script behind an already-registered hook is the exception:* it is
+  re-spawned per tool call, so behaviour changes land immediately with no restart.
+- **The allowlist file is trivially seedable.** Shape:
+  `{"approvals":[{"event":"pre_tool_call","command":"<exact command string from config>","approved_at":"<ISO>","script_mtime_at_approval":"<ISO mtime of the script>"}]}`.
+  Write it, then `hermes hooks doctor` must print `✓ allowlisted` and
+  `✓ script unchanged since approval` — a stale mtime shows as a warning, and
+  `hooks_auto_accept: true` alone does not silence the doctor's view.
 - **Prove it fires.** After wiring, trigger one command that must be blocked and
 quote the block reason. Config echo is not evidence; `hermes hooks test` shows the
-parsed directive without executing.
+parsed directive without executing — and it **overwrites `tool_input.command`**
+with its own synthetic `echo …` payload, so a payload file passed to it proves
+nothing about your matcher. Test the gate script directly by piping a real JSON
+payload into it, once per allowed and once per blocked case.
+
+## Gates scoped to one platform user
+
+A `pre_tool_call` hook can restrict a single Telegram/Discord user to a narrow
+subset of tools while the owner keeps everything. Three things must line up or the
+gate silently allows everybody:
+
+1. **Resolve the owner from `state.db`, not from the payload string.** The payload's
+   `session_id` is the *internal* id (`20261029_143418_5743154a`), not the platform
+   key — `extra` carries `task_id`/`tool_call_id`, no user id. Look it up:
+   `select session_key, user_id from sessions where id = ?` in `~/.hermes/state.db`
+   (open `file:…?mode=ro`), and fall back to `~/.hermes/sessions/sessions.json`
+   (`session_key → session_id`). Matching `telegram:dm:<id>` against the raw
+   payload never matches and turns the gate into a no-op that logs nothing.
+2. **Raise instead of guessing.** If neither lookup resolves the session, throw —
+   with `fail_closed: true` that becomes a block, which is the correct answer for
+   an unknown owner. Sessions with no row (cron, CLI) legitimately resolve to "not
+   restricted" and must keep working.
+3. **Confirm the live session, not a synthetic id.** Take a real session id from
+   `state.db` for the restricted user and for the owner, then feed both through the
+   script; a mismatch shows up as "the restricted id passes `docker ps`".
+
+Prose is not part of the boundary. The model in the restricted user's session keeps
+its full system prompt and memory, so it will happily *describe* owner-level access;
+only the hook decides what executes. Pair the hook with a per-chat ephemeral prompt
+(`platforms.<platform>.extra.channel_prompts."<chat_id>"`) that forbids disclosing
+the host, services, paths, other users and the tool inventory, and answer
+"what can you do" with one fixed sentence. Treat that as hygiene: a determined user
+can talk the model into words, never into a tool call.
+
+## Restarting the gateway from inside a session
+
+A supervised gateway refuses `systemctl --user restart hermes-gateway`,
+`hermes gateway restart`, `systemd-run … restart`, and any referenced script that
+contains one — the guard scans the command *and* the script it would execute, and
+no flag (`--yolo`, approvals off) bypasses it. The reason is real: SIGTERM reaches
+the child and the restart dies half-done. Use the in-band slash command `/restart`
+from the chat instead: the gateway drains the turn, exits with
+`GATEWAY_SERVICE_RESTART_EXIT_CODE` (75) and systemd's `Restart=always`
+(`RestartForceExitStatus=75`) brings it back — no shell, no SSH, no laptop.
+To confirm the reload landed, check `MainPID`/`ActiveEnterTimestamp` moved and
+grep `~/.hermes/logs/agent.log` for `shell hook registered` (that line goes to
+the agent log, not the journal).
 
 ## State that must survive `/new`
 
