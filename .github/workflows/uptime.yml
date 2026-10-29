@@ -2,6 +2,8 @@ name: uptime
 
 # Внешний сторож: если сервер целиком уйдёт в оффлайн, локальные алерты промолчат.
 # Проверяем публичные endpoints с раннера GitHub и пишем в Telegram.
+# Состояние хранится открытым issue с меткой uptime — GITHUB_TOKEN не может писать
+# repository variables, а issues может.
 
 on:
   schedule:
@@ -9,7 +11,8 @@ on:
   workflow_dispatch:
 
 permissions:
-  actions: write   # нужно для чтения/записи repository variable UPTIME_STATE
+  contents: read
+  issues: write
 
 concurrency:
   group: uptime
@@ -32,50 +35,56 @@ jobs:
             [ -n "$code" ] || code="000"
             echo "$url -> $code"
             case "$code" in
-              2*|3*|401|403) return 0 ;;
+              2*|3*|401|403|404) return 0 ;;
               *) fail="$fail $url($code)"; return 1 ;;
             esac
           }
           check https://ai.esmien.qd.je/ || true
           check https://llm.esmien.qd.je/health/liveliness || true
-          check https://bot.esmien.qd.je/ || true
           if [ -n "$fail" ]; then
-            echo "failed=$fail" >> "$GITHUB_OUTPUT"
             echo "state=down" >> "$GITHUB_OUTPUT"
+            echo "failed=${fail}" >> "$GITHUB_OUTPUT"
           else
             echo "state=up" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Read previous state
+      - name: Current incident state
         id: prev
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          value=$(gh api "repos/${{ github.repository }}/actions/variables/UPTIME_STATE" --jq '.value' 2>/dev/null || echo unknown)
-          echo "value=$value" >> "$GITHUB_OUTPUT"
-
-      - name: Notify Telegram
-        if: steps.probe.outputs.state != steps.prev.outputs.value
-        env:
-          TG_TOKEN: ${{ secrets.TG_TOKEN }}
-          TG_CHAT: ${{ secrets.TG_CHAT }}
-          STATE: ${{ steps.probe.outputs.state }}
-          FAILED: ${{ steps.probe.outputs.failed }}
-        run: |
-          if [ "$STATE" = "down" ]; then
-            text="🔴 <b>Сервер недоступен снаружи</b>%0AПроверка: ${FAILED:-см. лог}%0A%0AЭто внешний сторож GitHub Actions — локальные алерты в такой ситуации не придут."
+          open=$(gh issue list --repo "${{ github.repository }}" --label uptime --state open --json number --jq 'length')
+          if [ "$open" = "0" ]; then
+            echo "value=up" >> "$GITHUB_OUTPUT"
+            echo "issue=" >> "$GITHUB_OUTPUT"
           else
-            text="✅ <b>Сервер снова доступен снаружи</b>%0AВсе публичные точки отвечают."
+            number=$(gh issue list --repo "${{ github.repository }}" --label uptime --state open --json number --jq '.[0].number')
+            echo "value=down" >> "$GITHUB_OUTPUT"
+            echo "issue=$number" >> "$GITHUB_OUTPUT"
           fi
-          curl -fsS --max-time 20 \
-            "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
-            -d "chat_id=${TG_CHAT}" -d "parse_mode=HTML" -d "text=${text}" > /dev/null
 
-      - name: Save state
-        if: steps.probe.outputs.state != steps.prev.outputs.value
+      - name: Open incident and alert
+        if: steps.probe.outputs.state == 'down' && steps.prev.outputs.value == 'up'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          STATE: ${{ steps.probe.outputs.state }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CHAT }}
+          FAILED: ${{ steps.probe.outputs.failed }}
         run: |
-          gh api -X PATCH "repos/${{ github.repository }}/actions/variables/UPTIME_STATE" \
-            -f name=UPTIME_STATE -f value="$STATE" > /dev/null
+          stamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          gh issue create --repo "${{ github.repository }}" --title "Uptime incident: сервер недоступен снаружи" --label uptime --body "Проверка из GitHub Actions — ${FAILED}. Открыто: ${stamp}" > /dev/null
+          text="🔴 <b>Сервер недоступен снаружи</b>%0A${FAILED}%0A%0AВнешний сторож GitHub Actions — локальные алерты в такой ситуации не придут."
+          curl -fsS --max-time 20 "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" -d "chat_id=${TG_CHAT}" -d "parse_mode=HTML" -d "text=${text}" > /dev/null
+
+      - name: Close incident and report recovery
+        if: steps.probe.outputs.state == 'up' && steps.prev.outputs.value == 'down'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CHAT }}
+          ISSUE: ${{ steps.prev.outputs.issue }}
+        run: |
+          stamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          gh issue close "$ISSUE" --repo "${{ github.repository }}" --comment "Восстановлено: ${stamp}" > /dev/null
+          text="✅ <b>Сервер снова доступен снаружи</b>%0AВсе публичные точки отвечают."
+          curl -fsS --max-time 20 "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" -d "chat_id=${TG_CHAT}" -d "parse_mode=HTML" -d "text=${text}" > /dev/null
