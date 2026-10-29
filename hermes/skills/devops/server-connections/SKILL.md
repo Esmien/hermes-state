@@ -45,7 +45,7 @@ Rules:
 
 ## What the gate allows
 
-The restricted account (Telegram ID 9177284475, matched on the session key) may run exactly `ssh`, `scp`, `sftp` and `conn <list|ls|add|del|rm|ssh|scp|ping|help>`. Every other tool call — `read_file`, `write_file`, `patch`, web, cron, `clarify` — is blocked by `/root/.hermes/agent-hooks/ssh-only-gate.py`. That hook fails closed, so a broken gate denies rather than permits.
+The restricted account (Telegram ID 917728475, matched on the session key) may run exactly `ssh`, `scp`, `sftp` and `conn <list|ls|add|del|rm|ssh|scp|ping|help>`. Every other tool call — `read_file`, `write_file`, `patch`, web, cron, `clarify` — is blocked by `/root/.hermes/agent-hooks/ssh-only-gate.py`. That hook fails closed, so a broken gate denies rather than permits.
 
 ## Pitfalls
 

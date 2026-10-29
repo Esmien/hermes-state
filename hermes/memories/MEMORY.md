@@ -14,4 +14,4 @@ Telegram-боты (владелец 214062001): @esmien_vps_notificator_bot (н�
 §
 Дорогие LLM-маршруты (opus/gpt-6/sonnet) не трогать и не вызывать без явного указания владельца; DeepSeek-flash — дефолт для тестов.
 §
-TG allowlist: 214062001 (владелец, всё) + 9177284475 (только ssh: гейт agent-hooks/ssh-only-gate.py в hooks.pre_tool_call, fail_closed).
+TG allowlist: 214062001 (владелец, всё) + 917728475 (только ssh: гейт agent-hooks/ssh-only-gate.py в hooks.pre_tool_call, fail_closed).
