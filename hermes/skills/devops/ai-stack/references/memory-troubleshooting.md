@@ -4,6 +4,16 @@ Use when asked "what is eating the RAM" or when a container's footprint looks wr
 
 ## 1. Host overview
 
+**Read the line correctly before quoting it.** `free` near zero is normal Linux behaviour — page cache fills the gap and is reclaimable. The actionable number is **`available`** (this host: 7.8 GB total, ~3.3 GB used, ~4.7 GB cache, ~4.5 GB available ⇒ ~42 % loaded, healthy). Never open the answer with «память кончилась» off the `free` column.
+
+**`Swap: used` is the real signal, and it is attributable per process.** GBs in swap mean a past pressure spike pushed cold pages out: only the first touch of those pages costs disk I/O, nothing is degraded while they stay cold. Find the owners with a VmSwap sweep over host PIDs:
+
+```bash
+for p in $(ps -eo pid --no-headers); do s=$(awk '/VmSwap/{print $2}' /proc/$p/status 2>/dev/null); [ -n "$s" ] && [ "$s" -gt 20000 ] && echo "$((s/1024))MB $p $(tr '\0' ' ' </proc/$p/cmdline | cut -c1-60)"; done | sort -rn | head
+```
+
+Name the top swappers and offer the fix as an option (restart that service to pull pages back, or tune `vm.swappiness`) — do not apply it unprompted.
+
 ```bash
 free -h
 ps -eo pid,ppid,rss,pmem,comm --sort=-rss | head -20
