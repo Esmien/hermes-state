@@ -92,7 +92,7 @@ ed20fcd212379a0d96f986f5bc32a44579a1d6fb0a369f6e4b3e51de994318c7  ./hermes/skill
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
 84feede765923dc361ed88fbef4a733a6f87fe23c60a4b409ab4d045d4de2849  ./hermes/skills/devops/llm-route-bench/SKILL.md
 f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skills/devops/llm-route-bench/scripts/ab_bench.py
-fa37fc898923e0cac0eaadf2bbe4dbd4ec863ecf61eac251a7b27b24027e189c  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
+429f86bd6fb45527a3a66da029ce37e02749dc71c0a680254b0691c977cafd2b  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
 8a4f12f613576585992b5ce90b0d22d7fbc224282e71086a823ea938d6ca0548  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
 7bb23fbf44d8579fca367d42418ce677ca2b5921573272473022a3cc07c0846f  ./hermes/skills/devops/vps-network-exposure/SKILL.md
@@ -112,6 +112,8 @@ e5f2f984b0f6fe22509e84f12877713bedfb3630f13271980b4dfb057d023a98  ./hermes/skill
 940c24a4ad377299b89f8469ca49427e569ba8ca39e9df62b9d481d25a23a6fe  ./hermes/skills/research/ru-local-price-research/references/gold-scrap-ru.md
 cfa6128ed67a0224981a2c384ce188bd037e898a95c432465873306b6edb7349  ./hermes/skills/research/ru-local-price-research/references/jewelry-retail-ru.md
 2ea0d50444337de4809a62dc618d6d9c35bd2ba30f17ec6a138a20f53f9974a7  ./hermes/skills/social-media/DESCRIPTION.md
+dd255f9ffaee3cffe1f1caa43841fd774cff256ac50ae63a3df8077888b73799  ./hermes/skills/vps-cleanup-audit/SKILL.md
+352093bd5d4183591deb13fe0b115f3d561fe7610d63253797f5f603723c2403  ./hermes/skills/vps-cleanup-audit/references/recon-commands.md
 1cee33fe7aaddc9d8ce9319f4452dc9a357952feba049810e392a8ecf67ea28e  ./hermes/skills/web/DESCRIPTION.md
 6caf6cd781dd3a2e19a1501a619803776dfb0a2a2e00f770c4a9e97755b46026  ./hermes/skills/web/blocked-page-recovery/SKILL.md
 22b996996ae2bf252b31cfd2636231f08936729a381dce7ba8bfa4afb8ffe8c6  ./hermes/skills/web/blocked-page-recovery/scripts/recover_page.py

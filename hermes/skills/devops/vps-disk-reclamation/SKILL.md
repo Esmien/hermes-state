@@ -54,4 +54,5 @@ journalctl --vacuum-size=100M
 
 ## Related
 
+- A different host over SSH, «почистить сервер / привести к стоковому»: `vps-cleanup-audit` (read-only recon → tiered delete plan → gated execution).
 - Disk growth caused by Open WebUI ingest (document_chunk, needs VACUUM FULL): `ai-stack` skill, disk-and-memory reference (`disk-and-memory.md`).
