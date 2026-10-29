@@ -29,7 +29,6 @@ He phrases it as «добавь сервер: name / ip / user / pass». Map tha
 conn add <name> <host> <user> '<password>' [--port N]
 conn ping <name>                      # prove it works before reporting back
 conn ssh <name> -- <remote command>   # the normal way to act
-conn scp <name> <src> <dst>           # prefix one side with NAME:
 conn list                             # safe to show: passwords are masked
 conn del <name>
 ```
@@ -45,7 +44,7 @@ Rules:
 
 ## What the gate allows
 
-The restricted account (Telegram ID 917728475) may run exactly `ssh`, `scp`, `sftp` and `conn <list|ls|add|del|rm|ssh|scp|ping|help>`. Every other tool call — `read_file`, `write_file`, `patch`, web, cron, `clarify`, `docker`, anything else — is blocked by `/root/.hermes/agent-hooks/ssh-only-gate.py`. That hook fails closed, so a broken gate denies rather than permits.
+The restricted account (Telegram ID 917728475) may run exactly `ssh` and `conn <list|ls|add|del|rm|ssh|ping|help>`. `scp`, `sftp`, ssh port forwarding (`-L/-R/-D/-W`), `-A`, `-i`, `-F`, `-o *Forward*`/`ProxyCommand`/`LocalCommand` are deliberately blocked: scp with a local source exfiltrates files off this box, and a tunnel bypasses the tool gate entirely. Every other tool call — `read_file`, `write_file`, `patch`, web, cron, `clarify`, `docker`, anything else — is blocked by `/root/.hermes/agent-hooks/ssh-only-gate.py`. That hook fails closed, so a broken gate denies rather than permits.
 
 **The hook resolves the owner from the internal session id**, not from the payload's `session_id` shape: `hooks.pre_tool_call` payloads carry `20261029_143418_5743154a`-style ids, so the gate looks the id up in `~/.hermes/state.db` (`sessions.id` → `session_key`/`user_id`). Matching the platform key directly in the payload silently never fires — that mistake left the gate a no-op once.
 

@@ -94,7 +94,7 @@ ed20fcd212379a0d96f986f5bc32a44579a1d6fb0a369f6e4b3e51de994318c7  ./hermes/skill
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
 84feede765923dc361ed88fbef4a733a6f87fe23c60a4b409ab4d045d4de2849  ./hermes/skills/devops/llm-route-bench/SKILL.md
 f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skills/devops/llm-route-bench/scripts/ab_bench.py
-baffc297b9f7c8a4826c3e868754b73a136a2c243d57b6029d4773521371dd87  ./hermes/skills/devops/server-connections/SKILL.md
+dbf2d4709c2d6627a66b9bc9a4c3beaaa4a34f6589fc660814f6cb936cfb44e2  ./hermes/skills/devops/server-connections/SKILL.md
 429f86bd6fb45527a3a66da029ce37e02749dc71c0a680254b0691c977cafd2b  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
 8a4f12f613576585992b5ce90b0d22d7fbc224282e71086a823ea938d6ca0548  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
