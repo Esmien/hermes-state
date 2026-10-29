@@ -39,6 +39,30 @@ For open-webui `read_file` the top ~140 lines — newest-first, one section per 
 
 Similarly, when a check has to run **inside** a container, assume nothing is installed there: use that container's own interpreter (`/app/.venv/bin/python` for litellm) and stdlib `urllib.request` instead of `curl`/`wget`, and read secrets from the container's own env (`os.environ['LITELLM_MASTER_KEY']`) rather than passing them on the command line.
 
+### Open WebUI preflight — will it build on OUR tree and fit OUR data?
+
+Run these before recommending the bump; they turn "the changelog looks fine" into an actual risk statement.
+
+1. **No alembic revision in the diff ⇒ no schema migration on start.** Compare the two tags and filter for migration files:
+   ```bash
+   curl -s 'https://api.github.com/repos/open-webui/open-webui/compare/v<old>...v<new>' -o /tmp/owui_cmp.json
+   python3 -c "import json;d=json.load(open('/tmp/owui_cmp.json'));print(d['total_commits'],'commits');print([f['filename'] for f in d['files'] if 'migration' in f['filename']])"
+   ```
+   An empty list means the schema is untouched — say so in the review, it is the difference between a 5-minute pull and a migration window. The compare API caps at 300 files: when the count lands near that, cross-check `git/trees/v<new>?recursive=1` filtered on `backend/open_webui/migrations` instead of trusting the diff. Also print the changed `backend/` filenames: a rewrite of `models/<x>.py` plus its routers is the shape that carries data risk without a migration.
+2. **A storage rewrite without a migration is still a data risk — measure the blast radius, do not read the diff.** Such changes ride in an existing JSON column, normalize lazily on read and are rewritten only when the row is next saved, so nothing breaks at boot. What decides the risk is how many rows we have: `sudo -u postgres psql -d webui_db -tAc "select count(*) from note;"`. Zero rows lets the whole feature be dismissed in one line; a large count makes it the headline risk.
+3. **Check the rebrand's sed anchor in the target tag before promising the build succeeds.** `ai/webui-branding/Dockerfile` seds `    WEBUI_NAME += ' (Open WebUI)'` inside `backend/open_webui/env.py` and hard-fails via `grep -q 'rebranded: Esmien AI'` when the line moved:
+   ```bash
+   curl -sL https://raw.githubusercontent.com/open-webui/open-webui/v<new>/backend/open_webui/env.py | grep -n 'WEBUI_NAME'
+   ```
+   The four-space indent is part of the pattern — an upstream re-indent breaks the build, so fix the sed in the same change.
+4. **A new feature that talks to open-terminal only works if our terminal image has the route.** The host cannot resolve the compose service name, so probe by container IP and print status codes only — never the connection key read from `webui_db` (`config` key `terminal_server.connections`):
+   ```bash
+   IP=$(docker inspect open-terminal --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
+   # GET http://$IP:8000/files/cwd    -> 200 {"cwd": "/mnt/host", ...}
+   # GET http://$IP:8000/files/upload -> 405 = route exists, 404 = missing
+   ```
+   `405` on a GET is the cheapest proof that the POST route exists. A `404` means the advertised feature (file/image copy into the terminal) is dead on our image — report that instead of listing the feature as a benefit. Note the cwd: `/mnt/host` is the host root, so such a feature writes into `/`.
+
 ## 3. Summarize for THIS stack, not the raw list
 
 Group as **Added / Fixed / Changed**, and lead each item with a bold one-line gist so the user can skim. Then add a "what this means for our install" section. Rules:

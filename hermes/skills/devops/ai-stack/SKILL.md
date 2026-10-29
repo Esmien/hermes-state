@@ -37,6 +37,7 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host.
     .env                 secrets (NEVER cat — grep keys only)
     litellm/config.yaml  gateway settings ONLY (drop_params: true, forward_client_headers, router_settings); model routing lives in litellm_db, not here
     searxng/             settings.yml, limiter.toml, engines/
+    webui-branding/      Dockerfile for esmien/webui:local (ARG OPENWEBUI_BASE digest + rebrand sed) and the generated assets; RESTORE_WEBUI.md sits next to it
     backup-databases.sh  pg_dump helper
   backups/               postgres dumps, nginx/certbot archives
     postgres/<db>_<ts>.dump   retention: newest 3 dumps per DB (backup-databases.sh)
@@ -49,7 +50,7 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host.
 |---|---|---|
 | litellm | ghcr.io/berriai/litellm:**v1.105.1** (pinned; `main-latest` is a rolling dev tag — see below) | LLM gateway/proxy |
 | litellm-redis | redis:7-alpine, `--requirepass` from `${LITELLM_REDIS_PASSWORD}`, `--maxmemory 256mb --maxmemory-policy noeviction`, no published port | LiteLLM state store (auth cache, rate-limit/token counters, router cooldowns) |
-| open-webui | esmien/webui:local (built locally from `webui-branding/`, derived from OWUI 0.12.4) | chat UI, rebranded «Esmien AI» |
+| open-webui | esmien/webui:local (built locally from `ai/webui-branding/`, derived from OWUI 0.12.4) | chat UI, rebranded «Esmien AI» |
 | searxng | searxng/searxng:latest | web search |
 | open-terminal | ghcr.io/open-webui/open-terminal:latest | web terminal |
 
