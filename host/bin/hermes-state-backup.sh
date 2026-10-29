@@ -154,7 +154,6 @@ HOST_UNITS=(
     litellm-spend-retention.service litellm-spend-retention.timer
     postgres-backup.service postgres-backup.timer postgres-backup-notify.service postgres-backup-notify.timer
     webui-data-backup.service webui-data-backup.timer
-    server-monitor-alerts.service server-monitor-alerts.timer
 )
 for f in "${HOST_UNITS[@]}"; do
     [[ -f "/etc/systemd/system/$f" ]] && install -m 644 -D "/etc/systemd/system/$f" "$REPO_DIR/host/systemd/$f"
