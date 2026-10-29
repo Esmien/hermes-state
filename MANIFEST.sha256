@@ -131,7 +131,7 @@ df8b07b07e5a51df7e28294323319ca4e945fa3a2e7d6291b24957f74109c937  ./host/bin/doc
 807d90d5d8a0cb39287d6ee65c87f116eb18c3ab0b3e4ad25849ce1fcb046d9f  ./host/bin/docker-incident-detector.py
 f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-guard-postgres.sh
 c146da46593b866352bc6bc439ee1e1cd21754c8818af7993ab140ea011f0954  ./host/bin/hermes-boot-notify.sh
-d5c3ecfecff92c0e3447df985553f3000c6bc81c0f6d241858462c20d132776a  ./host/bin/hermes-state-backup.sh
+831716122f918e769cf0d9afdf90cbdb00fa6c5363e9e512be9985f095bb6bad  ./host/bin/hermes-state-backup.sh
 5249aa0ba7bc85fb2cfaa7357d93c1bde4fc24b9182a71d8df08dbb90f65be5e  ./host/bin/hermes-state-watch.sh
 22ba3afdadc842431f74993b46827aa9513433b82e27810fba6be2304d2e45ff  ./host/bin/litellm-spend-retention.sh
 95655be1c140ce102c02ba9cb73bfea09457869d62419f64ef9677efc48ab087  ./host/bin/litellm-watchdog.py
@@ -139,6 +139,8 @@ a87e4db1c389f6fb3c41b1dc4dfd0b08e9a969db61e6a2bae46e23cfc4a0f316  ./host/bin/owu
 7128ae03df8813658538e9ba264f8e30ab1899b067591eb7df7ddb405a4b4420  ./host/bin/searxng-quality-check.py
 42d76cebc17fefeb9e49a7b007e11aa7a538a359ffdbdcf08585a8c069c8dab6  ./host/bin/tor-rotate.sh
 20ff03e6cf44682eb7cad75deee62e4dc66fe8d981a3ee1d06d3800fab714e04  ./host/bin/webui-compact-images.sh
+325e542c816af0d79baa01e6fe818c99e96575be3b9c1adb0ffc31eda9d2b637  ./host/bin/webui-data-backup.py
+8da33c060670e95670d5c031015a08f91c06e5e75f3112c97e32a8815e32be63  ./host/bin/webui-data-restore.py
 280c5df9ffb3eb528513c5a93ef0cfc8d5ecbf527fd917211e92fe3998011383  ./host/bin/webui-generated-images-retention.sh
 5ad5ebcc8417f031dd5e5ef405acadbbc7686ec862f53c884dd99ab2c86940d4  ./host/etc/docker-autorecover.conf
 3268655956b4a866cc3d8d571719b1ae2f9dd0b1f5ac44ec569b95f2a8891456  ./host/etc/hermes-boot-expected-containers.txt
@@ -161,3 +163,7 @@ d8be75cb3bcaec2013af0acfe5e7b86a4be01fb62007d4aa7ba1dfed3e541bb5  ./host/systemd
 1ef105dda6bfd26dece7f2c0ca79a0cec08fd8de8b1316fab3c014119e8bba56  ./host/systemd/postgres-backup.timer
 ec956157d40c359a8385ab3d25cf95e9b9e529d742985b397ce44b1c7f0e97fc  ./host/systemd/searxng-quality.service
 83c97200a966efd499e9ffaf54ddb350bbcfd73aa15c12a765c25467476e043a  ./host/systemd/searxng-quality.timer
+fc801750350fb480b555f1f9b353c4a938d499fa2bcb14bb158cf3d213d4c04a  ./host/systemd/server-monitor-alerts.service
+775fc4b339e85e4892df9367a57ff8f695149d69c1672f58a7173c9edd677b6a  ./host/systemd/server-monitor-alerts.timer
+7c47f881ac021159cfc1afae6c4a9b6c2dfb11b1f2b52fce37ada75a61ae286b  ./host/systemd/webui-data-backup.service
+3ae9b9542cf57148ca806e996118616e126f0da7ba88b0f334256b9209d09504  ./host/systemd/webui-data-backup.timer
