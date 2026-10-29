@@ -1,0 +1,81 @@
+name: uptime
+
+# Внешний сторож: если сервер целиком уйдёт в оффлайн, локальные алерты промолчат.
+# Проверяем публичные endpoints с раннера GitHub и пишем в Telegram.
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write   # нужно для чтения/записи repository variable UPTIME_STATE
+
+concurrency:
+  group: uptime
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe public endpoints
+        id: probe
+        run: |
+          set -u
+          fail=""
+          check() {
+            local url="$1"
+            local code
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 15 "$url" || true)
+            [ -n "$code" ] || code="000"
+            echo "$url -> $code"
+            case "$code" in
+              2*|3*|401|403) return 0 ;;
+              *) fail="$fail $url($code)"; return 1 ;;
+            esac
+          }
+          check https://ai.esmien.qd.je/ || true
+          check https://llm.esmien.qd.je/health/liveliness || true
+          check https://bot.esmien.qd.je/ || true
+          if [ -n "$fail" ]; then
+            echo "failed=$fail" >> "$GITHUB_OUTPUT"
+            echo "state=down" >> "$GITHUB_OUTPUT"
+          else
+            echo "state=up" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Read previous state
+        id: prev
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          value=$(gh api "repos/${{ github.repository }}/actions/variables/UPTIME_STATE" --jq '.value' 2>/dev/null || echo unknown)
+          echo "value=$value" >> "$GITHUB_OUTPUT"
+
+      - name: Notify Telegram
+        if: steps.probe.outputs.state != steps.prev.outputs.value
+        env:
+          TG_TOKEN: ${{ secrets.TG_TOKEN }}
+          TG_CHAT: ${{ secrets.TG_CHAT }}
+          STATE: ${{ steps.probe.outputs.state }}
+          FAILED: ${{ steps.probe.outputs.failed }}
+        run: |
+          if [ "$STATE" = "down" ]; then
+            text="🔴 <b>Сервер недоступен снаружи</b>%0AПроверка: ${FAILED:-см. лог}%0A%0AЭто внешний сторож GitHub Actions — локальные алерты в такой ситуации не придут."
+          else
+            text="✅ <b>Сервер снова доступен снаружи</b>%0AВсе публичные точки отвечают."
+          fi
+          curl -fsS --max-time 20 \
+            "https://api.telegram.org/bot${TG_TOKEN}/sendMessage" \
+            -d "chat_id=${TG_CHAT}" -d "parse_mode=HTML" -d "text=${text}" > /dev/null
+
+      - name: Save state
+        if: steps.probe.outputs.state != steps.prev.outputs.value
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          STATE: ${{ steps.probe.outputs.state }}
+        run: |
+          gh api -X PATCH "repos/${{ github.repository }}/actions/variables/UPTIME_STATE" \
+            -f name=UPTIME_STATE -f value="$STATE" > /dev/null
