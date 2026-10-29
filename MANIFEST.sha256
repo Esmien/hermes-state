@@ -52,7 +52,7 @@ c0f64af2e1b45b36062a341d182ed42fc6f0a334a7b1aa6c30d7b2b7b89dcc55  ./hermes/skill
 acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skills/career/job-application-review/references/repo-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-814a46d61070497fb492c28fde7fa6762ab95c78da8e3744f3ad4ef3a1eacbaf  ./hermes/skills/devops/ai-stack/SKILL.md
+8c4c75e6719522aa432bf6dd5ff7ec4fdb84b6b60530badc77fbca74be709a13  ./hermes/skills/devops/ai-stack/SKILL.md
 1c1f11ef92d5482a5085069ba53f2e029ab66e45cc10eaf63a2e072818407f2b  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 81babc7468bf6f07194f4de6f6bd9d913b52ed404ba20718b56e56e04ec72f38  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
@@ -70,7 +70,7 @@ ad042b6fee80f9dde1317d8f976a826abe3f94e539c3577263e53d91cd70efd8  ./hermes/skill
 cbb06f14ec073a2b9436c977cd60cd31f8e7bb3de6ee7fc7c127454dcedaecc5  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
 ed07f0188d3a2dbe27c3f4b4a2966ae423f28bf2450ec8a040bd2cbc4c6ec0bf  ./hermes/skills/devops/ai-stack/references/searxng.md
 9cfae7089c96dcb5efc4d9a7a09f9f7e71059dcd92ae5ba59e560e3af6ed4767  ./hermes/skills/devops/ai-stack/references/signup-approval.md
-9c18193eca718446daa8e962326e33a02b1c121037c35088f8ce3ecc8ff1d142  ./hermes/skills/devops/ai-stack/references/updates.md
+edd659ed101bb0adb507ef894077beac36c3e35d92d3709fb8a788a6d0e2c031  ./hermes/skills/devops/ai-stack/references/updates.md
 dd2d44405b31543453db60080d99f9d8cea5a594cc5c24b5720e14567d5ccb69  ./hermes/skills/devops/ai-stack/references/upstream-release-review.md
 80ffd361b1c5f46f0006193a623ec4ff84c62eff2b4f2195adb5cc13a10e0a82  ./hermes/skills/devops/ai-stack/scripts/audit-dead-models.py
 c2fc4ce4b63f576ee21f3a0065f03f45b85b702159e047fd18083ae345eb0f49  ./hermes/skills/devops/ai-stack/scripts/check-env-parity.sh
