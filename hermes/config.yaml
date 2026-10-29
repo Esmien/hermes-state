@@ -2495,3 +2495,12 @@ fallback_providers:
     model: deepseek/deepseek-v4.1-flash
   - provider: openrouter
     model: anthropic/claude-haiku-5.5
+
+# --- ssh-only gate for restricted Telegram users ---
+hooks_auto_accept: true
+hooks:
+  pre_tool_call:
+    - matcher: ".*"
+      command: "/root/.hermes/agent-hooks/ssh-only-gate.py"
+      timeout: 10
+      fail_closed: true
