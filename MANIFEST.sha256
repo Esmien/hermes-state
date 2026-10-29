@@ -1,3 +1,4 @@
+2a4a654d1fff361215d5fc961ebb5dc4675d5fd5080c650e965146a6136bf6c6  ./.github/workflows/uptime.yml
 c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
 8c7c9c25f93c408a5db958f26b4012bf1932c25001b12bf7172d249c980366f0  ./hermes/config.yaml
@@ -124,7 +125,7 @@ cfa6128ed67a0224981a2c384ce188bd037e898a95c432465873306b6edb7349  ./hermes/skill
 f3ca9e5152d2ccdda1de46baf415df59ae3b5abd560704d10296579035a8ffe6  ./host/ai-stack/backup-databases.sh
 d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md
 6518ee29303b0e5ffdf86eb9091d17e44fe1d2fe6a9ebc20b1ac3caf5b7f18fe  ./host/ai-stack/runbook.md
-4b26b3db3bfa7639aaeb12f3b90f06389f63ad9dd7653ec30135864131645632  ./host/backups/tg-registry.json
+e858c08a853afd5d467acc03761b563b3e63d07d7fe56c0e3265c74ed85692b2  ./host/backups/tg-registry.json
 7cac890fcc48be6cfc3efe302dbab2d018074c270a15481e99b2c464be278184  ./host/bin/docker-detector-liveness.sh
 df8b07b07e5a51df7e28294323319ca4e945fa3a2e7d6291b24957f74109c937  ./host/bin/docker-incident-agent.sh
 807d90d5d8a0cb39287d6ee65c87f116eb18c3ab0b3e4ad25849ce1fcb046d9f  ./host/bin/docker-incident-detector.py
