@@ -99,7 +99,7 @@ Profiles use `~/.hermes/profiles/<name>/` with the same layout. When a profile i
 | config.yaml sections, skills enable/disable, toolsets, voice/STT/TTS | `references/configuration.md` |
 | How skills are chosen/loaded, why a skill never fires, catalog vs disk count | `references/skills-loading.md` |
 | Hard gates on dangerous actions: `pre_tool_call` hooks, fail-closed, state that survives `/new` | `references/agent-guardrails.md` |
-| Restricting ONE gateway user (guest/colleague) to a subset of tools or commands — «он в аллоулите, но только ssh» | `references/per-user-access-control.md` + `templates/ssh-only-gate.py` |
+| Restricting ONE gateway user (guest/colleague) to a subset of tools or commands — «он в аллоулите, но только ssh»; also load it whenever a hook must know WHO is asking, because the hook payload carries no platform user id | `references/per-user-access-control.md` + `templates/ssh-only-gate.py` |
 | AGENTS.md / .hermes.md / CLAUDE.md project rules | `references/project-context-files.md` |
 | Secret redaction, PII, approval modes, "reset permissions" | `references/security-privacy.md` |
 | Delegation, cron, curator, kanban | `references/background-systems.md` |
@@ -219,6 +219,8 @@ terminal(command="tmux new-session -d -s resumed 'hermes --resume 20260225_14305
 
 - **`SKILL.md` has a hard ~100 000-character cap, enforced after *every* op in a `skill_manage` batch.** A skill that has grown past it cannot be patched at all: the call aborts with `content is N characters (limit: 100 000)` and rolls the whole batch back, even for a one-line fix. Free space **first** — put the shrink as op #1 of the same batch and keep the net delta negative — or move topic depth into `references/` and leave a pointer. Check with `wc -c` before editing; a file already near 100k needs the shrink before the fix, not after.
 
+- **Never assert who is talking from config or memory.** `platforms.<p>.home_channel` holds the OWNER's id, not necessarily the sender's — the session may be a second allowlisted account (a restricted guest). Read `inbound message: platform=… user=… chat=<id>` in `~/.hermes/logs/gateway.log` (or `sessions.user_id` in `state.db`) before describing an id, an access level, or a restriction; when asked «уверен?», re-read the log instead of repeating the earlier claim.
+- **A registered `pre_tool_call` hook is not a working gate.** Hook payloads carry `session_id` = Hermes' internal task id, never the platform session key, so a hook that matches on `agent:<profile>:<platform>:dm:<id>` silently allows everyone. Prove any per-user restriction by testing the policy against a payload captured from the live gateway, and re-verify after upgrades — `references/per-user-access-control.md`.
 - **Never break prompt caching** — don't change past context, toolsets, or the system prompt mid-conversation. The only exception is context compression. To AUDIT whether caching is actually working (and which settings endanger it), load `references/prompt-cache-audit.md` — answer from the logged `cache=X/Y` hit rate in `~/.hermes/logs/agent.log`, never from config reading alone.
 - **Message role alternation** — never two assistant or two user messages in a row; only `tool` results can repeat.
 - **Secrets in `.env`, settings in `config.yaml`** — never tell a user to put a non-credential setting in `.env`.

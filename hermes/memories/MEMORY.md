@@ -8,10 +8,10 @@ Telegram-боты (владелец 214062001): @esmien_vps_notificator_bot (н�
 §
 Разбор падений: docker-autorecover.timer (60с) → /usr/local/bin/docker-incident-detector.py (детект+улики в /var/lib/docker-incidents/, контейнеры не трогает) → Hermes-агент через systemd-run (docker-incident-agent.sh, отчёт в TG). Allowlist /etc/docker-autorecover.conf, лог /var/log/docker-autorecover.log, сторож docker-detector-liveness.timer. Перед ручными работами с контейнерами — touch /var/lib/docker-autorecover/pause, после снять.
 §
-Бэкап состояния Hermes: коммит в приватный GitHub Esmien/hermes-state ПО ФАКТУ ИЗМЕНЕНИЙ (с 24.10.2026, не по таймеру): hermes-state-watch.service (inotify, debounce 90с) → hermes-state-backup.sh (flock, GITHUB_KEY из ai-stack/ai/.env, GIT_ASKPASS) → /var/lib/hermes-state/repo. Таймер отключён. Логи /var/log/hermes-state-watch.log и -backup.log. Детали — skill hermes-state-backup.
+Бэкап Hermes: коммит в приватный GitHub Esmien/hermes-state ПО ФАКТУ ИЗМЕНЕНИЙ: hermes-state-watch.service (inotify, debounce 90с) → hermes-state-backup.sh (flock, GIT_ASKPASS) → /var/lib/hermes-state/repo. Логи /var/log/hermes-state-*.log. Детали — skill hermes-state-backup.
 §
 Инфраструктура ставится из github.com/Esmien/vps-infra (bootstrap | bash → install.py), копия /root/vps-infra; ai-stack/deploy.sh исторический. Детали — skill vps-infra-installer.
 §
 Дорогие LLM-маршруты (opus/gpt-6/sonnet) не трогать и не вызывать без явного указания владельца; DeepSeek-flash — дефолт для тестов.
 §
-TG allowlist: 214062001 (владелец, всё) + 917728475 (только ssh: гейт agent-hooks/ssh-only-gate.py в hooks.pre_tool_call, fail_closed).
+TG: 214062001 = Владислав (владелец, всё); 917728475 = Игорь (только ssh/conn, гейт agent-hooks/ssh-only-gate.py, fail_closed).

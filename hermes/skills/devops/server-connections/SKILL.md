@@ -45,7 +45,9 @@ Rules:
 
 ## What the gate allows
 
-The restricted account (Telegram ID 917728475, matched on the session key) may run exactly `ssh`, `scp`, `sftp` and `conn <list|ls|add|del|rm|ssh|scp|ping|help>`. Every other tool call — `read_file`, `write_file`, `patch`, web, cron, `clarify` — is blocked by `/root/.hermes/agent-hooks/ssh-only-gate.py`. That hook fails closed, so a broken gate denies rather than permits.
+The restricted account (Telegram ID 917728475) may run exactly `ssh`, `scp`, `sftp` and `conn <list|ls|add|del|rm|ssh|scp|ping|help>`. Every other tool call — `read_file`, `write_file`, `patch`, web, cron, `clarify`, `docker`, anything else — is blocked by `/root/.hermes/agent-hooks/ssh-only-gate.py`. That hook fails closed, so a broken gate denies rather than permits.
+
+**The hook resolves the owner from the internal session id**, not from the payload's `session_id` shape: `hooks.pre_tool_call` payloads carry `20261029_143418_5743154a`-style ids, so the gate looks the id up in `~/.hermes/state.db` (`sessions.id` → `session_key`/`user_id`). Matching the platform key directly in the payload silently never fires — that mistake left the gate a no-op once.
 
 ## Pitfalls
 
