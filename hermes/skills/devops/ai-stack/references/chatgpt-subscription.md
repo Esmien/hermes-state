@@ -149,6 +149,38 @@ with their ids):
   subscribe deployments join an existing chat group as `mode: chat` (the provider
   bridges to Responses internally), while a Responses-only group stays
   `mode: responses`.
+- **Group naming: `<provider>/<slug>`, one `model_name` per group.** Standard
+  models live as `openai/gpt-6.1-sol`, `openai/gpt-6-luna`, … so they merge into
+  a group with any other deployment of the same model. Client-specific duplicates
+  get their own prefix (`aider.openai/gpt-6.1-sol`) because that client picks
+  models by literal name and must not fall into the chat-facing group.
+  OpenRouter-backed deployments keep `openrouter/` for a different reason: that
+  relay breaks native routes, so they stay on chat-completions and should not be
+  mixed with subscription deployments.
+- **A fallback leg can be the thing that fails.** `opencode/*` deployments demand
+  `x-opencode-session` and answer `400 MissingSessionID` without it, so a group
+  whose second leg is opencode works for tools that send the header and fails for
+  Open WebUI. Worse, that 400 masks the primary's real error (an invalid
+  parameter or an exhausted quota comes back as `MissingSessionID`). When a group
+  is meant to serve the chat UI, the fallback leg must not require client
+  headers — check by issuing one deliberately invalid request and reading whose
+  error comes back.
+
+## Reasoning effort on these routes
+
+Per-model levels, read from the account's own catalogue (`supported_reasoning_levels`):
+Sol 6.1 / Terra 6.1 / Astra — `low medium high xhigh max ultra`, default `low`;
+Luna — `low medium high xhigh max` (no `ultra`), default `medium`. **`ultra` is not
+another effort rung**: it switches to subagents, so a UI should offer
+`low…max` as a slider and a separate toggle for it.
+
+Verify that the value actually reaches OpenAI instead of dying in the proxy: send
+the same small task at every level with `reasoning: {"effort": …}` on
+`/v1/responses` and compare `usage.output_tokens_details.reasoning_tokens`. A
+value that is dropped by LiteLLM produces identical numbers at every level; a
+value that propagates gives a rising sequence, and budget models give a hard
+`0` at `low`. Add a negative control (`effort: "bogus"` must 400) — that proves
+validation happens upstream rather than inside the gateway.
 
 ## Exposure policy
 
