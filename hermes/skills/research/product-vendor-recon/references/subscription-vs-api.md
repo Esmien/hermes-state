@@ -62,6 +62,30 @@ endpoint.
 Warn in the same breath: all these surfaces share ONE allowance. Three tools
 signed into one account are one quota split three ways, not three quotas.
 
+## «Модели нет в списке» — сначала каталог, потом план
+
+Agent CLIs (OpenCode and friends) do not hardcode model ids: they snapshot the
+models.dev registry into a local cache on start. A model released after that
+snapshot is simply absent from `/models` — the account may well have access.
+
+Order of checks, cheapest first:
+
+1. Confirm the id exists in the live registry:
+   `curl -s https://models.dev/api.json` → `openai.models["gpt-6.1-terra"]`.
+   If it is there, the plan/account is not the problem — the client cache is.
+2. Delete the cache and restart the TUI so it re-fetches:
+   Linux `rm ~/.cache/opencode/models.json`, macOS
+   `rm ~/Library/Caches/opencode/models.json`.
+3. Only if the client is genuinely older, upgrade it — check against the
+   registry first (`opencode --version` vs the npm `opencode-ai` latest), because
+   «upgrade» on an already-latest build changes nothing and wastes the owner's
+   patience.
+4. Declaring the model under `provider.<name>.models` in `~/.config/opencode/opencode.json`
+   is a fallback for ids the registry lacks, not a fix for a stale cache — and
+   it must land in the GLOBAL config, not a project-level `opencode.jsonc`.
+
+## Rate structure worth memorising
+
 ## Pitfalls
 
 - Never promise an API from a chat subscription. OAuth-in-third-party-tool is
@@ -69,6 +93,10 @@ signed into one account are one quota split three ways, not three quotas.
 - A subscription's newest model may live on only one surface (Work/CLI) and be
   absent from plain chat — that is product design, not a bug; check the
   availability table before debugging the user's client.
+- Within chat, a single menu entry can BE the coding model: a generically named
+  entry (`GPT-6`) maps to the coding model at several thinking levels, while the
+  top level (`Pro`/Extra High) silently switches to the flagship. Read the
+  vendor's model page before telling the owner which weights answer them.
 - The sticker price is not the real one: cache hits, reasoning effort and the
   long-context threshold move the bill several-fold in either direction.
 - Refunds: a RU reseller usually keeps the money; the vendor's own billing may

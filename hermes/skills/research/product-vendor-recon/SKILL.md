@@ -109,4 +109,8 @@ user wants a call, not a table of contents.
 - A model can exist on one surface and not another (chat mode vs coding app vs
   CLI) and plan tiers gate it further. Read the vendor's own availability table
   before telling the owner what they get on their plan; «купил, а модели нет в
-  меню» is usually correct product design, not a bug.
+  меню» is usually correct product design, not a bug. But before blaming the
+  plan, rule out the client: agent CLIs serve their model picker from a cached
+  catalog snapshot, so a freshly released model is absent until that cache is
+  cleared — check the live registry (models.dev) first, then the cache, then the
+  plan (recipe in `references/subscription-vs-api.md`).

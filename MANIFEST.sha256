@@ -89,7 +89,7 @@ b201d073a6374940cc7a90bf418f3af9f7d5315c67f3f633edcea78012fb8fed  ./hermes/skill
 e04067631103fb7051c50bfb3de0962436243fe2c5ea74ada7690c37d877ad35  ./hermes/skills/devops/container-incident-response/SKILL.md
 244093d67fc1c519a82fe5fbd107a2cea7b8127de5d5e030001163f9bae0c53f  ./hermes/skills/devops/container-incident-response/references/agent-wakeup.md
 891b02a8d8af2ff6fe959e205bcb8a343270686135367050b673524c31c304e7  ./hermes/skills/devops/container-incident-response/references/detector-and-thresholds.md
-8961af69cd965f93da08e815167b5ed77332ca99d17b288645dadc9872218d84  ./hermes/skills/devops/credential-login-verification/SKILL.md
+42cb0414a2e84a7827dc42272095c1c8afd651469fe206abb92d8c511901fd38  ./hermes/skills/devops/credential-login-verification/SKILL.md
 65af83d2307a43298474305685d6a0eec08114dfcc0e9ff299ea4c5735bccac9  ./hermes/skills/devops/credential-login-verification/references/open-webui-auth.md
 da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skills/devops/credential-login-verification/scripts/login-path-audit.sh
 ee146464fb8b4fcf0272dff5912d82ef6d29ad8dcd5a8e7510de6266af1481b0  ./hermes/skills/devops/docker-compose-traps/SKILL.md
@@ -115,8 +115,8 @@ b5a494a45bfd430bfb3042ee0452a6b88c81481f147ce7fca2c29ed3e93c490a  ./hermes/skill
 2a38ce97e4a05808ffedbe37eb80039e9017d9b0d6966b0c60630b353b60b440  ./hermes/skills/productivity/owner-facing-docs/SKILL.md
 a7bc842330a491de5f73cd63e87521e53724d94d4f53949bfa2171beb8200e18  ./hermes/skills/research/DESCRIPTION.md
 e5f2f984b0f6fe22509e84f12877713bedfb3630f13271980b4dfb057d023a98  ./hermes/skills/research/city-relocation-report/SKILL.md
-88d65537fef19135dd6dfd3d3bcc4e7b91079b7ffd22d9e47856a146f38b05e7  ./hermes/skills/research/product-vendor-recon/SKILL.md
-eb3780fb4941ebe7090d6208d1b2a56ee1cec314c2c97ced64b3bd7e0d37d7da  ./hermes/skills/research/product-vendor-recon/references/subscription-vs-api.md
+88f39db6527b8984a0a4d27a1d66f64f0ae0b4e9fcbff3a10180f8fe85a8357e  ./hermes/skills/research/product-vendor-recon/SKILL.md
+efca46700a695a8d4c8f0081fa3ae398e45b7cc033113a7a893fc287acee5e7e  ./hermes/skills/research/product-vendor-recon/references/subscription-vs-api.md
 57f3af63fb0439ddd1ef17e2086c836fe864da60ad613fc1918c7149db65acc5  ./hermes/skills/research/ru-local-price-research/SKILL.md
 082f00a5894845b15e21e6fa46456f16bbf660afd472c72ccfa320fe0890f0a3  ./hermes/skills/research/ru-local-price-research/references/city-comparison-ru.md
 09cca2d18af5c50fb67f783aec072525e83487c6ba4e41427bf8aa754014e1f5  ./hermes/skills/research/ru-local-price-research/references/city-traffic-ru.md
