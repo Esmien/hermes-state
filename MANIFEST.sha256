@@ -95,7 +95,8 @@ da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skill
 ee146464fb8b4fcf0272dff5912d82ef6d29ad8dcd5a8e7510de6266af1481b0  ./hermes/skills/devops/docker-compose-traps/SKILL.md
 ed20fcd212379a0d96f986f5bc32a44579a1d6fb0a369f6e4b3e51de994318c7  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
-84feede765923dc361ed88fbef4a733a6f87fe23c60a4b409ab4d045d4de2849  ./hermes/skills/devops/llm-route-bench/SKILL.md
+1e4d16d0399deb39e8dd9f7eca12740d815c2a35d7849dc2400c68941c9e1feb  ./hermes/skills/devops/llm-route-bench/SKILL.md
+0cc271c2cc9bc6e510d9a8f5785fbcaf1037bd1970b12753526a14133804e80c  ./hermes/skills/devops/llm-route-bench/references/access-pricing.md
 f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skills/devops/llm-route-bench/scripts/ab_bench.py
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
@@ -114,7 +115,7 @@ b5a494a45bfd430bfb3042ee0452a6b88c81481f147ce7fca2c29ed3e93c490a  ./hermes/skill
 2a38ce97e4a05808ffedbe37eb80039e9017d9b0d6966b0c60630b353b60b440  ./hermes/skills/productivity/owner-facing-docs/SKILL.md
 a7bc842330a491de5f73cd63e87521e53724d94d4f53949bfa2171beb8200e18  ./hermes/skills/research/DESCRIPTION.md
 e5f2f984b0f6fe22509e84f12877713bedfb3630f13271980b4dfb057d023a98  ./hermes/skills/research/city-relocation-report/SKILL.md
-a1b27851f6ddd1cf30b417999cbfbf587ae9b8ebf0380c3c54d4bc7c952694ed  ./hermes/skills/research/product-vendor-recon/SKILL.md
+f1bd052a7ed2d67e772565ec2a6d4bc220dc1a167b29866bd10b1eec844be7f6  ./hermes/skills/research/product-vendor-recon/SKILL.md
 57f3af63fb0439ddd1ef17e2086c836fe864da60ad613fc1918c7149db65acc5  ./hermes/skills/research/ru-local-price-research/SKILL.md
 082f00a5894845b15e21e6fa46456f16bbf660afd472c72ccfa320fe0890f0a3  ./hermes/skills/research/ru-local-price-research/references/city-comparison-ru.md
 09cca2d18af5c50fb67f783aec072525e83487c6ba4e41427bf8aa754014e1f5  ./hermes/skills/research/ru-local-price-research/references/city-traffic-ru.md

@@ -1,6 +1,6 @@
 ---
 name: llm-route-bench
-description: "Use when a model seems worse: bench LiteLLM routes."
+description: "Use when a model seems worse or LLM cost/limits matter."
 version: 1.0.0
 author: VPS Admin
 license: MIT
@@ -17,6 +17,11 @@ metadata:
 Use when the owner says a model «тупит / хуже работает / отказывается», when comparing a
 cheap model against an expensive one, or after any change of a route/credential in the
 gateway. The point is to separate **model quality** from **route quality** with numbers.
+
+Also use when the question is money rather than quality: «где взять модель дешевле»,
+«стоит ли подписка», «какие там лимиты», «я не зря заплатил». Read
+`references/access-pricing.md` before quoting any number — it carries the official price
+ladder, the discount levers and the per-plan allowances.
 
 ## Rule zero
 
@@ -75,5 +80,8 @@ for those tokens. Send `«Скажи одно слово: ок»` with `max_toke
 
 ## Files
 
+- `references/access-pricing.md` — official per-token ladder, discount levers (cache,
+  batch/flex, long-context cliff, reasoning effort), subscription allowances per plan,
+  reseller markup math, and how to answer «стоит ли оно того».
 - `scripts/ab_bench.py` — probe + 8 deterministic tasks + price lookup from `/model/info`.
   Reads `LITELLM_MASTER_KEY` from `/home/ai_service/ai-stack/ai/.env`, never prints it.

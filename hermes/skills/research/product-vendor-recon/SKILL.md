@@ -43,7 +43,9 @@ user wants a call, not a table of contents.
    `/models` limits block — read it to see context window, output cap and whether
    the id hides a swappable backend. Search the model name itself to place it
    (vendor, release date, price per 1M tokens, benchmark tier) before judging
-   quality claims.
+   quality claims. If the public id is neutral (`default`, `smart`, `rufp/default`)
+   the backend is swappable by design: report the model as a vendor CLAIM, never
+   as a fact, and say out loud that it cannot be verified from outside.
 4. **Identify who is behind it** from the footer, not the about page: ИНН /
    ОГРН(ИП) → `https://www.rusprofile.ru/id/<ОГРН>` gives registration date,
    founders, co-owner companies, whether the entity is still active. Check the
@@ -77,3 +79,18 @@ user wants a call, not a table of contents.
   not a rating. Do not present it as independent validation.
 - Do not infer the app stack from the file extension or install instructions —
   state only what the docs say (OS support, CLI name, API base URL).
+- A masked model id (`default`, `rufp/default`) is not a model name: it is a
+  promise that the backend can be swapped per tier or overnight. The honest
+  answer to «точно ли там Sol?» is «заявлено, проверить нельзя» — plus, if the
+  owner wants more, a behavioural fingerprint on a trial key (control tasks with
+  known answers, tokenizer quirks, knowledge cutoff, refusal pattern, tokens/sec
+  vs the published profile) that yields «похоже / не похоже», not proof.
+- «от N ₽ / 1M токенов» on a RU reseller page is the teaser rate — usually the
+  cheapest component (cached input) at a marked-up rate. Compute the real
+  multiplier: their ₽ per 1M ÷ (official $ per 1M × FX). At ~1.5-2x you are
+  paying for rubles and no-VPN, not for the model — say that instead of
+  «дорого/дешево».
+- A model can exist on one surface and not another (chat mode vs coding app vs
+  CLI) and plan tiers gate it further. Read the vendor's own availability table
+  before telling the owner what they get on their plan; «купил, а модели нет в
+  меню» is usually correct product design, not a bug.
