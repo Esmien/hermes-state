@@ -114,6 +114,7 @@ b5a494a45bfd430bfb3042ee0452a6b88c81481f147ce7fca2c29ed3e93c490a  ./hermes/skill
 2a38ce97e4a05808ffedbe37eb80039e9017d9b0d6966b0c60630b353b60b440  ./hermes/skills/productivity/owner-facing-docs/SKILL.md
 a7bc842330a491de5f73cd63e87521e53724d94d4f53949bfa2171beb8200e18  ./hermes/skills/research/DESCRIPTION.md
 e5f2f984b0f6fe22509e84f12877713bedfb3630f13271980b4dfb057d023a98  ./hermes/skills/research/city-relocation-report/SKILL.md
+a1b27851f6ddd1cf30b417999cbfbf587ae9b8ebf0380c3c54d4bc7c952694ed  ./hermes/skills/research/product-vendor-recon/SKILL.md
 57f3af63fb0439ddd1ef17e2086c836fe864da60ad613fc1918c7149db65acc5  ./hermes/skills/research/ru-local-price-research/SKILL.md
 082f00a5894845b15e21e6fa46456f16bbf660afd472c72ccfa320fe0890f0a3  ./hermes/skills/research/ru-local-price-research/references/city-comparison-ru.md
 09cca2d18af5c50fb67f783aec072525e83487c6ba4e41427bf8aa754014e1f5  ./hermes/skills/research/ru-local-price-research/references/city-traffic-ru.md
@@ -123,7 +124,8 @@ cfa6128ed67a0224981a2c384ce188bd037e898a95c432465873306b6edb7349  ./hermes/skill
 051cfd884a995f8ee3f10f75adf53b620976d0936e9e7c6eaae368e8a9b31849  ./hermes/skills/vps-cleanup-audit/SKILL.md
 352093bd5d4183591deb13fe0b115f3d561fe7610d63253797f5f603723c2403  ./hermes/skills/vps-cleanup-audit/references/recon-commands.md
 1cee33fe7aaddc9d8ce9319f4452dc9a357952feba049810e392a8ecf67ea28e  ./hermes/skills/web/DESCRIPTION.md
-6caf6cd781dd3a2e19a1501a619803776dfb0a2a2e00f770c4a9e97755b46026  ./hermes/skills/web/blocked-page-recovery/SKILL.md
+6c2d28e6cdf41c471f0d96c3a09bbefde697e98ab7cabb6062c9affd7f412543  ./hermes/skills/web/blocked-page-recovery/SKILL.md
+d45a136df942a16e1503be0b03d4215f1682d16f6703abea1eb4dc6e5fea5e71  ./hermes/skills/web/blocked-page-recovery/scripts/html_to_text.py
 22b996996ae2bf252b31cfd2636231f08936729a381dce7ba8bfa4afb8ffe8c6  ./hermes/skills/web/blocked-page-recovery/scripts/recover_page.py
 f3ca9e5152d2ccdda1de46baf415df59ae3b5abd560704d10296579035a8ffe6  ./host/ai-stack/backup-databases.sh
 d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md

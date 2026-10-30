@@ -35,6 +35,19 @@ cannot render the page), that is not "page unreadable": fetch the raw HTML with
 curl and parse the embedded state (`application/ld+json`, `__NEXT_DATA__`,
 `window.__INITIAL_STATE__`) instead of looking for a renderer.
 
+For server-rendered pages there is no state blob to find — marketing sites, docs,
+help centres and legal pages arrive as plain HTML that a tag strip turns into
+readable lines:
+
+```bash
+python3 scripts/html_to_text.py page.html | head -c 5000
+```
+
+Fetch the whole cluster of pages that answer the question (product, pricing,
+help index, API docs, privacy) in ONE loop of `curl -A '<desktop UA>' -o <file>`
+and convert each — cheaper and more complete than re-searching for every fact
+and opening results one by one.
+
 Run it in one shot with the bundled script:
 
 ```bash
@@ -97,11 +110,13 @@ rate-limit HTML that looks like a success to a size check alone.
 ### 3. Jina Reader (requires JINA_API_KEY)
 
 `r.jina.ai` re-renders the live page in a real browser server-side and
-returns markdown. Anonymous access is dead (401 → Turnstile); a key is
-required:
+returns markdown. A key is not always required — try one plain request first,
+it frequently returns 200 + markdown anonymously, and it also clears origins
+that 403 a direct curl:
 
 ```bash
-curl -s -H "Authorization: Bearer $JINA_API_KEY" "https://r.jina.ai/{URL}"
+curl -sL -m 40 "https://r.jina.ai/{URL}" -o page.md   # no key: try first
+curl -s -H "Authorization: Bearer $JINA_API_KEY" "https://r.jina.ai/{URL}"  # if 401/Turnstile
 ```
 
 Handles JS SPAs that archives can't. Skip this route entirely when the env
