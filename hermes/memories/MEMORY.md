@@ -15,3 +15,5 @@ Hermes на этом VPS ходит через Open WebUI-гейтвей: model.
 У владельца: ChatGPT Plus (~2200 ₽/мес через РФ-посредника; квота Sol 15–160 сообщений/5ч ОБЩАЯ для Codex CLI, OpenCode и Hermes-провайдера openai-codex) и Google AI Pro. OpenCode 1.19.5 стоит (/snap/bin/opencode), умеет ChatGPT Plus/Pro по OAuth (/connect).
 §
 Владелец платит ChatGPT Plus (~2200 ₽/мес через РФ-посредника, не $20) и OpenCode Go; Zen/Console выключен. Hermes ходит на custom-провайдер Open WebUI (127.0.0.1:8080). GPT-6.1 Sol/Terra доступны через ChatGPT OAuth (Hermes openai-codex, OpenCode /connect) — квота 15–160 сообщений/5ч общая на все клиенты.
+§
+Подписки владельца: ChatGPT Plus (~2200 ₽/мес через посредника) и OpenCode Go (плоская, Zen/Console выключен). Plus отдан в стек как LiteLLM-провайдер chatgpt/ — 9 маршрутов в БД, токен /root/litellm-chatgpt/auth.json (монтируется в /tokens), спенд $0, пока не заданы цены в model_info.

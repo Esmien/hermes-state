@@ -14,40 +14,114 @@ models through the normal LiteLLM connection — no OWUI-side hack.
 
 ## Procedure
 
-1. **Version gate first.** The provider is documented against LiteLLM >= 1.106 and
-   needs the `mcp` package (`pip install 'litellm[proxy]'` pulls it). This stack is
-   pinned to an older tag — check inside the container before promising anything:
-   `docker exec litellm python -c "import litellm.llms.chatgpt; print('ok')"`.
+1. **Version gate first.** `chatgpt/` ships in LiteLLM >= 1.106 (needs the `mcp`
+   package, already inside the image). This stack runs v1.106.6; there is no
+   `python` on the container PATH, so probe with its venv interpreter:
+   `docker exec litellm /app/.venv/bin/python -c "import litellm.llms.chatgpt; print('ok')"`.
    Missing → bump deliberately per `references/updates.md`, never with a rolling tag.
-2. **Log in OUTSIDE the proxy.** Workers have no terminal for the device code; the
-   login must already exist on disk when the proxy starts.
-   `python -c "from litellm.llms.chatgpt.authenticator import Authenticator; Authenticator().get_access_token()"`
-   → prints URL + code → tokens land in `~/.config/litellm/chatgpt/auth.json`
-   (override with `CHATGPT_TOKEN_DIR` / `CHATGPT_AUTH_FILE`).
-3. **Mount that file writable** into the litellm container (`chown 65534` for the
-   non-root image). Access token ~10 days; the refresh token is single-use, so a
-   read-only copy dies at the first refresh. One file shared by every worker —
-   separate copies diverge and only one survives.
-4. **Add the route** to the model list used by the gateway:
-   `model_name: gpt-6.1-sol` / `model_info: {mode: responses}` /
-   `litellm_params: {model: chatgpt/gpt-6.1-sol}` (same for `gpt-6.1-terra`,
-   `gpt-6-luna`, `gpt-6-astra` — only ids the account's plan actually serves).
-5. **Restart, then prove it** with a real request (`/v1/responses`, one short
-   prompt) before telling the owner it works.
+2. **Log in OUTSIDE the proxy, from a throwaway container.** Workers have no
+   terminal for the device code. The image ENTRYPOINT is the litellm CLI, so
+   `docker run <img> /app/.venv/bin/python …` fails with `Unknown command:
+   /app/.venv/bin/python` — always pass **`--entrypoint`**:
+   ```bash
+   mkdir -p /root/litellm-chatgpt
+   docker run --rm --entrypoint /app/.venv/bin/python \
+     -e CHATGPT_TOKEN_DIR=/tokens -v /root/litellm-chatgpt:/tokens \
+     ghcr.io/berriai/litellm:v1.106.6 -c \
+     "from litellm.llms.chatgpt.authenticator import Authenticator; Authenticator().get_access_token(); print('LOGIN_DONE')"
+   ```
+   The flow is non-interactive: it prints a URL + a code the owner enters in the
+   browser (code TTL ~15 min), so run it backgrounded, relay the code, wait for
+   `LOGIN_DONE`. Result: `/root/litellm-chatgpt/auth.json` with `access_token`,
+   `account_id`, `refresh_token`, `expires_at`. The owner cannot do this from the
+   admin UI — say so plainly instead of hunting for a button.
+3. **Mount that dir writable** into the litellm service: compose volume
+   `/root/litellm-chatgpt:/tokens` + env `CHATGPT_TOKEN_DIR: /tokens` (the root
+   image needs no `chown 65534`; the `-non_root` image does). Access token ~10
+   days, refresh token single-use and written back into the same file, so a
+   read-only mount dies at the first refresh.
+4. **Discover the account's model list from the backend, do not guess ids** —
+   section below — then add the routes.
+5. **Prove BOTH doors** with a real request before reporting success:
+   `/v1/responses` (native) and `/v1/chat/completions` (bridged). Use
+   `max_tokens` >= 100: a reasoning model given a tiny budget returns
+   `content: null` with the text in `reasoning`, which is not a failure.
+
+## Model catalog — ask the backend, never guess
+
+The Codex backend lists what the signed-in plan actually serves. Run it through
+the container interpreter, with `Authorization: Bearer <access_token>` plus
+`ChatGPT-Account-Id` from `auth.json`:
+
+```python
+# docker cp a script in, or -c one-liner with the image's venv python
+d=json.load(open('/tokens/auth.json'))
+h={'Authorization':'Bearer '+d['access_token']}
+if d.get('account_id'): h['ChatGPT-Account-Id']=d['account_id']
+urllib.request.urlopen(urllib.request.Request(
+  'https://chatgpt.com/backend-api/codex/models?client_version=1.0.0', headers=h))
+```
+
+- **`client_version` is mandatory** — without it the call 400s with
+  `missing … ('query', 'client_version')`.
+- Each entry carries `slug`, `display_name`, `context_window`,
+  `supported_reasoning_levels` — use those instead of hardcoding model ids or
+  context sizes in docs.
+- The list is a superset of what is sensible in a chat UI: besides the current
+  GPT-6.x family it returns reserve and internal entries (e.g. `gpt-reserve`,
+  `codex-auto-review`). Add the chat models; leave the internal reviewer out and
+  say why.
+- A model's *availability tier* differs from its id: `-pro`, `-fast`, Ultrafast
+  are plan/price variants, not separate deployments. Do not add them as routes.
+
+## Adding / removing routes in the DB
+
+`STORE_MODEL_IN_DB=True`, so routes are DB rows, not `config.yaml` — add and
+remove them through the proxy API with the master key (`/model/info` lists rows
+with their ids):
+
+- add: `POST /model/new` with `{"model_name": "gpt-6.1-sol", "litellm_params":
+  {"model": "chatgpt/gpt-6.1-sol"}, "model_info": {"mode": "responses"}}`. Do not
+  hand-set `api_base` — the provider already knows the Codex endpoint, and an
+  explicit one only creates a second, subtly different deployment.
+- remove: `POST /model/delete` with `{"id": "<uuid>"}`.
+- **Two rows with the same `model_name` are not an error** — LiteLLM treats them
+  as two deployments of one group and load-balances/fails over. It still looks
+  like a bug in the admin UI, so after any batch add, count rows per
+  `model_name` via `/model/info` and delete the duplicate.
+- Adding routes needs no restart; Open WebUI picks the new names up on refresh.
+- Verified on 1.106.6: every `chatgpt/` model answers on both `/v1/responses` and
+  `/v1/chat/completions`, and `temperature` / `max_output_tokens` ride through
+  because `drop_params: true` strips them before the backend sees them.
 
 ## Hard limits of the bridge
 
 - **One ChatGPT login per proxy process.** Every virtual key, user and team then
   spends that one account; a second person's subscription needs a second
   deployment.
-- **No price in the cost map** → recorded spend is $0 and `max_budget` never
-  fires. Cap with `rpm_limit` / `tpm_limit` per key, or one consumer drains it.
+- **Spend is $0 by design, not for lack of prices.** The cost map already carries
+  list prices for these slugs (per 1M: 6.1 Sol $2/$10, 6.1 Terra $1/$5, Astra
+  $10/$50, Luna $0.10/$0.50, 5.6 Sol $4/$20, 5.6 Terra $2/$12, 5.6 Luna
+  $0.20/$1.20 — read them from `litellm.model_cost` inside the image rather than
+  trusting this list), but the `chatgpt/` provider is subscription-mode and
+  reports zero. `max_budget` never fires until each deployment's `model_info`
+  gets explicit `input_cost_per_token` / `output_cost_per_token` /
+  `cache_read_input_token_cost`. Those numbers are a **shadow value** — the plan
+  is flat-rate and the quota is per message — so rpm/tpm stays the real guard;
+  the dollar figure is for «кто сколько сожрал» and for comparing subscription
+  vs API cost.
 - **Backend rejects** `max_tokens`, `max_output_tokens`, `max_completion_tokens`
   and `metadata`; LiteLLM strips them. It also rejects `temperature` for these
   models — the stack's `drop_params: true` is what keeps Open WebUI from 400ing.
-- **The allowance is the Codex/Work quota** (≈15–160 Sol messages per 5 h, shared
-  weekly pool). It is the same pool Codex CLI, OpenCode and Hermes spend — a chat
-  UI on this route is eating coding quota.
+- **The allowance is the Codex/Work quota** — the same pool Codex CLI, OpenCode
+  and Hermes spend, so a chat UI on this route eats coding quota. Plus-era
+  estimates per 5 h (local messages): Astra 5–45, Sol 6.1 15–160, Sol 6.0 15–150,
+  Terra 35–285, Luna 350–3000; a weekly cap applies on top without a published
+  number. Order answers by cost: Luna/Terra first, Astra last.
+- **GPT-6.1 Sol is not a Chat model.** OpenAI exposes 6.1 Sol and 6.1 Terra only in
+  ChatGPT Work and Codex; Chat serves GPT-6 (6.0 Sol) and the 5.6 family. When the
+  owner says «я купил Plus, а где актуальная модель» — the answer is «переключись
+  на Work или в Codex», not «обнови приложение».
 - **Failure modes**: `ChatGPT device-code login needs a human` or `There are no
   healthy deployments` = no/expired auth.json (re-login outside, replace the
   file, restart). There is no logout/revoke call — delete the file and sign the

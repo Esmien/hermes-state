@@ -3,7 +3,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
 8c7c9c25f93c408a5db958f26b4012bf1932c25001b12bf7172d249c980366f0  ./hermes/config.yaml
 80d570f5dee54707ba43776e3f29ac7770d28f7fede82c774968c96201a09631  ./hermes/cron/jobs.json
-a1f3134b484f1542d02297a03a75b20f8edbb7b57837caaf458f6c4f9c0b0b45  ./hermes/memories/MEMORY.md
+a805e39adf73f8741965be88045e13c415d9b2372e21ba1b6f0bc59921da5db6  ./hermes/memories/MEMORY.md
 1994a24536e05c418d8680fe02655a16665baf3452dc7e650849ca43d6069210  ./hermes/memories/USER.md
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
 ace53680230203597ccc98a4e43af7d78ebd79690b210af403cd5e657dbf5513  ./hermes/plugins/muse-persona/__pycache__/__init__.cpython-314.pyc
@@ -58,7 +58,7 @@ e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skill
 8d68e96b9db5409e72a458b5116480a1138a32bd82478ec6ccafe779bd53a99e  ./hermes/skills/devops/ai-stack/SKILL.md
 748bb7e2addaec3a9228f0d50bee7c3b0d2d4944edc216767d89690659087c51  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
-1e739611761d13e9655356f255c6c48d57ef5b38ecb18b488b1b72bbca6efce2  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
+0221a9add8fe2621be82f1f2c62476bea17b003c88b8c96511003b442acc5934  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
 81babc7468bf6f07194f4de6f6bd9d913b52ed404ba20718b56e56e04ec72f38  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
 4899c677e4fab9179ac1009d0c75b7cced3e7b40e485d81694b4a94f830e1bfa  ./hermes/skills/devops/ai-stack/references/disk-and-memory.md
 81548cf239d36786d338994016df929475a5abe81057bbabd0f401f3b1d6905f  ./hermes/skills/devops/ai-stack/references/enricher-system-legacy.md
