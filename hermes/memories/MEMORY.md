@@ -13,3 +13,5 @@ TG: 214062001 = Владислав (владелец, всё); 917728475 = Иг�
 Hermes на этом VPS ходит через Open WebUI-гейтвей: model.name «Open WebUI», provider custom, base_url http://127.0.0.1:8080/api/v1; алиасы моделей (model.aliases.*) переключают сессию, дефолтный маршрут не меняют.
 §
 У владельца: ChatGPT Plus (~2200 ₽/мес через РФ-посредника; квота Sol 15–160 сообщений/5ч ОБЩАЯ для Codex CLI, OpenCode и Hermes-провайдера openai-codex) и Google AI Pro. OpenCode 1.19.5 стоит (/snap/bin/opencode), умеет ChatGPT Plus/Pro по OAuth (/connect).
+§
+Владелец платит ChatGPT Plus (~2200 ₽/мес через РФ-посредника, не $20) и OpenCode Go; Zen/Console выключен. Hermes ходит на custom-провайдер Open WebUI (127.0.0.1:8080). GPT-6.1 Sol/Terra доступны через ChatGPT OAuth (Hermes openai-codex, OpenCode /connect) — квота 15–160 сообщений/5ч общая на все клиенты.

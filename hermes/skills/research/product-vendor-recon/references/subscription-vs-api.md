@@ -55,9 +55,10 @@ OpenCode → first-class, no plugin:
 opencode → /connect → OpenAI → "ChatGPT Plus/Pro" → browser login → /models
 ```
 
-A generic OpenAI-compatible client with no OAuth support can still be pointed
-at `hermes proxy`, which exposes the OAuth-backed provider as a local OpenAI
-endpoint.
+`hermes proxy` is NOT a generic bridge — it only fronts its own OAuth upstreams
+(`nous`, `xai`). Do not offer it for a ChatGPT subscription. For that, go through
+LiteLLM's native `chatgpt/` provider (device-code OAuth, one account per process);
+recipe and its hard limits: ai-stack `references/chatgpt-subscription.md`.
 
 Warn in the same breath: all these surfaces share ONE allowance. Three tools
 signed into one account are one quota split three ways, not three quotas.
@@ -84,7 +85,20 @@ Order of checks, cheapest first:
    is a fallback for ids the registry lacks, not a fix for a stale cache — and
    it must land in the GLOBAL config, not a project-level `opencode.jsonc`.
 
-## Rate structure worth memorising
+## «Модель тупая»? Сначала reasoning-вариант
+
+Agent UIs (OpenCode and friends) expose the thinking level as a model VARIANT,
+and the default is `none` — «без рассуждений». A frontier model with reasoning
+off answers visibly worse, and the owner then blames the model, not the setting.
+Check the variant before discussing quality:
+
+- OpenAI variants: `none / minimal / low / medium / high / xhigh`; in the picker
+  they appear as separate rows (`… Fast`, `… High`), not as one entry with a slider.
+- Set it globally: `provider.openai.models.<id>.options.reasoningEffort: high`
+  (+ `textVerbosity`, `reasoningSummary`, `include: ["reasoning.encrypted_content"]`).
+- Switch on the fly with the `variant_cycle` keybind; custom variants go in `variants`.
+- High effort burns subscription quota faster — argue for `medium` on routine work,
+  never for leaving it on `none`.
 
 ## Pitfalls
 

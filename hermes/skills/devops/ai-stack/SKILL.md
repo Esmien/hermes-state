@@ -109,6 +109,7 @@ Removed in the `vps-infra` migration and **not** to be reintroduced: `DOMAIN`, `
 - `references/model-provenance.md` — **Model provenance and cleanup in Open WebUI**. Read when ghost models, dead/disabled presets, model ids that 400 or vanish.
 - `references/media-pipeline.md` — **Media pipeline (images / TTS through LiteLLM)**. Read when image generation, TTS, `cptr`, model routing for media.
 - `references/music-bot-lyria.md` — **Music bot (lyria)**. Read when the separate lyria deployment (its own Postgres/Redis/RabbitMQ).
+- `references/chatgpt-subscription.md` — **ChatGPT/Codex subscription as a LiteLLM route**. Read when asked to expose a ChatGPT Plus/Pro subscription as an API or to add `chatgpt/*` models into Open WebUI.
 - `references/updates.md` — **Updating stack containers**. Read when upgrading one container, rolling tags, LiteLLM upgrade.
 - `references/branding.md` — **Branding (Esmien AI)**. Read when brand assets, image/logo, screenshots.
 - `references/signup-approval.md` — **Signup approval and user administration**. Read when pending signups, the Telegram approver, user roles via the API.
