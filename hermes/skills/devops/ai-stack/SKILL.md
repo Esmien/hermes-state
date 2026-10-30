@@ -119,6 +119,7 @@ Removed in the `vps-infra` migration and **not** to be reintroduced: `DOMAIN`, `
 - `references/operations.md` — **Operations drills** (recreating a container after a config edit, routine checks).
 - `references/repo-hygiene.md` — **Git hygiene for `ai-stack`** (what must never be committed, commit shape).
 - `references/owui-admin-auth.md` — **Open WebUI admin auth** (`UI_PASSWORD` is LiteLLM's, not WebUI's).
+- `references/sandbox-terminal.md` — **Песочница `open-terminal-sandbox` для пользователей WebUI** (не-root, read-only, arduino-cli; подключение через `terminal_server.connections` + access_grants; ловушки `cap_setgid` и heredoc).
 - `references/model-route-benchmark.md` — **Model / route A/B benchmarking**. Read when the owner says a model underperforms, or before switching a LiteLLM group: hidden-prompt probe (injected system prompts show up as thousands of `prompt_tokens` on a one-line request), discriminating task set, cost per success. Run `scripts/model-route-bench.py [model ...]`.
 - `scripts/probe-owui-terminal.py` — **end-to-end terminal probe** (admin login → feature flags → real `run_command` → `/execute` evidence in open-terminal logs, cleans up its chat). Run after any Open WebUI update.
 - `scripts/lyria-enricher-router-pipe.py` — **живой OWUI-Pipe `enricher`** (decider → poem/idea → Argon → JSON). Держать синхронно с функцией в OWUI.

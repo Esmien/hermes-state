@@ -55,7 +55,7 @@ ac2da2b39f1c355bc76bf35b2cd9e74131ea62030f89781fe82c53ee0b4f029e  ./hermes/skill
 acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skills/career/job-application-review/references/repo-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-8d68e96b9db5409e72a458b5116480a1138a32bd82478ec6ccafe779bd53a99e  ./hermes/skills/devops/ai-stack/SKILL.md
+5f7983865aa4fd5091414fa1f5ef03529846b5ee54661c0c24c01766ce767822  ./hermes/skills/devops/ai-stack/SKILL.md
 748bb7e2addaec3a9228f0d50bee7c3b0d2d4944edc216767d89690659087c51  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 35c4acc63bbf0caa538360e5ad644b3be1bd96d7828c334c6f8bb78e6fd3e622  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
@@ -72,6 +72,7 @@ ad042b6fee80f9dde1317d8f976a826abe3f94e539c3577263e53d91cd70efd8  ./hermes/skill
 23681fed79a731f0e5ac3dbf907087700aedc29fa84c1b54872f7694682b3e76  ./hermes/skills/devops/ai-stack/references/owui-admin-auth.md
 3485b905f94be6019e23bcc8ee568bb999be2bf8a1394f66022bd2f07845dc8d  ./hermes/skills/devops/ai-stack/references/pitfalls.md
 cbb06f14ec073a2b9436c977cd60cd31f8e7bb3de6ee7fc7c127454dcedaecc5  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
+0d88f8e805d766e70ab30f493c1e1aa08314aeba28e53965b704154971b6b596  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
 ed07f0188d3a2dbe27c3f4b4a2966ae423f28bf2450ec8a040bd2cbc4c6ec0bf  ./hermes/skills/devops/ai-stack/references/searxng.md
 9cfae7089c96dcb5efc4d9a7a09f9f7e71059dcd92ae5ba59e560e3af6ed4767  ./hermes/skills/devops/ai-stack/references/signup-approval.md
 edd659ed101bb0adb507ef894077beac36c3e35d92d3709fb8a788a6d0e2c031  ./hermes/skills/devops/ai-stack/references/updates.md
