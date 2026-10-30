@@ -11,7 +11,7 @@
 | user | `1000:1000` |
 | workspace | named volume `ot_sandbox_workspace` → `/workspace` (cwd), `ot_sandbox_home` → `/home/user` |
 | mounts from host | none (no `/`, no socket) |
-| hardening | `cap_drop: ALL`, `cap_add: SETGID`, `no-new-privileges`, `read_only: true`, `tmpfs /tmp`, `mem 1g/1g`, `cpus 1.0`, `pids_limit 256` |
+| hardening | `cap_drop: ALL`, `cap_add: SETGID`, `no-new-privileges`, `read_only: true`, `tmpfs /tmp`, `mem 2g/2g`, `cpus 1.0`, `pids_limit 256` |
 | key | `OPEN_TERMINAL_SANDBOX_API_KEY` in `ai/.env` |
 | tools | `arduino-cli` 1.5.1 + core `arduino:avr` 1.8.8 baked into the image |
 
@@ -56,6 +56,27 @@ Pass secrets without touching disk: build them on the host and hand them to the 
 - Compiles/verifies sketches and reports flash/RAM usage — that is the useful part on a VPS.
 - **No flashing**: the board is not attached to the server, so `arduino-cli upload` has nothing to talk to. Upload only becomes real if a board is plugged into this host and mapped into the container, which re-opens a device-passthrough risk.
 - Cores/libs are baked in, so offline compile works; `arduino-cli lib install` needs egress from the sandbox.
+
+## Binding a model to the sandbox (so the terminal is always on)
+
+Choosing a terminal inside a chat lasts only for that chat; to have it on by
+default, the binding lives on the model row in `webui_db`:
+
+- **`meta.terminalId`** = the connection id from `terminal_server.connections`.
+  That is the whole switch — the frontend preselects the terminal for every chat
+  with that model.
+- **`base_model_id` is prefixed**: OWUI stores `chat.<litellm_group>`, e.g.
+  `chat.openai/gpt-6.1-sol`. The gateway group is the part after the dot; do not
+  look for a LiteLLM group literally named `chat.openai/…`, it does not exist.
+- **Effort control** lives in `params.model_controls` — one control, options
+  carrying `reasoning_effort` (`medium` / `high` / `xhigh` / `max`), the default
+  pointing at the middle option. Levels and their measured scaling:
+  `references/chatgpt-subscription.md` § Reasoning effort.
+- **Bind a dedicated model, not a shared one.** A terminal bound to a model every
+  user sees is still gated by `access_grants`, so the others get a model whose
+  tools fail — one copy of the model per audience costs nothing and avoids that.
+- A ready system prompt for an MCU assistant (`/workspace`, compile-before-answer,
+  edge-case pass, no fake «прошил»): `templates/mcu-assistant-system-prompt.md`.
 
 ## Known limitation
 

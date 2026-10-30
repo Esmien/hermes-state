@@ -99,17 +99,8 @@ with their ids):
 - **One ChatGPT login per proxy process.** Every virtual key, user and team then
   spends that one account; a second person's subscription needs a second
   deployment.
-- **Spend is $0 by design, not for lack of prices.** The cost map already carries
-  list prices for these slugs (per 1M: 6.1 Sol $2/$10, 6.1 Terra $1/$5, Astra
-  $10/$50, Luna $0.10/$0.50, 5.6 Sol $4/$20, 5.6 Terra $2/$12, 5.6 Luna
-  $0.20/$1.20 — read them from `litellm.model_cost` inside the image rather than
-  trusting this list), but the `chatgpt/` provider is subscription-mode and
-  reports zero. `max_budget` never fires until each deployment's `model_info`
-  gets explicit `input_cost_per_token` / `output_cost_per_token` /
-  `cache_read_input_token_cost`. Those numbers are a **shadow value** — the plan
-  is flat-rate and the quota is per message — so rpm/tpm stays the real guard;
-  the dollar figure is for «кто сколько сожрал» and for comparing subscription
-  vs API cost.
+- **The provider reports zero cost; the value has to be injected.** Cost map prices for these slugs exist (per 1M: 6.1 Sol $2/$10, 6.1 Terra $1/$5, Astra $10/$50, Luna $0.10/$0.50, 5.6 Sol $4/$20, 5.6 Terra $2/$12, 5.6 Luna $0.20/$1.20 — read them from `litellm.model_cost` inside the image rather than trusting this list), but the `chatgpt/` provider is subscription-mode and reports zero, so nothing is priced unless each deployment carries explicit `input_cost_per_token` / `output_cost_per_token` / `cache_read_input_token_cost`. Those numbers are a **shadow value** — the plan is flat-rate and the quota is per message — so rpm/tpm stays the real guard; the dollar figure is for «кто сколько сожрал» and for comparing subscription vs API cost.
+- **Setting the rates is not the same as getting them applied — always verify in SpendLogs.** On v1.106.6 a deployment can show non-zero rates in `/model/info` and still log every request at `$0` with `Billable request priced at $0 … pricing entry '<uuid>' declares non-zero rates … reason="pricing_not_applied"`. The same warning appears on unrelated `hermes.deepseek/*` rows, so it is a cost-calculator path problem, not a per-model mistake. After any pricing change send one request and read `LiteLLM_SpendLogs.spend` directly — a green `/model/info` proves nothing, and a UI showing `$0.00000000` may be the truth.
 - **Backend rejects** `max_tokens`, `max_output_tokens`, `max_completion_tokens`
   and `metadata`; LiteLLM strips them. It also rejects `temperature` for these
   models — the stack's `drop_params: true` is what keeps Open WebUI from 400ing.
@@ -181,6 +172,17 @@ value that is dropped by LiteLLM produces identical numbers at every level; a
 value that propagates gives a rising sequence, and budget models give a hard
 `0` at `low`. Add a negative control (`effort: "bogus"` must 400) — that proves
 validation happens upstream rather than inside the gateway.
+
+Use a task that actually needs thinking, not `2+2`: on a trivial prompt every
+level saturates in tens of tokens and the sequence proves nothing. Measured on
+Sol 6.1 with a ring-buffer/ISR task (~8.8 K prompt): `medium` 516 reasoning /
+26 s, `high` 907 / 32 s, `xhigh` 3915 / 114 s, `max` 4142 / 117 s. Two
+conclusions that hold up in practice — **`xhigh` is the only step that changes
+what the model does** (4.3× over `high`), and **`max` is decorative** (+6 %
+tokens, +3 s). Offer `medium → high → xhigh` as the real ladder and treat `max`
+as a comfort option, not an engineering one. A UI control (OWUI `model_controls`)
+should map its labels onto exactly those `reasoning_effort` values, and long
+labels read better in a menu than on a slider.
 
 ## Exposure policy
 

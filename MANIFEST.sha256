@@ -55,10 +55,10 @@ ac2da2b39f1c355bc76bf35b2cd9e74131ea62030f89781fe82c53ee0b4f029e  ./hermes/skill
 acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skills/career/job-application-review/references/repo-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-5f7983865aa4fd5091414fa1f5ef03529846b5ee54661c0c24c01766ce767822  ./hermes/skills/devops/ai-stack/SKILL.md
+b5c30caea4687add620669fdadd1d657205c4520171543ff8a1672dc50f15ba0  ./hermes/skills/devops/ai-stack/SKILL.md
 748bb7e2addaec3a9228f0d50bee7c3b0d2d4944edc216767d89690659087c51  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
-35c4acc63bbf0caa538360e5ad644b3be1bd96d7828c334c6f8bb78e6fd3e622  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
+99fb38b10e82a02157b11f24500961b8f45c08cbc4ccc86c7d638bd49dd42900  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
 81babc7468bf6f07194f4de6f6bd9d913b52ed404ba20718b56e56e04ec72f38  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
 4899c677e4fab9179ac1009d0c75b7cced3e7b40e485d81694b4a94f830e1bfa  ./hermes/skills/devops/ai-stack/references/disk-and-memory.md
 81548cf239d36786d338994016df929475a5abe81057bbabd0f401f3b1d6905f  ./hermes/skills/devops/ai-stack/references/enricher-system-legacy.md
@@ -72,7 +72,7 @@ ad042b6fee80f9dde1317d8f976a826abe3f94e539c3577263e53d91cd70efd8  ./hermes/skill
 23681fed79a731f0e5ac3dbf907087700aedc29fa84c1b54872f7694682b3e76  ./hermes/skills/devops/ai-stack/references/owui-admin-auth.md
 3485b905f94be6019e23bcc8ee568bb999be2bf8a1394f66022bd2f07845dc8d  ./hermes/skills/devops/ai-stack/references/pitfalls.md
 cbb06f14ec073a2b9436c977cd60cd31f8e7bb3de6ee7fc7c127454dcedaecc5  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
-87e79400a7bfd4cf5f944c02e7a52f385e1e74752a438f281f3d37d69351e987  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
+bd81bd83ef2ab984767ff5b517330317fb3ebae6a00a33e8903ebc952b9e2cc0  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
 ed07f0188d3a2dbe27c3f4b4a2966ae423f28bf2450ec8a040bd2cbc4c6ec0bf  ./hermes/skills/devops/ai-stack/references/searxng.md
 9cfae7089c96dcb5efc4d9a7a09f9f7e71059dcd92ae5ba59e560e3af6ed4767  ./hermes/skills/devops/ai-stack/references/signup-approval.md
 edd659ed101bb0adb507ef894077beac36c3e35d92d3709fb8a788a6d0e2c031  ./hermes/skills/devops/ai-stack/references/updates.md
@@ -88,6 +88,7 @@ b201d073a6374940cc7a90bf418f3af9f7d5315c67f3f633edcea78012fb8fed  ./hermes/skill
 36432d6a9677006a068a5ceefbc2e9995a298d98576e58372b92173b77126f44  ./hermes/skills/devops/ai-stack/scripts/probe-approval-guardian.py
 57a2a5e8f2f2395dfb18a9a37ebed061a5272f43b7737f966462483ea4e03f2a  ./hermes/skills/devops/ai-stack/scripts/probe-media-endpoints.py
 5f28a41cf05b85f901f2eceb62a441d72fd71042ea7e992a578d2a8192e72982  ./hermes/skills/devops/ai-stack/scripts/probe-owui-terminal.py
+ff55bffddfcb6abdaf04ad31dda831a11f0e5fd6f138a5b5d77473bf17e0e818  ./hermes/skills/devops/ai-stack/templates/mcu-assistant-system-prompt.md
 e04067631103fb7051c50bfb3de0962436243fe2c5ea74ada7690c37d877ad35  ./hermes/skills/devops/container-incident-response/SKILL.md
 244093d67fc1c519a82fe5fbd107a2cea7b8127de5d5e030001163f9bae0c53f  ./hermes/skills/devops/container-incident-response/references/agent-wakeup.md
 891b02a8d8af2ff6fe959e205bcb8a343270686135367050b673524c31c304e7  ./hermes/skills/devops/container-incident-response/references/detector-and-thresholds.md

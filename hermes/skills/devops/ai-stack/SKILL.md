@@ -53,6 +53,7 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host.
 | open-webui | esmien/webui:local (built locally from `ai/webui-branding/`, derived from OWUI 0.12.5) | chat UI, rebranded «Esmien AI» |
 | searxng | searxng/searxng:latest | web search |
 | open-terminal | ghcr.io/open-webui/open-terminal:latest | web terminal |
+| open-terminal-sandbox | esmien/open-terminal-arduino:local (built from `ai/arduino-sandbox/`) | не-root песочница для пользователей WebUI: shell, файлы, arduino-cli — `references/sandbox-terminal.md` |
 
 
 > `cptr` (`ghcr.io/open-webui/computer`) was removed from the stack on the owner's instruction: container, image, `/home/ai_service/webui_data/computer`, compose block, `deploy.sh` references (`SITES` entry, `start_apps`, final report), nginx vhost + cert `term.esmien.qd.je`, and the boot-expected list. Nothing should reintroduce it.
@@ -100,6 +101,14 @@ Removed in the `vps-infra` migration and **not** to be reintroduced: `DOMAIN`, `
 
 **Two different bots carry the Telegram notifications, and neither implies the other works.** Hermes sends its own messages with `TELEGRAM_BOT_TOKEN` from `/root/.hermes/.env` (`@esmien_vps_admin_bot`); `monitor.py` uses `BOT_TOKEN` / `FILE_BOT_TOKEN` from `/home/ai_service/notifications/.env` (`@esmien_vps_notificator_bot`, `@esmien_ai_backups_bot`). "Уведомления приходят" therefore proves only the Hermes bot. Verify each token on its own with `getMe` (username only, never print the value) before telling the owner a bot is dead — and after editing `notifications/.env`, restart every unit that reads it: the token is copied into the process memory at start, so a service restarted before the edit keeps polling 404 until the next restart (`journalctl -u server-monitor-bot` shows `getUpdates HTTP 404` every 5 s).
 
+## Answering the owner about models
+
+A question like «подходит ли эта модель под задачу», «какой уровень достаточен», «стоит ли брать X»
+wants a **verdict first**: what fits, what does not, and the one trade-off that decides it. Do not
+open the stack to answer it — no probes, no log digging, no spend queries. Run measurements only when
+the ask is explicitly «проверь», «прогони», «сравни»; stack work started on a conceptual question gets
+interrupted, and rightly so.
+
 ## References (read on demand)
 
 - `references/coupling-hermes.md` — **Hermes ↔ AI stack coupling**. Read when any change touching Hermes config, LiteLLM groups/fallback, the gateway or the emergency route.
@@ -119,7 +128,7 @@ Removed in the `vps-infra` migration and **not** to be reintroduced: `DOMAIN`, `
 - `references/operations.md` — **Operations drills** (recreating a container after a config edit, routine checks).
 - `references/repo-hygiene.md` — **Git hygiene for `ai-stack`** (what must never be committed, commit shape).
 - `references/owui-admin-auth.md` — **Open WebUI admin auth** (`UI_PASSWORD` is LiteLLM's, not WebUI's).
-- `references/sandbox-terminal.md` — **Песочница `open-terminal-sandbox` для пользователей WebUI** (не-root, read-only, arduino-cli; подключение через `terminal_server.connections` + access_grants; ловушки `cap_setgid` и heredoc).
+- `references/sandbox-terminal.md` — **Песочница `open-terminal-sandbox` для пользователей WebUI** (не-root, read-only, arduino-cli; подключение через `terminal_server.connections` + access_grants; привязка модели через `meta.terminalId`; ловушки `cap_setgid`, root-овский `.arduino15` и heredoc). Готовый системный промпт MCU-ассистента: `templates/mcu-assistant-system-prompt.md`.
 - `references/model-route-benchmark.md` — **Model / route A/B benchmarking**. Read when the owner says a model underperforms, or before switching a LiteLLM group: hidden-prompt probe (injected system prompts show up as thousands of `prompt_tokens` on a one-line request), discriminating task set, cost per success. Run `scripts/model-route-bench.py [model ...]`.
 - `scripts/probe-owui-terminal.py` — **end-to-end terminal probe** (admin login → feature flags → real `run_command` → `/execute` evidence in open-terminal logs, cleans up its chat). Run after any Open WebUI update.
 - `scripts/lyria-enricher-router-pipe.py` — **живой OWUI-Pipe `enricher`** (decider → poem/idea → Argon → JSON). Держать синхронно с функцией в OWUI.
