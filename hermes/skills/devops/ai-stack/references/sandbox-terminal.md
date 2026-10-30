@@ -21,6 +21,13 @@ Verified after build: `id` → uid 1000, `CapEff` → 0, `/etc` read-only, no `/
 
 - **`cap_drop: ALL` alone breaks the image.** `/usr/local/bin/python3-ot` carries the file capability `cap_setgid=ep`; executing a file-cap binary requires that capability in the process permitted set, so with an empty set the entrypoint dies with `/usr/local/bin/python3-ot: bad interpreter: Operation not permitted` and `restart: always` turns it into a restart loop. Fix = `cap_add: ["SETGID"]` (bounding set `0x40`), nothing more.
 - **`arduino-cli config init` does not create `~/Arduino`.** A `chown … /home/user/Arduino` in the Dockerfile fails (`No such file or directory`) unless that RUN does `mkdir -p` first.
+- **A root-owned data dir makes core installs impossible for uid 1000.** The build installs `arduino:avr` as root, so `/home/user/.arduino15/staging/packages` is root-owned; a later `arduino-cli core install esp32:esp32` dies with `permission denied`. Root inside the container cannot fix it either — `cap_drop: ALL` removes `CAP_DAC_OVERRIDE` and `/home/user` is `0700`, so even `docker exec -u root` gets `Permission denied`. Two fixes: `chown -R 1000:1000 /home/user` at the end of the Dockerfile, and point `ARDUINO_DIRECTORIES_DATA` at the writable volume (`/workspace/.arduino15`) so installs never depend on the image's `/home/user` at all. Copy the baked tree once with `cp -a /home/user/.arduino15 /workspace/.arduino15` so the pre-installed cores survive the switch.
+
+## What users can install on their own
+
+The sandbox has full egress (`github`/`pypi`/`downloads.arduino.cc` all 200) and a real toolchain: `git`, `python3`, `pip3`, `gcc`, `g++`, `make`, `cmake`, `node`. User-space installs work without root: `arduino-cli core install/libus install`, `pip3 install --user`, `npm install --prefix ~/.local`. `apt` never works (read-only rootfs, no root) — if a task truly needs system packages, the hardening has to be loosened knowingly.
+
+Core sizes are not small: `arduino:avr` 384 MB, `esp32:esp32` 6.2 GB after install (multiple Xtensa/RISC-V toolchains). `arduino-cli cache clean` removes ~1.8 GB of staged archives. Budget disk per platform.
 
 ## Wiring into Open WebUI (no restart needed)
 
