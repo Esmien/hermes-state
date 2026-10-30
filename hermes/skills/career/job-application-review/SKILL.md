@@ -17,6 +17,8 @@ The user drops an hh.ru (or any) vacancy link and asks «как это ложи�
 
 Same umbrella covers his **test assignments (take-home)**: he links a repo (usually `Esmien/...` with a ТЗ document) and asks «посмотри, как сделано». That is a code review for a hiring funnel, and the verdict decides whether it gets sent — see the take-home section below.
 
+Also covers the **market question**: «а есть ли сейчас спрос на X», «стоит ли мне переучиваться», «проверь это направление». Do not answer from general knowledge — count real vacancies and read real requirements (`references/market-demand.md`), then map the findings onto his profile in the same reply.
+
 ## Answer shape — verdict first
 
 Telegram, Russian, bullets (no tables), no preamble, no flattery.
@@ -44,6 +46,8 @@ PostgreSQL on a practical-expert level (pgvector, EXPLAIN, indexes, connection p
 Does **not** have: Kubernetes/Swarm, gRPC/AsyncAPI, microservice patterns (Saga, Circuit Breaker) as his own design work.
 
 His real asset is a **live production contour on his own VPS** — LiteLLM gateway over 40+ model groups, Open WebUI, Telegram bots with queues/DLQ, monitoring, verified backups, DB optimisations measured in factors. That is his portfolio and its numbers are checkable; treat it as stronger than a pet project on paper, and say so.
+
+He is also pushing a **second framing, and it is the stronger one today**: «обычные бэкендеры не нужны, нужны AI-разработчики» — people who ship working code with agents, integrate external model providers and orchestrate autonomous agents. The agent-oriented ads ask for exactly what his contour already does (MCP tools, tool calling, context management, multi-step scenarios, multi-provider LLM routing, planning/orchestration), so lead with «Python/AI-разработчик, агентные системы» and keep infrastructure as evidence, not as the headline. Do not sell it as a bypass of the years-of-experience filter — say that once and move on. How to measure the demand instead of guessing, and the vocabulary the ads actually use: `references/market-demand.md`.
 
 ## Hard rules about experience
 

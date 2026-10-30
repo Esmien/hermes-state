@@ -35,6 +35,8 @@ Operator runbook for the same territory, with the per-container inventory: `/hom
 | Pause flag | `/var/lib/docker-autorecover/pause` |
 | Log (decisions, launches, reports) | `/var/log/docker-autorecover.log` |
 | Watchdog of the watchdog, 10 min | `docker-detector-liveness.timer` |
+| Disk / inode / backup-freshness alerts, 10 min | `/etc/cron.d/server-monitor` → `notifications/monitor.py alerts` (cron, **not** systemd) |
+| External uptime probe, 15 min | GitHub Actions `.github/workflows/uptime.yml` in `hermes-state` → Telegram + issue |
 | Operator runbook | `/home/ai_service/ai-stack/runbook-containers.md` §9 |
 
 Flow: timer → detector spots an anomaly → writes an evidence dir → `systemd-run` starts `docker-incident-<name>-<ts>.service` → that wakes `hermes chat` with the prompt → the report goes to Telegram from the shell script, not from the agent.
@@ -71,6 +73,7 @@ Full recipe in `references/detector-and-thresholds.md`. Short form: throwaway co
 
 ## Pitfalls
 
+- **Never call a safety net missing before searching for it.** Alerting here is split across three registries: `systemctl list-timers --all`, `/etc/cron.d/*` and `crontab -l`, plus scripts under `/usr/local/bin`. A systemd-only survey once produced two false «этого нет» claims — disk alerts (they run from cron every 10 min at 85%) and offsite DB backups (they already went to the bot with nightly restore verification). Grep first, then report: a wrong gap claim costs more trust than a missed one.
 - **Sourcing an env file poisons the shell for later commands** (`COMPOSE_FILE`, `AUTORECOVER_*` test overrides). Run such exports in a subshell or `unset` them — otherwise the next unrelated `docker compose` command in another project resolves the wrong file.
 - **The agent's output is buffered**: `agent.log` stays 0 bytes until the nested `hermes chat` exits. Poll the systemd unit state, not the file size.
 - **A nested agent needs `/bin/bash script` under `systemd-run`** — the launcher is deliberately not `chmod +x` (no permission changes on this host), so invoking the path directly fails.
