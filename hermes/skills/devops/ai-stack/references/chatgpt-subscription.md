@@ -127,6 +127,29 @@ with their ids):
   file, restart). There is no logout/revoke call — delete the file and sign the
   session out on OpenAI's side.
 
+## Operating the route once it exists
+
+- **Enumerate models from the backend, never from guesses.**
+  `GET https://chatgpt.com/backend-api/codex/models?client_version=1.0.0` with the
+  OAuth bearer + `ChatGPT-Account-Id` returns the real catalogue for THIS account
+  (`slug`, `context_window`, `supported_reasoning_levels`). Plain `/models`
+  without `client_version` is a 400.
+- **Custom prices go in `litellm_params`, not `model_info`.** Passing
+  `input_cost_per_token` / `output_cost_per_token` inside `model_info` on
+  `/model/new` is accepted with 200 and then silently dropped — spend stays $0.
+  In `litellm_params` the same keys persist and SpendLogs start pricing the
+  route (verified: spend went from 0 to $0.0006 for a 2-turn test).
+- **`order` in `litellm_params` = priority inside a group.** Lower runs first,
+  the next order takes over on failure or 429. Since LiteLLM cannot see the
+  subscription quota, the fallback only fires after the backend rejects.
+- **No rename API.** Changing a deployment's `model_name` (or merging it into an
+  existing group) is delete + re-add with the same `litellm_params`.
+- **A group's `mode` is per-deployment.** Mixing `chat` and `responses` inside
+  one group makes behaviour depend on the endpoint, so keep a group homogeneous:
+  subscribe deployments join an existing chat group as `mode: chat` (the provider
+  bridges to Responses internally), while a Responses-only group stays
+  `mode: responses`.
+
 ## Exposure policy
 
 Personal subscription, personal risk: sharing it with other people is a terms
