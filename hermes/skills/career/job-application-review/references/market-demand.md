@@ -45,3 +45,40 @@ State the caveats in the same answer:
 - The document about his server is **not** the hiring artifact; a public agent-side project (MCP server + agent loop + tests), a Lyria repo with README/tests/CI, and 2–3 written cases are.
 - Positioning to recommend: «Python/AI-разработчик, агентные системы» — not «Python-бэкендер», with infrastructure as supporting evidence.
 - Lyria's open tail (uncommitted files) is the first thing to close before any of this is shown to anyone.
+
+## Geography — «а не проще ли искать в городе X»
+
+Area ids for `area=`: Москва **1**, Санкт-Петербург **2**, Новосибирск **4**, Краснодар **53**, Россия **113**. `api.hh.ru/areas/113` answers fine (only `/vacancies` is 403), so resolve a city id by walking the tree instead of guessing.
+
+Compare on three numbers, never on a raw count alone:
+
+- name-search count per city;
+- `&schedule=remote` over РФ;
+- **per-capita density** (count ÷ population) — 13 ads in a 1.6M city is thinner than 572 in 13M, and saying so out loud is what stops the «может, переехать» reflex.
+
+Most remote ads carry the employer's city, not the work location (303 of 435 remote AI ads are labelled «Москва»), so «в городе X нет удалёнки» is the wrong conclusion to draw — the work is remote, the vacancy is just published where the legal entity sits. Say that explicitly when he reads a city count as a work-format count.
+
+Filters that answer «есть ли вход»: `&experience=noExperience`, `&experience=between1And3`, `&experience=between3And6`. If the counter is missing from the HTML (`-1`), the page came back without it (captcha / rate limit) — pause 2 s and retry once; never report it as zero.
+
+## Directions — QA, DevOps, AI, and what each entry filter really is
+
+When he asks «а не податься ли в X», answer with counts **and** with the entry filter, because they differ per direction:
+
+- **QA** — biggest pool, lowest bar, ручной QA takes a beginner in weeks; also the track most exposed to AI tooling. Offer it as a fallback with a trigger («если через N месяцев откликов ноль»), not as a plan.
+- **DevOps** — smaller pool than AI (roughly 270 vs 570 name-search ads in Moscow), and the filter is **not years but k8s / Terraform / Ansible / cloud**. In DevOps those are the entry ticket; in AI roles Kubernetes is a plus (about half the AI ads mention it). Do not reuse the AI advice here — flip it explicitly, he will notice the contradiction otherwise.
+- **AI / agent roles** — filter is years plus a demonstrable agent system, and that is where his contour is the differentiator.
+
+**Trainee programmes are a cost, not a job.** «Месяц интенсива + стажировка 3–4 месяца 5/2, потом от 70 000 ₽ до вычета» for a DevOps «ученик» is a hiring-funnel business model; for someone with a live production contour it is a step backwards. Quote the net monthly, the months, and the fact that he already does the syllabus.
+
+## «Это долго и сложно?» — time-to-competence
+
+At 1–2 h/day, to *working* level (not mastery):
+
+- **Prometheus + Grafana** — 1–2 недели; he already monitors, this is a top-up and an immediate resume line.
+- **Сети** — 2–4 недели до «не плыву на собесе» (TCP/IP, DNS, TLS, tcpdump, nftables).
+- **n8n** — 3–5 дней; a plus in ads, not a requirement.
+- **ClickHouse** — 2–4 недели до базы (MergeTree, ORDER BY, партиции, TTL, materialized views); almost every ad wants it *on a project*.
+- **«Глубокий» Linux** — years in the abstract, but 3–4 недели to interview level on named topics: systemd, cgroups, namespaces, proc, strace, I/O.
+- **Kubernetes** — 2–3 месяца, the most expensive item; without a real cluster it stays paper.
+
+Attach three rules to any such answer: **one topic at a time** (six in parallel = zero in three months), **one topic = one artifact** in the portfolio (a RAG demo with Grafana metrics covers three items at once), and a **decision deadline** — «если за две недели не начал k3s, направление не твоё» — so the choice closes instead of becoming another month of reading.

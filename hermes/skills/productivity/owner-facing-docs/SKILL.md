@@ -20,6 +20,7 @@ This is not the same class as a chat answer. Chat: short, verdict first, bullets
 ## Hard style rules
 
 - **No analogies or metaphors.** He rejected a document built on a «мастерская / станки / диспетчер» frame with «НЕ НУЖНЫ АНАЛОГИИ». Explain the thing itself, not a picture of the thing. Concrete nouns, real numbers, plain sentences.
+- **«Чуть живее» means voice, not decoration.** After banning metaphors he asked for a livelier version — what he wanted was direct address to him, a judgement attached to the fact («это твой выбор, и я не считаю его недосмотром»), and short verdict lines. Do not read «живее» as literary flourishes, epithets or scene-setting.
 - **A document is standalone, not a diff.** Never write it as «что изменилось», «было/стало», a changelog of the session or a list of the commands you ran. If he asks for «актуальные данные», rebuild the whole document around the current state and keep a short «что изменилось» section as one block among many, not as the skeleton.
 - **Live data, never memory.** Re-query the server before writing: container states, disk and RAM, timers, registry contents, repo commit times. Memory and the previous version of the document are both stale by definition; a number copied from them will be wrong and he will notice.
 - **Verdict and gaps, not a brochure.** He reads a document for the honest part: where it is weak, what is not done, what the limits are. A document with only strengths is a document he will not trust.

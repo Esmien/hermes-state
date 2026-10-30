@@ -28,6 +28,8 @@ Telegram, Russian, bullets (no tables), no preamble, no flattery.
 3. **Чего не хватает** — честно, по пунктам, с оговоркой, закрывается ли это тестовым или это структурный пробел.
 4. **Вердикт** — прямо: «честная вакансия без цирка» / «не работа, а подписка на жизнь» / «хуита-стартап». Он ждёт оценку, а не пересказ.
 
+When he needs a cover letter, write four short paragraphs: three verifiable facts from his production contour (not «есть опыт»), then one honest line that he has no commercial tenure in hiring. Never open with «у меня нет коммерческого опыта, но» — that framing hands the recruiter the rejection before the second sentence.
+
 ## Getting the posting
 
 hh.ru: `api.hh.ru` answers 403 to non-browser clients, the HTML page does not. Fetch with a desktop UA and parse the `application/ld+json` block whose parsed `@type` is `JobPosting` — full recipe (and the whitespace/key-order trap) in the `blocked-page-recovery` skill, §4. Then read:
@@ -95,11 +97,17 @@ Design questions about his own code («а есть практический, а 
 
 ## Resume review checklist
 
-- **Claimed total experience vs date arithmetic.** He under-claimed 3.5 years against dates that span 4 — a filter he fails for free.
-- **Gap after the last role** — fill it with the real current work (his production contour), never leave a silent hole.
+Read the **settings block before the body**. The hh PDF opens with the search settings, and they disqualify more applications than any sentence below them:
+
+- **Локация, формат работы, готовность к переезду и командировкам.** «На месте работодателя» + «не готов к переезду» + «не готов к командировкам» from a regional city closes almost the entire market, because remote ads are the only ones that ignore geography. Name the switches to flip first — five minutes of settings beats any rewrite of the text.
+- **«Резюме обновлено».** hh ranks by bump date; a resume untouched for months is at the bottom of the pile. Advise bumping every 3–4 days.
+- **hh's own «Опыт работы — X лет Y месяцев»** against the years claimed in «Обо мне» and against the dates themselves. Then count the **gap after the last role** — empty months read as a red flag even when the reason is honest; fill it with the real production contour, never leave a silent hole.
+- **Cross-document contradictions.** The same fact diverges between the Google Doc and the hh PDF (typically education: «неоконченное высшее» vs «Высшее»). Name it once, without moralising, and tell him to keep a single version — a diploma is verified with one request.
 - **Vacancy keywords vs resume.** Brokers/DLQ, Linux/bash/network, code review/mentoring, k8s/gRPC: whatever genuinely exists goes in explicitly, because the keyword is the filter before any human reads it. His RabbitMQ+DLQ and Linux experience were missing entirely.
-- **Artifacts that read as unedited:** empty section headers, truncated words, typos, contradictory dates.
+- **Newest market framing missing entirely.** A resume with zero LLM/agent vocabulary reads as a 2023 backend profile no matter how good the body is — see the positioning section above.
+- **Artifacts that read as unedited:** empty section headers (a heading followed by five blank lines), truncated words, mangled skill names («Repositorv», «Dry»), typos, contradictory dates, double spaces.
 - **No GitHub/portfolio link** — a minus that matters more when formal tenure is absent.
+- **Sections that work and must not be «improved»:** team composition per project, achievement lines with numbers (30–40%, pool_size/max_overflow), the event-loop/CPU-bound story, RBAC as «самая интересная задача». Recruiters read those as real engineering; say so, so he does not cut them.
 
 ## Red flags to name explicitly
 

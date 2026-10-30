@@ -50,8 +50,8 @@ a63c8f879756854b45373f5d6b1ae0a7fefcdd4a5af840be8a60d83b64724744  ./hermes/skill
 bc8fddd7e5373b074c1c7dd423bb59d6e04769977e8a18354e3a6b3983209994  ./hermes/skills/autonomous-ai-agents/hermes-agent/templates/skin.yaml
 0c3041ebcc9e5d994e5faab572b72017eeab091e374a721800fc79a163e2d9d2  ./hermes/skills/autonomous-ai-agents/hermes-agent/templates/ssh-only-gate.py
 ac2da2b39f1c355bc76bf35b2cd9e74131ea62030f89781fe82c53ee0b4f029e  ./hermes/skills/career/hh-vacancy-research/SKILL.md
-0a492d93e07f85df3bfe48e6d46273b38cd56eabda78cc343fdd882c37a4b63d  ./hermes/skills/career/job-application-review/SKILL.md
-6d6b2b1188832633cb6b2e0e08c39c0120a372bcf0955e2e55250e51bfca043b  ./hermes/skills/career/job-application-review/references/market-demand.md
+43d5059aff9da58e6203b8dbad23a0232ca31b4e0c582739d4e5aef5db5bdd7d  ./hermes/skills/career/job-application-review/SKILL.md
+3d28d9ee09f251991ea5399812ba6f4e137be6466787dbc357c7ad79bd736607  ./hermes/skills/career/job-application-review/references/market-demand.md
 acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skills/career/job-application-review/references/repo-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
@@ -111,7 +111,7 @@ c27bb2f0f3acd71771de1e7dc2ec27311dced72cbdf3989577c6907928e52645  ./hermes/skill
 fb28a609372460b2788d3b7dbc551985d24d4042057971f4d6345144d2d78caa  ./hermes/skills/note-taking/DESCRIPTION.md
 7aea4e8f89f94ab2876d79898d10a5d4cdab31390c53f72ad6934b071179f826  ./hermes/skills/note-taking/obsidian/SKILL.md
 b5a494a45bfd430bfb3042ee0452a6b88c81481f147ce7fca2c29ed3e93c490a  ./hermes/skills/productivity/DESCRIPTION.md
-c0d051c527fc2d33ed5399bb87c9603d7dfdf93560af4459d848c7c75e799d1d  ./hermes/skills/productivity/owner-facing-docs/SKILL.md
+2a38ce97e4a05808ffedbe37eb80039e9017d9b0d6966b0c60630b353b60b440  ./hermes/skills/productivity/owner-facing-docs/SKILL.md
 a7bc842330a491de5f73cd63e87521e53724d94d4f53949bfa2171beb8200e18  ./hermes/skills/research/DESCRIPTION.md
 e5f2f984b0f6fe22509e84f12877713bedfb3630f13271980b4dfb057d023a98  ./hermes/skills/research/city-relocation-report/SKILL.md
 57f3af63fb0439ddd1ef17e2086c836fe864da60ad613fc1918c7149db65acc5  ./hermes/skills/research/ru-local-price-research/SKILL.md
