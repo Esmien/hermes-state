@@ -101,6 +101,24 @@ with their ids):
   deployment.
 - **The provider reports zero cost; the value has to be injected.** Cost map prices for these slugs exist (per 1M: 6.1 Sol $2/$10, 6.1 Terra $1/$5, Astra $10/$50, Luna $0.10/$0.50, 5.6 Sol $4/$20, 5.6 Terra $2/$12, 5.6 Luna $0.20/$1.20 — read them from `litellm.model_cost` inside the image rather than trusting this list), but the `chatgpt/` provider is subscription-mode and reports zero, so nothing is priced unless each deployment carries explicit `input_cost_per_token` / `output_cost_per_token` / `cache_read_input_token_cost`. Those numbers are a **shadow value** — the plan is flat-rate and the quota is per message — so rpm/tpm stays the real guard; the dollar figure is for «кто сколько сожрал» and for comparing subscription vs API cost.
 - **Setting the rates is not the same as getting them applied — always verify in SpendLogs.** On v1.106.6 a deployment can show non-zero rates in `/model/info` and still log every request at `$0` with `Billable request priced at $0 … pricing entry '<uuid>' declares non-zero rates … reason="pricing_not_applied"`. The same warning appears on unrelated `hermes.deepseek/*` rows, so it is a cost-calculator path problem, not a per-model mistake. After any pricing change send one request and read `LiteLLM_SpendLogs.spend` directly — a green `/model/info` proves nothing, and a UI showing `$0.00000000` may be the truth.
+
+  Do not conclude from a single zero row that the calculator is broken. Recompute the
+  expected figure by hand — `prompt_tokens × in_rate + output_tokens × out_rate`, with the
+  per-token rates from the deployment — and issue one fresh request. A new row that matches
+  your arithmetic to the cent proves the path works; only a fresh row that still logs `0`
+  while the arithmetic says otherwise is a real defect. **Output drives the bill**, at 5×
+  the input rate on Sol: an «объясни подробно» answer that ran to ~12.5 K output tokens
+  billed ~$0.16, while a compact code answer on the same model billed ~$0.02. Explanation
+  and overview questions belong on the cheaper tier (Terra/Luna) or behind an explicit
+  length cap, not on the strongest coding route.
+- **Reasoning text never streams, and that is upstream, not a config bug.** The Codex
+  backend emits `response.reasoning_summary_text.delta` for nothing, even when the request
+  asks for `reasoning: {effort, summary: "auto"}` — call it directly (bypassing the proxy)
+  and the event stream contains only `output_item.added/done` with an encrypted reasoning
+  item. The chat bridge then forwards that item whole as one `delta.reasoning_items` chunk.
+  Practical consequence: no slider or client setting can make «думает» appear progressively;
+  offer a elapsed-time indicator instead, and read `reasoning_tokens` from usage when you
+  need to know how much thinking was bought.
 - **Backend rejects** `max_tokens`, `max_output_tokens`, `max_completion_tokens`
   and `metadata`; LiteLLM strips them. It also rejects `temperature` for these
   models — the stack's `drop_params: true` is what keeps Open WebUI from 400ing.
@@ -180,7 +198,12 @@ Sol 6.1 with a ring-buffer/ISR task (~8.8 K prompt): `medium` 516 reasoning /
 conclusions that hold up in practice — **`xhigh` is the only step that changes
 what the model does** (4.3× over `high`), and **`max` is decorative** (+6 %
 tokens, +3 s). Offer `medium → high → xhigh` as the real ladder and treat `max`
-as a comfort option, not an engineering one. A UI control (OWUI `model_controls`)
+as a comfort option, not an engineering one. **The level is a ceiling, not a quota**: the
+model stops when it judges the task done, so on an easy question `high` and `xhigh` land
+close together (measured: 96 vs 349 reasoning tokens on one short answer, +$0.003) while
+the same pair diverges 4× on a hard one. This makes escalation cheap in the upward
+direction — recommend a low default plus a manual step up instead of paying for `max` on
+every request. A UI control (OWUI `model_controls`)
 should map its labels onto exactly those `reasoning_effort` values, and long
 labels read better in a menu than on a slider.
 
