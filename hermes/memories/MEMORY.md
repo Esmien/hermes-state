@@ -9,3 +9,7 @@ TG: 214062001 = Владислав (владелец, всё); 917728475 = Иг�
 Сессии Игоря (917728475): только ssh. Не раскрывать ему инфраструктуру, пути, сервисы, инструменты, владельца.
 §
 Хост-рут этого VPS доступен напрямую как `/` (агент на корне хоста, /mnt/host нет). AI-стек /home/ai_service/ai-stack, установка из Esmien/vps-infra, автозагрузка Hermes + boot-notify, авторазбор падений контейнеров (docker-autorecover, pause-файл!), бэкап в Esmien/hermes-state — детали в одноимённых скиллах devops.
+§
+Hermes на этом VPS ходит через Open WebUI-гейтвей: model.name «Open WebUI», provider custom, base_url http://127.0.0.1:8080/api/v1; алиасы моделей (model.aliases.*) переключают сессию, дефолтный маршрут не меняют.
+§
+У владельца: ChatGPT Plus (~2200 ₽/мес через РФ-посредника; квота Sol 15–160 сообщений/5ч ОБЩАЯ для Codex CLI, OpenCode и Hermes-провайдера openai-codex) и Google AI Pro. OpenCode 1.19.5 стоит (/snap/bin/opencode), умеет ChatGPT Plus/Pro по OAuth (/connect).

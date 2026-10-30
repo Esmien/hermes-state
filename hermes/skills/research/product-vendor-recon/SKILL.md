@@ -63,6 +63,13 @@ user wants a call, not a table of contents.
    wrong for, and the concrete safe setting for this user (never give a
    code agent full write access to a prod tree; keep `.env` and keys out of the
    opened folder).
+8. **If the owner already paid, switch from «брать или нет» to economics + wiring.**
+   Compare his paid surface against API-per-token and against the stack he
+   already runs: per-task token math, break-even volume, which allowance is
+   shared, and whether the subscription can be driven from his own agents
+   (OAuth provider) instead of only the vendor's app. Never end on «ну, месяц
+   оплачен» — end on «вот как выжать этот месяц и по какому признаку не
+   продлевать». Recipes and rate tables: `references/subscription-vs-api.md`.
 
 ## Pitfalls
 
@@ -90,6 +97,15 @@ user wants a call, not a table of contents.
   multiplier: their ₽ per 1M ÷ (official $ per 1M × FX). At ~1.5-2x you are
   paying for rubles and no-VPN, not for the model — say that instead of
   «дорого/дешево».
+- A chat/coding subscription is NOT an API. Do not tell the owner «подключим
+  подписку как API» — check the vendor's own client OAuth path first. A vendor
+  letting third-party agents sign in with a subscription is goodwill, not
+  contract: it can be closed without notice, and it burns the same allowance as
+  the vendor's own app. Say both halves.
+- Once money is spent, the honest question changes: not «стоило ли», but «что
+  именно этот месяц даёт и по какому измеримому признаку не продлевать» (git
+  log, расход токенов, число реально закрытых задач). A subscription sells
+  fear of missing out; do not feed it back with upgrade advice.
 - A model can exist on one surface and not another (chat mode vs coding app vs
   CLI) and plan tiers gate it further. Read the vendor's own availability table
   before telling the owner what they get on their plan; «купил, а модели нет в
