@@ -207,6 +207,14 @@ every request. A UI control (OWUI `model_controls`)
 should map its labels onto exactly those `reasoning_effort` values, and long
 labels read better in a menu than on a slider.
 
+## Owner's model role split
+
+Standing assignment as of Oct 2026: **Sol 6.1 = architect + reviewer** (its quota is what
+the subscription is bought for), **DeepSeek-flash = bulk coding**, **Luna = fast/cheap
+answers**. Consequences for advice: do not propose Sol for overviews or «объясни
+подробно» (output drives the bill), and when a reviewer is involved hand it the artifact
+(diff/file), never a chat summary — a reviewer without the code invents findings.
+
 ## Exposure policy
 
 Personal subscription, personal risk: sharing it with other people is a terms
