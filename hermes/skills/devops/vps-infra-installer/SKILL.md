@@ -132,6 +132,25 @@ install.py --skip tls,restore --only verify
   уже стоят, нужен только ping-URL в `/etc/deadman-ping.url`. **Главная засада:
   регистрация там email-based (magic link), автоматически из консоли не создаётся.**
 
+### Beszel (шаг `beszel`)
+
+Hub+agent в Docker, `/home/ai_service/beszel`, вместе ~20 МБ RAM. Hub только на
+`127.0.0.1:8090`. Связка — unix-сокет `beszel_socket/beszel.sock`.
+
+**Без UI его можно полностью настроить через PocketBase API** (superuser обходит rules):
+`/beszel superuser upsert <email> <pass>` внутри контейнера →
+`auth-with-password` → создать `users`/`systems`/`fingerprints`/`user_settings`/`alerts`.
+Грабли, на которые ушло время:
+
+- `KEY` — это **публичный ключ хаба**: `ssh-keygen -y -f beszel_data/id_ed25519`.
+- `TOKEN` — UUID из коллекции `fingerprints` (поле `token`); его **генерит фронтенд**
+  при создании системы, в `systems` его нет. Без fingerprints агент вечно ловит `401`.
+- Notifications = `user_settings.settings = {{"emails": [], "webhooks": ["telegram://<token>@telegram?chats=<id>&parseMode=HTML"]}}`
+  (внутри shoutrrr). Проверка: `POST /api/beszel/test-notification {{"url": ..., "userId": ...}}`
+  токеном юзера (не суперюзера) → `{{"err": false}}` = доставлено.
+- Алерты создаются только вручную: `alerts` = `{{name: Status|CPU|Memory|Disk, value, min, user, system}}`;
+  без них графики есть, а тревог нет совсем.
+
 ## Проверка
 
 `install.py check` печатает контейнеры/health, число таблиц, локальные HTTP,
