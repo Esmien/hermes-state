@@ -17,3 +17,5 @@ Hermes на этом VPS ходит через Open WebUI-гейтвей: model.
 Подписки владельца: ChatGPT Plus (~2200 ₽/мес через посредника) и OpenCode Go (плоская, Zen/Console выключен). Plus в стеке двумя маршрутами: серый chatgpt/ (9 моделей, токен /root/litellm-chatgpt/auth.json) и белый siwc/ (сайдкар /root/siwc, systemd siwc-gateway на 172.17.0.1:4010 → api.openai.com/v1/responses, креды /root/siwc/auth.json). Оба $0.
 §
 На хосте uid 1000 = ubuntu (с sudo) — и это же uid пользователя песочницы open-terminal-sandbox; файлы, созданные там, видны на хосте как ubuntu:ubuntu.
+§
+Правило владельца: recovery-репо (vps-infra, hermes-state) обязаны всегда совпадать с живым хостом — любое изменение на хосте сразу переносится в репо.

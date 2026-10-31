@@ -3,7 +3,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
 8c7c9c25f93c408a5db958f26b4012bf1932c25001b12bf7172d249c980366f0  ./hermes/config.yaml
 b7fb69a8dea49023864050b747a15ccd319ee9aed3aeb44dd1f761246e19b704  ./hermes/cron/jobs.json
-91efe26e377d0860b8b82c25576eb1305b6b7623ef0f1c9ff7a9964aa47d8353  ./hermes/memories/MEMORY.md
+fc6079629f3f1a802f2e5fe13a6d730bf9deaebd20fc0043ac79e311901cec0c  ./hermes/memories/MEMORY.md
 1994a24536e05c418d8680fe02655a16665baf3452dc7e650849ca43d6069210  ./hermes/memories/USER.md
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
 ace53680230203597ccc98a4e43af7d78ebd79690b210af403cd5e657dbf5513  ./hermes/plugins/muse-persona/__pycache__/__init__.cpython-314.pyc
