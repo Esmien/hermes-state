@@ -151,6 +151,13 @@ Hub+agent в Docker, `/home/ai_service/beszel`, вместе ~20 МБ RAM. Hub �
 - Алерты создаются только вручную: `alerts` = `{{name: Status|CPU|Memory|Disk, value, min, user, system}}`;
   без них графики есть, а тревог нет совсем.
 
+- **Let's Encrypt: 50 сертификатов на зарегистрированный домен за 168 ч.** При исчерпании
+  certbot отвечает `too many certificates ... retry after <UTC>` и **не выдаёт ничего**,
+  включая новые поддомены. На живом хосте выпуск добивает `mon-cert-setup.timer`
+  (каждые 30 мин, `SuccessExitStatus=1`, чтобы юнит не висел в `failed`): при успехе
+  сам кладёт vhost из `assets/host/nginx/`, переключает `APP_URL` Beszel на https,
+  пишет в Telegram и выключает таймер.
+
 ## Проверка
 
 `install.py check` печатает контейнеры/health, число таблиц, локальные HTTP,
