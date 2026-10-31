@@ -52,6 +52,26 @@ host-gateway) and `127.0.0.1:4010`. LiteLLM registers it as
 `model: openai/<slug>`, `api_base: http://host.docker.internal:4010/v1`,
 `api_key: <any>`; expose it as `siwc/<slug>` first so existing routes keep working.
 
+## Migrating routes without changing client config
+
+Goal: clients keep the same model names, only the upstream changes. LiteLLM has no
+"switch deployment" button, and two deployments under one name = random load balancing,
+so the order matters:
+
+1. `POST /model/update {"model_name": "<public name>", "litellm_params": {full params},
+   "model_info": {"id": "<new id>"}}` — rename the siwc deployment onto the public name.
+   `litellm_params` must be complete; a partial body silently keeps the old model name.
+2. `POST /model/block {"model_id": "<old id>"}` — disables the grey deployment without
+   deleting it (`model_info.blocked: true`), so the name now resolves only to white.
+3. Watch out for pre-existing multi-deployment pools: a name can already carry several
+   deployments (e.g. free-proxy copies or an OpenCode route that demands
+   `x-opencode-session`). Blocking only the grey one leaves the rest mixed in, and the
+   broken members keep failing intermittently exactly as before.
+4. Verify with a tool call plus the gateway log line — a `200` from LiteLLM alone does not
+   prove which upstream served it.
+
+Revert: `POST /model/unblock {"model_id": ...}`.
+
 ## Pitfalls
 
 - `ext_agent_host_id` must be a hyphenated **UUIDv4** with `urn:uuid:` prefix; a hex
