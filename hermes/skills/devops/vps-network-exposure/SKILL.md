@@ -102,6 +102,23 @@ Reload, don't restart: `sshd -t && systemctl reload ssh` keeps existing sessions
 - Баны переживают `systemctl restart fail2ban` (sqlite `/var/lib/fail2ban/fail2ban.sqlite3`); проверено — 12 IP вернулись.
 - Ручной бан ретроактивно: `fail2ban-client set sshd banip <ip>`; снять — `unbanip`. Авто-скан журнала начинается с момента старта, старые атаки сами не подхватятся.
 
+## Rate limiting nginx (добавлен 2026-10-31)
+
+Защита от L7-флуда (было: 200 rps на живой nginx → CPU в ноль без взлома).
+Зоны — `/etc/nginx/conf.d/zz-ratelimit.conf` (include раньше `sites-enabled`):
+`llm_api` 10r/s, `webui_api` 8r/s, `conn_per_ip`.
+
+- `llm.` — `limit_req zone=llm_api burst=40 nodelay` + `limit_conn 20` на весь server.
+- `ai.` — лимит **только в `location /api/`** (`burst=30`, `limit_conn 30`); статика
+  (`/_app`, `/assets`, `/static`) идёт через `location /` без лимита — иначе массовая
+  загрузка чанков при F5 даёт 429 и страница перестаёт грузиться. Правя этот конфиг,
+  не поднимайте лимит на `/`.
+- `limit_req_status 429` (по умолчанию 503 — для клиента неотличимо от «упало»).
+- Проверено: 60 параллельных → 37×200/23×429 на `ai/api`, 80 → 53×200/27×429 на `llm`,
+  через 3 с снова 200; все контейнеры healthy, статика 200.
+- **В `vps-infra` этих конфигов нет** (install.py генерирует nginx-вхосты кодом),
+  т.е. после переезда лимиты надо переприменять — кандидат на перенос в репо.
+
 ## Related
 
 - Which services exist, their ports and domains: `ai-stack` skill.
