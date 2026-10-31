@@ -11,12 +11,28 @@
 | user | `1000:1000` |
 | workspace | named volume `ot_sandbox_workspace` → `/workspace` (cwd), `ot_sandbox_home` → `/home/user` |
 | mounts from host | `:rw` только личный каталог `/home/ai_service/sandbox_files` → `/workspace/inbox` (владелец uid/gid 1000, mode 0700; ни `/`, ни socket) |
-| attachments | общий `webui_data/uploads` в песочницу **не монтируется** (там вложения всех пользователей WebUI). Нужный файл кладётся хост-утилитой `sandbox-inbox <file>`: копия в `/home/ai_service/sandbox_files`, `chown 1000:1000`, `0600`, uuid-префикс срезается, при совпадении имени — суффикс `.N`; печатает путь и sha256. `sandbox-inbox --list` / `--clear <имя>`. |
+| attachments | файлы из чата кладёт сам WebUI в `/workspace` (`chat_uploads: filesystem`). Хост-утилита `sandbox-inbox` — для ручной раскладки владельцем: копия в `/home/ai_service/sandbox_files` (→ `/workspace/inbox`), `chown 1000:1000`, `0600`, uuid-префикс срезается, при совпадении имени — суффикс `.N`; печатает путь и sha256. `sandbox-inbox --list` / `--clear <имя>`. |
 | hardening | `cap_drop: ALL`, `cap_add: SETGID`, `no-new-privileges`, `read_only: true`, `tmpfs /tmp`, `mem 2g/2g`, `cpus 1.0`, `pids_limit 256` |
 | key | `OPEN_TERMINAL_SANDBOX_API_KEY` in `ai/.env` |
 | tools | `arduino-cli` 1.5.1 + core `arduino:avr` 1.8.8 baked into the image |
 
 Verified after build: `id` → uid 1000, `CapEff` → 0, `/etc` read-only, no `/var/run/docker.sock`, `/home/ai_service` absent, `arduino-cli compile --fqbn arduino:avr:uno` on a blink sketch → 924 bytes.
+
+## Вложения чата попадают в терминал сами — `chat_uploads`
+
+Open WebUI умеет класть файлы из чата прямо в cwd терминала, без хост-стороны и без перепечатки моделью. Выключатель — `config.chat_uploads` в записи соединения (`terminal_server.connections`), значения `default` (файл остаётся в OWUI, в терминал не попадает) и `filesystem` (фронт делает `POST <terminal>/files/upload?directory=<cwd>` и кладёт файл в `/workspace`).
+
+У `Песочница · Arduino` включено (`filesystem`) через админ-API, без рестарта:
+
+```
+POST /api/v1/auths/signin                 {"email": <admin>, "password": OWUI_ADMIN_PASSWORD}
+GET  /api/v1/configs/terminal_servers     -> {"TERMINAL_SERVER_CONNECTIONS": [...]}
+POST /api/v1/configs/terminal_servers     {"TERMINAL_SERVER_CONNECTIONS": [... с правленым config]}
+```
+
+POST заменяет весь список — только read-modify-write, никогда не собирать массив с нуля. Проверка серверной части без браузера: `curl -H "Authorization: Bearer <key из config>" -F file=@x http://open-terminal-sandbox:8000/files/upload?directory=/workspace` → `{"path":"/workspace/x","size":N}`.
+
+Следствие: модель получает не текст в промпте, а файл на диске — читать его надо терминалом (`cat`/`head`), иначе она его «не видит». Хост-утилита `sandbox-inbox` остаётся для случая «владелец сам кладёт файл» (например, когда нужна побайтовая сверка с оригиналом).
 
 ## Two traps that cost a build + a crash loop
 

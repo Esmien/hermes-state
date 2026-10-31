@@ -3,7 +3,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
 8c7c9c25f93c408a5db958f26b4012bf1932c25001b12bf7172d249c980366f0  ./hermes/config.yaml
 b7fb69a8dea49023864050b747a15ccd319ee9aed3aeb44dd1f761246e19b704  ./hermes/cron/jobs.json
-737c38e1fd32a2e41300229dc5a3b87a4a83a3438cb54e883d4e81bf3a892b42  ./hermes/memories/MEMORY.md
+91efe26e377d0860b8b82c25576eb1305b6b7623ef0f1c9ff7a9964aa47d8353  ./hermes/memories/MEMORY.md
 1994a24536e05c418d8680fe02655a16665baf3452dc7e650849ca43d6069210  ./hermes/memories/USER.md
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
 ace53680230203597ccc98a4e43af7d78ebd79690b210af403cd5e657dbf5513  ./hermes/plugins/muse-persona/__pycache__/__init__.cpython-314.pyc
@@ -72,7 +72,7 @@ ad042b6fee80f9dde1317d8f976a826abe3f94e539c3577263e53d91cd70efd8  ./hermes/skill
 23681fed79a731f0e5ac3dbf907087700aedc29fa84c1b54872f7694682b3e76  ./hermes/skills/devops/ai-stack/references/owui-admin-auth.md
 3485b905f94be6019e23bcc8ee568bb999be2bf8a1394f66022bd2f07845dc8d  ./hermes/skills/devops/ai-stack/references/pitfalls.md
 cbb06f14ec073a2b9436c977cd60cd31f8e7bb3de6ee7fc7c127454dcedaecc5  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
-06eedff9cb52d0c3a4904e0cbe495d21e03d5f09fda68d12c624b04c5f1c8c2c  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
+3814331f3b5164e615e8503f9d71bb136811e08afc0630b9c69853f7dbf3372c  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
 ed07f0188d3a2dbe27c3f4b4a2966ae423f28bf2450ec8a040bd2cbc4c6ec0bf  ./hermes/skills/devops/ai-stack/references/searxng.md
 9cfae7089c96dcb5efc4d9a7a09f9f7e71059dcd92ae5ba59e560e3af6ed4767  ./hermes/skills/devops/ai-stack/references/signup-approval.md
 edd659ed101bb0adb507ef894077beac36c3e35d92d3709fb8a788a6d0e2c031  ./hermes/skills/devops/ai-stack/references/updates.md
