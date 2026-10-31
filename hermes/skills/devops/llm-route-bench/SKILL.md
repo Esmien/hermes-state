@@ -58,9 +58,28 @@ for those tokens. Send `«Скажи одно слово: ок»` with `max_toke
 - deepseek-v4.1-flash: 8/8 at ~$0.0004 per task — 20-40x cheaper than the broken Claude
   route with no quality loss on these tasks.
 
+## Code-generation bench (hidden tests)
+
+Use when the question is «какая модель лучше пишет код», not «какой маршрут чище». Full
+recipe, task ladder and the observed baseline: `references/code-gen-bench.md`; runnable
+harness: `scripts/code_bench.py`.
+
+- One request per (model, task), no retry, **no system prompt**, `reasoning_effort=high`.
+  A second attempt measures cooperation, not first-shot quality.
+- Grade by executing hidden tests against the extracted last ```python block in a subprocess
+  with a timeout. Never read the code yourself and never ask the model to grade itself.
+- Rank by pass count, then latency, then tokens. On algorithm tasks every model in this
+  stack scores 100%, so burn and speed are the only signal left — report `$/успех`, and for
+  subscription routes report quota share instead of dollars.
+- Every code bench must contain at least one **behavioural-preservation** task (rewrite a
+  module without changing its API) and one **bug-hunt** in a multi-hundred-line file. Those
+  two separate models; algorithm puzzles do not.
+
 ## Pitfalls
 
-- `opencode/*` groups need the `x-opencode-session` header **and** the Responses API: the
+- `opencode/*` groups need the `x-opencode-session` header on **every** endpoint — without it
+  the deployment answers 400 in a way that reads like a bad model name (seen on
+  `/v1/chat/completions`). They also want the Responses API: the
   channel rejects `/chat/completions` (`Model does not support this protocol`) while
   `/v1/responses` answers fine. Fix in the deployment: `litellm_params.model =
   "responses/<model>"` — LiteLLM then bridges chat→responses itself and text tasks start
@@ -77,6 +96,13 @@ for those tokens. Send `«Скажи одно слово: ок»` with `max_toke
 - A route that answers «ок» fine can still inject on the next call — injection is
   intermittent, so probe 3 times and trust the minimum, not the average.
 - Keep the spend visible: print `$/success` per model, not total only.
+- A prompt like «перепиши чисто, поведение сохранить» gets public functions renamed (`total`
+  → `to`) unless the tests call the API by name. Always assert the exact public names, not
+  just the behaviour — the rename is the most common real regression.
+- Numeric unit mismatches (docstring says milliseconds, code sleeps seconds) are invisible to
+  every model acting as reviewer, including the strongest ones. To measure review ability,
+  ask explicitly to compute the value for a few inputs and compare it with the docstring;
+  «найди баг» alone returns stylistic findings and misses the arithmetic.
 
 ## Files
 
@@ -85,3 +111,7 @@ for those tokens. Send `«Скажи одно слово: ок»` with `max_toke
   reseller markup math, and how to answer «стоит ли оно того».
 - `scripts/ab_bench.py` — probe + 8 deterministic tasks + price lookup from `/model/info`.
   Reads `LITELLM_MASTER_KEY` from `/home/ai_service/ai-stack/ai/.env`, never prints it.
+- `references/code-gen-bench.md` — model-name resolution in the gateway, harness design,
+  the six-task ladder, grading gotchas, cross-review protocol, baseline results.
+- `scripts/code_bench.py` — hidden-test generator bench: four tasks (truncate, CSV, legacy
+  refactor, 250-line bug hunt), runs inside the sandbox, writes JSONL.
