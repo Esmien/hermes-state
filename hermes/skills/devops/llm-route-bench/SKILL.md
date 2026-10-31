@@ -20,9 +20,12 @@ gateway. The point is to separate **model quality** from **route quality** with 
 
 Also use when the question is money rather than quality: «где взять модель дешевле»,
 «стоит ли подписка», «какие там лимиты», «я не зря заплатил», «можно ли затащить
-подписку в OpenCode / другой сторонний клиент». Read `references/access-pricing.md`
+подписку в OpenCode / другой сторонний клиент», «куда реально уходят запросы от chatgpt/».
+Read `references/access-pricing.md`
 before quoting any number — it carries the official price ladder, the discount levers,
-the per-plan allowances, and the subscription-vs-API rule per vendor.
+the per-plan allowances, and the subscription-vs-API rule per vendor;
+`references/subscription-routes.md` covers which upstream a plan-backed route really uses
+and the official OAuth shape it should be compared against.
 
 ## Rule zero
 
@@ -30,6 +33,11 @@ the per-plan allowances, and the subscription-vs-API rule per vendor.
 `scripts/ab_bench.py` refuses opus/gpt-6/sonnet unless `--allow-expensive` is passed —
 keep that guard. Cheap defaults (deepseek-v4.1-flash, claude-haiku-5.5) are fine to run
 for verification; everything else only on a direct request, and say the price up front.
+
+**A bench is only worth its price if the model is in the owner's working set.** Quote the
+cost before building anything bigger than a probe, and drop the job when the answer is
+«им не пользуюсь»: a perfect table for a model he will never call is vanity spend, and he
+will say so.
 
 ## Procedure
 
@@ -105,6 +113,11 @@ harness: `scripts/code_bench.py`.
 - A route that answers «ок» fine can still inject on the next call — injection is
   intermittent, so probe 3 times and trust the minimum, not the average.
 - Keep the spend visible: print `$/success` per model, not total only.
+- **Verdicts outlive the session, so make them quotable.** State the rule explicitly
+  («Terra — дефолт, Sol — эскалация») and keep the baseline table in the reference. When the
+  owner says «ты же хуесосил Terra», search the sessions for what was actually said and
+  answer from that quote: a false admission rewrites the stack's routing on a misremembered
+  fact, and a bare denial without the quote reads as defensiveness.
 - A prompt like «перепиши чисто, поведение сохранить» gets public functions renamed (`total`
   → `to`) unless the tests call the API by name. Always assert the exact public names, not
   just the behaviour — the rename is the most common real regression.
@@ -116,6 +129,10 @@ harness: `scripts/code_bench.py`.
   reasoning while still doing the work. Neither is visible in the name or in self-description;
   decide with the tokenizer fingerprint in `references/route-fingerprinting.md` (constant delta
   vs proportional delta), never with «кто ты» or the UI label.
+- **The alias does not say who bills you.** Resolve `model_name → litellm_params.model`
+  from `/model/info` before answering «это по подписке или по API?»: `openai/gpt-*` on top
+  of `chatgpt/*` is plan quota against the Codex backend, `openai/*` is metered API. Recipe
+  and the official alternative: `references/subscription-routes.md`.
 
 ## Files
 
@@ -129,5 +146,11 @@ harness: `scripts/code_bench.py`.
   the six-task ladder, grading gotchas, cross-review protocol, baseline results.
 - `references/route-fingerprinting.md` — как отличить подмену модели и вырезанные
   рассуждения по `usage.prompt_tokens` и полям ответа, с порядками величин по семействам.
+- `references/subscription-routes.md` — как узнать, какой upstream и чей биллинг стоит за
+  маршрутом, устройство `chatgpt/` (Codex backend + device flow под видом `codex_cli_rs`)
+  и официальный OAuth-флоу OpenAI для OSS-клиентов с его обязательными параметрами.
 - `scripts/code_bench.py` — hidden-test generator bench: four tasks (truncate, CSV, legacy
   refactor, 250-line bug hunt), runs inside the sandbox, writes JSONL.
+- `scripts/code_bench_hard.py` — hard tier (frames, token bucket, quirk-preserving refactor,
+  expression parser). Has `--selftest`: reference must score 100% and every broken variant
+  must fail its declared tests, so the harness is proven before any model call is spent.

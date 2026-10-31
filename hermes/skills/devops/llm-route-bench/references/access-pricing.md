@@ -75,6 +75,14 @@ Answer from this rule, not from the client's feature list:
   individuals), breaking the OpenCode Gemini-OAuth plugins, and its CLI FAQ calls
   piggybacking on that OAuth a terms violation. OpenAI still lets Codex OAuth serve
   OpenCode through the plan allowance — that is the exception, not the pattern.
+- **OpenAI's exception has two shapes, and they are not equivalent.** The documented one is
+  Sign in with ChatGPT for open-source/self-hosted apps: dynamic client registration, PKCE,
+  `resource=https://api.openai.com/v1`, inference on `POST /v1/responses` with `store:false`
+  and `stream:true`. The other is the device-code flow behind the `chatgpt/` provider, which
+  masquerades as `codex_cli_rs` against `chatgpt.com/backend-api/codex` — the docs for the
+  first shape explicitly forbid pointing at `backend-api`. When answering «мы же легально?»,
+  say which shape the stack actually uses before giving any verdict; details and the check
+  recipe are in `references/subscription-routes.md`.
 - **Order of checks before saying yes:** does the plan include an API/Console account
   (no → stop), does the vendor allow plan OAuth outside its own client (no → stop), is
   there an official first-party CLI that the client merely wraps (that is the only
