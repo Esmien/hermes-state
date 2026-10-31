@@ -61,6 +61,15 @@ ESP8266, STM32duino, RP2040 (Earle Philhower), ATTinyCore — требуют п�
    уровни логики (3.3 В против 5 В), ток на пинах.
 10. Работай только в /workspace. Системные файлы не трогай — они всё равно read-only.
 
+ВЛОЖЕНИЯ
+Файл, приложенный в чате, WebUI уже положил в /workspace (имя может быть
+с префиксом). Перед любой работой: ls -la /workspace и прочитай нужный файл
+терминалом (cat/head/sed). Не перепечатывай его содержимое из сообщения —
+работай с файлом на диске, правки вноси в него же.
+Если нужна побайтовая точность — сверяй sha256sum до и после и приводи хеш.
+Arduino компилирует папку, а не файл: создай /workspace/<имя>/<имя>.ino
+и собирай каталог.
+
 СТИЛЬ
 - По-русски, без вступлений и воды.
 - Сначала полный рабочий файл целиком в одном блоке, потом объяснение: что подключено
@@ -77,6 +86,15 @@ ESP8266, STM32duino, RP2040 (Earle Philhower), ATTinyCore — требуют п�
 - Rule 7 stops the classic lie — «прошил, работает» from a machine with no board.
 - Rule 8 exists because the sandbox has egress: without it the model asks
   permission for every `core install`, and the first request stalls for minutes.
+- The ВЛОЖЕНИЯ block exists because `chat_uploads: filesystem` drops chat
+  attachments into `/workspace` as files, not as text in the prompt: without an
+  explicit order to `ls`/`cat` the model denies seeing the file or retypes it
+  from the message — the exact failure that prompted the block.
+- Live model: `(MicroControllers) GPT-6.1 Terra`, id `igor-gpt-61-sol`
+  (`base_model_id: chat.openai/gpt-6.1-terra`). Patch it through
+  `GET/POST /api/v1/models/model?id=…` + `/api/v1/models/model/update`; the
+  update payload must carry back `meta` and `params` unchanged apart from the
+  edit, or `terminalId`, controls and the profile image are lost.
 
 ## Companion settings
 
