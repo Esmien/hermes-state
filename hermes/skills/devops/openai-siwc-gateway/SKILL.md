@@ -68,7 +68,13 @@ so the order matters:
    `x-opencode-session`). Blocking only the grey one leaves the rest mixed in, and the
    broken members keep failing intermittently exactly as before.
 4. Verify with a tool call plus the gateway log line — a `200` from LiteLLM alone does not
-   prove which upstream served it.
+   prove which upstream served it. When the name still carries several deployments, one
+   probe proves nothing: repeat the call until every deployment has served once, or
+   shrink the pool first. A blocked deployment stays visible in `/model/info` with
+   `blocked: true` — read its flag, never infer it from absence.
+5. After any `/model/update`, GET the object back and assert the changed field. A `200`
+   from the update endpoint does not confirm the mutation landed — a body with swapped
+   keys returns success while keeping the old value.
 
 Revert: `POST /model/unblock {"model_id": ...}`.
 
