@@ -113,7 +113,16 @@ harness: `scripts/code_bench.py`.
 - A route that answers «ок» fine can still inject on the next call — injection is
   intermittent, so probe 3 times and trust the minimum, not the average.
 - Keep the spend visible: print `$/success` per model, not total only.
-- **Verdicts outlive the session, so make them quotable.** State the rule explicitly
+- **A non-streaming pass is not a streaming pass.** A route can score 100% on every
+  non-stream task and still return only empty SSE deltas with no `finish_reason` on
+  `stream=true` (typical for a Responses-only upstream behind LiteLLM's chat bridge:
+  reasoning travels in Responses events the bridge drops). Hermes streams, so a route is
+  agent-ready only after a streaming probe that counts content-bearing vs empty chunks
+  and asserts `finish_reason` — the task set alone cannot certify it.
+- **Count logical calls in the spend log, not rows.** LiteLLM router retries multiply
+  spend rows: N identical `prompt_tokens` back-to-back with small completions is usually
+  one logical call retried (client attempts × router `max_retries`), not N users hammering
+  the route — divide before crying overload. State the rule explicitly
   («Terra — дефолт, Sol — эскалация») and keep the baseline table in the reference. When the
   owner says «ты же хуесосил Terra», search the sessions for what was actually said and
   answer from that quote: a false admission rewrites the stack's routing on a misremembered
