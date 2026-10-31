@@ -115,6 +115,23 @@ install.py --skip tls,restore --only verify
   (`__stored_in_notifications_env__`) даёт понятную ошибку, а не 404 от Telegram.
 - **Файлы пользователя едут отдельно от БД.** Псевдо-база `webui_data` в том же реестре — это tar.gz `uploads` + `generated_images` (~980 МБ, 55 частей), её пишет `webui-data-backup.timer` (Sun 04:00 UTC). `RESTORE_DBS` включает её, шаг `data` распаковывает архив в `WEBUI_DATA` (пропускает непустой каталог без `--restore`). Без этого шага bootstrap вернёт БД и конфиги, но не оригиналы файлов Knowledge.
 
+### Внешний мониторинг (GitHub Actions + dead-man)
+
+Внутренний мониторинг умирает вместе с хостом, поэтому внешний контур — снаружи:
+
+- `.github/workflows/uptime.yml` в `vps-infra`: cron `*/10`, curl `https://ai.` и
+  `https://llm.` с раннеров GitHub, 3 попытки → при провале Telegram (secret
+  `TG_BOT_TOKEN`, чат владельца). Секрет ставится через API с libsodium sealed box
+  (`pynacl` в отдельном venv, не системный); токен в логи не попадает — GitHub
+  маскирует. Дрилл: `workflow_dispatch` с `extra_url=https://httpbin.org/status/500`,
+  сообщение приходит с префиксом `[ТЕСТ]`.
+- **GitHub отключает `schedule` в публичных репо после 60 дней без активности** —
+  `uptime-heartbeat.timer` (раз в месяц) дописывает строку в
+  `maintainer/uptime-heartbeat.txt`, watcher коммитит. Без этого монитор молча умирает.
+- healthchecks.io как второй (более точный) контур: скрипт `deadman-ping.sh` + таймер
+  уже стоят, нужен только ping-URL в `/etc/deadman-ping.url`. **Главная засада:
+  регистрация там email-based (magic link), автоматически из консоли не создаётся.**
+
 ## Проверка
 
 `install.py check` печатает контейнеры/health, число таблиц, локальные HTTP,
