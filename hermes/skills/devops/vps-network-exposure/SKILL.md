@@ -87,6 +87,21 @@ Reload, don't restart: `sshd -t && systemctl reload ssh` keeps existing sessions
 - **Closing a port is a state change → gated.** Give the exact rules, the blast radius («контейнеры из 172.18 не затронуты») and the verification command, then wait for «Да».
 - **A privileged helper container is exposure of its own kind.** `privileged: true` + `pid: host` + `/var/run/docker.sock` + `/:/mnt/host` means host-root RCE from inside; when such a container is unused, name those four facts when proposing removal — they are the reason it matters more than an open port.
 
+## fail2ban (установлен 2026-10-31)
+
+Защита от SSH-брутфорса (было ~2.5k попыток/сутки). `fail2ban` 1.0.2, `enabled`, автозапуск.
+Конфиг: `/etc/fail2ban/jail.local` (перекрывает `jail.conf` + `jail.d/defaults-debian.conf`, где sshd уже включён).
+
+- `[DEFAULT]`: `findtime=1h`, `maxretry=4`, `bantime=1d`, `bantime.increment` до 4 недель, `backend=systemd`
+  (нужен `python3-systemd`), `ignoreip` = loopback + 10/8, 172.16/12, 192.168/16 (иначе можно забанить docker-сети).
+- `[sshd]`: `mode=aggressive` — ловит и Invalid user, и Failed password.
+- **Action по умолчанию на 24.04 — `nftables`**, а не iptables: создаёт свою таблицу `inet f2b-table`
+  (set `addr-set-sshd` + chain `hook input priority filter - 1`, `reject with icmp port-unreachable`).
+  Поэтому в `iptables -S INPUT` банов **не видно** — смотреть `nft list table inet f2b-table`.
+  С `fw-guard-postgres` в `table ip filter` не конфликтует.
+- Баны переживают `systemctl restart fail2ban` (sqlite `/var/lib/fail2ban/fail2ban.sqlite3`); проверено — 12 IP вернулись.
+- Ручной бан ретроактивно: `fail2ban-client set sshd banip <ip>`; снять — `unbanip`. Авто-скан журнала начинается с момента старта, старые атаки сами не подхватятся.
+
 ## Related
 
 - Which services exist, their ports and domains: `ai-stack` skill.
