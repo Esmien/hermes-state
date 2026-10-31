@@ -100,6 +100,23 @@ Operational detail for all of the above (inventory, block vs delete, DB audit):
 
 ## Pitfalls
 
+- **`stream` must be read before you force it.** Setting `body['stream'] = True` and then
+  deciding "client wanted a stream?" always answers False, so the gateway returns an
+  aggregated JSON to a caller that expects SSE. LiteLLM reports it as
+  `APIConnectionError: openai closed the responses stream before any terminal event` — 100%
+  reproducible on `/v1/responses`, invisible on `/v1/chat/completions`.
+- **Always synthesise a terminal event.** If the upstream stream ends without
+  `response.completed|incomplete|failed`, emit a synthetic `response.completed` yourself;
+  otherwise the proxy turns a merely truncated answer into a hard error.
+- **Upstream rejects `max_output_tokens < 16`**; clamp every `max_tokens`/
+  `max_completion_tokens` to `max(16, int(value))`.
+- **`/model/update` bookkeeping is treacherous.** Pass `model_info.id` and the full
+  `litellm_params`; then re-read `/model/info` and assert `blocked` **per deployment id**.
+  After a rename the flag can end up on the wrong row, which silently leaves the grey
+  route live and looks like a gateway bug.
+- `order` in `litellm_params` does not give strict priority under `simple-shuffle` — for a
+  real "primary → fallback" chain put the secondary in its own model group and declare it
+  in `router_settings.fallbacks`.
 - `ext_agent_host_id` must be a hyphenated **UUIDv4** with `urn:uuid:` prefix; a hex
   machine-id gives `invalid_authorize_request` / `param: ext_agent_host_id`.
 - Host-ID and client-id must persist; restarting or re-signing-in must not mint a new host.

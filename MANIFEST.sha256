@@ -106,7 +106,7 @@ a50279800395099308a9ee70885353b3e27cb3c4498f0c03c4cf545eb924d3f1  ./hermes/skill
 f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skills/devops/llm-route-bench/scripts/ab_bench.py
 8448c5899b2ffab423b675e9ff1c24f808f95fc736d3d010d72fcb8d3007e9c6  ./hermes/skills/devops/llm-route-bench/scripts/code_bench.py
 a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skills/devops/llm-route-bench/scripts/code_bench_hard.py
-7a360a01eff8023240d7000d8d3fb1b5f6b4a51904228d9e88025498f81db35f  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
+db774827231f115cab2f64ca33d98068f59885d8d3fbc1b094e334c66ee86efe  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
 7738db0c4bde71e6280b8c32cb7139e90da18962e2f331cfc1e9fdba51fc6345  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
