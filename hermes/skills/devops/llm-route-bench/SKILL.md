@@ -75,6 +75,14 @@ harness: `scripts/code_bench.py`.
 - Every code bench must contain at least one **behavioural-preservation** task (rewrite a
   module without changing its API) and one **bug-hunt** in a multi-hundred-line file. Those
   two separate models; algorithm puzzles do not.
+- **Hard tier saturates too.** `scripts/code_bench_hard.py` (4 tasks / 51 hidden tests:
+  binary frame decoder with resync, thread-safe token bucket on an injected clock,
+  quirk-preserving refactor with decoy "improvements", expression parser with unary-minus
+  vs `^` traps) was passed 51/51 first-shot by both Sol 6.1 and Terra. Conclusion: at
+  frontier level, *single-shot* code generation no longer separates models — only agent
+  loops, UX/design taste and multi-file work do. Stop building harder puzzles; build a
+  multi-turn harness instead. Validate the harness with `--selftest` (reference must be
+  100%, each broken variant must fail its declared tests) before spending a single call.
 
 ## Pitfalls
 
