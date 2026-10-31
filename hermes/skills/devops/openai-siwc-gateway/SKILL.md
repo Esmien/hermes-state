@@ -78,6 +78,26 @@ so the order matters:
 
 Revert: `POST /model/unblock {"model_id": ...}`.
 
+## Group placement, priority and fallbacks
+
+- **Order, not fallbacks, expresses «subscription first».** Inside one group set the SIWC leg
+  `litellm_params.order = 1` and the other provider `order = 2`: the router serves order 1 and
+  only moves on when that deployment errors or 429s. A `fallbacks` entry is for crossing
+  *groups*, not for ranking legs of the same group.
+- **A group leg must be usable by the clients that will hit it.** An OpenCode-backed leg needs
+  `x-opencode-session`; if it has to serve non-OpenCode clients, inject it in
+  `litellm_params.extra_headers` when creating/updating that deployment — otherwise every call
+  lands on `400 MissingSessionID`.
+- **Timeout-driven fallback across providers** (e.g. free relay → paid/OpenCode leg): set
+  `litellm_params.timeout` on the primary deployments, then add
+  `router_settings.fallbacks: [{group: [target_group]}]` to
+  `/home/ai_service/ai-stack/ai/litellm/config.yaml` and `docker restart litellm`. Verify with
+  `GET /router/settings`; a normal call only proves the primary, so force a slow/failed primary
+  if the fallback itself matters.
+
+Operational detail for all of the above (inventory, block vs delete, DB audit):
+`ai-stack` → `references/litellm-model-admin.md`.
+
 ## Pitfalls
 
 - `ext_agent_host_id` must be a hyphenated **UUIDv4** with `urn:uuid:` prefix; a hex
@@ -94,3 +114,7 @@ Revert: `POST /model/unblock {"model_id": ...}`.
   `ssh -L PORT:127.0.0.1:PORT` or have them paste the failing redirect URL; the code is
   single-use and short-lived.
 - Authorize URLs and auth.json carry tokens — never echo them; scratch copies must be wiped.
+- **The upstream stream can close early**: `openai closed the responses stream before any
+  terminal event (response.completed...)`. It surfaces in LiteLLM as
+  `MidStreamFallbackError` and looks like a route failure. Treat it as intermittent upstream
+  behaviour: retry once inside the sidecar before reporting a defect.

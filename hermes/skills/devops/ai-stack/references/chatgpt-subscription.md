@@ -151,8 +151,17 @@ with their ids):
 - **`order` in `litellm_params` = priority inside a group.** Lower runs first,
   the next order takes over on failure or 429. Since LiteLLM cannot see the
   subscription quota, the fallback only fires after the backend rejects.
-- **No rename API.** Changing a deployment's `model_name` (or merging it into an
-  existing group) is delete + re-add with the same `litellm_params`.
+- **Renaming is an in-place update.** `POST /model/update` with
+  `{model_name, litellm_params, model_info:{id}}` moves a deployment into another group and
+  keeps its id and spend history. The body must carry the **full** `litellm_params`: a body
+  with only `model_name` returns 200 and silently leaves the old name in place. To retire the
+  superseded deployment, `POST /model/block {"model_id": …}` — reversible with `/model/unblock`,
+  unlike `/model/delete`.
+- **A bare `provider/model` name can answer without a matching row.** With only
+  `openrouter.anthropic/claude-opus-5.5` in the DB, a request for `anthropic/claude-opus-5.5`
+  still succeeds through that OpenRouter deployment (response ids `gen-…`, real money). Before
+  telling the owner a route is dead, send one request and attribute the answer by its id or by
+  the upstream log — the absence of a row proves nothing.
 - **A group's `mode` is per-deployment.** Mixing `chat` and `responses` inside
   one group makes behaviour depend on the endpoint, so keep a group homogeneous:
   subscribe deployments join an existing chat group as `mode: chat` (the provider
@@ -166,14 +175,13 @@ with their ids):
   OpenRouter-backed deployments keep `openrouter/` for a different reason: that
   relay breaks native routes, so they stay on chat-completions and should not be
   mixed with subscription deployments.
-- **A fallback leg can be the thing that fails.** `opencode/*` deployments demand
-  `x-opencode-session` and answer `400 MissingSessionID` without it, so a group
-  whose second leg is opencode works for tools that send the header and fails for
-  Open WebUI. Worse, that 400 masks the primary's real error (an invalid
-  parameter or an exhausted quota comes back as `MissingSessionID`). When a group
-  is meant to serve the chat UI, the fallback leg must not require client
-  headers — check by issuing one deliberately invalid request and reading whose
-  error comes back.
+- **A fallback leg can be the thing that fails — but a bare curl is not the client.**
+  `opencode/*` deployments demand `x-opencode-session` and answer `400 MissingSessionID` when
+  the header is missing; Open WebUI forwards it itself, so a group whose second leg is OpenCode
+  works for the chat UI and fails only for hand-rolled probes. Do not judge the leg broken from
+  a curl without the header — reproduce with the real client, and if a non-OpenCode consumer must
+  use that leg, inject the header in `litellm_params.extra_headers`. Also remember that a 400
+  from that leg can mask the primary's real error (invalid parameter, exhausted quota).
 
 ## Reasoning effort on these routes
 
