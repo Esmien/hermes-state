@@ -162,6 +162,9 @@ https-коды доменов и число активных таймеров, �
   только после того, как его туда положили; удалённый с хоста файл из репо
   не исчезает (удаления не пропагируются сознательно).
 
+- **Таймер без своего `.service` не стартует:** `systemd` пишет `Refusing to start, unit X.service to trigger not loaded`, а `enable --now` при этом молча падает (`check=False`). `step_units` теперь сам добавляет `<name>.service` для каждого таймера, если такой файл есть в `assets/host/systemd/`. Симптом после добавления нового таймера в `CORE_TIMERS`: `is-enabled` = enabled, `is-active` = inactive.
+- **`install.py check` печатает `fail2ban: active` и `nginx rate-limit: да`** — после переезда это первое, что надо смотреть вместе с `таймеров активно: N/M`.
+
 ## Подводные камни, найденные при сборке
 
 - `curl | bash` забирает stdin: bootstrap делает `exec </dev/tty` последней

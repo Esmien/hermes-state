@@ -110,7 +110,7 @@ db774827231f115cab2f64ca33d98068f59885d8d3fbc1b094e334c66ee86efe  ./hermes/skill
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
 7738db0c4bde71e6280b8c32cb7139e90da18962e2f331cfc1e9fdba51fc6345  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
-db24192c243f799e04e0c24d8461d07cadc20c1b486728fae7fb5aad25c1b92e  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+b9777feaca2622721a7bc6039b72cc6b50afdc91bd3f6d3365012ec135757c7b  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
 c62e21e1d73acc3235557d2775b2ab2a90eafddf6ebd41cd104c9bb43c4f35f9  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
