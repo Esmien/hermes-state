@@ -41,7 +41,16 @@ install.py --bundle <path|url> --restore   # восстановление БД +
 install.py --skip tls,restore --only verify
 ```
 
-Шаги идут в порядке `preflight → … → hermes`, каждый идемпотентен.
+Шаги идут в порядке `preflight → … → hardening → tls → verify → hermes`, каждый идемпотентен.
+
+**`hardening`** (до `tls`, ибо vhost'ы ссылаются на зоны): ставит fail2ban +
+`python3-systemd`, пишет `/etc/fail2ban/jail.local` (sshd, `maxretry=4`/1ч, бан 1д,
+инкремент до 4 недель, `ignoreip` включает 10/8 + 172.16/12 + 192.168/16 — иначе
+забанит docker) и `/etc/nginx/conf.d/zz-ratelimit.conf` (`llm_api` 10r/s,
+`webui_api` 8r/s, `conn_per_ip`). `vhost_ssl()` добавляет лимиты по порту
+бэкенда: 4000 — server-level, 8080 — только `location /api/` (статика без
+лимита, иначе F5 даёт 429 на чанках). Проверка: `install.py check` печатает
+`fail2ban: active` и `nginx rate-limit: да`.
 
 ## Правила, которые нельзя нарушать
 
