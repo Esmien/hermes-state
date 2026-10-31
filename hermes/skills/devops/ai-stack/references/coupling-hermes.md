@@ -32,6 +32,24 @@
 - **Dead-key cleanup done:** `/root/.hermes/.env` `OPENROUTER_API_KEY` replaced with a working key (the old one answered `401 User not found`, and it also backed the now-removed `inkling` alias — that alias was deleted 2026-10-19). The stack's `ai/.env` `OPENROUTER_API_KEY` is dead too and unused: working OpenRouter traffic runs through DB credentials (`LiteLLM_CredentialsTable`: `Openrouter LiteLLM`, `OpenRouter ImgGen`, `OpenRouter VideoGen`), and `GET /credentials` masks them (`sk-…***`, 8 chars) — the value is not readable through the API, so a replacement must come from the owner.
 - **BLOCKER: the chain is inert — every OpenRouter key available to Hermes is dead.** `/root/.hermes/.env` `OPENROUTER_API_KEY` answers `401 {"error":{"message":"User not found"}}` on `/api/v1/key` AND on a real `/chat/completions` call (verified 2026-10-19); `hermes auth list` shows it as the only credential, so the `inkling` alias (`openrouter/thinkingmachines/inkling:free`) is broken too. **Do not "fix" this by copying the stack's `ai/.env` `OPENROUTER_API_KEY`: that one fails identically.** Working OpenRouter traffic here runs through DB credentials (`LiteLLM_CredentialsTable`: `Openrouter LiteLLM`, `OpenRouter ImgGen`, `OpenRouter VideoGen`), and `GET /credentials` masks them (`sk-…***`, 8 chars) — the value is not readable through the API. A fresh key (OpenRouter or another provider) must come from the owner.
 
+### Diagnosing a fallback episode
+
+- Start in `~/.hermes/logs/agent.log`: `grep 'Fallback activated'` gives the episode
+  timestamps and which tier caught it; read *upwards* from each hit for the cause —
+  `EmptyStreamError` (HTTP 200 with an empty SSE body, no `finish_reason`) is a different
+  defect class than 5xx/429/connection errors and points at Open WebUI, not upstream.
+- Then check `LiteLLM_SpendLogs` in the same window and classify: **no rows + OWUI access
+  log 200** = the request died inside Open WebUI and was never forwarded (its log stays
+  silent); **`status='failure'` rows** = gateway/upstream, read `metadata->>'attempted_fallbacks'`;
+  **success rows with real completions** = the stream was cut between Open WebUI and the
+  client while LiteLLM believed it delivered.
+- Correlate with `prompt_tokens` growth on the agent-loop group: failures clustering at
+  150k+ prompts while small probes pass means a giant-context streaming defect, and a
+  small-prompt bench scoring 100% on both models then proves nothing about it.
+- Keep the guardian separate: `service.*` `400 MissingSessionID` rows paired with
+  `guardian returned an empty answer … escalating` is the aux path failing, never evidence
+  about the main loop — do not mix the two verdicts.
+
 ## System-prompt layering (Open WebUI preset vs Hermes)
 
 - **The VPS_ADMIN persona is NOT part of Hermes' prompt — it lives in the Open WebUI preset.** `webui_db.model` row `id='vps-admin-hermes'` holds it in `params.system` (next to `temperature`/`max_tokens`); Open WebUI **prepends** it to whatever system message arrives (`utils/misc.py::add_or_update_system_message(append=False)` → `f'{preset}\n{request system}'`). Hermes' own prompt is only the `state.db.system_prompts` blob that starts «You are Hermes Agent, built by Nous Research…». Read the preset without dumping it: `select params::text from model where id='vps-admin-hermes'`.

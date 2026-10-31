@@ -133,6 +133,16 @@ harness: `scripts/code_bench.py`.
   from `/model/info` before answering «это по подписке или по API?»: `openai/gpt-*` on top
   of `chatgpt/*` is plan quota against the Codex backend, `openai/*` is metered API. Recipe
   and the official alternative: `references/subscription-routes.md`.
+- **Open WebUI display names are not API ids.** The UI shows «(Hermes) DeepSeek v4.1 Flash»
+  while the API serves `hermes.deepseek/deepseek-v4.1-flash` — resolve every name through
+  `GET /api/v1/models` before benching; a guessed id either 404s or silently benchmarks
+  a different route.
+- **`hermes.*` routes via Open WebUI strip `usage` (`in=0/out=0` on every call).** Token
+  and cost columns are then unusable — rank by pass rate, then latency, and say the spend
+  is unmeasurable on that route instead of printing `$0.00` as if it were free. Same logic
+  in reverse: a probe that errors while the task set passes means the *probe shape* is
+  wrong (a reasoning route enforcing a minimum `max_tokens`), not a broken route — raise
+  `max_tokens` and re-probe instead of flagging the route.
 
 ## Files
 

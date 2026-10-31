@@ -59,7 +59,7 @@ b5c30caea4687add620669fdadd1d657205c4520171543ff8a1672dc50f15ba0  ./hermes/skill
 748bb7e2addaec3a9228f0d50bee7c3b0d2d4944edc216767d89690659087c51  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 055726f7b857418c013c4062923acee90280a454d5f12be7760568160c0eba3e  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
-81babc7468bf6f07194f4de6f6bd9d913b52ed404ba20718b56e56e04ec72f38  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
+d49fd78d825e8b54685126619c61372e152081ff15cff668d835f446284c7036  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
 4899c677e4fab9179ac1009d0c75b7cced3e7b40e485d81694b4a94f830e1bfa  ./hermes/skills/devops/ai-stack/references/disk-and-memory.md
 81548cf239d36786d338994016df929475a5abe81057bbabd0f401f3b1d6905f  ./hermes/skills/devops/ai-stack/references/enricher-system-legacy.md
 4ca891acafa249bc7f4cab7c375b4f569cb7f48eae57651fe7edfd4e6133c703  ./hermes/skills/devops/ai-stack/references/enricher-system.md
@@ -98,7 +98,7 @@ da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skill
 ee146464fb8b4fcf0272dff5912d82ef6d29ad8dcd5a8e7510de6266af1481b0  ./hermes/skills/devops/docker-compose-traps/SKILL.md
 ed20fcd212379a0d96f986f5bc32a44579a1d6fb0a369f6e4b3e51de994318c7  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
-19c89517e355a4b0c2b509ee19df6f63806bb73cfda184520d599fe4ef8897b4  ./hermes/skills/devops/llm-route-bench/SKILL.md
+d640faef8ed850ea38e2564a1e536e3e4ecdda467531762a6b8cdb73ebfd87ba  ./hermes/skills/devops/llm-route-bench/SKILL.md
 2af389e91336a6a8769124ec2d237935d72155963d1549d63eef9def98953691  ./hermes/skills/devops/llm-route-bench/references/access-pricing.md
 a50279800395099308a9ee70885353b3e27cb3c4498f0c03c4cf545eb924d3f1  ./hermes/skills/devops/llm-route-bench/references/code-gen-bench.md
 67a29c2c5d1d68c24bfb0f4400c57a17baeb37b59b393dc40aea40b83eeeb3e9  ./hermes/skills/devops/llm-route-bench/references/route-fingerprinting.md
