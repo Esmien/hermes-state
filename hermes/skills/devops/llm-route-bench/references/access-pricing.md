@@ -47,6 +47,47 @@ Google: AI Pro ~$19.99 includes Gemini 4 Argon in the Antigravity app and CLI; l
 are published as «more rate limits» plus a credit pool, not as numbers — say so rather
 than inventing a count.
 
+Claude:
+
+- **Free** is a real $0 plan, no fixed published count: a rolling 5-hour allowance,
+  ~15-40 messages, ~30-100/day, and it scales down with long chats, attachments and
+  extended thinking. Sonnet + Haiku, 1M context; Opus/Fable are paid. No Claude Code,
+  no API credits, no Console access — so there is nothing to plug into a coding client.
+- **Pro $20** = claude.ai plus the official Claude Code, under session and weekly caps.
+  It explicitly does **not** include Console API usage (Anthropic's own help centre says
+  so) — API is a separate wallet billed per token, with a small minimum top-up.
+- **Max** buys more quota on the same products, still not API.
+- Quote the planes the owner actually needs: «подписка даёт X» and «API даёт Y» are two
+  separate purchases, and paying for one never satisfies the other.
+
+## Subscription → third-party client: the vendor matrix
+
+The recurring question is «вот у меня подписка, подключу её в OpenCode / Cline / агент».
+Answer from this rule, not from the client's feature list:
+
+- **Subscription ≠ API key.** No consumer plan of any vendor converts into an API
+  credential; API is metered billing in the vendor console. Anything claiming otherwise
+  is a proxy, a resale, or a ToS violation.
+- **Subscription OAuth in third-party clients is a per-vendor permission, and most
+  vendors revoked it.** Anthropic blocked subscription OAuth for third-party tools — only
+  the official Claude Code works on a Pro/Max account; proxy plugins that re-add it are a
+  ban risk. Google shut the consumer-tier path down (AI Pro / Ultra / Code Assist for
+  individuals), breaking the OpenCode Gemini-OAuth plugins, and its CLI FAQ calls
+  piggybacking on that OAuth a terms violation. OpenAI still lets Codex OAuth serve
+  OpenCode through the plan allowance — that is the exception, not the pattern.
+- **Order of checks before saying yes:** does the plan include an API/Console account
+  (no → stop), does the vendor allow plan OAuth outside its own client (no → stop), is
+  there an official first-party CLI that the client merely wraps (that is the only
+  supported shape).
+- **Never present a proxy/plugin workaround as the answer.** Name it once as a ToS/ban
+  risk with no support, then give the supported route: vendor API key, or the vendor's
+  own CLI on the plan.
+- Subscription caps are anti-arbitrage, not stinginess: agentic runs are tens of
+  thousands of tokens per task, so a flat $20 on agent traffic is instantly unprofitable
+  and gets closed the moment it is used. Say this plainly when the owner reads the
+  restriction as «душат обычных юзеров» — the $20 tier is a funnel into Max and API, and
+  enterprise seats plus API volume are where the vendor's revenue actually is.
+
 ## RU resellers
 
 - Markup math: their ₽/1M ÷ (official $/1M × FX). ~2x is typical (ProxyAPI);

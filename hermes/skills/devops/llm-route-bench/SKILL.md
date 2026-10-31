@@ -19,9 +19,10 @@ cheap model against an expensive one, or after any change of a route/credential 
 gateway. The point is to separate **model quality** from **route quality** with numbers.
 
 Also use when the question is money rather than quality: «где взять модель дешевле»,
-«стоит ли подписка», «какие там лимиты», «я не зря заплатил». Read
-`references/access-pricing.md` before quoting any number — it carries the official price
-ladder, the discount levers and the per-plan allowances.
+«стоит ли подписка», «какие там лимиты», «я не зря заплатил», «можно ли затащить
+подписку в OpenCode / другой сторонний клиент». Read `references/access-pricing.md`
+before quoting any number — it carries the official price ladder, the discount levers,
+the per-plan allowances, and the subscription-vs-API rule per vendor.
 
 ## Rule zero
 
@@ -112,7 +113,8 @@ harness: `scripts/code_bench.py`.
 
 - `references/access-pricing.md` — official per-token ladder, discount levers (cache,
   batch/flex, long-context cliff, reasoning effort), subscription allowances per plan,
-  reseller markup math, and how to answer «стоит ли оно того».
+  reseller markup math, the subscription-vs-API rule and the per-vendor matrix for
+  plugging a plan into a third-party client, and how to answer «стоит ли оно того».
 - `scripts/ab_bench.py` — probe + 8 deterministic tasks + price lookup from `/model/info`.
   Reads `LITELLM_MASTER_KEY` from `/home/ai_service/ai-stack/ai/.env`, never prints it.
 - `references/code-gen-bench.md` — model-name resolution in the gateway, harness design,
