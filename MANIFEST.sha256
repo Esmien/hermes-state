@@ -88,7 +88,7 @@ b201d073a6374940cc7a90bf418f3af9f7d5315c67f3f633edcea78012fb8fed  ./hermes/skill
 36432d6a9677006a068a5ceefbc2e9995a298d98576e58372b92173b77126f44  ./hermes/skills/devops/ai-stack/scripts/probe-approval-guardian.py
 57a2a5e8f2f2395dfb18a9a37ebed061a5272f43b7737f966462483ea4e03f2a  ./hermes/skills/devops/ai-stack/scripts/probe-media-endpoints.py
 5f28a41cf05b85f901f2eceb62a441d72fd71042ea7e992a578d2a8192e72982  ./hermes/skills/devops/ai-stack/scripts/probe-owui-terminal.py
-3bacd07893c562ced626881a7b478e7531f4273618c1fbb5321fea072232b987  ./hermes/skills/devops/ai-stack/templates/mcu-assistant-system-prompt.md
+553accbaf6031aa7df7687b7ecb02213c8eba071b5226f0a974f230c07e86904  ./hermes/skills/devops/ai-stack/templates/mcu-assistant-system-prompt.md
 e04067631103fb7051c50bfb3de0962436243fe2c5ea74ada7690c37d877ad35  ./hermes/skills/devops/container-incident-response/SKILL.md
 244093d67fc1c519a82fe5fbd107a2cea7b8127de5d5e030001163f9bae0c53f  ./hermes/skills/devops/container-incident-response/references/agent-wakeup.md
 891b02a8d8af2ff6fe959e205bcb8a343270686135367050b673524c31c304e7  ./hermes/skills/devops/container-incident-response/references/detector-and-thresholds.md

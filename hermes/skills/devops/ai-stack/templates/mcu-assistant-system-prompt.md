@@ -90,11 +90,12 @@ Arduino компилирует папку, а не файл: создай /works
   attachments into `/workspace` as files, not as text in the prompt: without an
   explicit order to `ls`/`cat` the model denies seeing the file or retypes it
   from the message — the exact failure that prompted the block.
-- Live model: `(MicroControllers) GPT-6.1 Terra`, id `igor-gpt-61-sol`
-  (`base_model_id: chat.openai/gpt-6.1-terra`). Patch it through
-  `GET/POST /api/v1/models/model?id=…` + `/api/v1/models/model/update`; the
-  update payload must carry back `meta` and `params` unchanged apart from the
-  edit, or `terminalId`, controls and the profile image are lost.
+- Live model: `(MicroControllers) GPT-6.1 Terra`, id `mc-assistant`
+  (`base_model_id: chat.openai/gpt-6.1-terra`). Slug cannot be edited in place:
+  OWUI has no rename, so it is create-new-id + delete-old — copy `name`,
+  `base_model_id`, `meta` (incl. `terminalId`, profile image) and `params`
+  verbatim, verify, only then delete. Old chats keep the stale model id and
+  show the model as unavailable.
 
 ## Companion settings
 
