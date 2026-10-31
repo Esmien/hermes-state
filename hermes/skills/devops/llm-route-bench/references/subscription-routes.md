@@ -54,7 +54,10 @@ Authorization (`https://auth.openai.com/api/accounts/authorize`, URL-encoded):
 
 - `client_id=dynamic_agent_client` for first registration; the callback returns the issued
   `client_id` (`oaiapp_...`) — store that one, never `dynamic_agent_client`.
-- `agent_name_hint` (app name), `ext_agent_host_id` (stable per host, e.g. `urn:uuid:<machine-id>`).
+- `agent_name_hint` (app name), `ext_agent_host_id` (stable per host). Host id must be
+  `urn:uuid:` + a **hyphenated UUIDv4**; a raw machine-id hex string is rejected with
+  `invalid_request_error` / `param: ext_agent_host_id` on the consent page. Persist it once
+  and reuse it for that host.
 - `response_type=code`, `state`, `nonce`, `code_challenge_method=S256`, `code_challenge`.
 - `scope=openid profile email offline_access resource.invoke chatgpt.tokens.use.direct`.
 - `resource=https://api.openai.com/v1`.
@@ -81,7 +84,21 @@ JSON arguments. `function_call` present → the bridge is worth building; prose 
 migrating is pointless regardless of how official the flow is, and the plan stays on the
 current route with a known risk.
 
-## 5. Do not accept a second-hand description of our own config
+## 5. Probe result: the official path does tool calling (31.10.2026)
+
+Run end-to-end on this VPS: dynamic registration → `oaiapp_…` client id, scopes include
+`chatgpt.tokens.use.direct`, `/v1/models` returns 10 visible slugs (`gpt-6.1-sol`,
+`gpt-6.1-terra`, `gpt-6-astra`, `gpt-6-luna`, `gpt-6-sol`, `gpt-5.6-*`), and one
+`/v1/responses` call with a `strict` tool came back as a clean
+`response.output_item.done` → `function_call` (`name`, `arguments` JSON) — no namespace
+prefixes, no prose. So the chat→responses bridge is worth building; cost is plan quota, $0.
+Remaining work for a migration: a host sidecar that owns the creds (0600, outside scratch),
+refreshes the token, accepts `/v1/chat/completions` and `/v1/responses`, and calls upstream
+with `store:false` + `stream:true`; LiteLLM then mounts it as an openai provider via
+`api_base`. Unresolved: buffering for non-streaming clients and manual re-auth on refresh
+expiry.
+
+## 6. Do not accept a second-hand description of our own config
 
 The owner may paste another model's audit (including a confident one with links) that
 claims something about this stack. Verify by reading the installed package and
