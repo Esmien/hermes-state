@@ -77,12 +77,18 @@ all reviewers is part of the fairness.
 
 ## Baseline on this stack (re-run before trusting)
 
-Easy tier: everything 100%; leaders are the fast ones (Luna ~4.6 s, Haiku ~6.9 s per task),
-slowest is Muse Spark (~20 s, 13.5k reasoning tokens).
+Tier 1, пять задач / 59 тестов: Haiku 59/59 (6.9 s), Muse Spark 59/59 (20 s, 13.6k reasoning),
+MiMo 58/59 (4.4k токенов — самый экономный), Luna 58/59 (4.6 s — самая быстрая),
+GLM 38/38 на трёх задачах (в первом раунде без заголовка сессии), **DeepSeek 55/59** —
+единственный, кто переименовал публичную функцию (`total` → `to`) при «чистом переписывании».
 
-Hard tier: all frontier routes score the same on bug-hunt (8/10 — everyone finds the missing
-retry, nobody finds the ms/seconds mismatch). Terra is 3-4x faster than Astra for the same
-score; Terra and Sol ~7-22 s, Astra ~30 s. Argon reports `reasoning_tokens: 0` on this route,
-which is a route property, not a model property.
+Tier 2, пять задач / 48 тестов: Terra, Sol, Astra — 46/48, Argon 45/48 (упал тест на
+конкуренции). Все провалили одно и то же: не нашли несовпадение единиц в `_backoff` в файле
+на 472 строки. Terra 7.7 s против Sol 22 s и Astra 30 s при равном счёте.
 
-Cross-review: 0 of 16 reviewer×file pairs named the planted unit defect.
+Что это значит для ролей: Terra — дефолт (втрое быстрее и вдвое дешевле при том же счёте),
+Sol — эскалация после двух неудач, DeepSeek — код с обязательной проверкой имён и сигнатур,
+Muse Spark — фоновый объём (плоская подписка OpenCode, 20 s никого не волнуют).
+
+Cross-review: 0 из 16 пар «ревьюер × файл» назвали заложенный дефект единиц; на пустом
+промпте Astra и Terra выдали «багов нет», Sol честно ответил «пришлите код».

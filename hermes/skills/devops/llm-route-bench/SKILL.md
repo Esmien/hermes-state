@@ -103,6 +103,10 @@ harness: `scripts/code_bench.py`.
   every model acting as reviewer, including the strongest ones. To measure review ability,
   ask explicitly to compute the value for a few inputs and compare it with the docstring;
   «найди баг» alone returns stylistic findings and misses the arithmetic.
+- A route can answer with a **different model** than its name promises, and can strip
+  reasoning while still doing the work. Neither is visible in the name or in self-description;
+  decide with the tokenizer fingerprint in `references/route-fingerprinting.md` (constant delta
+  vs proportional delta), never with «кто ты» or the UI label.
 
 ## Files
 
@@ -113,5 +117,7 @@ harness: `scripts/code_bench.py`.
   Reads `LITELLM_MASTER_KEY` from `/home/ai_service/ai-stack/ai/.env`, never prints it.
 - `references/code-gen-bench.md` — model-name resolution in the gateway, harness design,
   the six-task ladder, grading gotchas, cross-review protocol, baseline results.
+- `references/route-fingerprinting.md` — как отличить подмену модели и вырезанные
+  рассуждения по `usage.prompt_tokens` и полям ответа, с порядками величин по семействам.
 - `scripts/code_bench.py` — hidden-test generator bench: four tasks (truncate, CSV, legacy
   refactor, 250-line bug hunt), runs inside the sandbox, writes JSONL.
