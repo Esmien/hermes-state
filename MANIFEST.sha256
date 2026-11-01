@@ -110,9 +110,11 @@ b2a2f042ece1a5b57c714b32de75ca876b697b761c92abb0e276acd3ea3688f5  ./hermes/skill
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
 7738db0c4bde71e6280b8c32cb7139e90da18962e2f331cfc1e9fdba51fc6345  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
-334f36f34676320c0622f469d54edc83676ad240f900e4b77606fb5c040e9081  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+470cd8f113577cf5c7a94fd9e3e63346364e105a05d1b8d32346f7e6b20be290  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+5837a63d5629afd86761b3a88d293e4bab8797010928ee4c7c123f1e95b15555  ./hermes/skills/devops/vps-infra-installer/references/installer-pitfalls.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
-2d09b11177636959edeb783a7297b9751ea18348f7c4c0683f9d116cab47f667  ./hermes/skills/devops/vps-network-exposure/SKILL.md
+5d7251b081f75bb9794ce1690538092a195babc08dbded4298cb4bbd281e09c7  ./hermes/skills/devops/vps-network-exposure/SKILL.md
+76fbf48e513228977cc70d1ad367a57691c52a88ebebc6ae027444d4afb84687  ./hermes/skills/devops/vps-network-exposure/references/vpn-and-https-ingress.md
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
 918971595010770b622cd8cd01580d166146ce98f021a66960e49f7b4ba09b37  ./hermes/skills/devops/webui-ios-icons/SKILL.md
 482f644a1a22de3d85d84e7ce4da9e65ce2a22db90110f8c12e15ff5f5ca8b32  ./hermes/skills/devops/webui-rebranding/SKILL.md
