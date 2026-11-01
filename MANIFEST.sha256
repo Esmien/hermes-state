@@ -112,7 +112,7 @@ d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skill
 7738db0c4bde71e6280b8c32cb7139e90da18962e2f331cfc1e9fdba51fc6345  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
 334f36f34676320c0622f469d54edc83676ad240f900e4b77606fb5c040e9081  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
-c62e21e1d73acc3235557d2775b2ab2a90eafddf6ebd41cd104c9bb43c4f35f9  ./hermes/skills/devops/vps-network-exposure/SKILL.md
+ec563cd3ca087edff7a2b36dcb6367e04f75cbf151dfbadf3875ba06a1d3728f  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
 918971595010770b622cd8cd01580d166146ce98f021a66960e49f7b4ba09b37  ./hermes/skills/devops/webui-ios-icons/SKILL.md
 482f644a1a22de3d85d84e7ce4da9e65ce2a22db90110f8c12e15ff5f5ca8b32  ./hermes/skills/devops/webui-rebranding/SKILL.md
