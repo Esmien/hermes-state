@@ -215,6 +215,14 @@ terminal(command="tmux new-session -d -s resumed 'hermes --resume 20260225_14305
 - **Ink TUI** (`hermes --tui` or `display.interface: tui`) — terminal UI with docked widget apps — `references/tui-widgets.md`.
 - **OpenAI-compatible proxy** (`hermes proxy`) — a local OpenAI API backed by whichever OAuth provider you're signed into. Point Codex CLI, Aider, Cline, or any script at it — no API key.
 
+## Skill maintenance workflow
+
+When restructuring skills, complete the semantic migration rather than merely getting below a size limit:
+1. Read the existing skill and relevant references; locate an immutable pre-edit version in version control or a backup before removing or summarizing substantial material.
+2. Keep the essential procedure and always-applicable safety rules in `SKILL.md`; move conditional depth into a small set of topical references, linked at the relevant decision point. Do not reduce the main file to an index or optimize for minimum length at the expense of usefulness.
+3. Compare every original section against the resulting main file and references, restore meaningful commands, caveats and verification steps, then check links and size. Report any missing baseline or incomplete comparison explicitly; a valid link and a shorter file alone do not prove preservation.
+4. Finish the requested restructuring and verification in one pass rather than stopping at the first acceptable size or asking the owner to prompt the next obvious step. Use the explicitly requested fallback model when the owner asks for it; verify the chosen route and independently check its deliverables.
+
 ## Hard Invariants (never violate, regardless of what you loaded)
 
 - **`SKILL.md` has a hard ~100 000-character cap, enforced after *every* op in a `skill_manage` batch.** A skill that has grown past it cannot be patched at all: the call aborts with `content is N characters (limit: 100 000)` and rolls the whole batch back, even for a one-line fix. Free space **first** — put the shrink as op #1 of the same batch and keep the net delta negative — or move topic depth into `references/` and leave a pointer. Check with `wc -c` before editing; a file already near 100k needs the shrink before the fix, not after.
