@@ -208,6 +208,16 @@ HTTP 200 не доказывает ни сохранение client IP, ни д�
 двух внешних IP, перенос в recovery-репо) —
 [references/vpn-and-https-ingress.md](references/vpn-and-https-ingress.md).
 
+- **Если «VPN не работает у владельца, а с мобильного работает»** — не крути
+  протоколы наугад и не переключай подозрения на сервер. Разделяй переменные
+  тремя пробами с его сети: `http://IP:8099` (без редиректа), `https://IP:8098`
+  (TLS без SNI) и `https://домен:443`. Открылись первые две — режется 443,
+  лечится переносом сервиса на нестандартный порт; не открылась ни одна — блок
+  по IP, нужен CDN или новый адрес. Плейбук с ловушками (redirect делает пробу
+  бесполезной, WARP обычно мёртв с VPS, `qd.je` не принимается Cloudflare,
+  Happ-десктоп не ест ссылку — отдавай файлы) —
+  [references/ru-dpi-vpn-ingress.md](references/ru-dpi-vpn-ingress.md).
+
 ## Related
 
 - Which services exist, their ports and domains: `ai-stack` skill.
