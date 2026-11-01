@@ -110,12 +110,13 @@ b2a2f042ece1a5b57c714b32de75ca876b697b761c92abb0e276acd3ea3688f5  ./hermes/skill
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
 7738db0c4bde71e6280b8c32cb7139e90da18962e2f331cfc1e9fdba51fc6345  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
-fb8bbb67d3c63813adcb4724889e045116105e1ec915c463be90f0da83bc742f  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+3f0dc3ee097a8d179ddab044dc48f4f87e491b89547cf5db1e96ff76ded12117  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 fb25245137aaadb91c33f66e75b863f8e4022f5816a74e36f6a23f193ee9dcac  ./hermes/skills/devops/vps-infra-installer/references/beszel-and-monitoring.md
 5837a63d5629afd86761b3a88d293e4bab8797010928ee4c7c123f1e95b15555  ./hermes/skills/devops/vps-infra-installer/references/installer-pitfalls.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
-52f4cd3da1971b91c4ff66642f3e651a124909c44aeb4078b65bc86f75348c78  ./hermes/skills/devops/vps-network-exposure/SKILL.md
+4d814a5f88f366c8f3b5c380801b16c08559b2cd30eb1f84f74926ba2d7a5150  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 67d18d34c23823a2f6cb5d82fcdf9fcd63b6acd9bf6490417cc82e74342128b6  ./hermes/skills/devops/vps-network-exposure/references/fail2ban-and-rate-limits.md
+ab456b1ef7adc430422fc1e33515314c9a1470e7b00a35d68488490b214f7f9c  ./hermes/skills/devops/vps-network-exposure/references/firewall-and-ssh.md
 76fbf48e513228977cc70d1ad367a57691c52a88ebebc6ae027444d4afb84687  ./hermes/skills/devops/vps-network-exposure/references/vpn-and-https-ingress.md
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
 918971595010770b622cd8cd01580d166146ce98f021a66960e49f7b4ba09b37  ./hermes/skills/devops/webui-ios-icons/SKILL.md

@@ -65,7 +65,7 @@ install.py --skip tls,restore --only verify
    любого прогона проверяй, что «отклонить» в боте работает: `signin failed:
    HTTP 400` в `/var/log/owui-signup-approver.log` = рассинхрон пароля
    (разбор и починка — skill `credential-login-verification`,
-   `references/open-webui-auth.md`).
+   `credential-login-verification` skill's `references/open-webui-auth.md`).
 2. **БД восстанавливаются только в пустые базы** или с явным `--restore`.
    Дамп старше 72 ч требует `--force-stale`. Bundle кладёт дампы в
    `backups/postgres/`, свежесть — по mtime.
