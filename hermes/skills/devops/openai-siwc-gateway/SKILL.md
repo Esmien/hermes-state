@@ -95,8 +95,7 @@ Revert: `POST /model/unblock {"model_id": ...}`.
   `GET /router/settings`; a normal call only proves the primary, so force a slow/failed primary
   if the fallback itself matters.
 
-Operational detail for all of the above (inventory, block vs delete, DB audit):
-`ai-stack` → `references/litellm-model-admin.md`.
+For model inventory and cleanup, see `ai-stack` → `references/model-provenance.md`; the block/unblock procedure is documented above.
 
 ## Pitfalls
 

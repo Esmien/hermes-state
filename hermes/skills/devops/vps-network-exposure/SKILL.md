@@ -34,7 +34,7 @@ A firewall-closed port and an app-rejected connection are different risks (`ECON
 5. **Prove reachability from outside.** Use a live TCP probe from an independent external host or multiple check-host.net nodes: request `https://check-host.net/check-tcp?host=IP:PORT&max_nodes=3` with `Accept: application/json`, then query `/check-result/REQUEST_ID` after a short delay. A completed success demonstrates TCP reachability from that node only, not application authentication or reachability from the user's network; null/pending, timeouts and errors are inconclusive without controls. Corroborate using current service logs and firewall counters, without exposing secrets. For PostgreSQL, `grep -c 'no pg_hba.conf entry' /var/log/postgresql/postgresql-*-main.log` shows real foreign hits but historical entries do not prove present reachability.
 6. **Report** with the verdict-first shape above. If nothing needs closing, say «ничего не открыто» and stop — no plan.
 
-`scripts/audit-exposure.sh` runs steps 1–5 read-only and prints the whole picture in one go; run it first, then drill into whatever it flags.
+Run `bash scripts/audit-exposure.sh` from this skill directory for a read-only local inventory (steps 1–4); it does not run the external reachability probe in step 5. Then drill into its findings and perform step 5 separately.
 
 ## Closing a port (durable)
 
