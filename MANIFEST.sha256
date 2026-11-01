@@ -1,7 +1,7 @@
 2a4a654d1fff361215d5fc961ebb5dc4675d5fd5080c650e965146a6136bf6c6  ./.github/workflows/uptime.yml
 c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
-2124b53e203a6e843936e2839ae08f5b3f1b4c0df366a7bb9d9c45c33bfec3c0  ./hermes/config.yaml
+98091b65bc39e59598fbd41f8e5881b70b003c6bfb6d536c95bd2ae82ff78c89  ./hermes/config.yaml
 b7fb69a8dea49023864050b747a15ccd319ee9aed3aeb44dd1f761246e19b704  ./hermes/cron/jobs.json
 fc6079629f3f1a802f2e5fe13a6d730bf9deaebd20fc0043ac79e311901cec0c  ./hermes/memories/MEMORY.md
 1994a24536e05c418d8680fe02655a16665baf3452dc7e650849ca43d6069210  ./hermes/memories/USER.md
@@ -98,7 +98,7 @@ da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skill
 ee146464fb8b4fcf0272dff5912d82ef6d29ad8dcd5a8e7510de6266af1481b0  ./hermes/skills/devops/docker-compose-traps/SKILL.md
 ed20fcd212379a0d96f986f5bc32a44579a1d6fb0a369f6e4b3e51de994318c7  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
-cefcf6ab3f67ab66af25f915d9d0fe9cb7276351de5acdc284a830ee1336b56c  ./hermes/skills/devops/llm-route-bench/SKILL.md
+da3e7db6fddde6bc2e39d0297d6ce821ee8766a7e001f18945bf92197674803f  ./hermes/skills/devops/llm-route-bench/SKILL.md
 2af389e91336a6a8769124ec2d237935d72155963d1549d63eef9def98953691  ./hermes/skills/devops/llm-route-bench/references/access-pricing.md
 a50279800395099308a9ee70885353b3e27cb3c4498f0c03c4cf545eb924d3f1  ./hermes/skills/devops/llm-route-bench/references/code-gen-bench.md
 5334fd44c25091435f60658e94bcbdeab331514c41c0610c0a08b62f0978da1b  ./hermes/skills/devops/llm-route-bench/references/route-fingerprinting.md

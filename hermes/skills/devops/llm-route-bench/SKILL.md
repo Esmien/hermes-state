@@ -48,9 +48,16 @@ for those tokens. Send `«Скажи одно слово: ок»` with `max_toke
    ```bash
    python3 scripts/ab_bench.py --probe deepseek/deepseek-v4.1-flash
    ```
-2. **Run the task set** (`--runs 2` for stability). Tasks are graded deterministically —
-   exact JSON keys, exact arithmetic, exact word count, exact tool name/args, two tool
-   calls inside one assistant message. No LLM judge, so the numbers are not opinions.
+2. **Choose tasks that match the owner's actual work.** For an agent comparison, use multi-step
+   incident investigations with isolated, read-only synthetic tools, misleading clues, partial
+   evidence, safe remediation, verification and rollback. Identical model IDs, prompts, tool
+   schemas and settings are mandatory; never substitute the current agent or another route.
+   Keep short deterministic tasks as protocol smoke tests, not evidence of agent superiority.
+   Run repeated trials where feasible; disclose when results are single-shot.
+   Score factual diagnosis, evidence, uncertainty, safety, verification and rollback separately
+   from JSON formatting. Validate graders with positive and negative examples: substring checks
+   can misclassify negation and cannot assess semantic safety. Manually review relevant answers,
+   label subjective judgments, and do not present an unchecked heuristic as an objective score.
 3. **Read the summary**: pass rate, median latency, `$/успех`. Compare cost per *successful*
    task, not per token.
 4. **Test the same model on a second route** before blaming the model. If the model passes
@@ -113,16 +120,14 @@ harness: `scripts/code_bench.py`.
 - A route that answers «ок» fine can still inject on the next call — injection is
   intermittent, so probe 3 times and trust the minimum, not the average.
 - Keep the spend visible: print `$/success` per model, not total only.
-- **A non-streaming pass is not a streaming pass.** A route can score 100% on every
-  non-stream task and still return only empty SSE deltas with no `finish_reason` on
-  `stream=true` (typical for a Responses-only upstream behind LiteLLM's chat bridge:
-  reasoning travels in Responses events the bridge drops). Hermes streams, so a route is
-  agent-ready only after a streaming probe that counts content-bearing vs empty chunks
-  and asserts `finish_reason` — the task set alone cannot certify it.
-- **Count logical calls in the spend log, not rows.** LiteLLM router retries multiply
-  spend rows: N identical `prompt_tokens` back-to-back with small completions is usually
-  one logical call retried (client attempts × router `max_retries`), not N users hammering
-  the route — divide before crying overload. State the rule explicitly
+- **Test the protocol and mode actually used by the agent.** A non-streaming pass does not
+  certify streaming. Inspect SSE event types, content/tool deltas and `finish_reason`: Responses
+  events on a chat endpoint can be misread as empty chat chunks. Do not infer which component
+  dropped data or blame hidden reasoning without tracing the wire. If streaming is disabled,
+  verify non-streaming tool calls end-to-end and don't require a streaming pass for that setup.
+- **Count logical calls in the spend log, not rows.** Retries can multiply rows, but identical
+  token counts and timing do not prove retries: correlate request IDs, attempt metadata and
+  client logs before attributing rows or billing. State the rule explicitly
   («Terra — дефолт, Sol — эскалация») and keep the baseline table in the reference. When the
   owner says «ты же хуесосил Terra», search the sessions for what was actually said and
   answer from that quote: a false admission rewrites the stack's routing on a misremembered
