@@ -1,7 +1,7 @@
 ---
 name: vps-network-exposure
 description: "Use when a port may be open to the internet."
-version: 1.1.0
+version: 1.2.0
 author: VPS Admin
 license: MIT
 metadata:
@@ -9,22 +9,187 @@ metadata:
     tags: [devops, firewall, iptables, ufw, docker, postgres, security, exposure]
 ---
 
-# Network exposure on this VPS
+# Network exposure audit & closure (this VPS)
 
-Use for public ports, host or Docker listeners, firewall and access-control audits, VPN ingress and safe port closure.
+## When to Use
 
-## Core procedure
+The owner asks «у нас <порт> наружу?», a new service/container gets a published
+port, a security review is requested, or something must be firewalled. Covers the
+host-level question: which sockets listen on a routable address, what filters
+them, and how to close one durably. Stack-specific service facts live in the
+`ai-stack` skill.
 
-1. Inventory host listeners with `ss -tlnp` and Docker publications with `docker ps`; inspect both because host services are not in Docker, and published ports can use DNAT. `0.0.0.0`/`[::]` can be routable; loopback is local only. Verify actual filtering and bind address rather than relying on container EXPOSE.
-2. Check `ufw status`, current iptables/nftables rules and service ACLs. An active UFW systemd unit does not mean the firewall is enabled. Do not enable UFW as a one-port fix; it may cut SSH and services.
-3. Run `bash scripts/audit-exposure.sh` from this skill directory for local inventory, then drill into findings. It does not test external reachability.
-4. Probe from an independent external network where appropriate; check current service evidence and counters. Local or same-host-container probes can be allowlisted. A successful external TCP test proves reachability from that source only, not app authentication or reachability from the owner's ISP; pending/null or a timeout alone is inconclusive.
-5. Report the verdict first, then concise evidence. Distinguish network reachability from app-level authorization. For changes give exact commands, impact and rollback, and obtain explicit approval; verify live access and persistence afterward. Do not expose secrets or unbounded logs.
+## Answer shape (owner preference)
 
-## Load relevant reference before changes
+**First line = verdict, then evidence, then the fix as a gated plan.**
+«Да, открыт» / «Нет, только localhost» before any command output. Then a short
+bullet list of the facts that decided it. Then, only if action is needed, the
+exact commands under «⚠️ Требуется подтверждение». Do not open with the
+investigation.
 
-- [Firewall, Docker filtering, persistent guard and SSH](references/firewall-and-ssh.md): rule ordering, UFW pitfalls, SSH and verification.
-- [fail2ban and Nginx rate limiting](references/fail2ban-and-rate-limits.md): current configuration and safety checks.
-- [VPN and shared HTTPS ingress](references/vpn-and-https-ingress.md): 3x-ui, tunnel diagnosis, port 443, client-IP preservation and recovery.
+Keep two facts separate and say both:
 
-For stack services use `ai-stack`; for removing containers or reclaiming space use `vps-disk-reclamation`.
+1. **Network reachability** — is the TCP port reachable from the internet?
+2. **Authentication gate** — can such a client actually get in (`pg_hba.conf`,
+   app auth, allowlist)?
+
+A firewall-closed port and an app-rejected connection are different risks
+(`ECONNREFUSED` vs a 41k-line brute-force log) and must not be collapsed into one
+«закрыто».
+
+## Procedure (steps 1–5 are read-only)
+
+1. **Socket inventory.** `ss -tlnp | tail -n +2` — `0.0.0.0:*` / `[::]:*` =
+   routable bind, `127.0.0.1:*` = loopback only. Map each PID to its owner:
+   `ps -o pid,ppid,user,cmd -p <pid>`. Systemd services (host Postgres) exist
+   ONLY here — `docker ps` cannot see them.
+2. **Container view.** `docker ps --format '{{.Names}}\t{{.Image}}\t{{.Ports}}'`.
+   `5432/tcp` with no `->` is an internal EXPOSE only; `127.0.0.1:8001->8000/tcp`
+   is loopback-published; `0.0.0.0:PORT->…` is the real exposure. Cross-check with
+   `ss` that the listener is `docker-proxy` — if nothing listens on the host port,
+   traffic goes through DNAT and host `INPUT` rules never see it.
+   `ss` also catches non-Docker listeners, so read the whole list: snapped
+   services (`cupsd` on `0.0.0.0:631` was found this way) do not appear in
+   `systemctl is-active cups` — use `systemctl is-active snap.<name>.<svc>` and
+   `ps -o cmd -C <bin>`.
+3. **Filter state.** `iptables -S INPUT | head -20` (policy line first),
+   `ufw status`, `grep -hE '^ENABLED' /etc/ufw/ufw.conf`. Never infer the
+   firewall from `systemctl is-active ufw`.
+4. **App-level gate.** Read the service's own ACL, e.g. Postgres:
+   `grep -hE '^\s*listen_addresses' /etc/postgresql/*/main/postgresql.conf` and
+   `grep -hvE '^\s*#|^\s*$' /etc/postgresql/*/main/pg_hba.conf`.
+5. **Prove reachability with evidence, not with a guess.** Two honest signals:
+   - **live external probe** — `https://check-host.net/check-tcp?host=IP:PORT&max_nodes=3`
+     with `Accept: application/json`, then `/check-result/<REQUEST_ID>` after a
+     short delay. Success proves TCP reachability from that node only; `null` /
+     pending / timeout without a control is inconclusive.
+   - **service log** — the authoritative «the internet really reaches this port»
+     witness. For Postgres:
+     `grep -c 'no pg_hba.conf entry' /var/log/postgresql/postgresql-*-main.log`
+     (historically 41k lines, each with a real foreign source IP; expect 0 now
+     that `fw-guard-postgres` drops the traffic), then bucket the sources:
+     `grep -oE 'no pg_hba.conf entry for host "[0-9.]+"' <log> | awk '{print $NF}' | sort | uniq -c | sort -rn | head`.
+6. **Report** with the verdict-first shape. If nothing needs closing, say
+   «ничего не открыто» and stop — no plan.
+
+`scripts/audit-exposure.sh` runs steps 1–4 plus the listeners/firewall/guard
+state read-only and prints the whole picture in one go; run it first, then drill
+into whatever it flags. It does not run the external probe of step 5.
+
+## Closing a port (durable)
+
+Pattern that leaves intra-stack traffic intact (containers reach host Postgres
+from `172.16.0.0/12`):
+
+```bash
+# ACCEPT exceptions first, DROP everything else — order matters
+/usr/local/bin/fw-guard-postgres.sh
+```
+
+`/usr/local/bin/fw-guard-postgres.sh` (idempotent: deletes its own rules, then
+rebuilds them by inserting at position 1 in reverse order — ACCEPT 127.0.0.1,
+ACCEPT 172.16.0.0/12, DROP 5432) is driven by `fw-guard-postgres.service`
+(oneshot, `RemainAfterExit=yes`, `After=ufw.service network-online.target`,
+`WantedBy=multi-user.target`). Recreate that pair for any other port; it is the
+persistence mechanism on this host. Live state (2026-11-01): `iptables -S INPUT`
+= ACCEPT 127.0.0.1/32 → ACCEPT 172.16.0.0/12 → DROP, unit `active`/`enabled`.
+
+Verify after applying: `iptables -S INPUT | head -5` shows the three rules in
+order, `systemctl is-active fw-guard-postgres` = `active`, and
+`ss -tnp state established '( sport = :5432 )'` still shows the containers'
+`172.18.x` peers — no rule change without proof that the stack kept working.
+Then verify from **outside** (netns pattern in the reference); `iptables -S`
+alone shows intent, not effect. Confirm the counter sits on the expected rule:
+if the DROP counter does not move while a foreign probe times out, the packet is
+stopped somewhere else and the reasoning is wrong.
+
+## SSH on this host
+
+`PasswordAuthentication` is **off**: `sshd -T | grep -i
+passwordauthentication` → `no`; `/etc/ssh/sshd_config.d/50-cloud-init.conf`
+says `no`, backed by `/etc/cloud/cloud.cfg.d/99-ssh-no-password.cfg`
+(`ssh_pwauth: false`) so cloud-init cannot flip it back on reboot. Root logs in
+by key only; `ai_service` has **no** `authorized_keys` and cannot SSH in at all —
+use `su`/`sudo` from root.
+
+**sshd is first-match-wins, not last.** `Include /etc/ssh/sshd_config.d/*.conf`
+is line 12 and files apply in lexical order: `50-cloud-init.conf` must be the
+file that sets `PasswordAuthentication`, because `50-*` is read before
+`60-cloudimg-settings.conf`. A new `99-*.conf` would NOT fix a wrong earlier
+value. Verify with `sshd -T`, never from the file alone. Reload, don't restart:
+`sshd -t && systemctl reload ssh`. Loopback check:
+`ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no root@127.0.0.1 true`
+must answer `Permission denied (publickey)`.
+
+Full detail (rule ordering, UFW, DNAT, netns drill, gated changes) —
+[references/firewall-and-ssh.md](references/firewall-and-ssh.md).
+
+## Pitfalls that produce wrong verdicts
+
+- **`iptables` here is nf_tables and rejects more than one `-s`:**
+  `! -s 127.0.0.1 ! -s 172.16.0.0/12` → `multiple -s flags not allowed`, exit 2.
+  Express it as ordered ACCEPT rules plus an unconditional DROP.
+- **Insert at position 1 in reverse** (`-I INPUT 1 … DROP`, then ACCEPT 172.16/12,
+  then ACCEPT 127.0.0.1). `-A` appends below other ACCEPT rules and silently
+  never matches.
+- **`systemctl is-active ufw` = `active` while the firewall is OFF** —
+  `ENABLED=no` leaves the unit running with rules flushed (`ufw status` =
+  `inactive`, `iptables -S` = bare `-P INPUT ACCEPT`). And do not enable ufw to
+  fix one port: `DEFAULT_INPUT_POLICY="DROP"` with empty `user.rules` cuts SSH
+  and the whole stack at once. Nothing here persists iptables rules by default
+  (`netfilter-persistent` absent) — a rule without a oneshot unit dies on reboot.
+- **Docker-published ports can bypass `INPUT`.** If `docker-proxy` listens,
+  `INPUT` applies; if it is DNAT-ed straight to the container (no host listener),
+  filter on `DOCKER-USER` — and the cleaner fix is re-publishing as
+  `127.0.0.1:PORT:PORT`. Decide from `ss -tlnp` before claiming «закрыто».
+- **A probe from inside a container on the same host is the easiest false
+  «открыт»/«закрыто».** Bridge traffic is MASQUERADEd to `172.18.0.1`, inside the
+  trusted `172.16.0.0/12` — the probe is accepted by the very rule it should test.
+  Symptom: connect succeeds from `docker exec`, service log shows no foreign IPs.
+- **The only honest filter test uses a source outside every allowlist**, on the
+  real path, with the **packet counter** as witness plus an allowed control port
+  (a timeout alone may just mean «сеть сломана»). Block:
+  [references/firewall-and-ssh.md](references/firewall-and-ssh.md#netns-drill).
+- **Never conclude reachability from a third-party port-checker or a local
+  `curl` to your own public IP** (exits via loopback, always succeeds). Shodan
+  once reported `9223` while `ss -tlnp` and `iptables -t nat -S` showed nothing.
+- **`write_file`/`patch` refuse system paths** (`Refusing to write to sensitive
+  system path: /etc/...`): write to `~/.hermes/cache/scratch/`, then `cp`.
+- **Closing a port is a state change → gated.** Exact rules, blast radius
+  («контейнеры из 172.18 не затронуты») and verification command, then wait for
+  «Да».
+- **A privileged helper container is exposure of its own kind:**
+  `privileged: true` + `pid: host` + `/var/run/docker.sock` + `/:/mnt/host` =
+  host-root RCE from inside; name those four facts when proposing removal.
+
+## fail2ban и rate limiting nginx (установлены 2026-10-31)
+
+- **fail2ban** 1.0.2, `active`/`enabled`: SSH-брутфорс был ~2.5k попыток/сутки.
+  `/etc/fail2ban/jail.local`: `findtime=1h`, `maxretry=4`, `bantime=1d`,
+  `bantime.increment` (factor 2) до 4 недель, `backend=systemd`,
+  `ignoreip` = loopback + 10/8 + 172.16/12 + 192.168/16, `[sshd] mode=aggressive`.
+  На 24.04 action — `nftables`: баны в `nft list table inet f2b-table`, **не** в
+  `iptables -S INPUT`. Детали —
+  [references/fail2ban-and-rate-limits.md](references/fail2ban-and-rate-limits.md).
+- **nginx** (`/etc/nginx/conf.d/zz-ratelimit.conf`, include раньше
+  `sites-enabled`): зоны `llm_api` 10r/s, `webui_api` 8r/s, `conn_per_ip`. `llm.`
+  — server-level `burst=40 nodelay` + `limit_conn 20`; `ai.` — только
+  `location /api/`, `burst=30` + `limit_conn 30`, статика без лимита (иначе F5
+  даёт 429 на чанках). `limit_req_status 429`. В `vps-infra` этих конфигов нет —
+  после переезда их надо переприменять.
+
+## VPN и общий 443
+
+Админ-панель (3x-ui) — только loopback + реальный вход новыми кредами; туннель
+проверяется настоящим клиентом (HTTPS через SOCKS), а `stream`/`ssl_preread` на
+443 требует PROXY protocol на обеих сторонах, иначе backend видит loopback.
+HTTP 200 не доказывает ни сохранение client IP, ни доступ из сети владельца.
+
+Полная процедура (3x-ui API, диагностика Docker-подключений, MTProto, тесты с
+двух внешних IP, перенос в recovery-репо) —
+[references/vpn-and-https-ingress.md](references/vpn-and-https-ingress.md).
+
+## Related
+
+- Which services exist, their ports and domains: `ai-stack` skill.
+- Removing a container/image and reclaiming its disk: `vps-disk-reclamation` skill.

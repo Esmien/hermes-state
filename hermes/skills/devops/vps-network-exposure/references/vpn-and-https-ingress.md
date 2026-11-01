@@ -1,18 +1,82 @@
-# VPN, proxies and shared HTTPS ingress
+# VPN, прокси и общий HTTPS-ingress
 
-## VPN and proxies
+Дополнение к `SKILL.md` для случаев, когда на хосте ставится VPN/прокси
+(3x-ui/xray) или TCP-прокси забирает занятый 443. Всё, что меняет ingress, —
+state change: сначала план и откат, потом «Да».
 
-- After approval, complete deployment through real connection and recovery checks; distinguish owner-side client tests from checks already performed.
-- Bind the admin panel to loopback and verify a real login with the new credentials. Verify the backend itself listens, not merely Docker's published port.
-- Exercise a real tunnel with a client and an HTTPS request through its SOCKS proxy. This proves protocol and egress, not reachability from the owner's network or account access.
-- 3x-ui `setting -getApiToken` can prepend explanatory lines: extract the line beginning `apiToken:`. Repeated calls rotate the token; retain one in memory across API requests. Inbound API fields may already be JSON objects. Never print tokens, client URLs or secret configuration.
-- For Docker connection diagnosis check established sockets inside the container network namespace as well (`docker exec <container> netstat -tn` or `ss -tn`): host `ss` on the published port can show zero with DNAT. Compare authenticated client counters with a user request; established TCP alone proves neither tunnel operation nor page loading.
+## VPN и прокси (3x-ui)
 
-## Shared HTTPS port and client IP
+- После согласования работ доводи задачу до реально проверенного подключения и
+  восстановления; не останавливайся на установленной панели или созданном
+  inbound, если можешь продолжить самостоятельно. Если нужен клиентский тест
+  владельца — чётко отдели его от проверок, которые уже выполнил сам.
+- **Не публикуй админ-панель наружу:** слушать только `127.0.0.1`, проверять
+  фактический вход новыми учётными данными, а не доступность страницы.
+  Отдельно проверь, что клиентский порт слушает сам backend: публикация Docker
+  ещё не означает работающий сервис (`ss` внутри контейнера, не только на
+  хосте).
+- Проверяй туннель настоящим клиентом: запрос к целевому HTTPS-сервису через
+  SOCKS клиента. Это подтверждает протокол и выход, но не доступ из сети
+  владельца и не авторизацию в его аккаунте.
+- **3x-ui API:** `x-ui setting -getApiToken` может вернуть поясняющие строки
+  перед `apiToken:` — извлекай именно строку с этим префиксом. Повторный вызов
+  **ротирует токен**: при нескольких запросах держи один токен в памяти, не
+  запрашивай заново каждый раз. Поля inbound API могут уже быть объектами
+  JSON, а не строками. Токены, клиентские ссылки (`vless://…`) и конфигурацию
+  с секретами не выводить в чат и диагностические логи.
+- **Диагностика Docker-подключений:** смотри established-сокеты и в сетевом
+  namespace контейнера — `docker exec <container> ss -tn` (или `netstat -tn`).
+  Host `ss` по опубликованному порту может показывать ноль из-за DNAT, хотя
+  подключения есть. Сравни динамику счётчика конкретного авторизованного
+  клиента с запросом пользователя: сам факт established TCP не доказывает ни
+  работу туннеля, ни загрузку страниц.
+- Меньше поверхности: `ufw`/iptables-правила для панели не нужны, если она на
+  loopback; доступ к ней — через ssh-туннель.
 
-- Before sharing occupied port 443, inspect all IPv4/IPv6 listeners, vhosts, Nginx modules and actual HTTP responses and prepare rollback. First configure and test the loopback backend; after approval modify ingress, run `nginx -t` and reload, not restart.
-- When routing via `stream`/`ssl_preread` to a local HTTPS backend, preserve the real client IP: otherwise backend limits, logs and ACLs see loopback. Configure PROXY protocol on both sides and trust it only on loopback; check all vhosts and applications. Test first on a separate listener, then with two independent external IPs, including rate limiting and spoofing. HTTP 200 does not prove client IP preservation.
-- Distinguish external TCP, TLS/fallback and actual application connectivity from the user's network. For MTProto the link uses the published host port, not the container port. Never output secrets or links in chat or diagnostic logs.
-- For region-restricted services, check egress IP geolocation, service HTTP availability and authenticated access from the device through the established VPN separately. HTTP 200 and IP country do not prove account or subscription access.
-- After ingress changes, transfer configuration and recovery procedure to the recovery repository without secrets; verify restoration and autostart. Report outstanding recovery or client tests rather than claiming completion.
-- Inspect current ingress configuration and sockets instead of relying on historical notes: external IPs in the access log only prove individual requests, not rate limits, ACLs or spoofing protection. Independently verify application connectivity from the user's network and recovery-repository synchronization.
+## Общий HTTPS-порт 443 и сохранение адреса клиента
+
+- Перед размещением TCP-прокси на занятом 443 проверь все IPv4/IPv6 listeners
+  (`ss -tlnp`), vhost'ы (`nginx -T`), модули Nginx и фактические HTTP-коды,
+  сделай план отката.
+- Сначала настрой и проверь backend на loopback; затем после подтверждения
+  меняй ingress, `nginx -t` и `reload`, не `restart`.
+- При маршрутизации `stream`/`ssl_preread` к локальному HTTPS-backend
+  **сохраняй исходный IP клиента**: иначе backend видит loopback, а лимиты,
+  логи и ACL работают неправильно. Практика: PROXY protocol на обеих сторонах
+  (`proxy_protocol` на stream-апстриме, на HTTP-стороне
+  `listen … proxy_protocol` + `set_real_ip_from 127.0.0.1` +
+  `real_ip_header proxy_protocol`), доверять заголовку **только** от loopback;
+  проверить совместимость всех vhost'ов и приложений.
+- До включения проверяй это в отдельном тестовом listener, после — с двух
+  независимых внешних IP, включая проверку rate limit и попытки подмены
+  заголовка. **HTTP 200 не доказывает сохранение IP** — смотри реальный адрес в
+  логах/приложении.
+- Fallback: если клиент без SNI или с чужим SNI попадает не туда, проверяй
+  `default_server`/`ssl_reject_handshake`, а не только сам `ssl_preread`.
+
+## MTProto и региональные сервисы
+
+- Разделяй уровни: внешний TCP, работа TLS/fallback и настоящее прикладное
+  подключение из сети пользователя — каждое доказывает только свой уровень.
+- Для MTProto ссылка должна содержать **опубликованный host-порт**, а не
+  внутренний порт контейнера.
+- При оценке доступа к региональному сервису через VPN отдельно проверяй
+  геолокацию выходного IP, HTTP-доступность сервиса и полноценную
+  авторизованную работу с устройства через уже настроенный VPN. HTTP 200 и
+  страна IP не доказывают доступность аккаунта или подписки.
+
+## Перенос в recovery-репозиторий
+
+После изменения ingress перенеси конфигурацию и процедуру восстановления в
+`vps-infra` (или другой recovery-репозиторий) **без секретов**; проверь
+восстановление и автозапуск. Задача не считается завершённой, пока этот перенос
+или клиентский тест не выполнен — так и скажи, вместо «готово».
+
+Правило владельца: recovery-репо обязано совпадать с живым хостом.
+
+## Что нельзя подменять
+
+Наличие внешних IP в access log подтверждает только отдельные запросы, но не
+корректность rate limit, ACL и защиты от подмены адреса. Не считай прокси
+работающим без прикладной проверки из сети пользователя; не полагайся на
+запись о прошлой настройке — смотри текущий конфиг и сокеты.

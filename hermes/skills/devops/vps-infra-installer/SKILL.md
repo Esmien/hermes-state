@@ -1,7 +1,7 @@
 ---
 name: vps-infra-installer
 description: "Use when deploying or migrating this VPS from scratch."
-version: 1.0.0
+version: 1.1.0
 author: VPS Admin
 license: MIT
 metadata:
@@ -19,7 +19,9 @@ Open WebUI, SearXNG, open-terminal, Redis, Nginx + Certbot, бэкапы,
 Telegram-мониторинг, в конце — Hermes (хостовый режим).
 
 Репозиторий: `github.com/Esmien/vps-infra` (публичный, секретов внутри нет).
-Рабочая копия на этом сервере: `/root/vps-infra`.
+Рабочая копия на этом сервере: `/root/vps-infra`. Живой стек —
+`/home/ai_service/ai-stack`; его `deploy.sh` исторический и не покрывает
+Hermes, бэкапы и мониторинг.
 
 ## One-liner
 
@@ -35,15 +37,25 @@ curl -fsSL https://raw.githubusercontent.com/Esmien/vps-infra/main/bootstrap.sh 
 ```bash
 install.py                     # интерактивно: домены, e-mail, внешние секреты
 install.py --yes               # без вопросов, значения из существующих .env
+install.py --reconfigure       # переспросить секреты (Enter = оставить как есть)
+install.py --dry-run           # показать план, ничего не менять
 install.py check               # read-only проверка живого стека
 install.py export --with-data  # → /var/lib/vps-infra/vps-infra-bundle-*.tar.gz
 install.py --bundle <path|url> --restore   # восстановление БД + webui_data
+install.py --from-bot --restore --hermes --restore-hermes
 install.py --skip tls,restore --only verify
 ```
 
-Шаги идут в порядке `preflight → … → hardening → tls → verify → hermes`, каждый идемпотентен.
+Шаги идут в фиксированном порядке, каждый идемпотентен:
+`preflight → packages → users → stack → secrets → bundle → fetch → postgres →
+network → images → migrate → restore → data → apps → notifications → beszel →
+units → hardening → tls → verify → hermes`.
 
-**`hardening`** (до `tls`, ибо vhost'ы ссылаются на зоны): ставит fail2ban +
+`--only`/`--skip` принимают имена шагов; неизвестное имя — ошибка.
+`--skip preflight` вместе со `stack`/`secrets` разрешён и печатает, что
+конфигурация берётся из уже существующих файлов.
+
+**`hardening`** идёт до `tls`, ибо vhost'ы ссылаются на зоны: ставит fail2ban +
 `python3-systemd`, пишет `/etc/fail2ban/jail.local` (sshd, `maxretry=4`/1ч, бан 1д,
 инкремент до 4 недель, `ignoreip` включает 10/8 + 172.16/12 + 192.168/16 — иначе
 забанит docker) и `/etc/nginx/conf.d/zz-ratelimit.conf` (`llm_api` 10r/s,
@@ -65,7 +77,7 @@ install.py --skip tls,restore --only verify
    любого прогона проверяй, что «отклонить» в боте работает: `signin failed:
    HTTP 400` в `/var/log/owui-signup-approver.log` = рассинхрон пароля
    (разбор и починка — skill `credential-login-verification`,
-   `credential-login-verification` skill's `references/open-webui-auth.md`).
+   `references/open-webui-auth.md`).
 2. **БД восстанавливаются только в пустые базы** или с явным `--restore`.
    Дамп старше 72 ч требует `--force-stale`. Bundle кладёт дампы в
    `backups/postgres/`, свежесть — по mtime.
@@ -107,17 +119,39 @@ install.py --skip tls,restore --only verify
   восстановления — `file_id`, который вернул `sendDocument`. `monitor.py backup`
   пишет его в `backups/postgres/.tg-registry.json` (3 набора на базу), реестр
   уезжает в `hermes-state` как `host/backups/tg-registry.json`.
-- Части дампа обязаны быть **≤18 МБ**: `getFile` отдаёт не более 20 МБ, части по
-  45 МБ из чата уже не скачать (`TG_DOC_LIMIT` в `monitor.py`).
+- Части дампа обязаны быть **≤18 МБ** (`TG_DOC_LIMIT = 18 MiB` в `monitor.py`):
+  `getFile` отдаёт не более 20 МБ, части по 45 МБ из чата уже не скачать.
 - Нет реестра — fallback `getUpdates`: переслать файлы бэкапа самому боту.
 - `--from-bot` игнорирует проверку «дамп старше 72 ч» (источник выбран осознанно).
 - Токен проверяется на форму `123456:AA…`: заглушка из `install.json`
   (`__stored_in_notifications_env__`) даёт понятную ошибку, а не 404 от Telegram.
-- **Файлы пользователя едут отдельно от БД.** Псевдо-база `webui_data` в том же реестре — это tar.gz `uploads` + `generated_images` (~980 МБ, 55 частей), её пишет `webui-data-backup.timer` (Sun 04:00 UTC). `RESTORE_DBS` включает её, шаг `data` распаковывает архив в `WEBUI_DATA` (пропускает непустой каталог без `--restore`). Без этого шага bootstrap вернёт БД и конфиги, но не оригиналы файлов Knowledge.
+- **Файлы пользователя едут отдельно от БД.** Псевдо-база `webui_data` в том же
+  реестре — это tar.gz `uploads` + `generated_images` (~980 МБ, 55 частей), её
+  пишет `webui-data-backup.timer` (Sun 04:00 UTC). `RESTORE_DBS` включает её
+  (`webui_db`, `litellm_db`, `webui_data`), шаг `data` распаковывает архив в
+  `WEBUI_DATA` (пропускает непустой каталог без `--restore`). Без этого шага
+  bootstrap вернёт БД и конфиги, но не оригиналы файлов Knowledge.
 
-### Beszel, внешний мониторинг и TLS
+### Beszel, внешний мониторинг, TLS
 
-Для настройки Beszel, GitHub Actions, dead-man и ограничений выпуска сертификатов загрузи [references/beszel-and-monitoring.md](references/beszel-and-monitoring.md).
+- **Beszel** (шаг `beszel`): hub+agent в Docker, `/home/ai_service/beszel`,
+  hub только на `127.0.0.1:8090` (наружу — через `mon.` vhost), связка через
+  unix-сокет `beszel_socket/beszel.sock`, вместе ~20 МБ RAM. Без UI
+  настраивается целиком через PocketBase API; `KEY` — публичный ключ хаба,
+  `TOKEN` — UUID из `fingerprints` (без него агент вечно ловит 401), alerts
+  (Status/CPU/Memory/Disk) создаются только вручную. Команды и грабли —
+  [references/beszel-and-monitoring.md](references/beszel-and-monitoring.md).
+- **Внешний контур**: `.github/workflows/uptime.yml` (cron `*/10`, curl `ai.` и
+  `llm.`, 3 попытки → Telegram), дрилл через `workflow_dispatch` с
+  `extra_url=https://httpbin.org/status/500` (сообщение с префиксом `[ТЕСТ]`).
+  GitHub гасит `schedule` в публичном репо после 60 дней без активности —
+  поэтому `uptime-heartbeat.timer` раз в месяц дописывает
+  `maintainer/uptime-heartbeat.txt`. Второй контур healthchecks.io:
+  `deadman-ping.sh` + таймер, ping-URL в `/etc/deadman-ping.url`.
+- **TLS**: `qd.je` — общая квота Let's Encrypt (50 сертификатов / 168 ч) на все
+  поддомены и владельцев. Упор в лимит — норма, самописные ретрай-таймеры не
+  ставить (решение владельца): выпуском занимается только `certbot.timer`.
+
 ## Проверка
 
 `install.py check` печатает контейнеры/health, число таблиц, локальные HTTP,
@@ -164,10 +198,35 @@ https-коды доменов и число активных таймеров, �
   `assets/host/open-terminal-config`. Новый скрипт/юнит появляется в репо
   только после того, как его туда положили; удалённый с хоста файл из репо
   не исчезает (удаления не пропагируются сознательно).
+- **Таймер без своего `.service` не стартует:** `systemd` пишет `Refusing to
+  start, unit X.service to trigger not loaded`, а `enable --now` при этом молча
+  падает (`check=False`). `step_units` теперь сам добавляет `<name>.service`
+  для каждого таймера, если такой файл есть в `assets/host/systemd/`. Симптом
+  после добавления таймера в `CORE_TIMERS`: `is-enabled` = enabled,
+  `is-active` = inactive.
 
-- **Таймер без своего `.service` не стартует:** `systemd` пишет `Refusing to start, unit X.service to trigger not loaded`, а `enable --now` при этом молча падает (`check=False`). `step_units` теперь сам добавляет `<name>.service` для каждого таймера, если такой файл есть в `assets/host/systemd/`. Симптом после добавления нового таймера в `CORE_TIMERS`: `is-enabled` = enabled, `is-active` = inactive.
-- **`install.py check` печатает `fail2ban: active` и `nginx rate-limit: да`** — после переезда это первое, что надо смотреть вместе с `таймеров активно: N/M`.
+## Подводные камни (самые дорогие)
 
-## Подводные камни установщика
+- **Маска токена не должна вернуться в `.env`.** `save_config()` пишет в
+  `install.json` заглушку `__stored_in_notifications_env__`, а `prompt()` брал
+  значение из cfg раньше, чем из `notifications/.env` — прогон `--yes` записал
+  заглушку как `BOT_TOKEN`/`FILE_BOT_TOKEN` и убил оба бота до повторного
+  выпуска токенов в BotFather. Исправлено; симптом для диагностики — `Telegram
+  API HTTP 404`, а длина значения в `.env` (~31 символ) не похожа на токен.
+- **`notifications/.env` обязан быть `0640 root:ai_service`.** `write_file` без
+  `chown` оставил `root:root`, и `postgres-backup-notify.service`
+  (`User=ai_service`) падал с `PermissionError`, при этом таймер «успешно» шёл.
+- **Правки `assets/` затираются `sync_assets.py`** (host → repo): пока
+  `vps-infra-watch.service` активен, изменённый `assets/notifications/monitor.py`
+  вернётся к живому файлу через ~90 с. Правь репозиторий при остановленном
+  watcher'е и деплой живые копии до пуша.
+- **`curl | bash` забирает stdin:** bootstrap делает `exec </dev/tty` последней
+  командой, иначе вопросы install.py получают EOF. Проверять tty надо в
+  субшелле `( exec 3</dev/tty )`, иначе падает при запуске без терминала.
 
-Перед запуском, изменением синхронизации или восстановлением читай [references/installer-pitfalls.md](references/installer-pitfalls.md): stdin, assets, секреты, watcher, реестр бэкапов и безопасный drill.
+Полный список (бинарно-безопасный `write_file`, `ai/.env` и `WEBUI_URL`,
+пропуск `pg_dump` < 1 ч, `--only fetch` без `--infra-dir` и `GITHUB_KEY`,
+`inotifywait` на каталоге, числа проверенного drill, перезапись набора ключей
+в `ai/.env`) — [references/installer-pitfalls.md](references/installer-pitfalls.md).
+Читай его перед запуском на живом сервере, изменением синхронизации или
+восстановлением.
