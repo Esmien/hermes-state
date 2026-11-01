@@ -99,3 +99,47 @@ FR/DE за €4 решает то же без третьей стороны.
 - **`qd.je` — public suffix**: Cloudflare не принимает `*.qd.je` как зону («provide root domain»). Нужен собственный домен.
 - **Happ на десктопе** ссылку может не принять: отдавай файлы — голую ссылку, base64-подписку и готовый `xray`/`sing-box` JSON (проверенные запуском, а не «должны работать»).
 - Клиент по WS не умеет UDP, поэтому QUIC у приложений отваливается — это нормально, они падают на TCP.
+- **`listen: "0.0.0.0"` у inbound — дыра.** При `--network host` xray публикует
+  VLESS без TLS наружу мимо nginx. Держи `127.0.0.1` во всех inbounds и проверяй
+  `ss -tln` после перезапуска: должно остаться только loopback.
+
+## Два маршрута в одном xray + подписка для клиентов
+
+Владельцу нужен не второй сервер, а **выбор маршрута на клиенте** и одна
+универсальная ссылка. Делается тем же xray.
+
+- **Маршрут = отдельный WS-inbound на loopback.** `10081` path `/ws` (старый, не
+  трогать), `10082` path `/general`, `10083` path `/france`; в каждом свой `tag`
+  и `sniffing`. Роутинг — правилами по `inboundTag`, они ставятся ВЫШЕ доменных:
+  `{"type":"field","inboundTag":["in-france"],"outboundTag":"fr"}` и такой
+  же на `direct`. Блокировки (`geoip:private`, bittorrent) остаются первыми.
+- **Контейнер**: `--network host`, иначе новые loopback-порты не видны nginx;
+  при публикации через `-p` каждый порт нужен отдельно, иначе inbound молча не
+  слушает снаружи.
+- **nginx**: тот же сервер-блок 8443/2087, `location /general` и `/france` с
+  теми же `Upgrade`/`Connection`, что у `/ws`.
+- **Проверка маршрутов по IP выхода**: `/general` → `ipinfo.io` показывает IP
+  входного сервера, `/france` → IP зарубежного выхода; гонять на обоих портах.
+
+### Подписка
+
+- Файлы в `/var/www/<brand>-sub/<токен>/`: `clash.yaml`, `list.txt` (base64 от
+  списка `vless://`), `singbox.json`. Формат выбирает nginx по User-Agent:
+  `map $http_user_agent $sub_file { default "list.txt"; ~*(clash|mihomo|stash|flclash) "clash.yaml"; ~*(singbox|sing-box) "singbox.json"; }`
+  и `location ~ ^/sub/(?<tok>[A-Za-z0-9_-]+)/?$ { root /var/www/<brand>-sub; try_files /$tok/$sub_file =404; }`.
+  `try_files $sub_file` без `/$tok/` даёт 404 — путь собирается от `root`, а не от URI.
+- **Подписка живёт на рабочем порту входа (8443), не на 443** — иначе клиент,
+  у которого 443 заблокирован, конфиг просто не скачает.
+- **Профиль — минимализм.** Одна группа и ровно два узла «🇪🇪 Эстония
+  (General)» / «🇫🇷 Франция (Gemini)»: private/LAN → `DIRECT`,
+  `DOMAIN-SUFFIX` google/googleapis/gstatic/googleusercontent/withgoogle →
+  Франция, `MATCH` → Эстония. `GEOSITE` не брать (тянет geodata и ломается без
+  неё), авто-групп DIRECT/REJECT/PROXY не генерировать.
+- **Проверка перед отдачей**: `mihomo -t -d <dir> -f clash.yaml`, затем запустить
+  mihomo и прогнать `curl -x http://127.0.0.1:7890 https://ipinfo.io/json` (страна
+  General) и `https://www.google.com/` (200); все три формата тянуть с поддельным
+  `-A` (clash / v2rayN / sing-box).
+- **Токен на друга**: выпускать новым, не переиспользовать; отзыв доступа —
+  удаление каталога с токеном.
+- Готовый генератор всех трёх форматов — `templates/vpn-subscription-generator.py`
+  (подставить HOST/PORT/BRAND/маршруты, запускать с `--new`).

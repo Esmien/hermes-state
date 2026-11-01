@@ -1,7 +1,7 @@
 ---
 name: vps-network-exposure
 description: "Use when a port may be open to the internet."
-version: 1.2.0
+version: 1.3.0
 author: VPS Admin
 license: MIT
 metadata:
@@ -214,6 +214,15 @@ HTTP 200 не доказывает ни сохранение client IP, ни д�
   в 2 минуты с порогом 2 и откатом на `direct`. Без этого один блок порта или
   падение выхода оставляет владельца без связи. Рецепт и тест фейловера на копии
   конфига — [references/ru-dpi-vpn-ingress.md](references/ru-dpi-vpn-ingress.md).
+- **Клиенту — бренд и два маршрута, без мусора.** Один xray отдаёт несколько
+  маршрутов: отдельные WS-inbound на loopback-портах (`/general` → `direct`,
+  `/france` → зарубежный outbound), правило по `inboundTag` ставится выше
+  доменных. Клиенту — одна подписка (nginx `map` по User-Agent: clash / sing-box /
+  base64-список), внутри одна группа и ровно два узла «страна (назначение)».
+  Авто-группы DIRECT/REJECT/PROXY владелец считает мусором, `GEOSITE` не
+  использовать. Подписка должна открываться на рабочем порту (8443), не на 443.
+  Рецепт, проверка форматов и отзыв токена —
+  [references/ru-dpi-vpn-ingress.md](references/ru-dpi-vpn-ingress.md).
 
 Полная процедура (3x-ui API, диагностика Docker-подключений, MTProto, тесты с
 двух внешних IP, перенос в recovery-репо) —
