@@ -166,6 +166,10 @@ def analyze_pcap(path: str, secret: bytes):
             continue
         rec = buf[idx:]
         rlen = struct.unpack("!H", rec[3:5])[0]
+        if len(rec) < 5 + rlen:
+            print(f"{src}:{sp} -> {dp}: capture TRUNCATED ({len(rec)} of {5 + rlen} bytes)"
+                  " — re-run tcpdump with -s 0; HMAC check below would be a false negative")
+            continue
         print(f"{src}:{sp} -> {dp}: {validate_client_hello(rec[:5 + rlen], secret)}")
 
 
