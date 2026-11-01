@@ -115,49 +115,9 @@ install.py --skip tls,restore --only verify
   (`__stored_in_notifications_env__`) даёт понятную ошибку, а не 404 от Telegram.
 - **Файлы пользователя едут отдельно от БД.** Псевдо-база `webui_data` в том же реестре — это tar.gz `uploads` + `generated_images` (~980 МБ, 55 частей), её пишет `webui-data-backup.timer` (Sun 04:00 UTC). `RESTORE_DBS` включает её, шаг `data` распаковывает архив в `WEBUI_DATA` (пропускает непустой каталог без `--restore`). Без этого шага bootstrap вернёт БД и конфиги, но не оригиналы файлов Knowledge.
 
-### Внешний мониторинг (GitHub Actions + dead-man)
+### Beszel, внешний мониторинг и TLS
 
-Внутренний мониторинг умирает вместе с хостом, поэтому внешний контур — снаружи:
-
-- `.github/workflows/uptime.yml` в `vps-infra`: cron `*/10`, curl `https://ai.` и
-  `https://llm.` с раннеров GitHub, 3 попытки → при провале Telegram (secret
-  `TG_BOT_TOKEN`, чат владельца). Секрет ставится через API с libsodium sealed box
-  (`pynacl` в отдельном venv, не системный); токен в логи не попадает — GitHub
-  маскирует. Дрилл: `workflow_dispatch` с `extra_url=https://httpbin.org/status/500`,
-  сообщение приходит с префиксом `[ТЕСТ]`.
-- **GitHub отключает `schedule` в публичных репо после 60 дней без активности** —
-  `uptime-heartbeat.timer` (раз в месяц) дописывает строку в
-  `maintainer/uptime-heartbeat.txt`, watcher коммитит. Без этого монитор молча умирает.
-- healthchecks.io как второй (более точный) контур: скрипт `deadman-ping.sh` + таймер
-  уже стоят, нужен только ping-URL в `/etc/deadman-ping.url`. **Главная засада:
-  регистрация там email-based (magic link), автоматически из консоли не создаётся.**
-
-### Beszel (шаг `beszel`)
-
-Hub+agent в Docker, `/home/ai_service/beszel`, вместе ~20 МБ RAM. Hub только на
-`127.0.0.1:8090`. Связка — unix-сокет `beszel_socket/beszel.sock`.
-
-**Без UI его можно полностью настроить через PocketBase API** (superuser обходит rules):
-`/beszel superuser upsert <email> <pass>` внутри контейнера →
-`auth-with-password` → создать `users`/`systems`/`fingerprints`/`user_settings`/`alerts`.
-Грабли, на которые ушло время:
-
-- `KEY` — это **публичный ключ хаба**: `ssh-keygen -y -f beszel_data/id_ed25519`.
-- `TOKEN` — UUID из коллекции `fingerprints` (поле `token`); его **генерит фронтенд**
-  при создании системы, в `systems` его нет. Без fingerprints агент вечно ловит `401`.
-- Notifications = `user_settings.settings = {{"emails": [], "webhooks": ["telegram://<token>@telegram?chats=<id>&parseMode=HTML"]}}`
-  (внутри shoutrrr). Проверка: `POST /api/beszel/test-notification {{"url": ..., "userId": ...}}`
-  токеном юзера (не суперюзера) → `{{"err": false}}` = доставлено.
-- Алерты создаются только вручную: `alerts` = `{{name: Status|CPU|Memory|Disk, value, min, user, system}}`;
-  без них графики есть, а тревог нет совсем.
-
-- **`qd.je` — бесплатный домен-спейс: квота LE (50 сертификатов/168 ч) общая для ВСЕХ
-  его поддоменов и владельцев.** Первый выпуск может упереться в лимит — это норма,
-  **самописные ретрай-таймеры не ставить** (решение владельца): выпуском и продлением
-  занимается только `certbot.timer`, он повторяет до успеха. Нужен выпуск без
-  лотереи — домен в своей зоне или другой ACME CA (Buypass Go 180 дней / ZeroSSL),
-  там квота не общая. Проверка: `openssl x509 -enddate` + `systemctl list-timers certbot`.
-
+Для настройки Beszel, GitHub Actions, dead-man и ограничений выпуска сертификатов загрузи [references/beszel-and-monitoring.md](references/beszel-and-monitoring.md).
 ## Проверка
 
 `install.py check` печатает контейнеры/health, число таблиц, локальные HTTP,

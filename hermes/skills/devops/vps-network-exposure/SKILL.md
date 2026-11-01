@@ -87,41 +87,12 @@ Reload, don't restart: `sshd -t && systemctl reload ssh` keeps existing sessions
 - **Closing a port is a state change → gated.** Give the exact rules, the blast radius («контейнеры из 172.18 не затронуты») and the verification command, then wait for «Да».
 - **A privileged helper container is exposure of its own kind.** `privileged: true` + `pid: host` + `/var/run/docker.sock` + `/:/mnt/host` means host-root RCE from inside; when such a container is unused, name those four facts when proposing removal — they are the reason it matters more than an open port.
 
-## fail2ban (установлен 2026-10-31)
+## Защита SSH и ограничения Nginx
 
-Защита от SSH-брутфорса (было ~2.5k попыток/сутки). `fail2ban` 1.0.2, `enabled`, автозапуск.
-Конфиг: `/etc/fail2ban/jail.local` (перекрывает `jail.conf` + `jail.d/defaults-debian.conf`, где sshd уже включён).
-
-- `[DEFAULT]`: `findtime=1h`, `maxretry=4`, `bantime=1d`, `bantime.increment` до 4 недель, `backend=systemd`
-  (нужен `python3-systemd`), `ignoreip` = loopback + 10/8, 172.16/12, 192.168/16 (иначе можно забанить docker-сети).
-- `[sshd]`: `mode=aggressive` — ловит и Invalid user, и Failed password.
-- **Action по умолчанию на 24.04 — `nftables`**, а не iptables: создаёт свою таблицу `inet f2b-table`
-  (set `addr-set-sshd` + chain `hook input priority filter - 1`, `reject with icmp port-unreachable`).
-  Поэтому в `iptables -S INPUT` банов **не видно** — смотреть `nft list table inet f2b-table`.
-  С `fw-guard-postgres` в `table ip filter` не конфликтует.
-- Баны переживают `systemctl restart fail2ban` (sqlite `/var/lib/fail2ban/fail2ban.sqlite3`); проверено — 12 IP вернулись.
-- Ручной бан ретроактивно: `fail2ban-client set sshd banip <ip>`; снять — `unbanip`. Авто-скан журнала начинается с момента старта, старые атаки сами не подхватятся.
-
+Для fail2ban, nftables и rate limits загрузи [references/fail2ban-and-rate-limits.md](references/fail2ban-and-rate-limits.md).
 ## VPN, proxies and shared HTTPS ingress
 
 For VPN deployment, 3x-ui, tunnel diagnosis, shared port 443 and preservation of client IP, load [references/vpn-and-https-ingress.md](references/vpn-and-https-ingress.md). Verify client connectivity and recovery separately; never expose secrets.
-
-## Rate limiting nginx (добавлен 2026-10-31)
-
-Защита от L7-флуда (было: 200 rps на живой nginx → CPU в ноль без взлома).
-Зоны — `/etc/nginx/conf.d/zz-ratelimit.conf` (include раньше `sites-enabled`):
-`llm_api` 10r/s, `webui_api` 8r/s, `conn_per_ip`.
-
-- `llm.` — `limit_req zone=llm_api burst=40 nodelay` + `limit_conn 20` на весь server.
-- `ai.` — лимит **только в `location /api/`** (`burst=30`, `limit_conn 30`); статика
-  (`/_app`, `/assets`, `/static`) идёт через `location /` без лимита — иначе массовая
-  загрузка чанков при F5 даёт 429 и страница перестаёт грузиться. Правя этот конфиг,
-  не поднимайте лимит на `/`.
-- `limit_req_status 429` (по умолчанию 503 — для клиента неотличимо от «упало»).
-- Проверено: 60 параллельных → 37×200/23×429 на `ai/api`, 80 → 53×200/27×429 на `llm`,
-  через 3 с снова 200; все контейнеры healthy, статика 200.
-- **В `vps-infra` этих конфигов нет** (install.py генерирует nginx-вхосты кодом),
-  т.е. после переезда лимиты надо переприменять — кандидат на перенос в репо.
 
 ## Related
 
