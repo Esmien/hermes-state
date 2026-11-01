@@ -114,11 +114,12 @@ d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skill
 868ff72e3d63da39dff7eddf73a1093e96f3fee87c3b280e05b23d764c842c32  ./hermes/skills/devops/vps-infra-installer/references/beszel-and-monitoring.md
 e8e006023610f0821ac3c9500dc103277f47c94c0f27bc794063d63378d6c5cb  ./hermes/skills/devops/vps-infra-installer/references/installer-pitfalls.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
-4a4ae68b79e7363f37f9b6a2e6255374080ee696f74fe48598ca64f6758a4c25  ./hermes/skills/devops/vps-network-exposure/SKILL.md
+8f6e139b798adf5bc2b386137f171b5ed690157dd1eb2481400e54464bc37a40  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 d425961d7ec5f06199c8cdd8549ace70cd8f18ecad295497bfa06b2731491782  ./hermes/skills/devops/vps-network-exposure/references/fail2ban-and-rate-limits.md
 dd75e4fcfd44e1f053f632ece87c23de61135875900ae347a0919d7787beee6f  ./hermes/skills/devops/vps-network-exposure/references/firewall-and-ssh.md
-3155b70424b40b5634a95d8cf4370ed5fdd45b7711bf667f89fd1719670eb9d2  ./hermes/skills/devops/vps-network-exposure/references/vpn-and-https-ingress.md
+75e1b2e8fca538a605d5ec65acee2be0dafc258c145a1c50ae356f2e1c9a5a42  ./hermes/skills/devops/vps-network-exposure/references/vpn-and-https-ingress.md
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
+8b57399e312e23743d8a4cb4e95dd1825d63a441642f4f8678c3d548aa212329  ./hermes/skills/devops/vps-network-exposure/scripts/faketls-probe.py
 918971595010770b622cd8cd01580d166146ce98f021a66960e49f7b4ba09b37  ./hermes/skills/devops/webui-ios-icons/SKILL.md
 482f644a1a22de3d85d84e7ce4da9e65ce2a22db90110f8c12e15ff5f5ca8b32  ./hermes/skills/devops/webui-rebranding/SKILL.md
 2c40e123f597ebbb4db9edf5fe8e5d63a1aacf8f00b59eca1b5af0748062ac24  ./hermes/skills/email/DESCRIPTION.md
@@ -136,6 +137,7 @@ b48f44d04e51a3b4223d62fa39ae10be999caccbb046e940bc2cca52cf367bfc  ./hermes/skill
 09cca2d18af5c50fb67f783aec072525e83487c6ba4e41427bf8aa754014e1f5  ./hermes/skills/research/ru-local-price-research/references/city-traffic-ru.md
 940c24a4ad377299b89f8469ca49427e569ba8ca39e9df62b9d481d25a23a6fe  ./hermes/skills/research/ru-local-price-research/references/gold-scrap-ru.md
 cfa6128ed67a0224981a2c384ce188bd037e898a95c432465873306b6edb7349  ./hermes/skills/research/ru-local-price-research/references/jewelry-retail-ru.md
+bc12bab1c7c2073fb4f2157b7df5a6ac9af0e5d1de620484c7d9b63fb011de17  ./hermes/skills/skill-library-maintenance/SKILL.md
 2ea0d50444337de4809a62dc618d6d9c35bd2ba30f17ec6a138a20f53f9974a7  ./hermes/skills/social-media/DESCRIPTION.md
 051cfd884a995f8ee3f10f75adf53b620976d0936e9e7c6eaae368e8a9b31849  ./hermes/skills/vps-cleanup-audit/SKILL.md
 352093bd5d4183591deb13fe0b115f3d561fe7610d63253797f5f603723c2403  ./hermes/skills/vps-cleanup-audit/references/recon-commands.md
