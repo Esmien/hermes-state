@@ -21,9 +21,11 @@ Paths (same nginx server blocks):
 - `/france` — France (external exit), needed for Google/Gemini.
 - `/test` — spare inbound for experiments, routed independently (`inboundTag in-test`).
 - `/fi` — second exit that passes Gemini: `hels.sream-rutube.shop` → `193.233.136.5` (Helsinki, PLAY2GO), Google reports `fi`. Manual switch next to `/france`; no automatic failover.
-- `/lte` — RU-entry chain for mobile/whitelist use: entry `1.fan-video.study` → `87.228.33.97` (Selectel, St Petersburg), egress `87.121.105.34` (Helsinki, PLAY2GO). ~94 Mbit/s, seller cap 2 GB/day. Google reports this egress as `ru`, so it is useless for Gemini — never point `/france` or the owner's `/ws` at it. It only helps whitelist conditions when the client dials the RU entry itself; behind this server the first hop is blocked (see Whitelist mode).
+- `/panel/` — 3x-ui admin UI behind nginx; recipe, CSRF login check and credential rotation in `references/xui-panel.md`.
 
-Upstreams: 10081 `/ws`, 10082 `/general`, 10083 `/france`, 10084 `/test`, 10085 `/lte`, 10086 `/fi` — all bound to 127.0.0.1.
+There is deliberately **no** RU-entry inbound: an earlier `/lte` route (`1.fan-video.study` → Selectel SPb → Helsinki, Google saw it as `ru`) was removed once it was clear the whitelist first hop has to be dialled by the client itself, never by this server. Whitelist entries ship as direct client links only — see Whitelist mode.
+
+Upstreams: 10081 `/ws`, 10082 `/general`, 10083 `/france`, 10084 `/test`, 10086 `/fi`, 10100+i for the relayed `/p<i>` nodes, and 2053 for `/panel/` — all bound to 127.0.0.1.
 
 Adding a route means four coordinated edits, in this order: append an inbound (`tag`, 127.0.0.1, next free port, same client id, `wsSettings.path`) to `config.json`, add the outbound and a routing rule keyed on `inboundTag` **before** the catch-all `tcp,udp → fr` rule, add `paths` + `upstreams` entries to `brand.json`, then `apply_brand.py && nginx -t && systemctl reload nginx && docker restart vpn-router`. Verify by dialling the new path through the tunnel and checking the egress with ipinfo — not by reading the config back.
 
@@ -43,7 +45,7 @@ Never hand-edit the nginx confs — they are generated:
 
 `make_sub.py` renders three formats; nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. The response carries `profile-title: Esmien VPN` and `profile-update-interval: 12`.
 
-Rules: names are plain country names with flags (`🇪🇪 Эстония (General)`, `🇫🇷 Франция (Gemini)`, `🛠 Тест (Develop)`); the brand lives only in the group/profile title. "No clutter" means no junk nodes and no invented groups — it does **not** cap the node list: the owner explicitly ordered every usable upstream node relayed in, so the current subscription is one `Esmien VPN` group plus one `🛡 Белые списки` group. Never add a third group or a node class he did not ask for.
+Rules: names are plain country names with flags (`🇪🇪 Эстония (General)`, `🇫🇷 Франция (Gemini)`, `🛠 Тест (Develop)`); the brand lives only in the group/profile title. "No clutter" means no junk nodes and no invented groups — it does **not** cap the node list: the owner explicitly ordered every usable upstream node relayed in, so the relay pool ships as **one subscription** on its own token. The whitelist entries are a **second, separate subscription**, not a second group: the owner prefers a separate link for them. `make_sub.py` branches on a `kind` file inside the token dir — a dir whose `kind` reads `whitelist` gets a whitelist-only bundle (`make_sub.py --new-whitelist` creates one) — and the main bundle carries the relayed routes only. Never add a third group or a node class he did not ask for.
 
 URL shape: `https://<host>:8443/sub/<token>`. The port must be in the URL: plain 443 is blocked for the owner's ISP.
 
@@ -61,7 +63,7 @@ URL shape: `https://<host>:8443/sub/<token>`. The port must be in the URL: plain
 Two pools, never mixed:
 
 - **relay pool** — every usable upstream node becomes an inbound `/p<i>` (10100+i) on our host plus an outbound `p<i>`; clients reach it through us.
-- **whitelist pool** — only the nodes the provider itself labels **«Глушилки»** are exported as raw upstream links (`whitelist_links.json`, 0600) into a separate client group, because under address allowlists our foreign entry is the first thing that gets cut. Classify by the provider's own label, never by geography: `Москва / СПб / Новосиб` nodes are ordinary RU-exit relays and belong in the relay pool, and a plan may contain no «Глушилки» at all (the PC plan has none, the mobile one has ten) — merge the pools only after the owner confirms which nodes he means.
+- **whitelist pool** — only the nodes the provider itself labels **«Глушилки»** are exported as raw upstream links (`whitelist_links.json`, 0600) into a **separate subscription of their own**, because under address allowlists our foreign entry is the first thing that gets cut. Classify by the provider's own label, never by geography: `Москва / СПб / Новосиб` nodes are ordinary RU-exit relays and belong in the relay pool, and a plan may contain no «Глушилки» at all (the PC plan has none, the mobile one has ten) — merge the pools only after the owner confirms which nodes he means.
 
 Pitfall: Xray evaluates routing top-down. Inbound rules appended at the end land **after** the catch-all `network: tcp,udp → <default>` and are silently ignored — every relayed path then exits through the default outbound. Keep inbound-tag rules right after the block rules, before domain/ip/catch-all rules, and re-check one or two relayed paths against `ipinfo` after every import.
 
@@ -94,7 +96,7 @@ A whitelist is enforced on the **first hop**: the client must be able to reach t
 
 A Russian hosting IP is not automatically whitelisted either: lists cover specific service ranges, not "anything in RU". Only a real shutdown proves it; before that, say plainly that the path is unverified.
 
-Whatever shape is chosen, the whitelist node must already be **installed in the client before restrictions hit**: the subscription is served from this host, so during a shutdown nobody can fetch or update it. Ship both pools in one subscription while the network is open, give the backup node a plain name (`Резерв (белые списки)`), and state that switching is manual — no client detects a whitelist and fails over by itself. When the family dials the provider directly, use **two separate subscriptions**: one for the server's exit, one for the family, otherwise the duplicate-IP signature the whole split was meant to remove comes straight back. Cost-wise that is ~2× the plan price and still cheaper than a second owned node.
+Whatever shape is chosen, the whitelist node must already be **installed in the client before restrictions hit**: the subscription is served from this host, so during a shutdown nobody can fetch or update it. Hand the family its own whitelist subscription (separate token, see Subscription) while the network is open, give the backup nodes plain names, and state that switching is manual — no client detects a whitelist and fails over by itself. When the family dials the provider directly, use **two separate subscriptions**: one for the server's exit, one for the family, otherwise the duplicate-IP signature the whole split was meant to remove comes straight back. Cost-wise that is ~2× the plan price and still cheaper than a second owned node.
 
 ## Failover — off, deliberately
 
@@ -130,6 +132,7 @@ Two node kinds are unusable here: `hysteria2` links (Xray core has no such proto
 
 ## Pitfalls
 
+- The owner floats ideas in passing («выбросим эту Эстонию в помойку», «а если хостинг американский», «ничего не делаем, я образно») — that is thinking aloud, not a work order. Answer the technical question with the trade-off, then wait for an explicit «делай». Do not start a migration, buy a node or rewrite a pool off a hypothetical; he pushes back hard on unrequested initiative.
 - `gemini_geo_check.py` lives on the host, not in the containers: `docker cp /root/vpn-router/gemini_geo_check.py 3xui:/tmp/ggc.py` before running it through a socks listener inside `3xui`, otherwise the call fails with "can't open file".
 - `pkill -f <cfg>.json` inside `docker exec sh -c '…'` kills the shell running the loop, because the pattern matches that shell's own command line — a per-node probe stops after the first node. Launch the client with `… & pid=$!` and `kill $pid`.
 - `docker stats` reports `0B` for `vpn-router` because it runs on the host network — do not read that as "no traffic".

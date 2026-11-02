@@ -66,6 +66,7 @@ The same drift bites automations. Any bot that signs in with a password from `.e
 
 ## Pitfalls
 
+- **A `403` on `POST /login` is CSRF, not a wrong password.** Go panels (3x-ui 3.x, and most cookie-session UIs) embed `<meta name="csrf-token" content="…">` in the login page and require that value in an `X-CSRF-Token` header alongside the session cookie. Fetch the page first, extract the token, then post — a bare post answers 403 with an empty body however correct the password is. Behind a proxy the same 403 appears when the panel's origin check sees a mismatched host: pass `Host $http_host` (port included) and `X-Forwarded-Proto $scheme` from nginx, because `Host $host` drops the port while the browser's `Origin` keeps it. The 3x-ui case, with rotation and a working verification sequence, is written up in the `vpn-entry-stack` skill (its `xui-panel` reference).
 - **A `401` is not proof the password is wrong.** Wrong endpoint, wrong body schema, or a dead legacy route all return `401`. Establish the endpoint from logs first.
 - **`login: None` in a JSON response is not a failed login** if `token` is present — v2 changed the shape. Check the raw body before concluding.
 - **Editing `.env` without recreating the container changes nothing.** Compare `.env` mtime against `State.StartedAt`; if the file is newer, the running process still holds the old value.
