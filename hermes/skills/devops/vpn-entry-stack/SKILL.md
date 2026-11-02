@@ -56,6 +56,17 @@ URL shape: `https://<host>:8443/sub/<token>`. The port must be in the URL: plain
 - Its final verification can print `000` if curl lands inside the reload window — re-check manually before believing the switch failed.
 - Wildcard `*.esmien.qd.je` needs DNS-01. DigitalPlat (DNS host, `dns1/dns2.digitalplat.org`) has no publicly reachable API (403/404 on guessed endpoints, paths built dynamically in panel JS), so automation needs either a dashboard token plus its docs or moving the zone to a DNS provider with an open API (deSEC).
 
+## Upstream subscriptions (relaying nodes)
+
+Two pools, never mixed:
+
+- **relay pool** — every usable upstream node becomes an inbound `/p<i>` (10100+i) on our host plus an outbound `p<i>`; clients reach it through us.
+- **whitelist pool** — RU-entry nodes are exported as raw upstream links (`whitelist_links.json`, 0600) into a separate client group, because under address allowlists our foreign entry is the first thing that gets cut.
+
+Pitfall: Xray evaluates routing top-down. Inbound rules appended at the end land **after** the catch-all `network: tcp,udp → <default>` and are silently ignored — every relayed path then exits through the default outbound. Keep inbound-tag rules right after the block rules, before domain/ip/catch-all rules, and re-check one or two relayed paths against `ipinfo` after every import.
+
+`import_sub.py` builds the whole relay set idempotently; `probe_sub.py` measures each node (exit IP + Google country) before it goes into the pool. Hysteria2 nodes are unusable — the Xray core does not speak it.
+
 ## Gemini / geo
 
 Gemini's country is Google's own lookup of the **connection IP**, not the country of a hoster's brand, not DNS, and not the city in ipinfo. Measure it, never guess — run `scripts/gemini_geo_check.py` (packaged with this skill, deployed at `/root/vpn-router/gemini_geo_check.py`):
