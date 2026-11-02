@@ -1,41 +1,28 @@
-# 3x-ui admin panel behind nginx
+# 3x-ui panel - removed from this stack
 
-Panel container `3xui` (image `ghcr.io/mhsanaei/3x-ui`) listens on `127.0.0.1:2053`; it is never published raw. The public path is `https://<brand-host>:8443/panel/` on the same certificate and vhost as the VPN routes.
+**Status: deleted.** Container, `xui-data` volume, `/panel/` route in `brand.json`, the
+credentials file, the panel vhost, its `limit_req` zone and its fail2ban jail are all gone.
+Do not go looking for the panel, and do not reintroduce one without an explicit request.
 
-## Publish
+Why it went: it managed two idle inbounds that no client used, while the live routing lives in
+`config.json` as entry-tag -> specific-exit chains that a panel cannot express. The only thing
+it still contributed was a public admin surface. The Xray binary was extracted to
+`/usr/local/bin/xray` first, because the probe scripts had been borrowing it from the container.
 
-1. Set the base path so the panel generates its own links under it:
-   ```bash
-   docker exec 3xui /app/x-ui setting -webBasePath /panel/
-   docker restart 3xui
-   ```
-2. Add it to `brand.json` like a normal route — `paths["panel"] = "/panel/"`, `upstreams["/panel/"] = 2053` — so `apply_brand.py` regenerates it into both ports and every `legacy_hosts` block.
-3. `apply_brand.py` special-cases `/panel/` with a dedicated location: `Host $http_host`, `X-Forwarded-For`, `X-Forwarded-Proto $scheme`. Without the port in `Host` and without `X-Forwarded-Proto` the panel rejects every login with **403** (CSRF) even though the page loads. Do not route the panel through the generic VLESS location template.
-4. `nginx -t && systemctl reload nginx`, then `curl -o /dev/null -w '%{http_code}' https://<host>:8443/panel/` → `200`.
+What replaced it: `vpn-cfg` (`references/router-ops.md`) for edits, validation, restart and
+rollback, and nginx access logs for the little traffic visibility that matters.
 
-## Rotate credentials
+## If a UI is ever reintroduced
 
-```bash
-PW=$(openssl rand -hex 16)
-docker exec 3xui /app/x-ui setting -username admin -password "$PW"
-```
+Keep the two hard-won details, they cost real debugging time:
 
-`-username`, `-password`, `-port`, `-webBasePath`, `-getApiToken`, `-resetTwoFactor` are the CLI surface (`/app/x-ui setting -h`). Store the result in `/root/3xui-admin-credentials` (0600: `username`, `password`, `url`) and never echo the value into chat — hand the owner `ssh root@<host> 'grep password /root/3xui-admin-credentials'`.
+1. **CSRF.** Behind a proxy the panel answers every login with 403 unless the vhost forwards
+   the original `Host` (with port), `X-Forwarded-Proto` and `X-Forwarded-For`, and the client
+   echoes a matching `Origin`/`Referer`. A generic VLESS location template will not do; the
+   panel needs its own location block.
+2. **Login test.** `POST /login` alone always returns 403 and proves nothing. Fetch the page
+   with a cookie jar, pull the `csrf-token` meta value, then post with `X-CSRF-Token` and the
+   jar. Success is `{"success":true,...}` - a 200 with an empty body is not a login.
 
-## Verify the login for real
-
-The panel is CSRF-protected, so a bare `POST /panel/login` always answers 403 and proves nothing. Two requests:
-
-```bash
-curl -sS -c /tmp/c.jar https://<host>:8443/panel/ -o /tmp/p.html
-TOK=$(grep -o 'name="csrf-token" content="[^"]*"' /tmp/p.html | sed 's/.*content="//;s/"//')
-curl -sS -b /tmp/c.jar -c /tmp/c.jar -X POST https://<host>:8443/panel/login \
-  -H "X-CSRF-Token: $TOK" -H "Origin: https://<host>:8443" -H "Referer: https://<host>:8443/panel/" \
-  --data-urlencode username=admin --data-urlencode "password=$PW"
-```
-
-Success is `{"success":true,"msg":"You have successfully logged into your account."}` — a 200 with an empty body is not a login.
-
-## Exposure notes
-
-Publishing the panel means the internet sees it; the only gate is the panel login. Say so when reporting, and offer `limit_req` in the vhost (`limit_req_zone … zone=panel:1m rate=10r/m`) rather than silently leaving brute force wide open. The panel also serves at the backup port, since `apply_brand.py` writes both server blocks from the same upstream map.
+If it is ever published, put it behind a rate limit and a fail2ban jail from the start, and
+remember the panel is reachable on every port that `apply_brand.py` renders.

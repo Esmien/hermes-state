@@ -1,11 +1,11 @@
 ---
 name: vpn-entry-stack
-description: Use when editing the VPN entry, routes or subscriptions.
+description: Use when editing or deploying the VPN entry stack.
 ---
 
 # VPN entry stack (VLESS over WebSocket + TLS)
 
-The owner's home ISP (MTS, Novorossiysk) drops **port 443** and kills **fake-TLS/MTProto** to this server's IP. What works is a *real* TLS handshake on a non-standard port. That single fact drives the whole design — verify it before debugging anything else.
+The owner's home ISP (MTS, Krasnodar) drops **port 443** and kills **fake-TLS/MTProto** to this server's IP. What works is a *real* TLS handshake on a non-standard port. That single fact drives the whole design — verify it before debugging anything else.
 
 ## Layout
 
@@ -21,15 +21,27 @@ Paths (same nginx server blocks):
 - `/france` — France (external exit), needed for Google/Gemini.
 - `/test` — spare inbound for experiments, routed independently (`inboundTag in-test`).
 - `/fi` — second exit that passes Gemini: `hels.sream-rutube.shop` → `193.233.136.5` (Helsinki, PLAY2GO), Google reports `fi`. Manual switch next to `/france`; no automatic failover.
-- `/panel/` — 3x-ui admin UI behind nginx; recipe, CSRF login check and credential rotation in `references/xui-panel.md`.
 
 There is deliberately **no** RU-entry inbound: an earlier `/lte` route (`1.fan-video.study` → Selectel SPb → Helsinki, Google saw it as `ru`) was removed once it was clear the whitelist first hop has to be dialled by the client itself, never by this server. Whitelist entries ship as direct client links only — see Whitelist mode.
 
-Upstreams: 10081 `/ws`, 10082 `/general`, 10083 `/france`, 10084 `/test`, 10086 `/fi`, 10100+i for the relayed `/p<i>` nodes, and 2053 for `/panel/` — all bound to 127.0.0.1.
+3x-ui is **not** part of the stack: container, volume, `/panel/` route, credentials file, panel vhost, its rate-limit zone and fail2ban jail were all removed. It managed two idle inbounds and could not express "this entry -> that exit", which is the whole point of the routing, so it was one public admin surface for nothing. `references/xui-panel.md` keeps only the CSRF/login knowledge in case a UI is ever reintroduced — do not bring a panel back off your own initiative.
 
-Adding a route means four coordinated edits, in this order: append an inbound (`tag`, 127.0.0.1, next free port, same client id, `wsSettings.path`) to `config.json`, add the outbound and a routing rule keyed on `inboundTag` **before** the catch-all `tcp,udp → fr` rule, add `paths` + `upstreams` entries to `brand.json`, then `apply_brand.py && nginx -t && systemctl reload nginx && docker restart vpn-router`. Verify by dialling the new path through the tunnel and checking the egress with ipinfo — not by reading the config back.
+Upstreams: 10081 `/ws`, 10082 `/general`, 10083 `/france`, 10084 `/test`, 10085 `/fi`, 10100+i for the relayed `/p<i>` nodes — all bound to 127.0.0.1.
 
-Files: `/root/vpn-router/{config.json,brand.json,apply_brand.py,make_sub.py,failover.py,certbot_retry.py,provision_vpn_host.py,gemini_geo_check.py,probe_sub.py}`, subscriptions in `/var/www/esmien-sub/<token>/`.
+Adding a route means four coordinated edits, in this order: append an inbound (`tag`, 127.0.0.1, next free port, same client id, `wsSettings.path`) to `config.json`, add the outbound and a routing rule keyed on `inboundTag` **before** the catch-all `tcp,udp → fr` rule, add `paths` + `upstreams` entries to `brand.json`, then `apply_brand.py && nginx -t && systemctl reload nginx && vpn-cfg apply` (not a bare `docker restart` — `apply` proves the routes answer and reverts a broken config). Verify by dialling the new path through the tunnel and checking the egress with ipinfo — not by reading the config back.
+
+Files: `/root/vpn-router/{config.json,brand.json,apply_brand.py,make_sub.py,make_template.py,import_sub.py,probe_sub.py,test_whitelist.py,gemini_geo_check.py,failover.py,certbot_retry.py,provision_vpn_host.py}`, subscriptions in `/var/www/esmien-sub/<token>/`. Editing, applying and rolling back: `vpn-cfg` (`references/router-ops.md`).
+
+## Deploy / rebuild
+
+The entry is deliberately one container plus flat files, so a fresh server is a script run, not a rebuild from memory:
+
+```bash
+bash assets/vpn/scripts/deploy.sh <domain> [email]     # nginx+stream, cert, container, vhosts, subs
+python3 /root/vpn-router/import_sub.py <sub-file> [dead indices]
+```
+
+After any structural change, regenerate the secret-free template with `router/make_template.py`, copy the scripts and the new template into `/root/vps-infra/assets/vpn/`, and commit — the recovery repo must match the live host exactly. Full procedure and pitfalls: `references/router-ops.md`.
 
 ## Changing the public host
 
@@ -106,7 +118,7 @@ The owner removed automatic failover: `vpn-failover.timer` is `disabled`/`inacti
 
 ## Borrowed exit (third-party subscription)
 
-An exit lifted from someone's paid plan is a shared credential, not a free tunnel: provider panels count **unique IPs**, not devices, so this server shows up as one more client beside the owner's phone. The owner's plan is **unlimited** — the `720 GB / ∞` on the card is traffic *spent*, not a quota (confirmed 2026-11) — so volume is not what gets you banned; concurrency and datacenter origin are. Symptoms still worth knowing: the phone and the server knocking each other offline, or the account flagged for sharing.
+An exit lifted from someone's paid plan is a shared credential, not a free tunnel: provider panels count **unique IPs**, not devices, so this server shows up as one more client beside the owner's phone. The owner's plan is **unlimited** — the `720 GB / ∞` on the card is traffic *spent*, not a quota — so volume is not what gets you banned; concurrency and datacenter origin are. Symptoms still worth knowing: the phone and the server knocking each other offline, or the account flagged for sharing.
 
 A subscription bought **for the server alone** removes the duplicate-client signature (one key, one IP, exactly what the plan expects) and cuts the ban risk a lot, but not to zero: the provider still sees a datacenter origin, and transit/resale is usually forbidden in the terms. Keep a dedicated subscription off the phone and treat it as a layer under an owned VPS, not a replacement.
 
@@ -126,15 +138,15 @@ A second decoy means a different problem: a list of nodes named `Превыше�
 
 Handing a family subscription the *mobile* plan's keys exposes that plan: one leaked link grants every node. Say so before wiring it in.
 
-**Labels lie — probe every node.** On one 24-node plan every node carried a country flag and a friendly name, yet only 2 gave Google a supported country: the German, Swedish, Polish, US, Albanian and Austrian exits all answered `ru`. A reseller registers its whole address space the same way, so the flag describes the sale, not the geo. Run `scripts/probe_sub.py <sub-file> [indices]` — it builds an Xray client config per link, runs it inside `3xui`, and prints exit IP + Google country — then route only the accepted nodes.
+**Labels lie — probe every node.** On one 24-node plan every node carried a country flag and a friendly name, yet only 2 gave Google a supported country: the German, Swedish, Polish, US, Albanian and Austrian exits all answered `ru`. A reseller registers its whole address space the same way, so the flag describes the sale, not the geo. Run `scripts/probe_sub.py <sub-file> [indices]` — it builds an Xray client config per link, runs each one with the host binary (`/usr/local/bin/xray`; no container involved), and prints exit IP + Google country — then route only the accepted nodes.
 
 Two node kinds are unusable here: `hysteria2` links (Xray core has no such protocol) and nodes whose page yields `com` instead of a country code (Google could not place the address — not a supported verdict). Nodes that return 0 bytes are dead; treat them as absent rather than as blocked.
 
 ## Pitfalls
 
 - The owner floats ideas in passing («выбросим эту Эстонию в помойку», «а если хостинг американский», «ничего не делаем, я образно») — that is thinking aloud, not a work order. Answer the technical question with the trade-off, then wait for an explicit «делай». Do not start a migration, buy a node or rewrite a pool off a hypothetical; he pushes back hard on unrequested initiative.
-- `gemini_geo_check.py` lives on the host, not in the containers: `docker cp /root/vpn-router/gemini_geo_check.py 3xui:/tmp/ggc.py` before running it through a socks listener inside `3xui`, otherwise the call fails with "can't open file".
-- `pkill -f <cfg>.json` inside `docker exec sh -c '…'` kills the shell running the loop, because the pattern matches that shell's own command line — a per-node probe stops after the first node. Launch the client with `… & pid=$!` and `kill $pid`.
+- Probes need no container: `/usr/local/bin/xray run -c <cfg>` in the background (`& pid=$!`) plus `gemini_geo_check.py 127.0.0.1:<socks port>` is the whole recipe. If the binary ever disappears, `docker cp vpn-router:/usr/local/bin/xray` style copy out of a running xray container beats downloading a build.
+- A per-node probe must kill by PID (`… & pid=$!` … `kill $pid`). `pkill -f <cfg>.json` matches the shell that runs the loop itself and the probe stops after the first node.
 - `docker stats` reports `0B` for `vpn-router` because it runs on the host network — do not read that as "no traffic".
 - `docker run -p 127.0.0.1:PORT` does not expose extra inbounds: use `--network host` (with `--user 0:0` so the 0600 config is readable).
 - Keep every inbound bound to 127.0.0.1; an inbound on `0.0.0.0` publishes raw VLESS to the internet.

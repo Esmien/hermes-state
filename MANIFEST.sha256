@@ -109,11 +109,13 @@ a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skill
 b2a2f042ece1a5b57c714b32de75ca876b697b761c92abb0e276acd3ea3688f5  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
-30ccef2e51155659c55c8898f1a2a3bcce812e790e8759eef672b5ce85db09d4  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
-5d7a5ab51612c37d2cb8b55833f8e13671063f55c085bd667b177493a2d3502b  ./hermes/skills/devops/vpn-entry-stack/references/xui-panel.md
+601e7b4f10464f47fe5d10f73ca241bcd479ea72387d10632a476bb817fa0f86  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+979f55f542046fdffdbf181195d32fa3d0970badad7928eaed202b3d441ca7fa  ./hermes/skills/devops/vpn-entry-stack/references/router-ops.md
+97721e654258560d01bb1ced479ff6a8efe89b2990f13b0108e701c6818394dc  ./hermes/skills/devops/vpn-entry-stack/references/xui-panel.md
 fda24a0d23effbb247cc1d437b7a57fa3a6b7b45861f65dd6d0da3d3b43ff328  ./hermes/skills/devops/vpn-entry-stack/scripts/gemini_geo_check.py
 f5cf760b862da18ca4eb5f86f3a6bdecb4e1c9c8d02bb5406b082ecf6c7242c3  ./hermes/skills/devops/vpn-entry-stack/scripts/probe_sub.py
 27d91d66ae5de17a9f664e9dba7b40ea012152f7147b71d994e9c957707dc7e3  ./hermes/skills/devops/vpn-entry-stack/scripts/test_whitelist.py
+e2e06d92a26070b4617c0489ef8d4bc404b6b78a62369773e11e56152c52971c  ./hermes/skills/devops/vpn-entry-stack/scripts/vpn-cfg.sh
 7738db0c4bde71e6280b8c32cb7139e90da18962e2f331cfc1e9fdba51fc6345  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
 2da89659e2ce8d71f39c7f7b2a3aca6b2377c8d01bac93dbee8535549ef70868  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 868ff72e3d63da39dff7eddf73a1093e96f3fee87c3b280e05b23d764c842c32  ./hermes/skills/devops/vps-infra-installer/references/beszel-and-monitoring.md
