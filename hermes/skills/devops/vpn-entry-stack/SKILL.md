@@ -66,13 +66,17 @@ The Gemini web template embeds Google's verdict in `this.gbar_={CONFIG:[[[0,"www
 
 So a Paris VPS can be "Russia" for Google, and a Tallinn VPS too. Buying an exit is a per-IP lottery: rent (hourly if possible), run the checker, keep only a supported code, otherwise destroy and try another provider/subnet.
 
-"Smart DNS" services that unblock Gemini work by proxying the flows through their own IPs — DNS is only how they capture and redirect the domains. Changing resolvers alone cannot move the verdict, because the verdict follows the connection IP.
+"Smart DNS" services that unblock Gemini work by proxying the flows through their own IPs — DNS is only how they capture and redirect the domains. Changing resolvers alone cannot move the verdict, because the verdict follows the connection IP. Verified through one good exit: default resolver, Yandex DoH (`77.88.8.8`) and Google DoH (`8.8.8.8`) all returned the same `fr`; the bad exit returned `ru` under every resolver.
 
-Route Google domains *and* Google IP ranges through the FR exit and enable `sniffing`; a partial tunnel was not enough — the whole flow must leave through the good IP. Block `::/0` on the client-visible exit: an IPv6-capable client leaks its real address past the tunnel and the verdict follows the leak.
+Route Google domains *and* Google IP ranges through the FR exit and enable `sniffing`; a partial tunnel was not enough — the whole flow must leave through the good IP. IPv6 is the one leak that does flip the verdict, because Google then reads the real address past the tunnel: this host has **no global IPv6 at all** (no address, no default route, `curl -6` → `000`), the `direct` outbound is `UseIPv4`, and generated Clash profiles carry `ipv6: false` both top-level and in `dns` — so the stack itself cannot leak. The remaining vector is a client that bypasses the tunnel for v6; diagnose on the device with `test-ipv6.com` and switch IPv6 off in that client rather than hunting the server.
 
 ## Failover
 
-`vpn-failover.timer` (every 2 min) probes the external exit; 2 failures → default route flips to `direct`, 2 successes → back to `fr`. Internet survives an exit outage, only Gemini degrades. Test logic on a copy of the config — never point the live probe at an unreachable host.
+`vpn-failover.timer` probes the external exit **every 15 min with `RandomizedDelaySec=300`**, so activations land 15–20 min apart instead of on a visible 2-minute bot cadence. 2 failures → default route flips to `direct`, 2 successes → back to `fr`. Internet survives an exit outage, only Gemini degrades — but detection now takes up to ~40 min (two probes plus jitter); if that is too slow, lower `FAIL_THRESHOLD` to 1 instead of shortening the interval. Test logic on a copy of the config — never point the live probe at an unreachable host.
+
+## Borrowed exit (third-party subscription)
+
+An exit lifted from someone's paid plan is a shared credential, not a free tunnel: provider panels count **unique IPs**, not devices, so this server shows up as one more client beside the owner's phone, and every byte — full tunnel included — burns that plan's traffic quota. Symptoms of hitting a limit are the phone and the server knocking each other offline, or the account being flagged for datacenter-IP sharing. Keep it as a temporary layer, keep probes irregular (see Failover), and replace it with an owned VPS as soon as one passes the Gemini check.
 
 ## Pitfalls
 
@@ -81,3 +85,4 @@ Route Google domains *and* Google IP ranges through the FR exit and enable `snif
 - Cloudflare WARP is unusable from this host: UDP 2408 and 1.1.1.1:53 get no reply (8.8.8.8 works). Do not build routing on WARP here.
 - An external exit is a black box: its public hostname resolves to a front IP that may sit on a different ASN and different /24 than the subnet that actually egresses. Never infer the verdict from the resolved IP — force Google to answer from the exit: `curl --socks5-hostname <exit> 'https://dns.google/resolve?name=o-o.myaddr.l.google.com&type=TXT'` and read the `edns0-client-subnet` line. The hostname can also rotate between addresses, which silently changes the Gemini verdict.
 - Everything is mirrored in `Esmien/vps-infra` under `assets/vpn/` (sanitised: no UUID, no exit password). The public repo must never receive credentials.
+- After a push, `raw.githubusercontent.com` keeps serving the previous copy for minutes — a stale read is not a failed push. Confirm through the API instead: `curl -s 'https://api.github.com/repos/<owner>/<repo>/contents/<path>?ref=main'` and base64-decode `content`.

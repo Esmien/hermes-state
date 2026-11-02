@@ -109,7 +109,7 @@ a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skill
 b2a2f042ece1a5b57c714b32de75ca876b697b761c92abb0e276acd3ea3688f5  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
-1a7be97adccb69467b5479eb4ce1a0e4bfe134f026a4d2e6244b102ad2d54f28  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+c7f2988745c620c62b1ca1e237a48ea912748d0e152cc33456e969d1a5f50475  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 fda24a0d23effbb247cc1d437b7a57fa3a6b7b45861f65dd6d0da3d3b43ff328  ./hermes/skills/devops/vpn-entry-stack/scripts/gemini_geo_check.py
 7738db0c4bde71e6280b8c32cb7139e90da18962e2f331cfc1e9fdba51fc6345  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
 2da89659e2ce8d71f39c7f7b2a3aca6b2377c8d01bac93dbee8535549ef70868  ./hermes/skills/devops/vps-infra-installer/SKILL.md
