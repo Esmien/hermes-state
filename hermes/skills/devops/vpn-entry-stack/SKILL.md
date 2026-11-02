@@ -20,8 +20,9 @@ Paths (same nginx server blocks):
 - `/general` — Estonia (direct exit), normal traffic.
 - `/france` — France (external exit), needed for Google/Gemini.
 - `/test` — spare inbound for experiments, routed independently (`inboundTag in-test`).
+- `/lte` — RU-entry chain for mobile/whitelist use: entry `1.fan-video.study` → `87.228.33.97` (Selectel, St Petersburg), egress `87.121.105.34` (Helsinki, PLAY2GO). ~94 Mbit/s, seller cap 2 GB/day. Google reports this egress as `ru`, so it is useless for Gemini — never point `/france` or the owner's `/ws` at it.
 
-Upstreams: 10081 `/ws`, 10082 `/general`, 10083 `/france`, 10084 `/test` — all bound to 127.0.0.1.
+Upstreams: 10081 `/ws`, 10082 `/general`, 10083 `/france`, 10084 `/test`, 10085 `/lte` — all bound to 127.0.0.1.
 
 Files: `/root/vpn-router/{config.json,brand.json,apply_brand.py,make_sub.py,failover.py,certbot_retry.py,provision_vpn_host.py}`, subscriptions in `/var/www/esmien-sub/<token>/`.
 
