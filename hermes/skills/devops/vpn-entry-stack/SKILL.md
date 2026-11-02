@@ -54,7 +54,21 @@ URL shape: `https://<host>:8443/sub/<token>`. The port must be in the URL: plain
 
 ## Gemini / geo
 
-Gemini gates on the **connection IP and account region**, not DNS — do not try to fix it with resolvers. Estonia is unsupported; a French exit works (AEZA Paris `138.124.58.80` confirmed). Route Google domains *and* Google IP ranges through the FR exit and enable `sniffing` on the inbound, otherwise IP-based requests from mobile clients bypass domain rules. A partial tunnel was not enough — traffic has to go through the FR exit fully for the stub to disappear.
+Gemini's country is Google's own lookup of the **connection IP**, not the country of a hoster's brand, not DNS, and not the city in ipinfo. Measure it, never guess — run `scripts/gemini_geo_check.py` (packaged with this skill, deployed at `/root/vpn-router/gemini_geo_check.py`):
+
+    python3 gemini_geo_check.py [socks5-host:port]
+
+The Gemini web template embeds Google's verdict in `this.gbar_={CONFIG:[[[0,"www.gstatic.com","<build>","<cc>","<lang>"` — that two-letter `<cc>` is the country Google assigns to the exit. Supported codes work, `ru`/`by`/`ir`/... show the stub. Confirmed cases on this host:
+
+- `138.124.58.x` (AEZA, Paris) → `fr` → works.
+- `77.221.152.x` (AEZA, Paris) → `ru` → stub. Same city, same ASN — the /24 differs.
+- Our own `141.98.166.213` (Tallinn) → `ru` → stub, even though the IP geolocates to Estonia.
+
+So a Paris VPS can be "Russia" for Google, and a Tallinn VPS too. Buying an exit is a per-IP lottery: rent (hourly if possible), run the checker, keep only a supported code, otherwise destroy and try another provider/subnet.
+
+"Smart DNS" services that unblock Gemini work by proxying the flows through their own IPs — DNS is only how they capture and redirect the domains. Changing resolvers alone cannot move the verdict, because the verdict follows the connection IP.
+
+Route Google domains *and* Google IP ranges through the FR exit and enable `sniffing`; a partial tunnel was not enough — the whole flow must leave through the good IP. Block `::/0` on the client-visible exit: an IPv6-capable client leaks its real address past the tunnel and the verdict follows the leak.
 
 ## Failover
 
@@ -65,4 +79,5 @@ Gemini gates on the **connection IP and account region**, not DNS — do not try
 - `docker run -p 127.0.0.1:PORT` does not expose extra inbounds: use `--network host` (with `--user 0:0` so the 0600 config is readable).
 - Keep every inbound bound to 127.0.0.1; an inbound on `0.0.0.0` publishes raw VLESS to the internet.
 - Cloudflare WARP is unusable from this host: UDP 2408 and 1.1.1.1:53 get no reply (8.8.8.8 works). Do not build routing on WARP here.
+- An external exit is a black box: its public hostname resolves to a front IP that may sit on a different ASN and different /24 than the subnet that actually egresses. Never infer the verdict from the resolved IP — force Google to answer from the exit: `curl --socks5-hostname <exit> 'https://dns.google/resolve?name=o-o.myaddr.l.google.com&type=TXT'` and read the `edns0-client-subnet` line. The hostname can also rotate between addresses, which silently changes the Gemini verdict.
 - Everything is mirrored in `Esmien/vps-infra` under `assets/vpn/` (sanitised: no UUID, no exit password). The public repo must never receive credentials.
