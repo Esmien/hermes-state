@@ -43,7 +43,7 @@ Never hand-edit the nginx confs — they are generated:
 
 `make_sub.py` renders three formats; nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. The response carries `profile-title: Esmien VPN` and `profile-update-interval: 12`.
 
-Rules: names are plain country names with flags (`🇪🇪 Эстония (General)`, `🇫🇷 Франция (Gemini)`, `🛠 Тест (Develop)`); the brand lives only in the group/profile title. The owner asks for "no clutter" — do not add groups or extra proxies.
+Rules: names are plain country names with flags (`🇪🇪 Эстония (General)`, `🇫🇷 Франция (Gemini)`, `🛠 Тест (Develop)`); the brand lives only in the group/profile title. "No clutter" means no junk nodes and no invented groups — it does **not** cap the node list: the owner explicitly ordered every usable upstream node relayed in, so the current subscription is one `Esmien VPN` group plus one `🛡 Белые списки` group. Never add a third group or a node class he did not ask for.
 
 URL shape: `https://<host>:8443/sub/<token>`. The port must be in the URL: plain 443 is blocked for the owner's ISP.
 
@@ -61,7 +61,7 @@ URL shape: `https://<host>:8443/sub/<token>`. The port must be in the URL: plain
 Two pools, never mixed:
 
 - **relay pool** — every usable upstream node becomes an inbound `/p<i>` (10100+i) on our host plus an outbound `p<i>`; clients reach it through us.
-- **whitelist pool** — RU-entry nodes are exported as raw upstream links (`whitelist_links.json`, 0600) into a separate client group, because under address allowlists our foreign entry is the first thing that gets cut.
+- **whitelist pool** — only the nodes the provider itself labels **«Глушилки»** are exported as raw upstream links (`whitelist_links.json`, 0600) into a separate client group, because under address allowlists our foreign entry is the first thing that gets cut. Classify by the provider's own label, never by geography: `Москва / СПб / Новосиб` nodes are ordinary RU-exit relays and belong in the relay pool, and a plan may contain no «Глушилки» at all (the PC plan has none, the mobile one has ten) — merge the pools only after the owner confirms which nodes he means.
 
 Pitfall: Xray evaluates routing top-down. Inbound rules appended at the end land **after** the catch-all `network: tcp,udp → <default>` and are silently ignored — every relayed path then exits through the default outbound. Keep inbound-tag rules right after the block rules, before domain/ip/catch-all rules, and re-check one or two relayed paths against `ipinfo` after every import.
 
@@ -117,6 +117,12 @@ Panels built on Remnawave serve a decoy to clients they do not recognise: two vl
     curl -sS -A 'v2rayTun/4.7.0' -H 'x-hwid: <any hex>' '<sub-url>' -o sub.b64
 
 `Happ/2.11.0` with the same header returns the profile as a JSON Xray config instead. Pad before decoding (`base64 -d` wants `len % 4 == 0`), then parse one link per line.
+
+A second decoy means a different problem: a list of nodes named `Превышен лимит устройств` / `@VPNUI_bot` / `Сбросить лимит устройств` is the panel's device-limit page, not a parsing failure — the server's IP became one client too many. Either ask the owner to reset the limit in the provider bot, or skip the subscription entirely and have him export the node link from the phone app (cheaper — a reset gets consumed again on the next refresh).
+
+**Credentials are per plan, not per protocol.** Inside one plan every vless node shares a single UUID and every trojan node a single password, so one key opens the whole plan. Across two plans (PC vs mobile) they differ, and a node will not answer to the other plan's key: swapping the credential and retrying is the fastest way to tell "node dead" from "wrong key". `scripts/test_whitelist.py <sub> <other-sub> <indices> [--mobile]` does exactly that — builds each node with one plan's credential, then with the other's if the first run is silent.
+
+Handing a family subscription the *mobile* plan's keys exposes that plan: one leaked link grants every node. Say so before wiring it in.
 
 **Labels lie — probe every node.** On one 24-node plan every node carried a country flag and a friendly name, yet only 2 gave Google a supported country: the German, Swedish, Polish, US, Albanian and Austrian exits all answered `ru`. A reseller registers its whole address space the same way, so the flag describes the sale, not the geo. Run `scripts/probe_sub.py <sub-file> [indices]` — it builds an Xray client config per link, runs it inside `3xui`, and prints exit IP + Google country — then route only the accepted nodes.
 
