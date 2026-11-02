@@ -6,11 +6,21 @@
 
 ## fail2ban
 
-**Jail on a log file needs `backend = polling`.** `jail.d/defaults-debian.conf` sets `backend = systemd` globally, and a jail that only declares `logpath` then silently watches the journal instead: `fail2ban-client get <jail> logpath` answers "No file is currently monitored" and no "Found" lines ever appear. `fail2ban-regex <log> <filter>` passing while the jail stays at 0 failed is exactly this symptom.
+**Jail по лог-файлу обязан объявить `backend = polling`.** В `jail.d/defaults-debian.conf`
+глобально стоит `backend = systemd`, и jail, у которого указан только `logpath`, молча
+смотрит в journal вместо файла: `fail2ban-client get <jail> logpath` отвечает «No file is
+currently monitored», в `fail2ban.log` нет ни одной строки `Found`. Признак ровно этот:
+`fail2ban-regex <log> <filter>` находит совпадения, а jail показывает 0 failed.
 
-**The server's own address is ignored by default** (`ignoreself`), so a test triggered from the host never bans — the fail2ban log shows `Ignore <ip> by ignoreself rule`. To prove the jail works, set `ignoreself = false` temporarily, trigger, confirm the ban, then `unbanip` and restore the jail.
+**Собственный адрес сервера игнорируется по умолчанию** (`ignoreself`), поэтому проверка с
+хоста никогда не забанит — в логе будет `Ignore <ip> by ignoreself rule`. Чтобы доказать,
+что jail живой: временно `ignoreself = false`, спровоцировать, увидеть бан, затем `unbanip`
+и вернуть конфиг как был. Оставлять `ignoreself = false` нельзя — первый же всплеск 429 с
+собственного адреса отрежет доступ.
 
-Filter regexes: avoid backslashes when writing them through shell/heredoc layers — `\S` easily lands as `\\S` and the regex then never matches. A backslash-free `^<HOST> - - .+ "[^"]+" (401|403|429)` is enough for the default combined log format.
+**Регексп не гонять через shell/heredoc-слои:** `\S` легко доезжает как `\\S`, и фильтр
+перестаёт совпадать. Достаточно `^<HOST> - - .+ "[^"]+" (401|403|429)` для combined-формата —
+без единого бэкслеша.
 
 `fail2ban` 1.0.2, `active` + `enabled`. Конфиг `/etc/fail2ban/jail.local`
 (перекрывает `jail.conf` и `jail.d/defaults-debian.conf`, где `sshd` уже
@@ -18,7 +28,8 @@ Filter regexes: avoid backslashes when writing them through shell/heredoc layers
 
 - `[DEFAULT]`: `findtime = 1h`, `maxretry = 4`, `bantime = 1d`,
   `bantime.increment = true` (`bantime.factor = 2`, `bantime.maxtime = 4w`),
-  `backend = systemd` (нужен пакет `python3-systemd`),
+  `backend = systemd` (нужен пакет `python3-systemd`) — годится для journal-based
+  jail'ов; для файловых см. правило `backend = polling` выше,
   `ignoreip = 127.0.0.1/8 ::1 10.0.0.0/8 172.16.0.0/12 192.168.0.0/16` —
   иначе можно забанить docker-сети.
 - `[sshd]`: `mode = aggressive` — ловит и `Invalid user`, и `Failed password`.
@@ -35,7 +46,7 @@ Filter regexes: avoid backslashes when writing them through shell/heredoc layers
   `unbanip`. Автоскан журнала начинается с момента старта: старые атаки сами
   не подхватятся.
 - Проверка состояния: `fail2ban-client status sshd`,
-  `journalctl -u fail2ban --since -1d`.
+  `fail2ban-client status <jail>`, `journalctl -u fail2ban --since -1d`.
 
 ## Rate limiting nginx
 

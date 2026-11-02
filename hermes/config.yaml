@@ -2484,7 +2484,6 @@ auxiliary:
   approval:
     model: approval
     reasoning_effort: ''
-    extra_body: {}
     provider: custom
   compression:
     provider: custom
@@ -2510,3 +2509,5 @@ hooks:
       command: "/root/.hermes/agent-hooks/ssh-only-gate.py"
       timeout: 10
       fail_closed: true
+command_allowlist:
+  - sudo with combined-flag privilege escalation

@@ -67,6 +67,20 @@ Two consequences worth knowing: the template carries only `direct`/`blocked` out
 from a host whose config still holds placeholder UUIDs would bake the placeholder into the
 template - check that `brand.json`/`config.json` on the host are the real ones first.
 
+## Retiring a component
+
+Removing a service that was published behind nginx is five deletions, not one — miss any and the door stays open or the name keeps answering with the wrong certificate:
+
+1. `docker rm -f <name>` **and** `docker volume rm <volume>` — the volume holds the old credentials and database.
+2. its entries in `brand.json` (`paths`, `upstreams`), then re-run `apply_brand.py` so the generated confs drop the location.
+3. hand-written snippets it introduced (`zz-*.conf`), including any `limit_req_zone` — a zone still referenced by a live location fails `nginx -t`.
+4. its fail2ban jail and filter in `jail.d/` / `filter.d/`, then `systemctl restart fail2ban`.
+5. helper scripts and credential files in `/root`, plus its access log.
+
+Before step 1, copy out anything the rest of the stack borrows from that container — the xray binary is the usual one (`docker cp <c>:/app/bin/xray-linux-amd64 /usr/local/bin/xray`), and every probe script shells out to it.
+
+After removal, `https://<host>/<path>` on 443 answers `000` with a certificate-name mismatch rather than `404`: the vhost no longer exists, so the default server serves its own cert. That is the correct end state, not a broken TLS setup — do not "fix" it by minting a cert for a service you just deleted.
+
 ## Probes run on the host
 
 `/usr/local/bin/xray` is the same core the container runs; `probe_sub.py` and

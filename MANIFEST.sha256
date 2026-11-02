@@ -1,7 +1,7 @@
 2a4a654d1fff361215d5fc961ebb5dc4675d5fd5080c650e965146a6136bf6c6  ./.github/workflows/uptime.yml
 c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
-98091b65bc39e59598fbd41f8e5881b70b003c6bfb6d536c95bd2ae82ff78c89  ./hermes/config.yaml
+358e637750ea544567b53870efe69154497d321a8061c49a154d3c00c33a194a  ./hermes/config.yaml
 d7497d49194499204d44cb923a6b0d017e750f6652f51d38889858096c3a5db9  ./hermes/cron/jobs.json
 fc6079629f3f1a802f2e5fe13a6d730bf9deaebd20fc0043ac79e311901cec0c  ./hermes/memories/MEMORY.md
 1994a24536e05c418d8680fe02655a16665baf3452dc7e650849ca43d6069210  ./hermes/memories/USER.md
@@ -109,8 +109,8 @@ a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skill
 b2a2f042ece1a5b57c714b32de75ca876b697b761c92abb0e276acd3ea3688f5  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
-601e7b4f10464f47fe5d10f73ca241bcd479ea72387d10632a476bb817fa0f86  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
-979f55f542046fdffdbf181195d32fa3d0970badad7928eaed202b3d441ca7fa  ./hermes/skills/devops/vpn-entry-stack/references/router-ops.md
+c5dbe9fb2ae095a2ff73a31aa5502097d8cb081a9915b762c1a5fb9b246bddbe  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+625480e5e31a642015e3490a1c33f91f7304d13906717789077d25939170888e  ./hermes/skills/devops/vpn-entry-stack/references/router-ops.md
 97721e654258560d01bb1ced479ff6a8efe89b2990f13b0108e701c6818394dc  ./hermes/skills/devops/vpn-entry-stack/references/xui-panel.md
 fda24a0d23effbb247cc1d437b7a57fa3a6b7b45861f65dd6d0da3d3b43ff328  ./hermes/skills/devops/vpn-entry-stack/scripts/gemini_geo_check.py
 f5cf760b862da18ca4eb5f86f3a6bdecb4e1c9c8d02bb5406b082ecf6c7242c3  ./hermes/skills/devops/vpn-entry-stack/scripts/probe_sub.py
@@ -123,7 +123,7 @@ e8e006023610f0821ac3c9500dc103277f47c94c0f27bc794063d63378d6c5cb  ./hermes/skill
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
 c6a88e208125336f994254084e22db159cb2116a2650eb4dc1e3a9ad83eb4beb  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 19a9644e9db89f8464086b10bcf3bdc0a9d40a00ed4e9f8c3d61a1c6364edf55  ./hermes/skills/devops/vps-network-exposure/references/acme-and-cert-limits.md
-2dca0fb0205f669f42786c496ad1a3795161e6a5ef7d8038f6d16810d04a13d6  ./hermes/skills/devops/vps-network-exposure/references/fail2ban-and-rate-limits.md
+5d93386309b2930a54912308c4064bd9b875a89369c7123065eedffecb78d11e  ./hermes/skills/devops/vps-network-exposure/references/fail2ban-and-rate-limits.md
 dd75e4fcfd44e1f053f632ece87c23de61135875900ae347a0919d7787beee6f  ./hermes/skills/devops/vps-network-exposure/references/firewall-and-ssh.md
 97828cc98631665b9d1e8c10992a95349cb56ba0551941f3684a1461ff8aa718  ./hermes/skills/devops/vps-network-exposure/references/ru-dpi-vpn-ingress.md
 fe6241ba003a9ed5822b33b762b1a506e5a31dfc0e59f25419f87e41934346a0  ./hermes/skills/devops/vps-network-exposure/references/vpn-and-https-ingress.md
