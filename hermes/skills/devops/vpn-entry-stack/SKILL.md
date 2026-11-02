@@ -67,7 +67,7 @@ The Gemini web template embeds Google's verdict in `this.gbar_={CONFIG:[[[0,"www
 - `77.221.152.x` (AEZA, Paris) → `ru` → stub. Same city, same ASN — the /24 differs.
 - Our own `141.98.166.213` (Tallinn) → `ru` → stub, even though the IP geolocates to Estonia.
 
-So a Paris VPS can be "Russia" for Google, and a Tallinn VPS too. Buying an exit is a per-IP lottery: rent (hourly if possible), run the checker, keep only a supported code, otherwise destroy and try another provider/subnet.
+Why: Google's country follows the address *registration*, not the machine's location. Our block is `netname EE-HIP-…, country EE` but its RIPE org object is `Baykov Ilya Sergeevich, country RU, Moscow` — hence `ru` despite Tallinn. `77.221.152.x` is the same story (`Aeza-Network, FR` over `AEZA GROUP LLC, RU`), while the working `138.124.58.x` is a legacy `RIPE-ERX` block with no RU org. And `87.121.105.34` shows whois is not the whole answer either (whois SE, ipinfo FI, Google `ru`) — Google blends registries with geofeeds and observed traffic. So a Paris VPS can be "Russia" for Google, and a Tallinn VPS too. Buying an exit is a per-IP lottery: rent (hourly if possible), run the checker, keep only a supported code, otherwise destroy and try another provider/subnet.
 
 "Smart DNS" services that unblock Gemini work by proxying the flows through their own IPs — DNS is only how they capture and redirect the domains. Changing resolvers alone cannot move the verdict, because the verdict follows the connection IP. Verified through one good exit: default resolver, Yandex DoH (`77.88.8.8`) and Google DoH (`8.8.8.8`) all returned the same `fr`; the bad exit returned `ru` under every resolver.
 
@@ -90,9 +90,11 @@ The owner removed automatic failover: `vpn-failover.timer` is `disabled`/`inacti
 
 ## Borrowed exit (third-party subscription)
 
-An exit lifted from someone's paid plan is a shared credential, not a free tunnel: provider panels count **unique IPs**, not devices, so this server shows up as one more client beside the owner's phone, and every byte — full tunnel included — burns that plan's traffic quota. Symptoms of hitting a limit are the phone and the server knocking each other offline, or the account being flagged for datacenter-IP sharing.
+An exit lifted from someone's paid plan is a shared credential, not a free tunnel: provider panels count **unique IPs**, not devices, so this server shows up as one more client beside the owner's phone. The owner's plan is **unlimited** — the `720 GB / ∞` on the card is traffic *spent*, not a quota (confirmed 2026-11) — so volume is not what gets you banned; concurrency and datacenter origin are. Symptoms still worth knowing: the phone and the server knocking each other offline, or the account flagged for sharing.
 
-A subscription bought **for the server alone** removes the duplicate-client signature (one key, one IP, exactly what the plan expects) and cuts the ban risk a lot, but not to zero: the provider still sees a datacenter origin, transit/resale is usually forbidden in the terms, and family-sized traffic looks like resale. Keep a dedicated subscription off the phone, leave 3–5× headroom in the quota, and treat it as a layer under an owned VPS, not a replacement.
+A subscription bought **for the server alone** removes the duplicate-client signature (one key, one IP, exactly what the plan expects) and cuts the ban risk a lot, but not to zero: the provider still sees a datacenter origin, and transit/resale is usually forbidden in the terms. Keep a dedicated subscription off the phone and treat it as a layer under an owned VPS, not a replacement.
+
+These sellers are typically **resellers** (arbitrage): one key, but exits on unrelated ASNs (AEZA Paris, PLAY2GO Helsinki). That explains both why they are cheap and why they cannot fix IP reputation — they rent someone else's subnets. Practical consequence: the exit behind a node can change without notice, so re-run the geo checker before blaming our side when Gemini breaks.
 
 ## Pitfalls
 
