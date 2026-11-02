@@ -6,6 +6,12 @@
 
 ## fail2ban
 
+**Jail on a log file needs `backend = polling`.** `jail.d/defaults-debian.conf` sets `backend = systemd` globally, and a jail that only declares `logpath` then silently watches the journal instead: `fail2ban-client get <jail> logpath` answers "No file is currently monitored" and no "Found" lines ever appear. `fail2ban-regex <log> <filter>` passing while the jail stays at 0 failed is exactly this symptom.
+
+**The server's own address is ignored by default** (`ignoreself`), so a test triggered from the host never bans — the fail2ban log shows `Ignore <ip> by ignoreself rule`. To prove the jail works, set `ignoreself = false` temporarily, trigger, confirm the ban, then `unbanip` and restore the jail.
+
+Filter regexes: avoid backslashes when writing them through shell/heredoc layers — `\S` easily lands as `\\S` and the regex then never matches. A backslash-free `^<HOST> - - .+ "[^"]+" (401|403|429)` is enough for the default combined log format.
+
 `fail2ban` 1.0.2, `active` + `enabled`. Конфиг `/etc/fail2ban/jail.local`
 (перекрывает `jail.conf` и `jail.d/defaults-debian.conf`, где `sshd` уже
 включён).
@@ -62,3 +68,11 @@ limit_conn_zone $binary_remote_addr zone=conn_per_ip:10m;
 При разделении 443 stream-прокси проверь реальный client IP и защиту от
 подмены: [vpn-and-https-ingress.md](vpn-and-https-ingress.md). Конфиги и
 возможность восстановления сверяй с актуальным `vps-infra`, а не с записями.
+
+## Реальный IP за stream-прокси
+
+Цепочка `stream 443 → 127.0.0.1:<hop> → 127.0.0.1:9443` теряет адрес клиента на **каждом** лишнем хопе: nginx stream отправляет в PROXY-заголовке свой `$remote_addr`, то есть адрес предыдущего хопа, а не исходного клиента. Два хопа дают в логах `127.0.0.1` при живых `set_real_ip_from`/`real_ip_header proxy_protocol` в http-контексте.
+
+Правильно — один хоп: `server { listen 443; ssl_preread on; proxy_pass <backend>; proxy_protocol on; }` прямо на TLS-листенер (`listen 127.0.0.1:9443 proxy_protocol ssl`). Бэкенд, который PROXY не понимает (mtproto/mtg), получает свой мелкий хоп-стриппер: `server { listen 127.0.0.1:10445 proxy_protocol; proxy_pass 127.0.0.1:10443; }` — принимает заголовок и отдаёт чистый TCP.
+
+Проверка: запрос с внешнего адреса должен дать этот же адрес в `$remote_addr` access-лога. Если в логе `127.0.0.1` при рабочем сайте — PROXY-цепочка лишняя или не принимается на промежуточном листенере (`wrong version number` у клиента = заголовок уехал в TLS).
