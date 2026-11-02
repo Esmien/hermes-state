@@ -90,6 +90,16 @@ ls -la /home/ai_service/ai-stack/backups/postgres/          # дампы: keep-n
 
 Бэкапы делает `postgres-backup.timer` (02:30 UTC) + проверяет восстановлением `monitor.py verify` (03:15 UTC); ночной дайджест уходит в Telegram.
 
+Две вещи, которых нет в `deploy.sh`:
+
+- **История Hermes** (`state.db` + `sessions/`, ~28 МБ) — `hermes-history-backup.timer` (вс 04:20 UTC) кладёт архив в файл-бот
+  (`db=hermes_history`, 2 части). Восстановление: скачать части, `cat hermes_history_*.part_* > hermes_history.tar.gz`,
+  распаковать в `/root/.hermes/` при остановленном Hermes (иначе SQLite-файлы перезапишутся живыми).
+- **Секреты** (`.env` стека, notifications, `/root/.hermes`) — `secrets-offsite-backup.timer` (вс 04:10 UTC) шифрует
+  AES-256-CBC и отправляет `.enc` в файл-бот (`db=secrets_offsite`) плюс inventory с именами ключей, без значений.
+  Ключ расшифровки пришёл один раз в чат уведомлений — держи его в менеджере паролей, без него архив бесполезен.
+  Расшифровка: `openssl enc -d -aes-256-cbc -pbkdf2 -iter 300000 -in secrets_*.enc -out secrets.tar.gz -pass pass:<ключ>`.
+
 ## Diag-шпаргалка
 
 ```bash

@@ -63,6 +63,19 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host.
 - **Nginx** = TLS terminator (replaced caddy); **Certbot** issues/renews certs.
 - Only 80/443 are deliberate ingress and the compose backends bind 127.0.0.1 — but **that is a per-service setting, not a host guarantee**. The HOST PostgreSQL 17 listens on `0.0.0.0:5432` (`listen_addresses='*'`) and nothing filtered it (`ufw` is `ENABLED=no`, `iptables INPUT` policy ACCEPT), so the port was open to the internet and being brute-forced (`grep -c 'no pg_hba.conf entry' /var/log/postgresql/postgresql-17-main.log` → 41k). It is now guarded by `/usr/local/bin/fw-guard-postgres.sh` + `fw-guard-postgres.service` (only 127.0.0.1 and 172.16.0.0/12 get in). **Never answer «что у нас наружу» from `docker ps` alone** — host services (Postgres, nginx, docker-proxy) are invisible there. Audit/closure procedure: `vps-network-exposure` skill.
 
+## Facts that get misquoted in summaries
+
+- `GET /model/info` returns **80 entries (aliases) over 43 unique upstream models** — say «80 записей/
+  алиасов», never «80 маршрутов»: half of the entries point at the same deployment.
+- **`edge-tts` is an orphan container.** It runs on `stack-net` with no published port, is not in the compose
+  file and is not referenced by `litellm/config.yaml`; WebUI TTS is `audio.tts.engine=openai` with
+  `audio.tts.model=tts.openrouter/gemini-3.8-flash-lite-tts` (through LiteLLM → OpenRouter). Do not describe
+  edge-tts as the stack's TTS path; removal needs the owner's confirmation.
+- **`bot_db` is empty**: 0 tables in `public`, 0 backends; its 7.7 MB is template overhead. Leftover of the
+  pre-lyria deployment — never list it as live data.
+- Host dumps cover **`webui_db` + `litellm_db` only**; `lyria`'s own Postgres is deliberately unbacked and
+  `bot_db` is not dumped either.
+
 ## Domains → backend
 
 ```

@@ -9,6 +9,37 @@
 - **Build the registry entry before deleting the split parts.** `backup_registry_entry` hashes every part; deleting them first raises `FileNotFoundError` after the upload already succeeded, leaving 55 orphan files in the chat and no registry.
 - **`build_split_instruction` does not fit 55 parts** (Telegram caps a message at 4096 chars). The script sends the full instruction only for ≤10 parts and otherwise a compact `cat …part_* > …` + sha256 line.
 
+## Offsite copies added 2026-11 (Hermes history, .env secrets)
+
+- `hermes-history-backup.timer` (Sun 04:20 UTC) → `/usr/local/bin/hermes-history-backup.py`: consistent
+  SQLite snapshots (`sqlite3 .backup`, WAL-safe) of `state.db` + `kanban.db` plus `sessions/`, ~28 MB
+  tar.gz → 2 parts to the file bot, registry set `db="hermes_history"`, 2 local archives in
+  `/var/lib/hermes-history-backup`. Reason: `hermes-state-backup.sh` ships config/memories/skills/cron/
+  plugins but NOT conversation history — after a total loss the chats were gone.
+- `secrets-offsite-backup.timer` (Sun 04:10 UTC) → `/usr/local/bin/secrets-offsite-backup.py`: collects
+  `.env` files (ai-stack, notifications, `/root/.hermes/.env`, any under `deploy/music_bot`), writes a
+  key-name-only inventory, encrypts the tar with AES-256-CBC/pbkdf2-300k using `/root/.secrets/offsite.key`
+  (600, generated once), round-trip verifies (decrypt → sha256 → tar listing) and only then uploads the
+  `.enc` + inventory to the file bot as `db="secrets_offsite"`. The passphrase is delivered ONCE to the
+  notification chat (flag `/root/.secrets/offsite.key.sent`) and exists nowhere else — losing that Telegram
+  message loses the archive. Never print it; to rotate, delete key+flag and re-run.
+- Both are registered in `install.py` (`CORE_TIMERS` + `HOST_BIN_SCRIPTS`) and mirrored in
+  `assets/host/{bin,systemd}` — keep those copies in step with `/usr/local/bin`.
+
+## Which layer actually detects an offline host
+
+- **The primary external watchdog is the GitHub Actions `uptime.yml` in the private `hermes-state` repo**, not
+  `deadman-ping`. It probes `https://ai.esmien.qd.je/` and `https://llm.esmien.qd.je/health/liveliness` every
+  15 min from a runner, keeps state in an open issue labeled `uptime`, and messages Telegram only on the
+  up→down and down→up transitions. It depends on repo secrets `TG_TOKEN`/`TG_CHAT`.
+- **`deadman-ping.timer` is the SECOND contour and is not configured**: no `/etc/deadman-ping.url`, no
+  `DEADMAN_URL=` key in `notifications/.env`, so the script exits without pinging anything. Since 2026-11 it
+  writes one journal line per day (`DEADMAN_URL не задан`) instead of exiting silently. Wiring it needs the
+  owner's healthchecks.io check URL — nothing the agent can generate.
+- **`uptime-heartbeat.timer` is NOT uptime monitoring.** It is a monthly job (1st, 03:00) that commits to
+  `vps-infra/maintainer/uptime-heartbeat.txt` so GitHub does not disable scheduled workflows on an inactive
+  repo. Never quote it as «пинг наружу, видно падение хоста».
+
 ## External uptime watchdog (server offline)
 
 - Local alerts die with the host, so `.github/workflows/uptime.yml` in the private `hermes-state` repo probes `https://ai.esmien.qd.je/` and `https://llm.esmien.qd.je/health/liveliness` every 15 min from a GitHub runner and writes to Telegram via `TG_TOKEN`/`TG_CHAT` repo secrets.

@@ -58,6 +58,23 @@ Companion skills: `ai-stack` (what is inside the AI stack, and the backup verifi
   no offsite encrypted copy of `.env` files and no written list of where DNS/tokens come from, that is the real
   remaining gap and worth exactly one recommendation.
 
+- **A timer that runs is not a timer that does something.** `systemctl list-timers` proves scheduling only.
+  Read `ExecStart`, then the script's config sources: `deadman-ping` ran every 5 min for weeks with no
+  `DEADMAN_URL` anywhere and pinged nobody; `uptime-heartbeat` is a monthly GitHub-actions keepalive, not an
+  uptime probe. Before grading the monitoring layer, open the script and its env.
+- **The external eye does exist — check it before saying «мониторинга снаружи нет».** `.github/workflows/uptime.yml`
+  in the private `hermes-state` repo probes ai/llm every 15 min from a GitHub runner and messages Telegram on
+  up→down / down→up transitions (state in an open `uptime` issue). `deadman-ping` (healthchecks.io) is the
+  unconfigured second contour, and wiring it needs the owner's account URL.
+- **`docker system df`: read the `RECLAIMABLE` column, not TOTAL.** 13.89 GB of build cache with 43 MB
+  reclaimable is not «17 GB можно освободить без потерь» — pruning costs a full rebuild of `esmien/webui`
+  and the arduino sandbox (6–10 min of the RTO).
+- **`/model/info` entries ≠ routes.** 80 entries over 43 unique upstream models — count both before quoting.
+- **Check DBs for content, not just size.** `bot_db` is 7.7 MB of template with 0 tables; quoting it as live
+  data is how a summary loses credibility.
+- **Harness backup scope:** `hermes-state` carries config/memories/skills/cron/plugins — NOT
+  `state.db`/`sessions`. Those now go weekly to the file bot via `hermes-history-backup.timer`.
+
 ## Accepted risks — do NOT list these as holes
 
 The owner has decided these; re-flagging them wastes the session and reads as nagging:
@@ -70,6 +87,10 @@ The owner has decided these; re-flagging them wastes the session and reads as na
 - No fallbacks between model routes, no key limits — conscious product choices.
 - No full-host restore drill yet: accepted, because the recovery plan is «manual install → monitoring shows errors →
   fix → update the deploy script», and the two things that must not be lost (DBs + harness) are already offsite.
+- `deadman-ping` without `DEADMAN_URL` (healthchecks.io needs the owner's account). The primary external check is
+  the GitHub Actions workflow; note it as «второй контур не подключён», never as a fresh hole.
+- `edge-tts` kept as a spare although nothing consumes it; `bot_db` left in place with 0 tables. Removing either
+  is destructive and needs a separate explicit go-ahead.
 
 When the owner corrects one of these, accept it in one line, strike it from the list, and continue — do not
 re-argue it in the same answer.

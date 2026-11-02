@@ -1,7 +1,68 @@
 {
-  "updated_at": "2026-11-02T03:00:12Z",
+  "updated_at": "2026-11-02T20:35:13Z",
   "chat_id": "214062001",
   "sets": [
+    {
+      "db": "secrets_offsite",
+      "dump": "secrets_20261102_203511.tar.gz.enc",
+      "size": 13152,
+      "sha256": "10ef8439be776a93366ba6bdbc3b835ba402af9bd6760fd18318c8ec6423f2f7",
+      "created_at": "2026-11-02T20:35:12Z",
+      "chat_id": "214062001",
+      "complete": true,
+      "parts": [
+        {
+          "name": "secrets_20261102_203511.tar.gz.enc",
+          "size": 13152,
+          "sha256": "10ef8439be776a93366ba6bdbc3b835ba402af9bd6760fd18318c8ec6423f2f7",
+          "file_id": "BQACAgIAAxkDAAIBmWro9AF28mOfgoGYx1Vk3sj-oxckAAI3tQACHZFIS5iSUxfhj-1HPQQ",
+          "message_id": 409
+        }
+      ]
+    },
+    {
+      "db": "hermes_history",
+      "dump": "hermes_history_20261102_203317.tar.gz",
+      "size": 29209809,
+      "sha256": "7bc9939514de903103ee55f329b73d97ae5ea64c812e9b952dd81247df9ad7eb",
+      "created_at": "2026-11-02T20:33:20Z",
+      "chat_id": "214062001",
+      "complete": true,
+      "parts": [
+        {
+          "name": "hermes_history_20261102_203317.tar.gz.part_00",
+          "size": 14604905,
+          "sha256": "78c461fe4f0ca542ebe6ca2262940df84c6be7ddaad38eb7599f2ca785c649b3",
+          "file_id": "BQACAgIAAxkDAAIBlmro85KpO6iivvCshLujh9t2tfTiAAIXtQACHZFISxqQOx7VW7e1PQQ",
+          "message_id": 406
+        },
+        {
+          "name": "hermes_history_20261102_203317.tar.gz.part_01",
+          "size": 14604904,
+          "sha256": "33d745b3bc70e24035cb142a1371799bc0a16b836354f567cdc0933b24172d43",
+          "file_id": "BQACAgIAAxkDAAIBl2ro85PLtX9wymG12q_6GLXh-1ClAAIYtQACHZFIS3LF76E0r8fcPQQ",
+          "message_id": 407
+        }
+      ]
+    },
+    {
+      "db": "secrets_offsite",
+      "dump": "secrets_20261102_203313.tar.gz.enc",
+      "size": 13152,
+      "sha256": "02d22abdd7287e315b397c585367b6a6c35a232163ebc542bb81d47b13605878",
+      "created_at": "2026-11-02T20:33:14Z",
+      "chat_id": "214062001",
+      "complete": true,
+      "parts": [
+        {
+          "name": "secrets_20261102_203313.tar.gz.enc",
+          "size": 13152,
+          "sha256": "02d22abdd7287e315b397c585367b6a6c35a232163ebc542bb81d47b13605878",
+          "file_id": "BQACAgIAAxkDAAIBk2ro84rrVLAGFvrJt5DfxtrVFrZnAAIVtQACHZFIS9xbiKWEDMWAPQQ",
+          "message_id": 403
+        }
+      ]
+    },
     {
       "db": "litellm_db",
       "dump": "litellm_db_20261102_023000.dump",
