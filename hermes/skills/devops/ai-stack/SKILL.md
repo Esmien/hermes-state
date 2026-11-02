@@ -109,6 +109,21 @@ open the stack to answer it — no probes, no log digging, no spend queries. Run
 the ask is explicitly «проверь», «прогони», «сравни»; stack work started on a conceptual question gets
 interrupted, and rightly so.
 
+## Answering the owner «сервер защищён / отказоустойчив / бэкапы / восстановлю за 30 минут»
+
+A yes/no posture question wants a verdict, evidence per claim, and a short list of what is actually
+left — not a re-inventory essay. Procedure and the accepted-risk list: `vps-posture-assessment` skill.
+Two hard rules from this stack:
+
+- **Never claim the dumps are unverified or unrestorable without reading `references/backups-notifications.md`.**
+  Restore verification exists on two paths: the bot command `/backups` restores the newest dump of each DB
+  into a throwaway `verify_restore_*` database and drops it, and the nightly `monitor.py verify` report does
+  the same at 03:15. What is NOT proof is the nightly `backup` digest («Сохранены бэкапы») — it is an upload
+  receipt only. Answer «прогонялся ли restore» from the verify path, not from `ls backups/` and not from the digest.
+- **Secrets have no offsite copy.** `ai/.env` is git-ignored by design and the only backup (`backups/env.bak-*`)
+  sits on the same disk, so on total host loss tokens, LiteLLM keys, DB passwords and DNS access are the slowest
+  step — slower than rebuilding 21 GB of images. Say this instead of «бэкапы есть, всё ок».
+
 ## References (read on demand)
 
 - `references/coupling-hermes.md` — **Hermes ↔ AI stack coupling**. Read when any change touching Hermes config, LiteLLM groups/fallback, the gateway or the emergency route.

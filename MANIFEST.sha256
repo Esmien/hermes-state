@@ -55,7 +55,7 @@ ac2da2b39f1c355bc76bf35b2cd9e74131ea62030f89781fe82c53ee0b4f029e  ./hermes/skill
 acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skills/career/job-application-review/references/repo-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-7205be08b6bcabfca98159a43888a35f10d70edbcf8b04ad74e4a603b329b973  ./hermes/skills/devops/ai-stack/SKILL.md
+927edc379f542bf9bff754a700b122eb0a6280f47ada250105b9c0e76dd60ff6  ./hermes/skills/devops/ai-stack/SKILL.md
 748bb7e2addaec3a9228f0d50bee7c3b0d2d4944edc216767d89690659087c51  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 055726f7b857418c013c4062923acee90280a454d5f12be7760568160c0eba3e  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
@@ -130,6 +130,8 @@ fe6241ba003a9ed5822b33b762b1a506e5a31dfc0e59f25419f87e41934346a0  ./hermes/skill
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
 6089d1d7d5f1cc59b77d4147ea1b2b404175cec3888f095d4bc6e049f2f8391d  ./hermes/skills/devops/vps-network-exposure/scripts/faketls-probe.py
 5e780432952150f90883eff45349e648ab6e3417334b171b7d4215fd1f798ff3  ./hermes/skills/devops/vps-network-exposure/templates/vpn-subscription-generator.py
+631527cd6e38cb70b1fd6f59842c5dc96d9cb46bf47eccf0c5b88666139b452b  ./hermes/skills/devops/vps-posture-assessment/SKILL.md
+de682e106bd529ef8b78d202dabcc84f694b04e5de8d5ff0a79a827864ada28d  ./hermes/skills/devops/vps-posture-assessment/references/recovery-rto.md
 918971595010770b622cd8cd01580d166146ce98f021a66960e49f7b4ba09b37  ./hermes/skills/devops/webui-ios-icons/SKILL.md
 482f644a1a22de3d85d84e7ce4da9e65ce2a22db90110f8c12e15ff5f5ca8b32  ./hermes/skills/devops/webui-rebranding/SKILL.md
 2c40e123f597ebbb4db9edf5fe8e5d63a1aacf8f00b59eca1b5af0748062ac24  ./hermes/skills/email/DESCRIPTION.md
