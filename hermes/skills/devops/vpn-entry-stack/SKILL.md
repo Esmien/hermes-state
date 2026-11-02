@@ -20,9 +20,11 @@ Paths (same nginx server blocks):
 - `/general` — Estonia (direct exit), normal traffic.
 - `/france` — France (external exit), needed for Google/Gemini.
 - `/test` — spare inbound for experiments, routed independently (`inboundTag in-test`).
-- `/lte` — RU-entry chain for mobile/whitelist use: entry `1.fan-video.study` → `87.228.33.97` (Selectel, St Petersburg), egress `87.121.105.34` (Helsinki, PLAY2GO). ~94 Mbit/s, seller cap 2 GB/day. Google reports this egress as `ru`, so it is useless for Gemini — never point `/france` or the owner's `/ws` at it.
+- `/lte` — RU-entry chain for mobile/whitelist use: entry `1.fan-video.study` → `87.228.33.97` (Selectel, St Petersburg), egress `87.121.105.34` (Helsinki, PLAY2GO). ~94 Mbit/s, seller cap 2 GB/day. Google reports this egress as `ru`, so it is useless for Gemini — never point `/france` or the owner's `/ws` at it. It only helps whitelist conditions when the client dials the RU entry itself; behind this server the first hop is blocked (see Whitelist mode).
 
 Upstreams: 10081 `/ws`, 10082 `/general`, 10083 `/france`, 10084 `/test`, 10085 `/lte` — all bound to 127.0.0.1.
+
+Adding a route means four coordinated edits, in this order: append an inbound (`tag`, 127.0.0.1, next free port, same client id, `wsSettings.path`) to `config.json`, add the outbound and a routing rule keyed on `inboundTag` **before** the catch-all `tcp,udp → fr` rule, add `paths` + `upstreams` entries to `brand.json`, then `apply_brand.py && nginx -t && systemctl reload nginx && docker restart vpn-router`. Verify by dialling the new path through the tunnel and checking the egress with ipinfo — not by reading the config back.
 
 Files: `/root/vpn-router/{config.json,brand.json,apply_brand.py,make_sub.py,failover.py,certbot_retry.py,provision_vpn_host.py}`, subscriptions in `/var/www/esmien-sub/<token>/`.
 
@@ -71,16 +73,31 @@ So a Paris VPS can be "Russia" for Google, and a Tallinn VPS too. Buying an exit
 
 Route Google domains *and* Google IP ranges through the FR exit and enable `sniffing`; a partial tunnel was not enough — the whole flow must leave through the good IP. IPv6 is the one leak that does flip the verdict, because Google then reads the real address past the tunnel: this host has **no global IPv6 at all** (no address, no default route, `curl -6` → `000`), the `direct` outbound is `UseIPv4`, and generated Clash profiles carry `ipv6: false` both top-level and in `dns` — so the stack itself cannot leak. The remaining vector is a client that bypasses the tunnel for v6; diagnose on the device with `test-ipv6.com` and switch IPv6 off in that client rather than hunting the server.
 
-## Failover
+## Whitelist mode (RU entry)
 
-`vpn-failover.timer` probes the external exit **every 15 min with `RandomizedDelaySec=300`**, so activations land 15–20 min apart instead of on a visible 2-minute bot cadence. 2 failures → default route flips to `direct`, 2 successes → back to `fr`. Internet survives an exit outage, only Gemini degrades — but detection now takes up to ~40 min (two probes plus jitter); if that is too slow, lower `FAIL_THRESHOLD` to 1 instead of shortening the interval. Test logic on a copy of the config — never point the live probe at an unreachable host.
+A whitelist is enforced on the **first hop**: the client must be able to reach the address it dials. So a chain whose first hop is this Estonian server is worthless in whitelist mode — traffic dies before it ever reaches the RU entry behind it, no matter how good that entry is. Two shapes actually work:
+
+- the client dials the RU entry **directly** (loses the brand, the subscription and the per-tunnel control; every user then sits on the provider's single key);
+- our own entry lives on a **Russian VPS** (Selectel, Timeweb, Rostelecom), and the foreign exit sits behind it — brand and control survive, at the price of one more node.
+
+A Russian hosting IP is not automatically whitelisted either: lists cover specific service ranges, not "anything in RU". Only a real shutdown proves it; before that, say plainly that the path is unverified.
+
+## Failover — off, deliberately
+
+The owner removed automatic failover: `vpn-failover.timer` is `disabled`/`inactive` and the default route is pinned to `fr`. Do not re-enable it without an explicit request. Rationale: a silent flip to `direct` keeps the internet alive but leaves geo-gated services refusing in a way that looks like the tunnel works ("connected, but Gemini says no"), which is harder to diagnose than a dead tunnel. With the timer off an exit outage kills `/france`, `/ws` and everything on the default route loudly; `/general` and `/test` stay on `direct` and are unaffected.
+
+`failover.py` and the unit files stay on disk and in the repo, unwired — re-enabling is `systemctl enable --now vpn-failover.timer`. If a probe is ever restored, keep the cadence irregular (`RandomizedDelaySec=300` on a 15-minute timer) so it does not read as a bot, and test the logic on a copy of the config, never against the live probe host.
 
 ## Borrowed exit (third-party subscription)
 
-An exit lifted from someone's paid plan is a shared credential, not a free tunnel: provider panels count **unique IPs**, not devices, so this server shows up as one more client beside the owner's phone, and every byte — full tunnel included — burns that plan's traffic quota. Symptoms of hitting a limit are the phone and the server knocking each other offline, or the account being flagged for datacenter-IP sharing. Keep it as a temporary layer, keep probes irregular (see Failover), and replace it with an owned VPS as soon as one passes the Gemini check.
+An exit lifted from someone's paid plan is a shared credential, not a free tunnel: provider panels count **unique IPs**, not devices, so this server shows up as one more client beside the owner's phone, and every byte — full tunnel included — burns that plan's traffic quota. Symptoms of hitting a limit are the phone and the server knocking each other offline, or the account being flagged for datacenter-IP sharing.
+
+A subscription bought **for the server alone** removes the duplicate-client signature (one key, one IP, exactly what the plan expects) and cuts the ban risk a lot, but not to zero: the provider still sees a datacenter origin, transit/resale is usually forbidden in the terms, and family-sized traffic looks like resale. Keep a dedicated subscription off the phone, leave 3–5× headroom in the quota, and treat it as a layer under an owned VPS, not a replacement.
 
 ## Pitfalls
 
+- `gemini_geo_check.py` lives on the host, not in the containers: `docker cp /root/vpn-router/gemini_geo_check.py 3xui:/tmp/ggc.py` before running it through a socks listener inside `3xui`, otherwise the call fails with "can't open file".
+- `docker stats` reports `0B` for `vpn-router` because it runs on the host network — do not read that as "no traffic".
 - `docker run -p 127.0.0.1:PORT` does not expose extra inbounds: use `--network host` (with `--user 0:0` so the 0600 config is readable).
 - Keep every inbound bound to 127.0.0.1; an inbound on `0.0.0.0` publishes raw VLESS to the internet.
 - Cloudflare WARP is unusable from this host: UDP 2408 and 1.1.1.1:53 get no reply (8.8.8.8 works). Do not build routing on WARP here.
