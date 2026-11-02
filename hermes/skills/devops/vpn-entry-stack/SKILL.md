@@ -20,13 +20,14 @@ Paths (same nginx server blocks):
 - `/general` — Estonia (direct exit), normal traffic.
 - `/france` — France (external exit), needed for Google/Gemini.
 - `/test` — spare inbound for experiments, routed independently (`inboundTag in-test`).
+- `/fi` — second exit that passes Gemini: `hels.sream-rutube.shop` → `193.233.136.5` (Helsinki, PLAY2GO), Google reports `fi`. Manual switch next to `/france`; no automatic failover.
 - `/lte` — RU-entry chain for mobile/whitelist use: entry `1.fan-video.study` → `87.228.33.97` (Selectel, St Petersburg), egress `87.121.105.34` (Helsinki, PLAY2GO). ~94 Mbit/s, seller cap 2 GB/day. Google reports this egress as `ru`, so it is useless for Gemini — never point `/france` or the owner's `/ws` at it. It only helps whitelist conditions when the client dials the RU entry itself; behind this server the first hop is blocked (see Whitelist mode).
 
-Upstreams: 10081 `/ws`, 10082 `/general`, 10083 `/france`, 10084 `/test`, 10085 `/lte` — all bound to 127.0.0.1.
+Upstreams: 10081 `/ws`, 10082 `/general`, 10083 `/france`, 10084 `/test`, 10085 `/lte`, 10086 `/fi` — all bound to 127.0.0.1.
 
 Adding a route means four coordinated edits, in this order: append an inbound (`tag`, 127.0.0.1, next free port, same client id, `wsSettings.path`) to `config.json`, add the outbound and a routing rule keyed on `inboundTag` **before** the catch-all `tcp,udp → fr` rule, add `paths` + `upstreams` entries to `brand.json`, then `apply_brand.py && nginx -t && systemctl reload nginx && docker restart vpn-router`. Verify by dialling the new path through the tunnel and checking the egress with ipinfo — not by reading the config back.
 
-Files: `/root/vpn-router/{config.json,brand.json,apply_brand.py,make_sub.py,failover.py,certbot_retry.py,provision_vpn_host.py}`, subscriptions in `/var/www/esmien-sub/<token>/`.
+Files: `/root/vpn-router/{config.json,brand.json,apply_brand.py,make_sub.py,failover.py,certbot_retry.py,provision_vpn_host.py,gemini_geo_check.py,probe_sub.py}`, subscriptions in `/var/www/esmien-sub/<token>/`.
 
 ## Changing the public host
 
@@ -98,9 +99,22 @@ A subscription bought **for the server alone** removes the duplicate-client sign
 
 These sellers are typically **resellers** (arbitrage): one key, but exits on unrelated ASNs (AEZA Paris, PLAY2GO Helsinki). That explains both why they are cheap and why they cannot fix IP reputation — they rent someone else's subnets. Practical consequence: the exit behind a node can change without notice, so re-run the geo checker before blaming our side when Gemini breaks.
 
+### Turning a plan into a pool
+
+Panels built on Remnawave serve a decoy to clients they do not recognise: two vless nodes named `Данное приложение не обновлено` / `или не поддерживается`, both on `0.0.0.0:1`. A browser UA, `v2rayNG/…` or `ClashMeta/…` all get that decoy. What works is a supported app UA **plus** a hardware-id header:
+
+    curl -sS -A 'v2rayTun/4.7.0' -H 'x-hwid: <any hex>' '<sub-url>' -o sub.b64
+
+`Happ/2.11.0` with the same header returns the profile as a JSON Xray config instead. Pad before decoding (`base64 -d` wants `len % 4 == 0`), then parse one link per line.
+
+**Labels lie — probe every node.** On one 24-node plan every node carried a country flag and a friendly name, yet only 2 gave Google a supported country: the German, Swedish, Polish, US, Albanian and Austrian exits all answered `ru`. A reseller registers its whole address space the same way, so the flag describes the sale, not the geo. Run `scripts/probe_sub.py <sub-file> [indices]` — it builds an Xray client config per link, runs it inside `3xui`, and prints exit IP + Google country — then route only the accepted nodes.
+
+Two node kinds are unusable here: `hysteria2` links (Xray core has no such protocol) and nodes whose page yields `com` instead of a country code (Google could not place the address — not a supported verdict). Nodes that return 0 bytes are dead; treat them as absent rather than as blocked.
+
 ## Pitfalls
 
 - `gemini_geo_check.py` lives on the host, not in the containers: `docker cp /root/vpn-router/gemini_geo_check.py 3xui:/tmp/ggc.py` before running it through a socks listener inside `3xui`, otherwise the call fails with "can't open file".
+- `pkill -f <cfg>.json` inside `docker exec sh -c '…'` kills the shell running the loop, because the pattern matches that shell's own command line — a per-node probe stops after the first node. Launch the client with `… & pid=$!` and `kill $pid`.
 - `docker stats` reports `0B` for `vpn-router` because it runs on the host network — do not read that as "no traffic".
 - `docker run -p 127.0.0.1:PORT` does not expose extra inbounds: use `--network host` (with `--user 0:0` so the 0600 config is readable).
 - Keep every inbound bound to 127.0.0.1; an inbound on `0.0.0.0` publishes raw VLESS to the internet.
