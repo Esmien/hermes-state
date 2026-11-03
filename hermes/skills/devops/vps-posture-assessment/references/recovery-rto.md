@@ -8,15 +8,17 @@ Numbers below were measured on the host, not assumed.
 - Egress measured with a 100 MB Hetzner pull: **≈29.5 MB/s (~236 Mbit/s)**. Re-measure before quoting if the
   provider or the plan changed: `curl -o /dev/null -m 10 -w "%{speed_download} B/s\n" https://ash-speed.hetzner.com/100MB.bin`
   (Cloudflare's `speed.cloudflare.com` endpoint may return a 1-byte body here — do not read that as a dead link).
-- Docker images on this host total **≈21 GB** → ≈12 min of download alone at that rate.
+- Docker images on this host total **≈27 GB** → ≈15 min of download alone at that rate.
 - There is **no registry mirror** in `/etc/docker/daemon.json`; pulls go straight to ghcr/docker hub.
+- Re-measure both before quoting: images grow by ~1 GB per крупное обновление, a stale «21 GB» makes the estimate
+  optimistic (`docker system df` → total images, not the whole `/var/lib/docker`).
 
 ## Step costs
 
 | Step | Cost | Note |
 |---|---|---|
 | apt base + PostgreSQL 17 + pgvector + roles/DBs | 3–4 min | `install.py` step sequence |
-| Pull ≈21 GB of images | ~12 min | unpack on 4 vCPU adds 5–8 min |
+| Pull ≈27 GB of images | ~15 min | unpack on 4 vCPU adds 5–8 min |
 | **Build** `esmien/webui:local` and `esmien/open-terminal-arduino:local` | 6–10 min | these are NOT pulls — local Dockerfiles (`ai/webui-branding/`, `ai/arduino-sandbox/`); forgetting this breaks every estimate |
 | Restore `webui_db` (120 MB) + `litellm_db` (34 MB) | 2–3 min | `pg_restore`, newest dump auto-applied by `deploy.sh` |
 | `webui_data` (1.5 GB, 55 Telegram parts) | 5–8 min | `webui-data-restore.py`, weekly archive |

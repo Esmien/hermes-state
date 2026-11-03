@@ -18,19 +18,50 @@ metadata:
 Open WebUI, SearXNG, open-terminal, Redis, Nginx + Certbot, бэкапы,
 Telegram-мониторинг, в конце — Hermes (хостовый режим).
 
-Репозиторий: `github.com/Esmien/vps-infra` (публичный, секретов внутри нет).
-Рабочая копия на этом сервере: `/root/vps-infra`. Живой стек —
+Репозиторий: `github.com/Esmien/vps-infra` (**приватный**, секретов внутри нет).
+Публичная точка входа для `curl | bash` — отдельный репозиторий `Esmien/vps-bootstrap`,
+в нём лежит только `bootstrap.sh` и README. Рабочая копия на этом сервере: `/root/vps-infra`. Живой стек —
 `/home/ai_service/ai-stack`; его `deploy.sh` исторический и не покрывает
 Hermes, бэкапы и мониторинг.
 
 ## One-liner
 
+**Владелец требует одну команду и уход.** Любая инструкция развёртывания подаётся как один
+copy-paste блок; многошаговые «сначала склонируй, потом запусти с флагами» он отвергает
+(«инструкция разворачивания ГОВНО»). Всё, что можно автоматизировать, автоматизируется в
+`bootstrap.sh`, а не переносится в чат.
+
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Esmien/vps-infra/main/bootstrap.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/Esmien/vps-bootstrap/main/bootstrap.sh | sudo bash
 ```
 
-`bootstrap.sh` ставит git/curl/python3 → клонирует в `/opt/vps-infra` →
-`exec python3 install.py`. Аргументы пробрасываются через `bash -s -- …`.
+До запуска на машине лежит файл стартовых секретов (`/root/bootstrap.env`, иначе
+`/tmp/bootstrap.env` или `./bootstrap.env`; путь можно задать `VPS_BOOTSTRAP_ENV`):
+
+```
+GITHUB_TOKEN=ghp_...        # клон приватного vps-infra + доступ к реестру в hermes-state
+SECRETS_KEY=<пароль архива .env>
+TG_FILE_TOKEN=123:AA...     # РЕАЛЬНЫЙ файл-бот: из него тянутся секреты и дампы
+# необязательно:
+BOT_TOKEN=... FILE_BOT_TOKEN=... HERMES_BOT_TOKEN=... WEBUI_URL=... EXTRA_ARGS="--skip tls"
+```
+
+`bootstrap.sh` ставит git/curl/python3/openssl → клонирует приватный репозиторий по токену
+и сразу вычищает токен из `.git/config` → пишет пароль архива в `/root/.secrets/offsite.key`
+(600) → запускает `install.py` с готовым набором флагов (`--yes --secrets-from-bot
+--secrets-key … --tg-token … --from-bot --hermes --restore-hermes`, плюс тестовые токены и
+`--set` из env-файла). Лог — `/var/log/vps-bootstrap.log`, он же дублируется на экран.
+По умолчанию TLS пропускается; `WITH_TLS=1` включает шаг nginx/certbot, `BOOTSTRAP_DRY=1`
+превращает прогон в `--dry-run`.
+
+**Канон `bootstrap.sh` живёт в приватном `vps-infra`, публичная копия только для curl.**
+Рассинхрон ловит `maintainer/publish_bootstrap.py` (сверяет содержимое по API и коммитит
+только при отличии; `--check` — exit 1 при расхождении). Правку скрипта без публикации
+считать незавершённой: владелец запускает именно публичный URL.
+
+`stdin` при `curl | bash` — это труба: скрипт делает `exec </dev/tty`, иначе вопросы
+`install.py` получат EOF. Для Hermes установщик вызывается с `--non-interactive`, когда
+терминала нет (`HERMES_INSTALL_ARGS` переопределяет).
 
 ## Режимы
 
@@ -104,7 +135,9 @@ units → hardening → tls → verify → hermes`.
 
 ## Переезд (проверенный порядок)
 
-1. Одной командой: `bootstrap.sh | bash -s -- --from-bot --restore --hermes --restore-hermes`.
+1. Одной командой: положить `bootstrap.env` (GITHUB_TOKEN, SECRETS_KEY, TG_FILE_TOKEN + тестовые
+   токены ботов) и запустить `curl … | sudo bash` — режим восстановления задаётся самим файлом;
+   дополнительные флаги — через EXTRA_ARGS в нём.
    `fetch` берёт последний набор дампов из файл-бота (реестр `file_id` → части →
    склейка → sha256), `hermes` + `--restore-hermes` разворачивает состояние из
    `Esmien/hermes-state` (config/SOUL/memories/skills/cron, `/usr/local/bin`,

@@ -14,38 +14,29 @@
 4. **Пропускаем только TLS** (`--skip-tls`): у машины за NAT нет входящего адреса, а путь
    сертификатов проверяется живым продлением каждый день.
 
-## Команды
+## Команда — одна, дальше уходить
 
-Хост (Ubuntu):
-
-```bash
-sudo snap install multipass
-multipass launch 24.04 --name drill --cpus 4 --memory 8G --disk 80G
-multipass shell drill
-```
-
-Внутри:
+На хосте (Ubuntu) готовится файл стартовых секретов `~/bootstrap.env` (GITHUB_TOKEN,
+SECRETS_KEY, TG_FILE_TOKEN + тестовые токены ботов + `WEBUI_URL=http://drill.local`),
+после чего весь прогон — один блок:
 
 ```bash
-sudo apt update && sudo apt install -y git curl ca-certificates
-TOKEN='<github pat>'
-git clone https://$TOKEN@github.com/Esmien/vps-infra.git
-cd vps-infra
-
-sudo python3 install.py -y --skip-tls \
-  --secrets-from-bot --secrets-key /home/ubuntu/offsite.key \
-  --tg-token '<РЕАЛЬНЫЙ FILE_BOT_TOKEN>' \
-  --from-bot \
-  --bot-token '<ТЕСТ_УВЕДОМЛЕНИЯ>' \
-  --file-bot-token '<ТЕСТ_ФАЙЛЫ>' \
-  --hermes-token '<ТЕСТ_HERMES>' \
-  --hermes --restore-hermes \
-  --set WEBUI_URL=http://drill.local
+multipass launch 24.04 --name drill --cpus 4 --memory 8G --disk 80G \
+  && multipass transfer ~/bootstrap.env drill:/tmp/bootstrap.env \
+  && multipass exec drill -- bash -c 'curl -fsSL https://raw.githubusercontent.com/Esmien/vps-bootstrap/main/bootstrap.sh | sudo bash'
 ```
 
-`--tg-token` — именно **реальный** токен файл-бота: им скачиваются и архив секретов, и дампы.
-Он же нужен, потому что шаг `secrets` перезаписывает `notifications/.env` тестовым токеном
-**до** шага `fetch`, и без явного флага скачивание пойдёт тестовым ботом и упрётся в 404.
+Внутри виртуалки ничего руками не клонируется и не копируется: bootstrap сам тянет приватный
+репозиторий по токену, раскладывает `.env` из архива и запускает установщик со всеми флагами.
+Прогресс — `/var/log/vps-bootstrap.log` в виртуалке; ход прогона и «что считается успехом»
+можно проверять, не дожидаясь конца.
+
+Если нужен только план — `BOOTSTRAP_DRY=1` в env-файле (пробрасывается как `--dry-run`).
+
+`TG_FILE_TOKEN` в env-файле — именно **реальный** токен файл-бота: им скачиваются и архив
+секретов, и дампы базы. Он же обязателен потому, что шаг `secrets` перезаписывает
+`notifications/.env` тестовым токеном **до** шага `fetch`: без явного `--tg-token` скачивание
+пойдёт тестовым ботом и упрётся в 404.
 
 ## Что считается успехом
 
@@ -103,8 +94,9 @@ find /tmp/testroot -name '.env' -printf '%m %u:%g %p\n'
 - **Восстановленный харнесс Hermes тащит cron-задачи.** После прогона их надо погасить
   (`hermes cron ...`) или сразу удалить машину, иначе они начнут работать по расписанию
   внутри виртуалки и слать сообщения в тестовый бот.
-- **Установщик Hermes интерактивный** (`curl -fsSL … | bash`): `--yes` его не отключает,
-  на этом шаге будут вопросы. Это не зависание.
+- **Установщик Hermes интерактивный, но это уже не мешает:** без tty `install.py` запускает
+  его с `--non-interactive` (переопределяется `HERMES_INSTALL_ARGS`). Если прогон всё же
+  встал на вопросе — значит запускали с живым tty и без переменной, это не зависание.
 - **`--from-bot` тянет ~1 ГБ файлов пользователя** (55 частей) сверх дампов: полный прогон
   это ~27 ГБ образов + 1 ГБ данных + сборка двух своих образов, ориентир — час.
 - **`WEBUI_URL` из архива указывает на боевой адрес.** Для прогона переопределять
