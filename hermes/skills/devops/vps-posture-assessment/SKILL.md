@@ -54,14 +54,21 @@ Companion skills: `ai-stack` (what is inside the AI stack, and the backup verifi
 - **RPO and RTO are different answers.** RPO here: 24 h for the two host DBs, 7 days for WebUI files, git for
   configs/harness. RTO: see `references/recovery-rto.md`, ~35–50 min for the AI stack — «30 минут» is optimistic,
   not a lie; say which scenario it applies to (AI stack without lyria).
-- **The longest step in a total loss is not data — it is access.** Secrets are deliberately out of git; if there is
-  no offsite encrypted copy of `.env` files and no written list of where DNS/tokens come from, that is the real
-  remaining gap and worth exactly one recommendation.
+- **The longest step in a total loss is not data — it is access.** Secrets stay out of git, but there IS an
+  offsite encrypted copy now (`secrets-offsite-backup.timer`, weekly, AES-256, file bot) — check it before
+  calling access a gap. What remains is narrower: the archive's passphrase was delivered once into Telegram and
+  exists nowhere else, and the list of where DNS/tokens/accounts come from still lives in the owner's head.
 
 - **A timer that runs is not a timer that does something.** `systemctl list-timers` proves scheduling only.
   Read `ExecStart`, then the script's config sources: `deadman-ping` ran every 5 min for weeks with no
   `DEADMAN_URL` anywhere and pinged nobody; `uptime-heartbeat` is a monthly GitHub-actions keepalive, not an
-  uptime probe. Before grading the monitoring layer, open the script and its env.
+  uptime probe. Before grading the monitoring layer, open the script and its env. The `LAST` column carries the
+  other half: `-` means the timer has never fired on schedule, even when a manual run succeeded and left
+  artefacts on disk — report «настроен, по расписанию ещё не запускался», not «работает».
+- **Run distro python tools with `env -u PYTHONPATH`.** The agent's shell exports PYTHONPATH into Hermes's own
+  venv (cryptography 50), which shadows the system packages: `certbot certificates` dies with
+  `AttributeError: module 'lib' has no attribute 'GEN_EMAIL'` while the same binary works from a clean
+  environment and from `certbot.timer`. Unset the variable before declaring a system tool broken.
 - **The external eye does exist — check it before saying «мониторинга снаружи нет».** `.github/workflows/uptime.yml`
   in the private `hermes-state` repo probes ai/llm every 15 min from a GitHub runner and messages Telegram on
   up→down / down→up transitions (state in an open `uptime` issue). `deadman-ping` (healthchecks.io) is the

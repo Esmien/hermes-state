@@ -145,9 +145,12 @@ Two hard rules from this stack:
   into a throwaway `verify_restore_*` database and drops it, and the nightly `monitor.py verify` report does
   the same at 03:15. What is NOT proof is the nightly `backup` digest («Сохранены бэкапы») — it is an upload
   receipt only. Answer «прогонялся ли restore» from the verify path, not from `ls backups/` and not from the digest.
-- **Secrets have no offsite copy.** `ai/.env` is git-ignored by design and the only backup (`backups/env.bak-*`)
-  sits on the same disk, so on total host loss tokens, LiteLLM keys, DB passwords and DNS access are the slowest
-  step — slower than rebuilding 21 GB of images. Say this instead of «бэкапы есть, всё ок».
+- **Secrets DO have an offsite copy — say it, with the caveat.** `ai/.env` is git-ignored by design, but
+  `secrets-offsite-backup.timer` (Sunday 04:10 UTC) tars every `.env` on the host, encrypts it AES-256-CBC
+  (pbkdf2, key `/root/.secrets/offsite.key`), round-trip verifies decrypt → sha256 → tar listing, and uploads
+  the `.enc` plus a key-name-only inventory to the file bot as `db="secrets_offsite"`. The residual risk is not
+  the archive but its passphrase: it was delivered once into Telegram and exists nowhere else. Never repeat the
+  old line «секреты нигде не лежат» — it is wrong and it scares the owner for nothing.
 
 ## References (read on demand)
 
