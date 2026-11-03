@@ -76,6 +76,20 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host.
 - Host dumps cover **`webui_db` + `litellm_db` only**; `lyria`'s own Postgres is deliberately unbacked and
   `bot_db` is not dumped either.
 
+## Смотреть UI снаружи — только через SSH-туннель
+
+`open-webui` (8080) и `litellm` (4000) публикуются на `127.0.0.1`, поэтому с чужой машины
+(и на прогоне без TLS, где nginx вообще не ставится) браузер видит их так:
+
+```bash
+ssh -N -L 8080:127.0.0.1:8080 -L 4000:127.0.0.1:4000 root@<host>
+# http://localhost:8080 — WebUI, http://localhost:4000/ui — LiteLLM
+```
+
+Логин LiteLLM — `UI_USERNAME`/`UI_PASSWORD` из `ai/.env` (только `grep` ключей, значения в чат не
+выводить); на восстановленной БД пользователи уже есть, а экран первичной регистрации WebUI означает
+пустую `webui_db` — и первый зарегистрированный станет админом.
+
 ## Domains → backend
 
 The public names are moving from the `esmien.qd.je` zone (free DNS whose authoritatives fail — see `vpn-entry-stack` for the triage) to the owned **`esmien.ru`** zone on Cloudflare. Both sets are served in parallel until the owner moves the family, so an old and a new name point at the same backend:

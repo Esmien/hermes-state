@@ -113,6 +113,13 @@ Drills, from cheap to conclusive — `references/push-outage-drill.md`:
 
 ## Gotchas
 
+- **Свежесть `tg-registry.json` проверять в локальном клоне, а не через raw.** `raw.githubusercontent.com`
+  отдаёт этот файл из CDN ещё несколько минут после пуша (кэш-бастер `?cb=` не помогает), поэтому
+  «нового дампа не видно» ≠ «не запушено». Смотреть коммит:
+  `git -C /var/lib/hermes-state/repo show HEAD:host/backups/tg-registry.json | python3 -c 'import json,sys; print(json.load(sys.stdin)["updated_at"])'`.
+  Сам реестр пишет `monitor.py` при отправке дампа в бота, а снапшот подхватывает его только следующим
+  прогоном — после `systemctl start postgres-backup-notify.service` нужен ещё один снапшот, иначе
+  свежий дамп есть в боте, но `install.py --from-bot` на новой машине его не увидит.
 - **Do not re-enable `hermes-state-backup.timer`.** The owner replaced the schedule with change-triggered snapshots on 2026-10-24; a timer means duplicate commits and a second source of truth. The unit stays on disk only as a manual fallback.
 - `Conflicts=` pointing at the unit itself is dropped by systemd with a warning (`Dependency Conflicts=… is dropped`) — do not “guard” a singleton service that way.
 - `write_file` refuses paths under `/etc`; stage the unit in `/root/.hermes/cache/scratch/` and
