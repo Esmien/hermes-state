@@ -56,12 +56,12 @@ ac2da2b39f1c355bc76bf35b2cd9e74131ea62030f89781fe82c53ee0b4f029e  ./hermes/skill
 acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skills/career/job-application-review/references/repo-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-964d3ef9f08e99ebfa615298718222d69b14db84753021c7c5c309b4fc24640c  ./hermes/skills/devops/ai-stack/SKILL.md
+136e81aad3f36dead0beb96d6262d92ba90c95809b74f67db5e9fbd083c5bb83  ./hermes/skills/devops/ai-stack/SKILL.md
 e2f836d92b721494a2dd993a035536a6108b714b9fa4e1840084232bc4ce5f39  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 055726f7b857418c013c4062923acee90280a454d5f12be7760568160c0eba3e  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
 d49fd78d825e8b54685126619c61372e152081ff15cff668d835f446284c7036  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
-6f164e2c8a5cb549244fa0d6549f679288e6556ab747aee455f2625dd4370321  ./hermes/skills/devops/ai-stack/references/disk-and-memory.md
+2bbd56db1295e2b1974a04c60eba5d3da515c02edb11e7b3dae19e7e3bd90ee8  ./hermes/skills/devops/ai-stack/references/disk-and-memory.md
 81548cf239d36786d338994016df929475a5abe81057bbabd0f401f3b1d6905f  ./hermes/skills/devops/ai-stack/references/enricher-system-legacy.md
 4ca891acafa249bc7f4cab7c375b4f569cb7f48eae57651fe7edfd4e6133c703  ./hermes/skills/devops/ai-stack/references/enricher-system.md
 8cdb49eee81350e2f6614d24c8e4499efcada0974c9c8b4e163108e1afcb0b3e  ./hermes/skills/devops/ai-stack/references/litellm-model-db.md
@@ -133,7 +133,7 @@ e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skill
 f4f414bab4ec686903fd37211f744e8f4a324f99dbde957c7fe41f23cd6906e3  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 5c14899bdd8eb297fa5156aa5e70943a35b1c7e376f70308642ac315fedbc73e  ./hermes/skills/devops/vps-network-exposure/references/acme-and-cert-limits.md
 7a3f38209b4d651536f5b150cceeb1af9ab0a3c84189ed47b98b65d144bb36a6  ./hermes/skills/devops/vps-network-exposure/references/domain-migration-and-dns.md
-2538788beb5392e14b3a8e8fb1b73cc089396f5c47e14008136e317efb07558f  ./hermes/skills/devops/vps-network-exposure/references/fail2ban-and-rate-limits.md
+194697d5efe8f76c8314b4919ec160c9ef243d85ea7b14d5d30fadfd8ccc8e97  ./hermes/skills/devops/vps-network-exposure/references/fail2ban-and-rate-limits.md
 dd75e4fcfd44e1f053f632ece87c23de61135875900ae347a0919d7787beee6f  ./hermes/skills/devops/vps-network-exposure/references/firewall-and-ssh.md
 97828cc98631665b9d1e8c10992a95349cb56ba0551941f3684a1461ff8aa718  ./hermes/skills/devops/vps-network-exposure/references/ru-dpi-vpn-ingress.md
 fe6241ba003a9ed5822b33b762b1a506e5a31dfc0e59f25419f87e41934346a0  ./hermes/skills/devops/vps-network-exposure/references/vpn-and-https-ingress.md
@@ -180,7 +180,7 @@ f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-
 9c6388452c33f57d635ffbb36e318429fa22545a6e5a6f1d71551320a2678a1e  ./host/bin/hermes-history-backup.py
 b8f7c9ca9783c86ee8049647f549867ff7d72731a8e146a07c09f0403601be31  ./host/bin/hermes-state-backup.sh
 5249aa0ba7bc85fb2cfaa7357d93c1bde4fc24b9182a71d8df08dbb90f65be5e  ./host/bin/hermes-state-watch.sh
-22ba3afdadc842431f74993b46827aa9513433b82e27810fba6be2304d2e45ff  ./host/bin/litellm-spend-retention.sh
+fe38a04fbff517367311ae12433a60b9969e37743e0aba58a41a492769f9c2d4  ./host/bin/litellm-spend-retention.sh
 95655be1c140ce102c02ba9cb73bfea09457869d62419f64ef9677efc48ab087  ./host/bin/litellm-watchdog.py
 a87e4db1c389f6fb3c41b1dc4dfd0b08e9a969db61e6a2bae46e23cfc4a0f316  ./host/bin/owui-signup-approver.py
 7128ae03df8813658538e9ba264f8e30ab1899b067591eb7df7ddb405a4b4420  ./host/bin/searxng-quality-check.py

@@ -96,6 +96,13 @@ limit_conn_zone $binary_remote_addr zone=conn_per_ip:10m;
 
 - `llm.` (`conf.d/llm.esmien.ru.conf`): `limit_req zone=llm_api
   burst=40 nodelay` + `limit_conn conn_per_ip 20` на весь server.
+- **`/v1/models` заслуживает отдельной, более жёсткой зоны.** Это самый долбимый путь:
+  сканеры перебирают его десятками тысяч запросов, а легитимный клиент спрашивает список
+  моделей редко. Зона `llm_models` (`rate=1r/s`), применяется только в
+  `location = /v1/models { limit_req zone=llm_models burst=5 nodelay; … }`; остальной API
+  живёт на прежних 10 r/s. Проверка после reload: `/v1/models` без ключа → `401`
+  (не 403/429 на первом запросе), с ключом → `200`, `/health/liveliness` → `200`.
+  Не переносить этот лимит на `location /` — пострадают реальные ответы модели.
 - `ai.` / `app.` (`conf.d/ai.esmien.ru.conf`, `app.esmien.ru.conf`): лимит **только
   в `location /api/`** (`burst=120`, `limit_conn 30`); статика (`/_app`,
   `/assets`, `/static`) идёт через `location /` без лимита — иначе массовая

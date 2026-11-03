@@ -71,6 +71,16 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host.
   file and is not referenced by `litellm/config.yaml`; WebUI TTS is `audio.tts.engine=openai` with
   `audio.tts.model=tts.openrouter/gemini-3.8-flash-lite-tts` (through LiteLLM → OpenRouter). Do not describe
   edge-tts as the stack's TTS path; removal needs the owner's confirmation.
+- **Красная стена «Failure» в UI LiteLLM — чаще всего не модели, а сканеры.** Прежде чем
+  искать сбой, сгруппировать последние отказы по модели: строки с пустой моделью — это
+  неаутентифицированные `401/429` на `/v1/models` (`SELECT model, count(*) FROM
+  "LiteLLM_SpendLogs" WHERE status='failure' AND "startTime" > now() - interval '1 hour'
+  GROUP BY 1`). Адрес источника виден в `/var/log/nginx/access.log` (там же `curl/8.x` UA и
+  пути `/cohere`, `/vllm`, `/vertex_ai`); в `docker logs litellm` — только `172.18.0.1`, то есть
+  docker-proxy, а не клиент. Лечение — джейл `nginx-llm-unauth` + лимит на `/v1/models`
+  (скилл `vps-network-exposure`, раздел про fail2ban и rate limits) и чистка анонимных
+  строк (`references/disk-and-memory.md`). Не перезапускать LiteLLM и не искать причину в ключах:
+  0 успешных запросов с этих адресов = утечки нет, есть мусор.
 - **`bot_db` is empty**: 0 tables in `public`, 0 backends; its 7.7 MB is template overhead. Leftover of the
   pre-lyria deployment — never list it as live data.
 - Host dumps cover **`webui_db` + `litellm_db` only**; `lyria`'s own Postgres is deliberately unbacked and
