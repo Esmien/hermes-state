@@ -50,9 +50,19 @@ BOT_TOKEN=... FILE_BOT_TOKEN=... HERMES_BOT_TOKEN=... WEBUI_URL=... EXTRA_ARGS="
 и сразу вычищает токен из `.git/config` → пишет пароль архива в `/root/.secrets/offsite.key`
 (600) → запускает `install.py` с готовым набором флагов (`--yes --secrets-from-bot
 --secrets-key … --tg-token … --from-bot --hermes --restore-hermes`, плюс тестовые токены и
-`--set` из env-файла). Лог — `/var/log/vps-bootstrap.log`, он же дублируется на экран.
-По умолчанию TLS пропускается; `WITH_TLS=1` включает шаг nginx/certbot, `BOOTSTRAP_DRY=1`
+`--set` из env-файла). Лог установщика — `/var/log/vps-infra-install.log`; `bootstrap.sh`
+дублирует туда только свой stderr (`/var/log/vps-bootstrap.log`). **stdout установщика через
+`tee` не прогонять:** труба лишает его tty, и живой блок прогресса молча превращается в
+плоский поток строк. По умолчанию TLS пропускается; `WITH_TLS=1` включает шаг nginx/certbot, `BOOTSTRAP_DRY=1`
 превращает прогон в `--dry-run`.
+
+**Прогресс — не поток строк.** Владелец требует, чтобы под заголовком текущего шага жил блок
+последних 15–20 строк вывода, старые строки уходили вверх, а заголовки пройденных шагов
+оставались в истории; при смене шага блок стирается, заголовок остаётся. Это реализовано
+классом `Pane` в `install.py` (ANSI-курсор, откат к построчному выводу при не-tty,
+`NO_PANE=1` для отключения). Правила якорной арифметики, перехвата вывода дочерних процессов
+и проверки отрисовки — [references/installer-output-pane.md](references/installer-output-pane.md);
+правку панели без такой проверки не считать сделанной.
 
 **Канон `bootstrap.sh` живёт в приватном `vps-infra`, публичная копия только для curl.**
 Рассинхрон ловит `maintainer/publish_bootstrap.py` (сверяет содержимое по API и коммитит
@@ -304,3 +314,6 @@ https-коды доменов и число активных таймеров, �
 в `ai/.env`) — [references/installer-pitfalls.md](references/installer-pitfalls.md).
 Читай его перед запуском на живом сервере, изменением синхронизации или
 восстановлением.
+
+Устройство живого блока прогресса и способ проверить его отрисовку без экрана —
+[references/installer-output-pane.md](references/installer-output-pane.md) + `scripts/pty-screen-dump.py`.

@@ -120,11 +120,13 @@ f5cf760b862da18ca4eb5f86f3a6bdecb4e1c9c8d02bb5406b082ecf6c7242c3  ./hermes/skill
 27d91d66ae5de17a9f664e9dba7b40ea012152f7147b71d994e9c957707dc7e3  ./hermes/skills/devops/vpn-entry-stack/scripts/test_whitelist.py
 e2e06d92a26070b4617c0489ef8d4bc404b6b78a62369773e11e56152c52971c  ./hermes/skills/devops/vpn-entry-stack/scripts/vpn-cfg.sh
 7738db0c4bde71e6280b8c32cb7139e90da18962e2f331cfc1e9fdba51fc6345  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
-6f263009c6961964ef168f36e466ae71e9fe800230f0b5e7ee88a1dccefaf1fc  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+a6ae7f84e168b12744a2cd86a5d5fe432e5ca1ca2dec0b0f79661f80fcf2fac7  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 868ff72e3d63da39dff7eddf73a1093e96f3fee87c3b280e05b23d764c842c32  ./hermes/skills/devops/vps-infra-installer/references/beszel-and-monitoring.md
+e204f02c8a35e6c876321da47d4c17e87ae5e39458939932ed6281600dbbde1c  ./hermes/skills/devops/vps-infra-installer/references/installer-output-pane.md
 e8e006023610f0821ac3c9500dc103277f47c94c0f27bc794063d63378d6c5cb  ./hermes/skills/devops/vps-infra-installer/references/installer-pitfalls.md
-b362f01c4425e8c81203c60646fbbb68ae5463eb95dbbc1118d6784df6107700  ./hermes/skills/devops/vps-infra-installer/references/restore-drill.md
+7248e48e8a3f14b983f794b9e15ef2fcfe00766910478a76f054a6cd90aa204e  ./hermes/skills/devops/vps-infra-installer/references/restore-drill.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
+9322f6721bd100d46dccd4da500d4fcf25c02408fbf3bef2376803265fa5df94  ./hermes/skills/devops/vps-infra-installer/scripts/pty-screen-dump.py
 163c8bf7292a6c5d89204b3ddd000a7403b7a3a3c5005a4f953be8e24c681da5  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 5c14899bdd8eb297fa5156aa5e70943a35b1c7e376f70308642ac315fedbc73e  ./hermes/skills/devops/vps-network-exposure/references/acme-and-cert-limits.md
 7a3f38209b4d651536f5b150cceeb1af9ab0a3c84189ed47b98b65d144bb36a6  ./hermes/skills/devops/vps-network-exposure/references/domain-migration-and-dns.md
