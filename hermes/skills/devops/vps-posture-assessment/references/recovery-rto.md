@@ -29,18 +29,30 @@ optimistic end of the range, not a fabrication — quote it as «около ча
 
 - `install.py` (from the `vps-infra` repo): PostgreSQL + roles/DBs, TLS/nginx, the `ai` stack, Beszel,
   VPN assets incl. the xray config, notify/autorecover units, Hermes from the `hermes-state` repo.
-  Useful flags: `--restore`, `--restore-hermes`, `--from-bot` (fetches DB and webui_data sets from Telegram).
+  Useful flags: `--restore`, `--restore-hermes`, `--from-bot` (fetches DB and webui_data sets from Telegram),
+  and `--secrets-from-bot --secrets-key <passphrase file>` which downloads the encrypted `.env` archive and
+  lays all four files back into place with the right owners/modes.
 - `deploy.sh` inside `/home/ai_service/ai-stack`: containers + restore of the newest local dump.
 - **Not covered, by hand every time**: lyria (its own compose lives in `/root/deploy/music_bot/infra`, outside the
   installer and outside backups — owner's decision, so treat its loss as accepted), stale project checkouts
-  (e.g. a `payment-service` tree that is not deployed), Beszel history, DNS records, bot tokens.
+  (e.g. a `payment-service` tree that is not deployed), Beszel history, DNS records.
 - The single durable artefact for «3 часа ночи» is `runbook.md` in the stack repo (симптомы A–E). Keep it in
   sync when a recovery procedure changes.
 
 ## The real bottleneck in a total loss
 
-Images and dumps are mechanically reproducible; **access is not**. `.env` files are git-ignored on purpose and the
-only copies (`backups/env.bak-*`) sit on the same disk, so tokens, LiteLLM master key, DB passwords and DNS access
-must come from the owner's memory or a password manager. Recommend exactly one thing: an encrypted offsite copy of
-those `.env` files plus a list of *where each access is obtained from* (never the values themselves) — same channel
-as the other offsite backups.
+Images and dumps are mechanically reproducible; **access used to be the gap, and it is now mostly closed.**
+`.env` files are git-ignored on purpose, but since the weekly offsite job exists they are not lost with the disk:
+`secrets-offsite-backup.timer` (Sun 04:10 UTC) tar+gzips every `.env` (ai-stack, notifications, `/root/.hermes`,
+`music_bot`), encrypts with AES-256-CBC/pbkdf2-300k using `/root/.secrets/offsite.key` (600), round-trip verifies,
+and uploads the `.enc` plus a key-names-only inventory to the file bot under `db="secrets_offsite"`.
+
+So do **not** repeat the old line «offsite copies of secrets do not exist» — that was true before this job and is
+now wrong. The remaining single point of failure is the **passphrase**: it was delivered to Telegram exactly once
+(flag `/root/.secrets/offsite.key.sent`) and exists nowhere else. If the owner cannot find that message, the archive
+is unreadable after a total loss — say that instead, and recommend he put it in a password manager.
+
+A restore from the archive was verified end-to-end into a throwaway root (`VPS_INFRA_SECRETS_ROOT=/tmp/x`): four
+files, perms `640 root:ai_service` (`600` under `/root`), sha256 of each identical to the inventory.
+
+Still manual after a total loss: DNS records and the passphrase itself.

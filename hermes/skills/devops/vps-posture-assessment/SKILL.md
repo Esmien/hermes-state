@@ -36,6 +36,9 @@ Companion skills: `ai-stack` (what is inside the AI stack, and the backup verifi
    один неверен по терминологии»), then per claim: что подтвердилось → что осталось. Numbers before adjectives.
 4. **Offer concrete closures, not a lecture.** 1–4 items with effort estimates; wait for confirmation before
    any change (standing rule: любое изменение — отдельно подтверждается).
+5. **Documents for a third party are redacted.** «Полный обзор, покажи другу» = a `.md` file, not a chat dump:
+   no IPs, domains, paths, container names or tokens; keep counts, timings and design decisions. Write it with
+   `owner-facing-docs` and offer an internal version separately if he needs it.
 
 ## Verdict rules (the part that gets it wrong)
 
@@ -94,6 +97,8 @@ The owner has decided these; re-flagging them wastes the session and reads as na
 - No fallbacks between model routes, no key limits — conscious product choices.
 - No full-host restore drill yet: accepted, because the recovery plan is «manual install → monitoring shows errors →
   fix → update the deploy script», and the two things that must not be lost (DBs + harness) are already offsite.
+  When this comes up, say the procedure is written and ready (Multipass VM + `install.py --secrets-from-bot`,
+  `vps-infra-installer` → `references/restore-drill.md`) but has not been run end-to-end yet — never claim «отрепетировано».
 - `deadman-ping` without `DEADMAN_URL` (healthchecks.io needs the owner's account). The primary external check is
   the GitHub Actions workflow; note it as «второй контур не подключён», never as a fresh hole.
 - `edge-tts` kept as a spare although nothing consumes it; `bot_db` left in place with 0 tables. Removing either

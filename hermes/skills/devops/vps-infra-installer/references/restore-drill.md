@@ -1,0 +1,111 @@
+# Restore drill on a clean machine (no TLS)
+
+Прогон полного восстановления на чистой машине: единственный способ доказать, что путь
+«пустой сервер → живой стек с данными» реально проходится. Владелец считает такой прогон
+обязательным и требует именно e2e, а не «поднялось на глазок».
+
+## Форма, которую владелец принял
+
+1. **Ничего не копируем руками, кроме секретов.** Репозиторий — `git clone` с GitHub,
+   не tar/scp с живого сервера. `.env` раскладывает сам установщик из зашифрованного архива.
+2. **Поднимаем всё**, включая нотификаторы, бэкаперы и всех сторожей — на **тестовых**
+   токенах ботов, которые владелец выдаёт отдельно.
+3. **Hermes с харнессом обязателен** (`--hermes --restore-hermes`).
+4. **Пропускаем только TLS** (`--skip-tls`): у машины за NAT нет входящего адреса, а путь
+   сертификатов проверяется живым продлением каждый день.
+
+## Команды
+
+Хост (Ubuntu):
+
+```bash
+sudo snap install multipass
+multipass launch 24.04 --name drill --cpus 4 --memory 8G --disk 80G
+multipass shell drill
+```
+
+Внутри:
+
+```bash
+sudo apt update && sudo apt install -y git curl ca-certificates
+TOKEN='<github pat>'
+git clone https://$TOKEN@github.com/Esmien/vps-infra.git
+cd vps-infra
+
+sudo python3 install.py -y --skip-tls \
+  --secrets-from-bot --secrets-key /home/ubuntu/offsite.key \
+  --tg-token '<РЕАЛЬНЫЙ FILE_BOT_TOKEN>' \
+  --from-bot \
+  --bot-token '<ТЕСТ_УВЕДОМЛЕНИЯ>' \
+  --file-bot-token '<ТЕСТ_ФАЙЛЫ>' \
+  --hermes-token '<ТЕСТ_HERMES>' \
+  --hermes --restore-hermes \
+  --set WEBUI_URL=http://drill.local
+```
+
+`--tg-token` — именно **реальный** токен файл-бота: им скачиваются и архив секретов, и дампы.
+Он же нужен, потому что шаг `secrets` перезаписывает `notifications/.env` тестовым токеном
+**до** шага `fetch`, и без явного флага скачивание пойдёт тестовым ботом и упрётся в 404.
+
+## Что считается успехом
+
+```bash
+docker ps --format '{{.Names}}' | wc -l                                    # 18
+curl -s -o /dev/null -w '%{http_code}\n' http://127.0.0.1:8080/           # 200
+curl -s http://127.0.0.1:4000/health/liveliness                            # I'm alive!
+sudo -u postgres psql -d webui_db -Atc 'select count(*) from chat;'         # 265
+sudo -u postgres psql -d litellm_db -Atc 'select count(*) from "LiteLLM_ProxyModelTable";'  # 80
+hermes --version && ls -d /root/.hermes/skills/*/*/ | wc -l                 # 29
+systemctl list-timers --no-pager | grep -cE 'watchdog|autorecover|backup'   # >=3
+sha256sum /home/ai_service/ai-stack/ai/.env                                 # сверка с инвентарём
+```
+
+Числа — эталон на дату написания; расхождение по чатам/моделям нормально, расхождение по
+`.env` — нет: значит шаблон потерял ключи.
+
+## Секреты: как устроено восстановление
+
+- Архив — набор `secrets_offsite` в реестре `file_id` (файл `<ts>.tar.gz.enc`) плюс
+  `<ts>.inventory.txt` с sha256 каждого `.env` и списком имён ключей (без значений).
+- `--secrets-from-bot` берёт набор из файл-бота; `--secrets-archive PATH` — локальный `.enc`
+  (когда архива в боте ещё нет). Пароль — `--secrets-key`, по умолчанию
+  `/root/.secrets/offsite.key`.
+- Внутри архива пути абсолютные относительно `/`: `home/ai_service/ai-stack/ai/.env`,
+  `home/ai_service/notifications/.env`, `root/.hermes/.env`, `root/deploy/music_bot/.env`.
+  Распаковка идёт в `/`, права ставятся автоматически: `640 root:ai_service` для `/home`,
+  `600` для `/root`.
+- Восстановление выполняется **до** `preflight`, иначе `self.env` останется пустым и шаблон
+  упадёт с «в шаблоне не заполнены: …».
+
+## Проверка без опасности для живого хоста
+
+`VPS_INFRA_SECRETS_ROOT=/tmp/testroot` перенаправляет распаковку архива в тестовый корень —
+живые `.env` не трогаются:
+
+```bash
+rm -rf /tmp/testroot && mkdir -p /tmp/testroot
+VPS_INFRA_SECRETS_ROOT=/tmp/testroot python3 install.py --only verify \
+  --secrets-archive /var/lib/secrets-offsite/secrets_<ts>.tar.gz.enc \
+  --secrets-key /root/.secrets/offsite.key
+find /tmp/testroot -name '.env' -printf '%m %u:%g %p\n'
+```
+
+Затем сверить sha256 распакованных файлов с инвентарём — это доказывает, что архив целый,
+а не «распаковался без ошибок». Аналогично `VPS_INFRA_HERMES_ENV=/tmp/.env` позволяет
+проверить `--hermes-token` на копии, не подменяя токен живого агента.
+
+## Грабли
+
+- **Два процесса на одном токене бота крадут друг у друга обновления.** Прогон со живыми
+  токенами отбирает команды у боевых ботов: живой `server-monitor-bot` начинает молча
+  терять `/health`, а Hermes — свои сообщения. Всегда тестовые токены через
+  `--bot-token/--file-bot-token/--hermes-token`.
+- **Восстановленный харнесс Hermes тащит cron-задачи.** После прогона их надо погасить
+  (`hermes cron ...`) или сразу удалить машину, иначе они начнут работать по расписанию
+  внутри виртуалки и слать сообщения в тестовый бот.
+- **Установщик Hermes интерактивный** (`curl -fsSL … | bash`): `--yes` его не отключает,
+  на этом шаге будут вопросы. Это не зависание.
+- **`--from-bot` тянет ~1 ГБ файлов пользователя** (55 частей) сверх дампов: полный прогон
+  это ~27 ГБ образов + 1 ГБ данных + сборка двух своих образов, ориентир — час.
+- **`WEBUI_URL` из архива указывает на боевой адрес.** Для прогона переопределять
+  `--set WEBUI_URL=http://drill.local`, иначе интерфейс будет строить ссылки на прод.
