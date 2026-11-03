@@ -1,9 +1,10 @@
 ---
 name: vps-infra-installer
 description: "Use when deploying or migrating this VPS from scratch."
-version: 1.2.0
+version: 1.3.0
 author: VPS Admin
 license: MIT
+platforms: [linux]
 metadata:
   hermes:
     tags: [devops, deploy, migration, postgres, docker, hermes]
@@ -18,9 +19,12 @@ metadata:
 Open WebUI, SearXNG, open-terminal, Redis, Nginx + Certbot, бэкапы,
 Telegram-мониторинг, в конце — Hermes (хостовый режим).
 
-Репозиторий: `github.com/Esmien/vps-infra` (**приватный**, секретов внутри нет).
+Репозиторий: `github.com/Esmien/vps-infra` (**публичный**, секретов внутри нет).
 Публичная точка входа для `curl | bash` — отдельный репозиторий `Esmien/vps-bootstrap`,
-в нём лежит только `bootstrap.sh` и README. Рабочая копия на этом сервере: `/root/vps-infra`. Живой стек —
+в нём лежит только `bootstrap.sh` и README. Оба репозитория читаются без токена: клон идёт
+по обычному https, реестр `file_id` берётся из `raw.githubusercontent.com`, а не из GitHub API
+(у API лимит 60 запросов/час на IP и лишний 404 на чужой токен). `GITHUB_TOKEN` — только для
+пуша и на случай приватности; без него прогон полноценный. Рабочая копия на этом сервере: `/root/vps-infra`. Живой стек —
 `/home/ai_service/ai-stack`; его `deploy.sh` исторический и не покрывает
 Hermes, бэкапы и мониторинг.
 
@@ -39,12 +43,17 @@ curl -fsSL https://raw.githubusercontent.com/Esmien/vps-bootstrap/main/bootstrap
 `/tmp/bootstrap.env` или `./bootstrap.env`; путь можно задать `VPS_BOOTSTRAP_ENV`):
 
 ```
-GITHUB_TOKEN=ghp_...        # клон приватного vps-infra + доступ к реестру в hermes-state
+GITHUB_TOKEN=ghp_...        # НЕОБЯЗАТЕЛЕН: репозитории публичные, клон и реестр идут без токена
 SECRETS_KEY=<пароль архива .env>
 TG_FILE_TOKEN=123:AA...     # РЕАЛЬНЫЙ файл-бот: из него тянутся секреты и дампы
 # необязательно:
 BOT_TOKEN=... FILE_BOT_TOKEN=... HERMES_BOT_TOKEN=... WEBUI_URL=... EXTRA_ARGS="--skip tls"
 ```
+
+Проверка стартовых секретов обязана ругаться **один раз и по всему списку**: показать все
+отсутствующие переменные и то, какие ключи в файле фактически есть. Иначе владелец правит
+файл по одной строке за прогон. Имена-синонимы принимаются: `GITHUB_KEY`=`GITHUB_TOKEN`,
+`FILE_BOT_TOKEN`=`TG_FILE_TOKEN`.
 
 `bootstrap.sh` ставит git/curl/python3/openssl → клонирует приватный репозиторий по токену
 и сразу вычищает токен из `.git/config` → пишет пароль архива в `/root/.secrets/offsite.key`
@@ -312,30 +321,33 @@ https-коды доменов и число активных таймеров, �
   шагом `users`, поэтому `chown` на `ai_service` там ещё невозможен: ловить `LookupError`
   (а не только `KeyError`), запоминать пути и дожимать владельца в `step_users`. На чистой
   машине падение на этом `chown` — не «сломанный архив», а порядок шагов.
-- **Проверка «а не установлено ли уже» не имеет права убивать прогон.** `run(cmd,
-  check=False)` на отсутствующем бинарнике обязан возвращать rc=127, а не звать `die()`:
-  иначе на чистой машине первый же зонд (`psql --version`) обрывает установку до того, как
-  что-то поставлено. Необязательные бинарники проверять через `shutil.which()`. Второй
-  class той же ошибки — сторонний apt-репозиторий: armored `signed-by` apt читает не
-  всегда (`NO_PUBKEY`, «repository is not signed» при живом ключе). Ключ класть бинарным
-  keyring'ом через `gpg --dearmor` в `/usr/share/keyrings/<name>.gpg`, сверять отпечаток
-  и один раз повторять `apt-get update`. Все вызовы update — через один
-  самовосстанавливающийся `apt_update()`: `.list`, оставшийся от прошлого прогона, валит
-  update с rc=100 ещё на шаге `packages`; рассинхрон зеркала («unexpected size») лечится
-  ретраями с backoff и `No-Cache` на последней попытке; а fake-IP `198.18.x.x` в тексте
-  ошибки — это туннель на хосте, там ретраи бесполезны. Если после смены плеча CDN apt всё
-  равно ждёт другой размер файла — виноват не CDN, а локальный кэш индексов: чистить только
-  свои файлы `/var/lib/apt/lists/*pgdg*` и повторять update. Порядок, проверка в чистом
-  контейнере и диагностика — [references/apt-and-fresh-host.md](references/apt-and-fresh-host.md).
-- **Один токен — два имени и два репозитория.** Bootstrap-файл отдаёт `GITHUB_TOKEN`, установщик ищет
-  `GITHUB_KEY` для реестра `file_id`; оба имени обязаны приниматься, иначе чистый прогон
-  встаёт на «реестр file_id недоступен». Второе — охват: fine-grained токен, выданный только
-  на `vps-infra`, на `Esmien/hermes-state` получает **404, а не 403**, установщик молча уходит
-  в fallback `getUpdates` (а он пуст: Telegram не отдаёт сообщения старше 24 ч), и прогон
-  падает с «в боте не нашлось дампов», хотя реестр жив и полон. Токен нужен с доступом к
-  обоим приватным репозиториям (`Contents: Read`), а в фатальное сообщение выносить причину
-  (HTTP-код/«нет GITHUB_KEY»), а не только «дампов нет». Разбор всех токенов прогона (кто
-  источник, кто приёмник) — [references/restore-drill.md](references/restore-drill.md).
+- **Зонды и apt не имеют права убивать прогон.** `run(..., check=False)` на отсутствующем
+  бинарнике возвращает rc=127, а не `die()`; необязательные бинарники проверять через
+  `shutil.which()`. Сторонний apt-репозиторий чинится одним самовосстанавливающимся
+  `apt_update()`: бинарный keyring через `gpg --dearmor`, ретраи на рассинхрон зеркала,
+  чистка только своих `/var/lib/apt/lists/*pgdg*`, http вместо https при зависшем кэше
+  Fastly. Диагностика и проверка в чистом контейнере —
+  [references/apt-and-fresh-host.md](references/apt-and-fresh-host.md).
+- **Креды не вписывать в URL строкой `${TOKEN}@host`.** Такая строка при записи файла
+  попадает под маскировку секретов и превращается в обрубок (`x-access-token:${GITH.../}`),
+  файл остаётся синтаксически валидным для `bash -n`, а на чистой машине падает
+  `bad substitution` при клоне. Авторизация — заголовком:
+  `git -c http.extraheader="Authorization: Basic $(printf '%s' "x-access-token:$TOKEN" | base64 -w0)"`;
+  проверять не `bash -n`, а исполнением фрагмента с подставным токеном.
+- **`psql` по имени — это perl-обёртка `pg_wrapper`.** `/usr/bin/psql` →
+  `/usr/share/postgresql-common/pg_wrapper`; под `sudo -u postgres` на минимальной ВМ она даёт
+  `unable to execute /usr/bin/psql: Permission denied`, хотя кластер `online` и сервис `active
+  (exited)`. Ходить прямо в `/usr/lib/postgresql/<ver>/bin/psql` (хелпер `pg_bin()`), иначе
+  readiness-проверка и все SQL-вызовы падают на здоровой базе. При таймауте ожидания писать в
+  лог `pg_lsclusters`, `systemctl status postgresql`, хвост `journalctl -u postgresql@<ver>-main` —
+  по одной строке «не отвечает» причину не угадать.
+- **Токен — необязательный, но если он есть — с доступом к нужному репо.** Репозитории
+  публичные, поэтому клон и реестр работают без токена; fine-grained токен, выданный
+  только на `vps-infra`, на чужой приватный репо отвечает **404, а не 403**, и любой
+  fallback на `getUpdates` даёт пустоту (Telegram не отдаёт сообщения старше 24 ч).
+  Причины и разбор всех токенов прогона —
+  [references/restore-drill.md](references/restore-drill.md) и
+  [references/installer-pitfalls.md](references/installer-pitfalls.md).
 
 Полный список (бинарно-безопасный `write_file`, `ai/.env` и `WEBUI_URL`,
 пропуск `pg_dump` < 1 ч, `--only fetch` без `--infra-dir` и `GITHUB_KEY`,
