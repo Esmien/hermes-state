@@ -48,6 +48,40 @@ currently monitored», в `fail2ban.log` нет ни одной строки `Fo
 - Проверка состояния: `fail2ban-client status sshd`,
   `fail2ban-client status <jail>`, `journalctl -u fail2ban --since -1d`.
 
+## Джейл против сканеров LLM-шлюза
+
+Сканеры долбят `https://llm.<домен>/v1/models` без ключа (десятки тысяч `401`/`429`,
+плюс единичные пробы `/cohere`, `/vllm`, `/vertex_ai`, `/azure_ai`). Штатный `sshd`-джейл
+их не видит: он смотрит journal, а запросы живут в nginx access-логе.
+
+`/etc/fail2ban/filter.d/nginx-llm-unauth.conf`:
+
+```ini
+[Definition]
+failregex = ^<HOST> - - .+ "[^"]+" (401|403|429)
+ignoreregex =
+```
+
+`/etc/fail2ban/jail.d/nginx-llm.local`:
+
+```ini
+[nginx-llm]
+enabled  = true
+port     = http,https
+filter   = nginx-llm-unauth
+logpath  = /var/log/nginx/access.log
+backend  = polling
+maxretry = 30
+findtime = 5m
+bantime  = 6h
+```
+
+- `backend = polling` обязателен (см. выше), иначе джейл молча читает journal и показывает 0 failed.
+- `ignoreip` берётся из `[DEFAULT]` — docker-сети и loopback не пострадают, но и легитимный
+  клиент с протухшим ключом попадёт под бан: 30 отказов за 5 минут он не наберёт, а бот набирает.
+- Проверка: `fail2ban-client status nginx-llm`, затем повторить всплеск с чужого адреса и
+  убедиться, что он в `Banned IP list`; `nginx -t`/reload тут не нужны, nginx не менялся.
+
 ## Rate limiting nginx
 
 Зоны объявляет `install.py` в `/etc/nginx/conf.d/zz-ratelimit.conf` (include раньше

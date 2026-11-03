@@ -110,6 +110,18 @@ harness: `scripts/code_bench.py`.
   passing. Tools survive only on raw `/v1/responses`: through the bridge the model sees them
   namespaced (`default.get_pawn_rate`) and answers in prose without ever emitting a
   `function_call`, so every tool task fails. Agentic work stays on the OpenRouter route.
+  **Деплойменты живут в БД, а не в `config.yaml`** (`LiteLLM_ProxyModelTable`), и в них
+  `litellm_params->>'model'` и `litellm_credential_name` хранятся **зашифрованными** — по
+  строке модели не определить, какой из двух деплойментов группы сидит на OpenCode. Диагноз
+  ставят сравнением с соседними группами: где `x-opencode-session` в `extra_headers` есть, а
+  где нет. Лечение — дописать заголовок **всем** деплойментам группы (OpenRouter лишний
+  игнорирует) и перезапустить контейнер:
+  `UPDATE "LiteLLM_ProxyModelTable" SET litellm_params = jsonb_set(litellm_params,
+  '{extra_headers}', coalesce(litellm_params->'extra_headers','{}'::jsonb) ||
+  '{"x-opencode-session":"litellm-service-session"}'::jsonb), updated_at = now()
+  WHERE model_name='<group>'`.
+  Симптом «флапает через раз» = в группе два деплоймента, один без заголовка: проверять
+  четырьмя подряд вызовами (`200 200 200 200`), а не одним.
 - Meta's `muse-spark-1.3-contributor` via OpenRouter rejects `max_tokens < 16`
   (`max_output_tokens must be >= 16`), so a 5-token probe returns a false 400. The probe uses
   16 and labels unanswered probes `route error`, not `clean`.

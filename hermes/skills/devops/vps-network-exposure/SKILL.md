@@ -187,6 +187,45 @@ Full detail (rule ordering, UFW, DNAT, netns drill, gated changes) —
   `error.log` (уровень warn пишется не туда, где его ищут). Лечится `burst=120`,
   а не отключением лимита.
 
+## Сканеры LLM-шлюза (`/v1/models` без ключа)
+
+**Не читай это как поломку LiteLLM.** В UI гейтвея появляются тысячи красных `Failure`
+с моделями вида `gpt-4o`, `claude-sonnet-*`, `mistral-small` и текстом про credential —
+выглядит как «сломались наши ключи», а на деле это внешние боты ищут открытый LLM-прокси.
+Признак: у запросов **нет ни `user`, ни alias ключа**, а статусы — только `401`/`429`.
+
+Диагностика (read-only, минута):
+
+```bash
+awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -5
+# по подозрительному IP — что просили и чем отвечали
+grep -h "^<IP> " /var/log/nginx/access.log | awk '{print $7}' | sort | uniq -c | sort -rn | head
+grep -h "^<IP> " /var/log/nginx/access.log | awk '{print $9}' | sort | uniq -c | sort -rn
+# мусор в базе от неаутентифицированных попыток
+sudo -u postgres /usr/lib/postgresql/17/bin/psql -X -tA -d litellm_db \
+  -c "SELECT date_trunc('hour',\"startTime\"), count(*) FROM \"LiteLLM_SpendLogs\" WHERE model='' GROUP BY 1 ORDER BY 1 DESC LIMIT 6"
+```
+
+Что считать вердиктом: `200` есть только у `/health/liveliness` (он публичный по замыслу), всё
+остальное — `401`/`429`. Тогда это не утечка и не сломанная авторизация, а мусорный трафик.
+Типовая картина: десятки тысяч `GET /v1/models`, единичные пробы путей провайдеров
+(`/cohere`, `/vllm`, `/vertex_ai`, `/azure_ai`, `/gemini`), `/key/info`.
+
+Ущерб — не доступ, а шум: `LiteLLM_SpendLogs` копит сотни тысяч строк с `model=''`, они
+раздувают базу и отчёты по расходам.
+
+Лечение (гейтед, двумя частями):
+
+1. fail2ban-джейл на access-лог `llm.`-хоста: `backend = polling`, фильтр
+   `^<HOST> - - .+ "[^"]+" (401|403|429)`, `maxretry=30`, `findtime=5m`,
+   `bantime=6h` + инкремент. Рецепт — `references/fail2ban-and-rate-limits.md`.
+2. Чистка `DELETE FROM "LiteLLM_SpendLogs" WHERE model=''` и та же чистка в
+   `litellm-spend-retention`, иначе мусор возвращается каждую неделю.
+
+Не предлагать в качестве лечения «перевыпустить ключ OpenCode»: текст ошибки называет
+credential, но запрос пришёл вообще без ключа — это ложный след, который уводит в
+перевыпуск живых кредов.
+
 ## VPN и общий 443
 
 Маршрутизатор — отдельный контейнер `vpn-router` (Xray, `--network host`, конфиг
