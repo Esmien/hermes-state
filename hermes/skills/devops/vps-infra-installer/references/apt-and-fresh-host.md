@@ -128,6 +128,18 @@ PY
   `unexpected size` при любых ретраях и любом IP. Лечение: удалить только свои файлы
   (`rm -f /var/lib/apt/lists/*pgdg*`) и повторить update. Установщик делает это сам в ветке
   `unexpected size` (`_purge_pgdg_lists()`), не трогая индексы других репозиториев.
+- **Корня `lists/` мало — чистить и `lists/partial/`.** Недокачанный индекс лежит там как
+  `Packages.bz2.FAILED`, и apt при следующем запуске докачивает его Range-запросом: старые
+  байты склеиваются с новыми, размер не сходится ни с одним `Release`, и `unexpected size`
+  повторяется даже после `rm -f /var/lib/apt/lists/*pgdg*`. Удалять `lists/*pgdg*` **и**
+  `lists/partial/*pgdg*`. Проверить гипотезу, ничего не удаляя, — прогон с отдельным
+  каталогом списков:
+
+  ```bash
+  apt-get -o Dir::State::Lists=/var/tmp/alists -o Acquire::http::Pipeline-Depth=0 update
+  ```
+
+  Прошло чисто = виновато локальное состояние (кэш/partial), а не зеркало.
 - Прежде чем винить репозиторий, сверить зеркало с другой машины: скачать
   `dists/<codename>-pgdg/Release` и `main/binary-amd64/Packages.bz2`, сравнить `sha256sum`
   файла с записью в `Release`. Совпало — зеркало цело, проблема на стороне клиента.
