@@ -124,8 +124,8 @@ e2e06d92a26070b4617c0489ef8d4bc404b6b78a62369773e11e56152c52971c  ./hermes/skill
 868ff72e3d63da39dff7eddf73a1093e96f3fee87c3b280e05b23d764c842c32  ./hermes/skills/devops/vps-infra-installer/references/beszel-and-monitoring.md
 e8e006023610f0821ac3c9500dc103277f47c94c0f27bc794063d63378d6c5cb  ./hermes/skills/devops/vps-infra-installer/references/installer-pitfalls.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
-17c5d88cb4a44680a35a85acb28420601188826082ec820c9df1f95cee130438  ./hermes/skills/devops/vps-network-exposure/SKILL.md
-19a9644e9db89f8464086b10bcf3bdc0a9d40a00ed4e9f8c3d61a1c6364edf55  ./hermes/skills/devops/vps-network-exposure/references/acme-and-cert-limits.md
+0d8c93c5e16e9898350aa8d440e093d8c2a6f28b79ff9a2b6d5104531c6cfee9  ./hermes/skills/devops/vps-network-exposure/SKILL.md
+d3ec46179b8488b59635453cac7b29d23e117e61a458439ad5f7136bf60b2cb7  ./hermes/skills/devops/vps-network-exposure/references/acme-and-cert-limits.md
 318d0b81fbd52c38da2cc1bab06060c7b2cae9fa5cfc838346b2f8fbdf87d6f2  ./hermes/skills/devops/vps-network-exposure/references/domain-migration-and-dns.md
 5d93386309b2930a54912308c4064bd9b875a89369c7123065eedffecb78d11e  ./hermes/skills/devops/vps-network-exposure/references/fail2ban-and-rate-limits.md
 dd75e4fcfd44e1f053f632ece87c23de61135875900ae347a0919d7787beee6f  ./hermes/skills/devops/vps-network-exposure/references/firewall-and-ssh.md
@@ -136,8 +136,8 @@ d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skill
 5e780432952150f90883eff45349e648ab6e3417334b171b7d4215fd1f798ff3  ./hermes/skills/devops/vps-network-exposure/templates/vpn-subscription-generator.py
 c8957b1d477467418d64748c30fd00de6102b1c0736ae1d8ed894e656a1ae08b  ./hermes/skills/devops/vps-posture-assessment/SKILL.md
 de682e106bd529ef8b78d202dabcc84f694b04e5de8d5ff0a79a827864ada28d  ./hermes/skills/devops/vps-posture-assessment/references/recovery-rto.md
-918971595010770b622cd8cd01580d166146ce98f021a66960e49f7b4ba09b37  ./hermes/skills/devops/webui-ios-icons/SKILL.md
-bf15c13ccc7315c776873a3683387ae99ff466aeead97395cd33ea6e05a10e9e  ./hermes/skills/devops/webui-rebranding/SKILL.md
+ee4da44acd0fa13e9866411ecb0a8bcdbf1f810dd3971d07506d8738ecaf6856  ./hermes/skills/devops/webui-ios-icons/SKILL.md
+0717464930c6df4b7f5377038a3ea9db8950102cbdf016e59a972406231f4c43  ./hermes/skills/devops/webui-rebranding/SKILL.md
 2c40e123f597ebbb4db9edf5fe8e5d63a1aacf8f00b59eca1b5af0748062ac24  ./hermes/skills/email/DESCRIPTION.md
 c27bb2f0f3acd71771de1e7dc2ec27311dced72cbdf3989577c6907928e52645  ./hermes/skills/media/DESCRIPTION.md
 fb28a609372460b2788d3b7dbc551985d24d4042057971f4d6345144d2d78caa  ./hermes/skills/note-taking/DESCRIPTION.md

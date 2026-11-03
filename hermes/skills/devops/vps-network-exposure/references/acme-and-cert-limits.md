@@ -41,7 +41,50 @@ retry after 2026-11-01 23:21:03 UTC
 
 ## Wildcard (`*.<домен>`) — только DNS-01, только с DNS-API
 
-- HTTP-01 wildcard не выдаёт. Нужна запись TXT `_acme-challenge`, значит нужен
+- ## Wildcard через Cloudflare DNS-01 — рабочий рецепт
+
+Когда зона живёт в Cloudflare (а не у бесплатного регистратора), DNS-01
+становится дешёвым: один сертификат на все хосты, без порта 80 и без лимита «50
+на домен».
+
+```bash
+apt-get install -y python3-certbot-dns-cloudflare
+# токен: My Profile → API Tokens → Custom → Zone / DNS / Edit, Zone Resources = одна зона
+install -d -m 700 /root/.secrets
+printf 'dns_cloudflare_api_token = %s\n' "<token>" > /root/.secrets/cf.ini && chmod 600 /root/.secrets/cf.ini
+certbot certonly --cert-name <zone>-wildcard --dns-cloudflare \
+  --dns-cloudflare-credentials /root/.secrets/cf.ini \
+  --dns-cloudflare-propagation-seconds 30 \
+  -d "*.<zone>" -d <zone> --non-interactive --agree-tos -m admin@<zone>
+```
+
+- `*.zone` **не покрывает apex** и только один уровень: `*.esmien.ru` годится для
+  `vpn.`/`ai.`, но не для `a.b.`. Добавляй `-d <zone>` отдельно.
+- `--cert-name` задавай явно: иначе certbot положит wildcard в каталог первого
+  домена и потом путает продление с per-host сертификатами.
+- Токену хватает `Zone → DNS → Edit` на конкретную зону: `GET /zones?name=<zone>`
+  работает, создание зон/NS/WAF — уже нет. Создание записей:
+  `POST /zones/{id}/dns_records {"type":"A","name":"<sub>","content":"<ip>","ttl":120,"proxied":false}`.
+- `proxied: false` (серое облако) — обязательное условие для своих vhost'ов на
+  нестандартных портах: оранжевое облако терминирует TLS и ломает и 8443, и
+  выпуск сертификатов.
+- Продление: хук `/etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh`
+  (`nginx -t && systemctl reload nginx`), `certbot.timer` уже есть.
+- **`certbot renew --dry-run` может висеть минутами** — это встроенный
+  `random sleep` (до ~5 мин), а не поломка. Для теста:
+  `certbot renew --cert-name <name> --dry-run --no-random-sleep-on-renew`.
+
+## Делегирование поддомена: зона должна существовать у нового NS **до** смены NS
+
+Провайдер бесплатного поддомена при сохранении NS проверяет авторитетность и
+отвечает `The external nameservers are not yet authoritative for this domain`,
+если зона у нового провайдера ещё не создана. Порядок жёсткий:
+
+1. создать зону `sub.example.com` у DNS-провайдера и получить **его** пару NS;
+2. перенести записи (A для каждого хоста, TXT и пр.);
+3. только теперь вписать новые NS в панели родителя.
+
+HTTP-01 wildcard не выдаёт. Нужна запись TXT `_acme-challenge`, значит нужен
   доступ к DNS через API либо ручной прогон каждые ~60 дней.
 - **Не предполагай, что у бесплатного регистратора есть DNS-API.** У DigitalPlat
   в документации прямо написано «do not assume the API can manage external DNS

@@ -60,6 +60,19 @@ Judge every mark at the **real target size** (16–22 px), never from a 500 px e
 
 Colour adds a second axis nobody checks: a **monochrome dark** mark on the `#000` sidebar is invisible at 22 px even when its geometry would survive, and the favicon is a single file for both themes. The only shape that reads on white and on black is two-tone — dark facets plus a light rim/outline. Evaluate any candidate against both backgrounds before shipping one file; report the dark-theme result honestly instead of shipping the light one and hoping.
 
+Outline that actually reads, applied **after** downscaling (`rim` as a share of the output size, never of the 1080 px source — otherwise a 12 px source rim becomes 0.4 px at 32 px and the favicon is blank again):
+
+```python
+def add_outline(img, rim_ratio=0.025, color=(221, 225, 231, 255)):
+    rim = max(1, round(max(img.size) * rim_ratio))
+    grown = img.getchannel("A").filter(ImageFilter.MaxFilter(rim * 2 + 1))
+    halo = Image.new("RGBA", img.size, color)
+    halo.putalpha(grown)
+    return Image.alpha_composite(halo, img)      # rim behind, artwork on top
+```
+
+Call it on every output (`out = add_outline(fit_square(src, size, padding))`), not just the splash — the 22 px sidebar mark is the one that matters. On white the rim is near-invisible, on black it carries the silhouette; at small sizes the dark fill merges with the background and the result reads as line-art, which is the desired look.
+
 ## Verify after a rebuild
 
 ```bash
@@ -103,6 +116,18 @@ When the bytes are correct, change the URLs: ship `apple-touch-icon-v2.png`, `fa
 Escalate in this order, cheapest first: new page URL (`?v=2`) for the web clip, full device reboot, and only then a fresh origin (new subdomain) — a new hostname is the one thing no client cache can survive.
 
 Also: `manifest.json` is generated in `main.py`, so `logo.png` padding must satisfy the **maskable** safe zone (content inside the central 80 %; 12 % padding, not 6 %) or Android's circular crop eats the tips of the mark.
+
+## Editing the Dockerfile programmatically
+
+When a `RUN sed ... \` block is written from Python/heredoc, the line-continuation backslashes get doubled (`\\` at end of line) and the build dies with `dockerfile parse error ... unknown instruction: -e`. After any scripted edit of the Dockerfile, assert one backslash per continued line before building:
+
+```python
+for i, ln in enumerate(open(dockerfile).read().splitlines(), 1):
+    if ln.rstrip().endswith("\\"):
+        print(i, len(ln) - len(ln.rstrip("\\")))   # must be 1 everywhere
+```
+
+Prefer end-anchored `sed` on stable upstream strings plus a `&& grep -q` guard in the same `RUN`, so a renamed upstream tag fails the build loudly instead of shipping a half-rebranded image.
 
 ## Rollback
 

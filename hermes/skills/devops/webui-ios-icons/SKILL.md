@@ -45,9 +45,54 @@ Changing a home-screen icon on iOS means the clip must be deleted and re-added, 
 
 Follow `webui-rebranding`: replace `logo_light.png` / `logo_dark.png`, then `docker compose build open-webui` and `docker compose up -d --force-recreate open-webui`. Fixed filenames (`apple-touch-icon.png`, `favicon.png`, `web-app-manifest-*.png`) mean content changes while the URL stays identical — which is exactly why caches hold on.
 
+### 2b. Cache-bust the icon URLs (do this on every rebrand)
+
+A rebuild alone leaves every client on the old artwork. Bump the filenames so the URL changes, otherwise iOS keeps serving its cached copy forever and Android/Chrome treat the file as immutable.
+
+1. Emit versioned copies in `generate_assets.py` next to the originals:
+
+```python
+for src, dst in (("apple-touch-icon.png", "apple-touch-icon-v2.png"),
+                 ("favicon.png", "favicon-v2.png"),
+                 ("logo.png", "logo-v2.png")):
+    (OUT / dst).write_bytes((OUT / src).read_bytes())
+```
+
+2. Repoint both consumers in the Dockerfile (image build, not the live container):
+
+```dockerfile
+RUN sed -i \\
+        -e "s|/static/apple-touch-icon.png|/static/apple-touch-icon-v2.png|g" \\
+        /app/build/index.html \\
+ && sed -i "s|/static/logo.png|/static/logo-v2.png|g" /app/backend/open_webui/main.py \\
+ && grep -q "apple-touch-icon-v2.png" /app/build/index.html
+```
+
+`index.html` carries the `apple-touch-icon` / `favicon` links; `main.py` (`/manifest.json`) carries the PWA `icons` array. Grep after sed so a silently-missed replacement fails the build instead of shipping half-bumped.
+
+3. Nginx: serve icons and manifest with no-cache. Without it the backend sends no cache headers at all and browsers invent their own expiry.
+
+```nginx
+location ~ ^/(manifest\.json|static/(logo\.png|favicon\.png|apple-touch-icon\.png|web-app-manifest-.*\.png))$ {
+    proxy_pass http://127.0.0.1:8080;
+    proxy_hide_header Cache-Control;
+    proxy_hide_header Expires;
+    add_header Cache-Control "no-cache, must-revalidate" always;
+}
+```
+
+Verify the bump actually reached the client stack before telling anyone to reinstall:
+
+```bash
+curl -s https://ai.esmien.ru/ | grep -oE 'href="/static/(favicon|apple-touch)[^"]*"'
+curl -s https://ai.esmien.ru/manifest.json | grep -oE '/static/[a-z0-9.-]+'
+```
+
 ### 3. Desktop and browser tabs
 
 Hard refresh (`Ctrl+Shift+R`). If the tab icon still sticks, clear the browser's favicon cache — that cache is separate from normal page cache.
+
+For the **install dialog** (Chrome/Brave "Install app") the icon comes from the browser's stored web-app record, not from the page. Sequence that worked: ship the no-cache headers from 2b, uninstall the app (`chrome://apps`), clear site data for the origin, restart the browser fully, then install again. Do not judge the rollout by the install dialog before the browser is restarted — it reads the pre-restart snapshot.
 
 ### 4. iPhone
 
@@ -58,7 +103,9 @@ There is **no supported API to refresh an already-installed Web Clip icon**; App
 - **Re-add as a bookmark instead of a web app** — in iOS 26 the Add to Home Screen sheet has an "Open as Web App" toggle; switching it off produces a bookmark whose removal does not touch Safari cookies, so the login survives. Cost: it opens with Safari chrome instead of standalone.
 - **Mind the theme, not the file** — on iOS 18+ the system generates dark/tinted icon variants itself, by maths on foreground/background colours (no ML, handled by IconServices). That is why icons flip instantly when the theme changes, and it says nothing about whether new artwork has landed.
 
-Do **not** send anyone through "clear Safari cache" — it is an extra step that fixes nothing here.
+Do **not** send anyone through "clear Safari cache" — it is an extra step that fixes nothing here. Confirmed in practice: iOS still showed the old icon after clearing website data, and still after swapping in `apple-touch-icon-v2.png` — the touch-icon cache is not cleared by either.
+
+When both the URL bump and a re-add fail, stop iterating on the icon and **move the app to a new origin** (`app.esmien.ru` → same container, same TLS via the wildcard, one extra vhost). A new origin has no icon history at all, so it is the only path with a guaranteed outcome. Cost: everyone on that origin logs in once.
 
 ### 5. Android
 
