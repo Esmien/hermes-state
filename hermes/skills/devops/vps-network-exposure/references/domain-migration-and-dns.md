@@ -70,6 +70,35 @@ grep -rhoE '^[A-Z_]+=.*old\.domain' /home/ai_service/*/*/.env /root/deploy/*/.en
 покажет предупреждение о несовпадении. Скажи это владельцу заранее; отдельную
 заглушку он может и не захотеть, если DNS уже мёртв.
 
+## Добавить поддомен через API Cloudflare
+
+Wildcard `*.esmien.ru` покрывает всё первого уровня, поэтому новый сервис — это
+запись в DNS плюс vhost, certbot не нужен. Токен живёт в `/root/.secrets/cf.ini`
+(600), в чат его не выводить и в командах не эхоить:
+
+```bash
+TOK=$(cut -d= -f2- /root/.secrets/cf.ini | tr -d ' ')
+ZID=$(curl -sS -H "Authorization: Bearer $TOK" \
+  'https://api.cloudflare.com/client/v4/zones?name=esmien.ru' | jq -r '.result[0].id')
+curl -sS -X POST -H "Authorization: Bearer $TOK" -H 'Content-Type: application/json' \
+  "https://api.cloudflare.com/client/v4/zones/$ZID/dns_records" \
+  --data '{"type":"A","name":"foo.esmien.ru","content":"141.98.166.213","ttl":120,"proxied":false}'
+```
+
+- Токен с правами `Zone → DNS → Edit` видит зону через `/zones?name=` и правит
+  записи, но не умеет WAF, Access, Tunnel и смену NS — это права аккаунта.
+- `proxied:false` (серое облако) для всего, что несёт свой TLS или нестандартный
+  протокол; оранжевое облако проксирует только 80/443/2053/2083/2087/2096/8443.
+- Запись расходится за секунды: проверять `dig +short @1.1.1.1` и `@8.8.8.8`,
+  а не только кэш одного резолвера.
+- **Запись без vhost = имя в никуда:** запрос упадёт на `default_server` и отдаст
+  чужой сайт с несовпадающим сертификатом. Создавая запись, сразу же делай
+  виртуалку, иначе получается красивое имя, ведущее в дефолт.
+- Пробную запись (например, для проверки прав) удаляй сразу: `DELETE
+  /zones/$ZID/dns_records/$RID` — иначе через месяц она числится как «а это что?».
+- Wildcard `*.esmien.ru` покрывает ровно один уровень: `a.esmien.ru` да,
+  `a.b.esmien.ru` — нет.
+
 ## Бесплатный Cloudflare не принимает поддомен как зону
 
 Попытка завести `sub.example.com` отдельной зоной на Free упирается в
