@@ -57,6 +57,8 @@ Always in a subshell: `COMPOSE_FILE` and `COMPOSE_PROJECT_NAME` persist in the c
 
 The `ai` project needs none of this — its `.env` sits in the compose directory and is auto-loaded. `lyria-migrate` sits at `Exited (0)` by design. Full per-container host inventory and recovery decision tree: `/home/ai_service/ai-stack/runbook-containers.md`.
 
+Equivalent, and cleaner than sourcing, is to pass the file explicitly from the project root: `docker compose -f infra/docker-compose.yml --env-file .env up -d bot`. Address services by **compose service name**, not container name — the bot's service is `bot` while its container is `lyria-bot`, so `up -d lyria-bot` answers `no such service` (same trap for the workers: `generation-worker`, `enricher-worker`).
+
 ## Before manual maintenance: pause the incident detector
 
 `docker-autorecover.timer` (every 60 s) runs `docker-incident-detector.py`, which wakes a Hermes agent on any anomaly. It never acts on its own, but it will fire an incident and start a diagnostic agent under your hands mid-maintenance. Create the flag first, remove it only after the verify pass:

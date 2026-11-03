@@ -127,7 +127,24 @@ docker compose --env-file ../.env -f docker-compose.yml up -d --no-deps bot
 rm -f /var/lib/docker-autorecover/pause
 ```
 
-Compose-переменные `COMPOSE_PROJECT_NAME`, `REDIS_HOST` и прочие лежат в `/root/deploy/music_bot/.env`, а не в `infra/` — без `--env-file ../.env` подстановка молча врёт.
+Compose-переменные `COMPOSE_PROJECT_NAME`, `REDIS_HOST` и прочие лежат в `/root/deploy/music_bot/.env`, а не в `infra/` — без `--env-file ../.env` подстановка молча врёт. Сервис в compose называется **`bot`**, а контейнер — `lyria-bot`: `up -d lyria-bot` падает с `no such service`, и это не признак поломки стека.
+
+### Смена домена вебхука (бот «жив», но глухой)
+
+`WEBHOOK_BASE_URL` живёт в `/root/deploy/music_bot/.env` (не в `infra/`). Если его хост перестаёт резолвиться, Telegram продолжает слать апдейты на старый URL: бот не падает, `docker ps` показывает `Up`, а новых сообщений нет — единственный след это отсутствие свежих `POST /webhook` в логах контейнера.
+
+Порядок при переезде:
+
+1. `sed -i` по строке `WEBHOOK_BASE_URL` (бэкап `.env` рядом, права `600` — там лежат секреты), проверить `grep -n '^WEBHOOK_BASE_URL='`.
+2. Пересоздать **только бота**: `docker compose --env-file .env -f infra/docker-compose.yml up -d bot`. Вебхук перерегистрируется самим приложением при старте — руками `setWebhook` не нужен.
+3. Проверить глазами Telegram, не печатая токен:
+
+```bash
+T=$(docker inspect lyria-bot --format '{{range .Config.Env}}{{println .}}{{end}}' | grep -m1 '^BOT_TOKEN=' | cut -d= -f2-)
+curl -sS "https://api.telegram.org/bot$T/getWebhookInfo" | python3 -c "import sys,json;r=json.load(sys.stdin)['result'];print(r['url'],r['pending_update_count'],r.get('last_error_message'))"
+```
+
+Ждём новый URL, `pending 0`, пустой `last_error`. Дополнительный признак живости: `POST https://<new host>/webhook` без секрета даёт `401` (бот проверяет `X-Telegram-Bot-Api-Secret-Token`), а `GET` — `405`.
 
 **Проверка промпта без Telegram:** вызвать обогатитель напрямую (`ENRICH_URL` + `ENRICH_TOKEN`, `model: enricher`) и глазами посмотреть JSON; затем проверить, что в `generations.prompt` лежит бриф, а не JSON (`select prompt from generations where id=…`).
 

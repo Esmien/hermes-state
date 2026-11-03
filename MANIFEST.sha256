@@ -55,7 +55,7 @@ ac2da2b39f1c355bc76bf35b2cd9e74131ea62030f89781fe82c53ee0b4f029e  ./hermes/skill
 acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skills/career/job-application-review/references/repo-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-46a71e1896a09dfce180e90d571b0a91ae0931400f8064f090df5a8cf1e22312  ./hermes/skills/devops/ai-stack/SKILL.md
+430273e0c816ff2cdc7f653e5649c57b835c42f29d7d8bf69e96b65ded8e9b3c  ./hermes/skills/devops/ai-stack/SKILL.md
 e2f836d92b721494a2dd993a035536a6108b714b9fa4e1840084232bc4ce5f39  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 055726f7b857418c013c4062923acee90280a454d5f12be7760568160c0eba3e  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
@@ -67,7 +67,7 @@ ab95b4ac1ada135d305e22e973f2db9fb96e8be86549eca51bb3c7d1c649d066  ./hermes/skill
 f8e128849a7415e8960053cc090fa4d6b95cfa5a660e91c753fa30d14be26142  ./hermes/skills/devops/ai-stack/references/memory-troubleshooting.md
 2d849578fcc6ed9e9a090915cebe892a884756fdb541e101804f29dfcade5fd9  ./hermes/skills/devops/ai-stack/references/model-provenance.md
 ad042b6fee80f9dde1317d8f976a826abe3f94e539c3577263e53d91cd70efd8  ./hermes/skills/devops/ai-stack/references/model-route-benchmark.md
-6a401cf2abbc2a5f49cb84c5ebacc53ca09ab9207621fc078da6211cfb054886  ./hermes/skills/devops/ai-stack/references/music-bot-lyria.md
+5fbd66fb792bfb0365976ca9f446fb048b38d9e6bd2959908e4e4a57bbb93916  ./hermes/skills/devops/ai-stack/references/music-bot-lyria.md
 9e9ccc47eca53127d1e0bc915b2dbc74c1c6a01704991b6b44be484bd0106af8  ./hermes/skills/devops/ai-stack/references/operations.md
 23681fed79a731f0e5ac3dbf907087700aedc29fa84c1b54872f7694682b3e76  ./hermes/skills/devops/ai-stack/references/owui-admin-auth.md
 3485b905f94be6019e23bcc8ee568bb999be2bf8a1394f66022bd2f07845dc8d  ./hermes/skills/devops/ai-stack/references/pitfalls.md
@@ -95,7 +95,7 @@ e04067631103fb7051c50bfb3de0962436243fe2c5ea74ada7690c37d877ad35  ./hermes/skill
 dbe445840ee9330e92fcc1cf8dbcd703b4e32769ca1ee4207bac0e760df5853e  ./hermes/skills/devops/credential-login-verification/SKILL.md
 65af83d2307a43298474305685d6a0eec08114dfcc0e9ff299ea4c5735bccac9  ./hermes/skills/devops/credential-login-verification/references/open-webui-auth.md
 da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skills/devops/credential-login-verification/scripts/login-path-audit.sh
-ee146464fb8b4fcf0272dff5912d82ef6d29ad8dcd5a8e7510de6266af1481b0  ./hermes/skills/devops/docker-compose-traps/SKILL.md
+31473060303004be1a3979c8b3245a04e68321ff8ffe808fd7f886a6741271e7  ./hermes/skills/devops/docker-compose-traps/SKILL.md
 ed20fcd212379a0d96f986f5bc32a44579a1d6fb0a369f6e4b3e51de994318c7  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
 da3e7db6fddde6bc2e39d0297d6ce821ee8766a7e001f18945bf92197674803f  ./hermes/skills/devops/llm-route-bench/SKILL.md
@@ -109,7 +109,7 @@ a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skill
 b2a2f042ece1a5b57c714b32de75ca876b697b761c92abb0e276acd3ea3688f5  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
-f84c2131f8941bab536a1a670dc47b4e63b6fe39be03239037b4df877eac7710  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+5522df62594b5686fa8e4412e5b1be16d47f6b320fe303a5bb5a15f05e6b2e0e  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 b27eca178d05f333d2dcc34d9e98b9f1763fea9ae17a7b6fa2eabaa92098a0b1  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
 b3e01208b42620cdf4c4126c8769dffe221fed325ee679ed50065a9e27167782  ./hermes/skills/devops/vpn-entry-stack/references/gemini-geo.md
 625480e5e31a642015e3490a1c33f91f7304d13906717789077d25939170888e  ./hermes/skills/devops/vpn-entry-stack/references/router-ops.md

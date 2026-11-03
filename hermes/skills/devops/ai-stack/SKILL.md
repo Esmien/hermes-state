@@ -84,7 +84,7 @@ The public names are moving from the `esmien.qd.je` zone (free DNS whose authori
 ai.esmien.ru    -> 127.0.0.1:8080  (open-webui)   | ai.esmien.qd.je
 llm.esmien.ru   -> 127.0.0.1:4000  (litellm)      | llm.esmien.qd.je
 bot.esmien.ru   -> 127.0.0.1:8000  (music bot)    | bot.esmien.qd.je
-mon.esmien.ru   -> 127.0.0.1:8090  (beszel hub, not yet in DNS) | mon.esmien.qd.je
+mon.esmien.ru   -> 127.0.0.1:8090  (beszel hub)      | mon.esmien.qd.je
 vpn.esmien.ru:8443 (VPN entry)                    | vpn.esmien.qd.je:8443
 ```
 
