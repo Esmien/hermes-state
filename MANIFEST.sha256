@@ -175,7 +175,7 @@ a9061fcc0312ea416285f150b5b51e250789df04c5ef7d2249a4b86a08fb370b  ./host/backups
 df8b07b07e5a51df7e28294323319ca4e945fa3a2e7d6291b24957f74109c937  ./host/bin/docker-incident-agent.sh
 807d90d5d8a0cb39287d6ee65c87f116eb18c3ab0b3e4ad25849ce1fcb046d9f  ./host/bin/docker-incident-detector.py
 f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-guard-postgres.sh
-c146da46593b866352bc6bc439ee1e1cd21754c8818af7993ab140ea011f0954  ./host/bin/hermes-boot-notify.sh
+89d6ff8db0bcc42319a1f84d24db0966ef0daa3e97219ec7d9ccd041253129d8  ./host/bin/hermes-boot-notify.sh
 9c6388452c33f57d635ffbb36e318429fa22545a6e5a6f1d71551320a2678a1e  ./host/bin/hermes-history-backup.py
 b8f7c9ca9783c86ee8049647f549867ff7d72731a8e146a07c09f0403601be31  ./host/bin/hermes-state-backup.sh
 5249aa0ba7bc85fb2cfaa7357d93c1bde4fc24b9182a71d8df08dbb90f65be5e  ./host/bin/hermes-state-watch.sh
@@ -196,7 +196,7 @@ d94956c4773216c78eaf20f74c60342567b2d365df8661b47d67a2de59c54ad1  ./host/systemd
 ccd8be1d1a2d7a548995b2df7c15fc18c22e6d43d250766040f407bc8744923a  ./host/systemd/docker-autorecover.timer
 b8ec24836fc80e04a836844e187d5f10c3800a514a03be0652728cc916b0f08d  ./host/systemd/docker-detector-liveness.service
 10360a368641f7b1793d3c1f5b808570c7c2f5310e5653ebb8d753253bcc344f  ./host/systemd/docker-detector-liveness.timer
-ab0f37da87f323352382f00f90807652118b2772ef5793557ae6aa319bdc5c5e  ./host/systemd/hermes-boot-notify.service
+178b4cecb7a0ad84f7d3c4f117d95bbec19c844a5d977a4caceff3fcb6730c4c  ./host/systemd/hermes-boot-notify.service
 8c56643f1077d2ad33e6721c091ee85ef24ff99d5f4f887d2a9370ff52467eae  ./host/systemd/hermes-history-backup.service
 508541cc08928f4b9edd5d6248effb4e2c1bdebda55212aec3fbbeb5d4f1490e  ./host/systemd/hermes-history-backup.timer
 1d6fa0320266568911761b39436896677e64e505f9f1c3d651231a06d0cb41fc  ./host/systemd/hermes-state-backup.service
