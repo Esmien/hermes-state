@@ -78,6 +78,49 @@ ss -tn state established '( sport = :8443 )'
 | a few `101` per IP, long-lived established sockets, large `$10` | normal session |
 | `499` on a path | client aborted; count per IP to see who is flapping |
 
+Identify the device from its **subscription** line, not its WebSocket UA: Happ fetches
+`/sub/<token>` as `Happ/4.12.0/ios/…` but opens the tunnel with a desktop Chrome UA, so a
+"Windows Chrome" WS stream from a home IP is usually the owner's iPhone. Match the IP between the
+subscription request and the `101` lines before blaming a device that is not even in the room.
+
+## 4b. Session lifetime — the number that decides
+
+`$request_time` on the vhost turns the log into a session histogram: an upgraded WebSocket writes
+its line **when it closes**, and `rt` is the whole session lifetime. Define the format in a
+`conf.d` file (it must sit in the http context), point the `access_log` line in
+`apply_brand.py`'s template at it, then `python3 apply_brand.py && nginx -t && systemctl reload nginx`.
+
+    log_format vpnx '$remote_addr [$time_local] "$request" $status $body_bytes_sent rt=$request_time urt=$upstream_response_time ua="$http_user_agent"';
+
+Parse with a regex (`rt=([\d.]+)`), not awk columns — the custom format no longer matches the
+combined layout and column-based counting silently reads the wrong field. Two shapes:
+
+| rt | bytes | reading |
+|---|---|---|
+| ~0.1 s, on many paths at once | tiny | client health checks (url-test / auto-ping), not failures |
+| 2–9 s, repeating, one path | same few KB each time | the tunnel stalls mid-transfer and the app redials |
+
+## 4c. A stall after a few KB is an MTU blackhole, not DPI
+
+Median session of a few seconds that keeps delivering the same ~3.8 KB (2–3 full packets), while
+small requests and the server-side self-test are perfect, is the classic PPPoE path-MTU blackhole:
+our 1500-byte packets are dropped on the client's line and the ICMP that would teach TCP the real
+MTU never arrives, so the transfer dies once it outgrows the first packets. The discriminator that
+separates it from provider filtering: the owner's **whitelist** subscription keeps working on the
+same Wi-Fi, because whitelist traffic never touches our entry at all.
+
+Clamp MSS on the entry ports (reversible, no speed cost, applies to all clients):
+
+```bash
+iptables -t mangle -A POSTROUTING -p tcp --sport 8443 --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1300
+iptables -t mangle -A POSTROUTING -p tcp --sport 2087 --tcp-flags SYN,RST SYN -j TCPMSS --set-mss 1300
+iptables -t mangle -S POSTROUTING | grep TCPMSS     # confirm, and persist if it works
+```
+
+Ask the owner to browse for a minute, then re-read the `rt` histogram — sessions should climb from
+seconds to minutes. If they do not, the next split is by exit: dial `/general` (direct) instead of
+`/france` to decide between the path and the borrowed exit, and never change both at once.
+
 ## 5. Verdict
 
 - Container stable, self-test fast, `generate_204 = 204` → the tunnel is healthy; the drop is the
