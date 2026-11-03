@@ -39,7 +39,9 @@ signed» — то есть ключ фактически не применён. 
    `chmod 0644`. Без `gpg` — копия как есть (fallback для урезанных образов).
 4. Сверить отпечаток: `gpg --show-keys --with-colons <keyring>` должен содержать ожидаемый
    (`ACCC4CF8` для pgdg). Не совпал — `die()` с отпечатком в тексте, а не молчаливый apt.
-5. Только теперь писать sources: `deb [signed-by=/usr/share/keyrings/pgdg.gpg] https://apt.postgresql.org/pub/repos/apt <codename>-pgdg main`.
+5. Только теперь писать sources: `deb [signed-by=/usr/share/keyrings/pgdg.gpg] http://apt.postgresql.org/pub/repos/apt <codename>-pgdg main`.
+   Целостность держит GPG-подпись `InRelease` и хэши пакетов, поэтому http допустим и
+   работает там, где https-плечо отдаёт битый кэш (но сам по себе CDN не обходит — см. ниже).
 6. `apt-get update -qq`; при `NO_PUBKEY`/`not signed` — переустановить ключ и повторить
    **один** раз, второй провал — `die()` с последней строкой вывода apt (в лог — хвост).
 
@@ -98,6 +100,34 @@ PY
   `-o Acquire::http::No-Cache=true -o Acquire::http::Pipeline-Depth=0`, чтобы обойти
   промежуточный кэш. Классифицировать как временные: `unexpected size`, `mirror sync`,
   `hash sum mismatch`, `failed to fetch`, `some index files failed`, `502`, `503`.
+- **`No-Cache` не лечит зависший CDN.** Fastly на `Cache-Control: no-cache` отвечает тем же
+  `X-Cache: HIT, HIT` с прежним `Age`, а `http` и `https` идут через один и тот же кэш
+  (`Server: nginx` + `Age:` в ответе). Смена схемы URL — не обход CDN: проверять по
+  заголовкам, а не по виду ссылки.
+- **Диагностика «кто отдаёт старое» — сравнить `Last-Modified` по anycast-адресам:**
+
+  ```bash
+  for ip in 151.101.2.52 151.101.66.52 151.101.130.52 151.101.131.52 151.101.195.52; do
+    echo -n "$ip → "
+    curl -sSI --resolve apt.postgresql.org:443:$ip \
+      https://apt.postgresql.org/pub/repos/apt/dists/noble-pgdg/InRelease \
+    | grep -i last-modified | tr -d '\r'
+  done
+  ```
+
+  Разные даты по разным адресам = завис объект на конкретном плече; одинаково свежие =
+  CDN чист, ищи причину на клиенте.
+- **Смотреть тело, а не заголовок.** `curl -sI` отдаёт `Last-Modified`/`Age` объекта, а apt
+  читает содержимое: у зависшего плеча заголовок бывает свежим, а внутри `InRelease` —
+  `Date` двухдневной давности. Проверка, которая не обманывает:
+  `curl -s <url>/InRelease | grep -m1 '^Date:'` — сравнивать эту дату между плечами и с
+  `Release file created at:` из вывода apt.
+- **Свежий `InRelease` на всех плечах, а apt всё равно ждёт другой размер — виноват
+  локальный кэш индексов.** В `/var/lib/apt/lists/` остаётся прежний `InRelease`; apt считает
+  свою копию актуальной и не перекачивает её, а `Packages.bz2` тянет новый — отсюда вечный
+  `unexpected size` при любых ретраях и любом IP. Лечение: удалить только свои файлы
+  (`rm -f /var/lib/apt/lists/*pgdg*`) и повторить update. Установщик делает это сам в ветке
+  `unexpected size` (`_purge_pgdg_lists()`), не трогая индексы других репозиториев.
 - Прежде чем винить репозиторий, сверить зеркало с другой машины: скачать
   `dists/<codename>-pgdg/Release` и `main/binary-amd64/Packages.bz2`, сравнить `sha256sum`
   файла с записью в `Release`. Совпало — зеркало цело, проблема на стороне клиента.
