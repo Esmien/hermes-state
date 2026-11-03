@@ -173,7 +173,7 @@ d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stac
 815da837558002dc51a9fd6ed7cf9ffc5e758b88a76f919d10fe5c552e359597  ./host/backups/tg-registry.json
 7cac890fcc48be6cfc3efe302dbab2d018074c270a15481e99b2c464be278184  ./host/bin/docker-detector-liveness.sh
 df8b07b07e5a51df7e28294323319ca4e945fa3a2e7d6291b24957f74109c937  ./host/bin/docker-incident-agent.sh
-807d90d5d8a0cb39287d6ee65c87f116eb18c3ab0b3e4ad25849ce1fcb046d9f  ./host/bin/docker-incident-detector.py
+ec6676d1e7be69864c893f6fd16c13a4dd394765d053b1230387ba84a8da1f26  ./host/bin/docker-incident-detector.py
 f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-guard-postgres.sh
 89d6ff8db0bcc42319a1f84d24db0966ef0daa3e97219ec7d9ccd041253129d8  ./host/bin/hermes-boot-notify.sh
 9c6388452c33f57d635ffbb36e318429fa22545a6e5a6f1d71551320a2678a1e  ./host/bin/hermes-history-backup.py
