@@ -45,7 +45,7 @@ bash assets/vpn/scripts/deploy.sh <domain> [email]     # nginx+stream, cert, con
 python3 /root/vpn-router/import_sub.py <sub-file> [dead indices]
 ```
 
-After any structural change, regenerate the secret-free template with `router/make_template.py`, copy the scripts and the new template into `/root/vps-infra/assets/vpn/`, and commit — the recovery repo must match the live host exactly. Full procedure and pitfalls: `references/router-ops.md`.
+The VPN is its **own project**, not part of the AI-stack installer: the canonical repo is the private `Esmien/vpn-service` (`router/`, `nginx/`, `scripts/`, `systemd/`). A full server rebuild is therefore two steps — `install.py` for the AI stack, then `deploy.sh` from this repo for the entry; the bootstrap one-liner does not bring the tunnel back. After any structural change, regenerate the secret-free template with `router/make_template.py`, copy the live files into the repo, and commit — it must match the live host exactly. Runtime secrets stay out of git via `.gitignore`: `config.json` (client UUID), `subs.json`, `whitelist_links.json`, `*.key`, `*.pem`, `*.enc`. Full procedure and pitfalls: `references/router-ops.md`.
 
 ## Changing the public host
 
@@ -182,5 +182,5 @@ Two node kinds are unusable here: `hysteria2` links (Xray core has no such proto
 - Keep every inbound bound to 127.0.0.1; an inbound on `0.0.0.0` publishes raw VLESS to the internet.
 - Cloudflare WARP is unusable from this host: UDP 2408 and 1.1.1.1:53 get no reply (8.8.8.8 works). Do not build routing on WARP here.
 - An external exit is a black box: its public hostname resolves to a front IP that may sit on a different ASN and different /24 than the subnet that actually egresses. Never infer the verdict from the resolved IP — force Google to answer from the exit: `curl --socks5-hostname <exit> 'https://dns.google/resolve?name=o-o.myaddr.l.google.com&type=TXT'` and read the `edns0-client-subnet` line. The hostname can also rotate between addresses, which silently changes the Gemini verdict.
-- Everything is mirrored in `Esmien/vps-infra` under `assets/vpn/` (sanitised: no UUID, no exit password). The public repo must never receive credentials.
+- Canonical source is the private repo `Esmien/vpn-service`; `Esmien/vps-infra/assets/vpn/` is a leftover copy that is no longer updated — editing it changes nothing live. Push only credential-free files: `config.json` (UUID), `subs.json` and `whitelist_links.json` are gitignored, and no repo (public or private) should ever receive exit passwords or client UUIDs.
 - After a push, `raw.githubusercontent.com` keeps serving the previous copy for minutes — a stale read is not a failed push. Confirm through the API instead: `curl -s 'https://api.github.com/repos/<owner>/<repo>/contents/<path>?ref=main'` and base64-decode `content`.
