@@ -123,8 +123,9 @@ e2e06d92a26070b4617c0489ef8d4bc404b6b78a62369773e11e56152c52971c  ./hermes/skill
 868ff72e3d63da39dff7eddf73a1093e96f3fee87c3b280e05b23d764c842c32  ./hermes/skills/devops/vps-infra-installer/references/beszel-and-monitoring.md
 e8e006023610f0821ac3c9500dc103277f47c94c0f27bc794063d63378d6c5cb  ./hermes/skills/devops/vps-infra-installer/references/installer-pitfalls.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
-c6a88e208125336f994254084e22db159cb2116a2650eb4dc1e3a9ad83eb4beb  ./hermes/skills/devops/vps-network-exposure/SKILL.md
+17c5d88cb4a44680a35a85acb28420601188826082ec820c9df1f95cee130438  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 19a9644e9db89f8464086b10bcf3bdc0a9d40a00ed4e9f8c3d61a1c6364edf55  ./hermes/skills/devops/vps-network-exposure/references/acme-and-cert-limits.md
+318d0b81fbd52c38da2cc1bab06060c7b2cae9fa5cfc838346b2f8fbdf87d6f2  ./hermes/skills/devops/vps-network-exposure/references/domain-migration-and-dns.md
 5d93386309b2930a54912308c4064bd9b875a89369c7123065eedffecb78d11e  ./hermes/skills/devops/vps-network-exposure/references/fail2ban-and-rate-limits.md
 dd75e4fcfd44e1f053f632ece87c23de61135875900ae347a0919d7787beee6f  ./hermes/skills/devops/vps-network-exposure/references/firewall-and-ssh.md
 97828cc98631665b9d1e8c10992a95349cb56ba0551941f3684a1461ff8aa718  ./hermes/skills/devops/vps-network-exposure/references/ru-dpi-vpn-ingress.md
