@@ -32,8 +32,24 @@ metadata:
 | log | `/var/log/hermes-state-backup.log` (logrotate weekly, 4 kept) |
 | failure alert | Telegram via `hermes send -t telegram` (works without the gateway running) |
 
-Snapshot layout inside the repo: `hermes/{config.yaml,SOUL.md,memories/,skills/,cron/jobs.json,plugins/,hooks/,scripts/}`,
+Snapshot layout inside the repo: `hermes/{config.yaml,SOUL.md,memories/,skills/,cron/jobs.json,plugins/,hooks/,agent-hooks/,scripts/}`,
 `host/{bin,systemd,etc,ai-stack,backups}/`, `MANIFEST.sha256`, `README.md`.
+
+`hooks/` и `agent-hooks/` — **разные каталоги**, и это не косметика: `agent-hooks/`
+держит предохранители вызовов инструментов (`ssh-only-gate.py` и подобные), на которые
+ссылается `config.yaml`. Снапшот обязан копировать оба (`rsync -a --delete …/agent-hooks/`).
+Если файл хука не доехал, на восстановленной машине получаем ровно две плохие ветки:
+хук с `fail_closed: true` и отсутствующим файлом блокирует **все** инструменты
+(`command not found` на каждом вызове), а его отключение молча снимает ограничение
+с тех пользователей, ради которых гейт и стоял. Поэтому после восстановления
+сверять `ls -l ~/.hermes/agent-hooks/ && grep -n "agent-hooks" -A2 ~/.hermes/config.yaml`,
+а не только наличие `config.yaml`.
+
+**Шаблон-заглушка опаснее отсутствия файла.** Шаблон хука (каталог шаблонов в скилле `hermes-agent`) содержит `RESTRICTED_USERS = {"000000000"}`. Скопированный шаблон выглядит рабочим гейтом,
+но не ограничивает никого — тихий обход. Признаки: размер ~3.8 КБ вместо рабочего
+~7.4 КБ и `grep -c 000000000 <file> != 0`. Настоящий файл забирать из
+`https://raw.githubusercontent.com/Esmien/hermes-state/main/hermes/agent-hooks/<name>.py`
+и после подмены ставить `0755`.
 
 `host/backups/tg-registry.json` — реестр `file_id` частей дампов, которые
 `notifications/monitor.py` отправил в файл-бот. Именно из него `install.py --from-bot`
@@ -56,7 +72,7 @@ Secrets inside `config.yaml` are `${ENV_VAR}` references only — that is why th
 
 ## Change-driven, not scheduled (owner's rule since 2026-10-24)
 
-Backups fire **when the state changes**, not on a clock. `hermes-state-watch.service` runs `inotifywait -r -t 15` over the snapshot inputs (`/root/.hermes/{skills,memories,plugins,hooks,scripts,cron,config.yaml,SOUL.md}`, `/usr/local/bin`, `/etc/systemd/system`, the runbook and the stack backup script), waits for `QUIET=90` seconds without events (`MAXDELAY=900` if changes never stop), then calls the snapshot script. The script itself already no-ops when the tree is unchanged, so a burst of edits produces exactly one commit.
+Backups fire **when the state changes**, not on a clock. `hermes-state-watch.service` runs `inotifywait -r -t 15` over the snapshot inputs (`/root/.hermes/{skills,memories,plugins,hooks,agent-hooks,scripts,cron,config.yaml,SOUL.md}`, `/usr/local/bin`, `/etc/systemd/system`, the runbook and the stack backup script), waits for `QUIET=90` seconds without events (`MAXDELAY=900` if changes never stop), then calls the snapshot script. The script itself already no-ops when the tree is unchanged, so a burst of edits produces exactly one commit.
 
 - `inotify-tools` is required (`inotifywait 3.22` present). systemd `.path` units are **not** recursive — they would miss `skills/<name>/SKILL.md`.
 - The watcher also runs one snapshot at service start, which covers edits made while it was down (host rebooted, unit stopped).
