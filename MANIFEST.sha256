@@ -71,7 +71,7 @@ ad042b6fee80f9dde1317d8f976a826abe3f94e539c3577263e53d91cd70efd8  ./hermes/skill
 5fbd66fb792bfb0365976ca9f446fb048b38d9e6bd2959908e4e4a57bbb93916  ./hermes/skills/devops/ai-stack/references/music-bot-lyria.md
 9e9ccc47eca53127d1e0bc915b2dbc74c1c6a01704991b6b44be484bd0106af8  ./hermes/skills/devops/ai-stack/references/operations.md
 23681fed79a731f0e5ac3dbf907087700aedc29fa84c1b54872f7694682b3e76  ./hermes/skills/devops/ai-stack/references/owui-admin-auth.md
-3485b905f94be6019e23bcc8ee568bb999be2bf8a1394f66022bd2f07845dc8d  ./hermes/skills/devops/ai-stack/references/pitfalls.md
+2d28feb508e9ddae732fc354510c87e7a39b3317a396fcd6504111f42326faf2  ./hermes/skills/devops/ai-stack/references/pitfalls.md
 cbb06f14ec073a2b9436c977cd60cd31f8e7bb3de6ee7fc7c127454dcedaecc5  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
 3814331f3b5164e615e8503f9d71bb136811e08afc0630b9c69853f7dbf3372c  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
 ed07f0188d3a2dbe27c3f4b4a2966ae423f28bf2450ec8a040bd2cbc4c6ec0bf  ./hermes/skills/devops/ai-stack/references/searxng.md
@@ -90,7 +90,7 @@ b201d073a6374940cc7a90bf418f3af9f7d5315c67f3f633edcea78012fb8fed  ./hermes/skill
 57a2a5e8f2f2395dfb18a9a37ebed061a5272f43b7737f966462483ea4e03f2a  ./hermes/skills/devops/ai-stack/scripts/probe-media-endpoints.py
 5f28a41cf05b85f901f2eceb62a441d72fd71042ea7e992a578d2a8192e72982  ./hermes/skills/devops/ai-stack/scripts/probe-owui-terminal.py
 553accbaf6031aa7df7687b7ecb02213c8eba071b5226f0a974f230c07e86904  ./hermes/skills/devops/ai-stack/templates/mcu-assistant-system-prompt.md
-e04067631103fb7051c50bfb3de0962436243fe2c5ea74ada7690c37d877ad35  ./hermes/skills/devops/container-incident-response/SKILL.md
+c2990b8b3dc221c6a14b0909b40d37535cb58fe0d7f4ef50459ee672f4dfbc11  ./hermes/skills/devops/container-incident-response/SKILL.md
 244093d67fc1c519a82fe5fbd107a2cea7b8127de5d5e030001163f9bae0c53f  ./hermes/skills/devops/container-incident-response/references/agent-wakeup.md
 891b02a8d8af2ff6fe959e205bcb8a343270686135367050b673524c31c304e7  ./hermes/skills/devops/container-incident-response/references/detector-and-thresholds.md
 dbe445840ee9330e92fcc1cf8dbcd703b4e32769ca1ee4207bac0e760df5853e  ./hermes/skills/devops/credential-login-verification/SKILL.md
@@ -121,12 +121,12 @@ f5cf760b862da18ca4eb5f86f3a6bdecb4e1c9c8d02bb5406b082ecf6c7242c3  ./hermes/skill
 27d91d66ae5de17a9f664e9dba7b40ea012152f7147b71d994e9c957707dc7e3  ./hermes/skills/devops/vpn-entry-stack/scripts/test_whitelist.py
 e2e06d92a26070b4617c0489ef8d4bc404b6b78a62369773e11e56152c52971c  ./hermes/skills/devops/vpn-entry-stack/scripts/vpn-cfg.sh
 7738db0c4bde71e6280b8c32cb7139e90da18962e2f331cfc1e9fdba51fc6345  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
-c752668b2a73b6eaedb038aab4241d91012e95fcc2487d08b105e68c81c972f4  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+bf0391bc633da01eb1f5a78a313a0f98c8951c06f38176071cc9fbfdef0ff283  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 17d8c01e315a5eec3e51dd1b1e578de7ba90f3486725b8dae7959e80c4e768a8  ./hermes/skills/devops/vps-infra-installer/references/apt-and-fresh-host.md
 868ff72e3d63da39dff7eddf73a1093e96f3fee87c3b280e05b23d764c842c32  ./hermes/skills/devops/vps-infra-installer/references/beszel-and-monitoring.md
 e204f02c8a35e6c876321da47d4c17e87ae5e39458939932ed6281600dbbde1c  ./hermes/skills/devops/vps-infra-installer/references/installer-output-pane.md
 8fa537d6e919f4863fe12ef8b8dc27e698cc6d4164dc2146a871b93066954acd  ./hermes/skills/devops/vps-infra-installer/references/installer-pitfalls.md
-7248e48e8a3f14b983f794b9e15ef2fcfe00766910478a76f054a6cd90aa204e  ./hermes/skills/devops/vps-infra-installer/references/restore-drill.md
+568a7aff81b83836269c707a919f783b1c74e1f0ebf3cf521fbd8352d553f7b9  ./hermes/skills/devops/vps-infra-installer/references/restore-drill.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
 9322f6721bd100d46dccd4da500d4fcf25c02408fbf3bef2376803265fa5df94  ./hermes/skills/devops/vps-infra-installer/scripts/pty-screen-dump.py
 163c8bf7292a6c5d89204b3ddd000a7403b7a3a3c5005a4f953be8e24c681da5  ./hermes/skills/devops/vps-network-exposure/SKILL.md
