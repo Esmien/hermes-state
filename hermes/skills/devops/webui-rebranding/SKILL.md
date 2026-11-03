@@ -34,12 +34,14 @@ docker compose up -d --force-recreate open-webui      # run backgrounded, then w
 
 | Asset | Source | Note |
 |---|---|---|
-| `splash.png` | colour logo | light theme |
-| `splash-dark.png` | mono logo | dark theme (`isDarkMode` in `index.html`) |
-| `favicon.png`, `favicon-96x96.png`, `favicon.ico`, `favicon.svg` | colour logo | one file for both themes |
-| `logo.png`, `apple-touch-icon.png`, `web-app-manifest-*.png` | colour logo | PWA manifest |
+| `splash.png` | `LIGHT_SRC` (light theme source) | light theme |
+| `splash-dark.png` | `DARK_SRC` (mono logo) | dark theme (`isDarkMode` in `index.html`) |
+| `favicon.png`, `favicon-96x96.png`, `favicon.ico`, `favicon.svg` | `LIGHT_SRC` | one file for both themes |
+| `logo.png`, `apple-touch-icon.png`, `web-app-manifest-*.png` | `LIGHT_SRC` | PWA manifest |
 
-`generate_assets.py` builds everything from `logo_light.png` / `logo_dark.png`; sources must be square PNG with alpha, object ≥520 px tall (largest asset is 512×512). JPEG without alpha → `python cutout.py in.jpg logo_light.png --bg light` first.
+`generate_assets.py` builds everything from `logo_light.png` / `logo_dark.png`; sources must be square PNG with alpha, object ≥520 px tall (largest asset is 512×512). JPEG without alpha → `python cutout.py in.jpg logo_light.png --bg light` first. Run it with the **system** interpreter — `/usr/bin/python3 generate_assets.py` — the script needs Pillow, which lives in the Debian package (`apt-get install -y python3-pil`), not in the agent runtime's python.
+
+"Dark mark everywhere" is a legitimate order and a trap at once: only the splash is theme-aware, so a dark mark that looks right on white disappears at 22 px in the dark sidebar. Implement it at script level (`LIGHT_SRC = Path("logo_dark.png")  # why`), never by overwriting `logo_light.png` — the next person has to be able to read the decision. Then show the dark screenshot before calling it done: the owner judges art by artifact, and "reads fine" is his verdict, not yours.
 
 ## What theming actually reaches
 
@@ -56,6 +58,8 @@ Open WebUI is BSD-3 **plus clause 4**: removing the "Open WebUI" branding is all
 
 Judge every mark at the **real target size** (16–22 px), never from a 500 px export. Faceted renders and chrome/molecule art collapse there: strokes at 1 % of the mark become 0.15–0.2 px. What survives: thick orthogonal geometry (≥2 px stroke, no gaps <1 px). The crystal is fine as a splash, not as the 22 px mark.
 
+Colour adds a second axis nobody checks: a **monochrome dark** mark on the `#000` sidebar is invisible at 22 px even when its geometry would survive, and the favicon is a single file for both themes. The only shape that reads on white and on black is two-tone — dark facets plus a light rim/outline. Evaluate any candidate against both backgrounds before shipping one file; report the dark-theme result honestly instead of shipping the light one and hoping.
+
 ## Verify after a rebuild
 
 ```bash
@@ -67,6 +71,17 @@ docker logs open-webui --since 5m 2>&1 | grep -iE 'alembic|migrat|error' | tail 
 ```
 
 Screenshot proof (login page, light/dark, sidebar at 100 %): the Playwright recipe lives in the `ai-stack` skill, Branding reference file (`branding.md`) (`~/.hermes/cache/scratch/shot/`). Take screenshots instead of describing the result — visual verdicts are what the owner judges.
+
+Without Playwright the cached Chromium does the job in one command (no venv, no server):
+
+```bash
+CH=$(ls -d /root/.cache/ms-playwright/chromium-*/chrome-linux64/chrome | head -1)
+$CH --headless=new --disable-gpu --no-sandbox --hide-scrollbars --window-size=1280,860 \
+  --virtual-time-budget=8000 --screenshot=/tmp/webui_light.png http://127.0.0.1:8080/
+# same call with --force-dark-mode for the dark theme
+```
+
+`--virtual-time-budget` is what lets the SPA finish hydrating before the shot; without it the screenshot is a white rectangle. If Chromium dies on `libcups.so.2` / `libnss3` / `libgbm1`, install them (`apt-get install -y libcups2 libnss3 libatk-bridge2.0-0 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libpango-1.0-0 libcairo2`) — a one-time host dependency, not a reason to fall back to prose.
 
 ## Rollback
 

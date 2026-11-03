@@ -109,8 +109,9 @@ a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skill
 b2a2f042ece1a5b57c714b32de75ca876b697b761c92abb0e276acd3ea3688f5  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
-5522df62594b5686fa8e4412e5b1be16d47f6b320fe303a5bb5a15f05e6b2e0e  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+a21414eb72a09fd1041ec6959d52a6360cca03f97ee1d6b04dab085d4686f4c5  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 b27eca178d05f333d2dcc34d9e98b9f1763fea9ae17a7b6fa2eabaa92098a0b1  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
+56d31b86575725c38f0537733048e0b7dd594e5e6d072c2283cb3cee1f8f93c7  ./hermes/skills/devops/vpn-entry-stack/references/domain-and-tls.md
 b3e01208b42620cdf4c4126c8769dffe221fed325ee679ed50065a9e27167782  ./hermes/skills/devops/vpn-entry-stack/references/gemini-geo.md
 625480e5e31a642015e3490a1c33f91f7304d13906717789077d25939170888e  ./hermes/skills/devops/vpn-entry-stack/references/router-ops.md
 97721e654258560d01bb1ced479ff6a8efe89b2990f13b0108e701c6818394dc  ./hermes/skills/devops/vpn-entry-stack/references/xui-panel.md
@@ -136,7 +137,7 @@ d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skill
 c8957b1d477467418d64748c30fd00de6102b1c0736ae1d8ed894e656a1ae08b  ./hermes/skills/devops/vps-posture-assessment/SKILL.md
 de682e106bd529ef8b78d202dabcc84f694b04e5de8d5ff0a79a827864ada28d  ./hermes/skills/devops/vps-posture-assessment/references/recovery-rto.md
 918971595010770b622cd8cd01580d166146ce98f021a66960e49f7b4ba09b37  ./hermes/skills/devops/webui-ios-icons/SKILL.md
-482f644a1a22de3d85d84e7ce4da9e65ce2a22db90110f8c12e15ff5f5ca8b32  ./hermes/skills/devops/webui-rebranding/SKILL.md
+84466335d114cc7ba256ae5642dce1fe3b512825309b0d0cd108e4e0a5eae292  ./hermes/skills/devops/webui-rebranding/SKILL.md
 2c40e123f597ebbb4db9edf5fe8e5d63a1aacf8f00b59eca1b5af0748062ac24  ./hermes/skills/email/DESCRIPTION.md
 c27bb2f0f3acd71771de1e7dc2ec27311dced72cbdf3989577c6907928e52645  ./hermes/skills/media/DESCRIPTION.md
 fb28a609372460b2788d3b7dbc551985d24d4042057971f4d6345144d2d78caa  ./hermes/skills/note-taking/DESCRIPTION.md

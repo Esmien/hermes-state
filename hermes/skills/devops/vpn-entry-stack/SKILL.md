@@ -65,6 +65,8 @@ Prerequisites before pointing the entry at a new name:
 
 Verification after the switch, in one pass: `openssl s_client -servername <new host>` shows the new CN; `https://<host>:8443/` returns `200` and `/<path>` returns `400` (a WS inbound refusing a plain GET — that is the healthy answer); `/sub/<token>` returns `200` with the new host inside the links; a locally dialled Xray client gets a real egress IP; `check-host.net/check-tcp` on the entry port answers from most nodes. Keep `legacy_hosts` in place even when the old zone's DNS is dead — it costs nothing and revives old links if that zone comes back.
 
+A name change has to reach the **applications**, not just nginx and the subscription. Grep every config on the host for the old name (`grep -rn '<old-host>' /root/deploy /home/ai_service --include='*.env*' --include='*.yml'`) — a webhook base URL, an OAuth redirect or an app's own public URL keeps answering `200` on the new vhost while quietly pointing at the dead one. Then re-register the webhook and confirm the provider's own state (`getWebhookInfo` → `pending_update_count=0`); the music bot sat deaf for days on an old `bot.<old-host>` URL that no TLS or HTTP check would ever flag.
+
 ## Subscription
 
 `make_sub.py` renders three formats; nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. The response carries `profile-update-interval: 12` and a `profile-title` that depends on the token: `apply_brand.py` scans `/var/www/esmien-sub/*/kind` and emits `00-esmien-sub-title.conf` with `map $esmien_sub_token $esmien_sub_title` (whitelist token → `Esmien VPN (LTE)`, everything else → `Esmien VPN`) plus a matching `$esmien_sub_fname` map, so downloads are named `esmien-vpn` / `esmien-vpn-lte`. A new token inherits its title from its `kind` file — never hard-code the title in the nginx template, and never let two subscriptions share a display name: the owner tells them apart by the suffix.
@@ -72,6 +74,8 @@ Verification after the switch, in one pass: `openssl s_client -servername <new h
 Rules: names are plain country names with flags (`🇪🇪 Эстония (General)`, `🇫🇷 Франция (Gemini)`, `🛠 Тест (Develop)`); the brand lives only in the group/profile title. "No clutter" means no junk nodes and no invented groups — it does **not** cap the node list: the owner explicitly ordered every usable upstream node relayed in, so the relay pool ships as **one subscription** on its own token. The whitelist entries are a **second, separate subscription**, not a second group: the owner prefers a separate link for them. `make_sub.py` branches on a `kind` file inside the token dir — a dir whose `kind` reads `whitelist` gets a whitelist-only bundle (`make_sub.py --new-whitelist` creates one) — and the main bundle carries the relayed routes only. Never add a third group or a node class he did not ask for.
 
 URL shape: `https://<host>:8443/sub/<token>`. The port must be in the URL: plain 443 is blocked for the owner's ISP.
+
+While the entry's DNS is unreliable, ship duplicate nodes addressed by bare IP: `vless(addr=<ip>)` / `clash_proxy(addr=<ip>)` with `server`/`sni`/`Host` still carrying the hostname, so TLS and the WebSocket routing stay valid without any resolver. Pair them with an `http://<ip>/sub/<token>` vhost as an emergency fetch path — that URL exposes the token to the transit provider, so it is a fallback, never the default.
 
 ## Subscription expiry
 
@@ -87,7 +91,7 @@ The provider's expiry is in the `subscription-userinfo` response header of any s
 - `provision_vpn_host.py <host>` wraps it and on success rewrites `brand.json`, rebuilds nginx + subscriptions, reloads, verifies.
 - Its final verification can print `000` if curl lands inside the reload window — re-check manually before believing the switch failed.
 - `qd.je` is a **free subdomain under someone else's registry**, and that is the deeper problem: its DNS is one provider's goodwill. Any name the entry depends on needs authoritative servers that actually answer — measure them (`dig` per NS, 5 tries each) before trusting a provider, and prefer an owned domain whose NS point at a large DNS host. Cheap registrars are fine for this (RU cards work, NS are editable); avoid giveaway TLDs that anti-spam filters already treat as hostile.
-- Wildcard `*.esmien.qd.je` needs DNS-01. DigitalPlat (DNS host, `dns1/dns2.digitalplat.org`) has no publicly reachable API (403/404 on guessed endpoints, paths built dynamically in panel JS), so automation needs either a dashboard token plus its docs or moving the zone to a DNS provider with an open API (deSEC).
+- Wildcard `*.esmien.ru` is issued with **DNS-01 through the Cloudflare API** — one certificate `esmien-wildcard` covers `*.esmien.ru` plus the apex, so a new service needs no certbot run at all, only an A record and a server block. Token lives in `/root/.secrets/cf.ini` (0600, scope `Zone:DNS:Edit`), plugin is `python3-certbot-dns-cloudflare`, renewal hook reloads nginx. Full command, verification matrix, API-side subdomain creation and the "name stopped resolving" triage: `references/domain-and-tls.md`.
 
 ## Upstream subscriptions (relaying nodes)
 
