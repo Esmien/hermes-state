@@ -120,7 +120,8 @@ f5cf760b862da18ca4eb5f86f3a6bdecb4e1c9c8d02bb5406b082ecf6c7242c3  ./hermes/skill
 27d91d66ae5de17a9f664e9dba7b40ea012152f7147b71d994e9c957707dc7e3  ./hermes/skills/devops/vpn-entry-stack/scripts/test_whitelist.py
 e2e06d92a26070b4617c0489ef8d4bc404b6b78a62369773e11e56152c52971c  ./hermes/skills/devops/vpn-entry-stack/scripts/vpn-cfg.sh
 7738db0c4bde71e6280b8c32cb7139e90da18962e2f331cfc1e9fdba51fc6345  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
-a6ae7f84e168b12744a2cd86a5d5fe432e5ca1ca2dec0b0f79661f80fcf2fac7  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+c3e325c7d6169b44b00bd457fd1a9fa5d8b8ace873721acc606824c648d5f85a  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+dde145727375372180420ee2066d581aacb25f58d55f75c16ed19a9aeb12cec6  ./hermes/skills/devops/vps-infra-installer/references/apt-and-fresh-host.md
 868ff72e3d63da39dff7eddf73a1093e96f3fee87c3b280e05b23d764c842c32  ./hermes/skills/devops/vps-infra-installer/references/beszel-and-monitoring.md
 e204f02c8a35e6c876321da47d4c17e87ae5e39458939932ed6281600dbbde1c  ./hermes/skills/devops/vps-infra-installer/references/installer-output-pane.md
 e8e006023610f0821ac3c9500dc103277f47c94c0f27bc794063d63378d6c5cb  ./hermes/skills/devops/vps-infra-installer/references/installer-pitfalls.md
