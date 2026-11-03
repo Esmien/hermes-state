@@ -78,11 +78,23 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host.
 
 ## Domains → backend
 
+The public names are moving from the `esmien.qd.je` zone (free DNS whose authoritatives fail — see `vpn-entry-stack` for the triage) to the owned **`esmien.ru`** zone on Cloudflare. Both sets are served in parallel until the owner moves the family, so an old and a new name point at the same backend:
+
 ```
-ai.esmien.qd.je   -> 127.0.0.1:8080  (open-webui)
-llm.esmien.qd.je  -> 127.0.0.1:4000  (litellm)
-bot.esmien.qd.je  -> 127.0.0.1:8000  (music bot, lyria-bot)
+ai.esmien.ru    -> 127.0.0.1:8080  (open-webui)   | ai.esmien.qd.je
+llm.esmien.ru   -> 127.0.0.1:4000  (litellm)      | llm.esmien.qd.je
+bot.esmien.ru   -> 127.0.0.1:8000  (music bot)    | bot.esmien.qd.je
+mon.esmien.ru   -> 127.0.0.1:8090  (beszel hub, not yet in DNS) | mon.esmien.qd.je
+vpn.esmien.ru:8443 (VPN entry)                    | vpn.esmien.qd.je:8443
 ```
+
+Adding a service name on a new zone — order matters:
+
+1. Wait until the A record answers from two public resolvers. Under Cloudflare it must be **grey cloud (DNS only)**: with the orange proxy on, HTTP-01 validation comes back `530` and certbot fails before nginx is even involved. An orange record is only correct if the service is deliberately fronted by Cloudflare (then TLS terminates at the edge and the origin vhost needs no Let's Encrypt cert).
+2. Issue the certificate through a **port-80 ACME stub** for the new name (`location /.well-known/acme-challenge/ { root /var/www/html; }`), `certbot certonly --webroot`. A full vhost cannot be written first — `nginx -t` refuses to load a config whose `ssl_certificate` path does not exist yet.
+3. Then write the real vhost as a copy of the old one with the hostname substituted — same `listen 127.0.0.1:9443 proxy_protocol ssl http2`, same rate-limit zones, timeouts and `X-Forwarded-*`. A new name without its own vhost silently lands on the default server of that listener.
+4. Drop the ACME stub once the real file carries the port-80 block (a copy of the site file already has it) and `nginx -t && systemctl reload nginx`.
+5. Verify with `curl -o /dev/null -w '%{http_code} cert=%{ssl_verify_result}' https://<name>/` — want `200 cert=0`. Then confirm the old name still answers, because the family stays on it until the owner says otherwise.
 
 ## Versioning
 
