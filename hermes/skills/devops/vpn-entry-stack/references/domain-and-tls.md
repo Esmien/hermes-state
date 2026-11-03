@@ -79,7 +79,7 @@ Say plainly that this is a stopgap: the name still belongs to whoever issued it,
 ## After a name change
 
 - Grep the whole host for the old name, not just nginx: `grep -rn '<old-host>' /root/deploy /home/ai_service --include='*.env*' --include='*.yml'`. A service answers `200` on the new vhost while its webhook, OAuth redirect or public URL still points at the dead name — the music bot was deaf for days this way. Re-register and confirm the provider's own state (`getWebhookInfo` → `pending_update_count=0`, no `last_error_message`).
-- Keep the old name as a legacy vhost with its own certificate until every user has moved; it costs nothing and revives stale links if that zone comes back.
+- Legacy vhosts are worth keeping only while the old name still resolves. Once the old zone's DNS is dead, keep nothing: its vhosts and certificates were removed on the owner's order and the forced migration was accepted as unavoidable (without NS control the name cannot be revived anyway). An unknown SNI that still answers `200` from the default vhost with a `*.esmien.ru` certificate is worse than a clean failure — it looks like a live site with a broken certificate.
 
 ## When a name stops resolving
 

@@ -83,7 +83,7 @@ units → hardening → tls → verify → hermes`.
    `backups/postgres/`, свежесть — по mtime.
 3. **`:latest`-образы не обновляются**, если уже есть локально: повторный
    install не должен молча менять версии. WebUI-образ собирается, если его нет.
-4. **Домен `bot.esmien.qd.je` — это lyria (бот с музыкой), не open-terminal.**
+4. **Домен `bot.esmien.ru` — это lyria (бот с музыкой), не open-terminal.**
    Порт 8000 на хосте занят `lyria-bot`. open-terminal не публикует порт;
    health проверяется `docker exec open-terminal curl …/health`. Третий домен
    опционален (`extra_domain`), по умолчанию пуст.
@@ -148,9 +148,7 @@ units → hardening → tls → verify → hermes`.
   поэтому `uptime-heartbeat.timer` раз в месяц дописывает
   `maintainer/uptime-heartbeat.txt`. Второй контур healthchecks.io:
   `deadman-ping.sh` + таймер, ping-URL в `/etc/deadman-ping.url`.
-- **TLS**: `qd.je` — общая квота Let's Encrypt (50 сертификатов / 168 ч) на все
-  поддомены и владельцев. Упор в лимит — норма, самописные ретрай-таймеры не
-  ставить (решение владельца): выпуском занимается только `certbot.timer`.
+- **TLS:** один wildcard `*.esmien.ru` (плюс apex), выпущенный через **DNS-01 Cloudflare** (`esmien-wildcard`, токен `/root/.secrets/cf.ini` 0600, плагин `certbot-dns-cloudflare`, хук продления перезагружает nginx). Новый поддомен = DNS-запись + vhost, certbot больше не запускается, квота Let's Encrypt больше не упирается. Старая зона `qd.je` **выведена из эксплуатации**: её DNS-провайдер перестал отвечать, vhost'ы и сертификаты удалены — не возвращай их в `legacy_hosts` и не чини их certbot'ом. Упор в квоту был нормой для неё, самописные ретрай-таймеры не ставить (решение владельца): выпуском занимается только `certbot.timer`.
 
 ## Проверка
 
