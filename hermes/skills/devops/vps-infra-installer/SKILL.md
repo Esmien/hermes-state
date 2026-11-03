@@ -107,7 +107,12 @@ install.py --bot-token … --file-bot-token … --hermes-token …             #
 Шаги идут в фиксированном порядке, каждый идемпотентен:
 `preflight → packages → users → stack → secrets → bundle → fetch → postgres →
 network → images → migrate → restore → data → apps → notifications → beszel →
-units → hardening → tls → verify → hermes`.
+units → hardening → tls → verify → health → hermes`.
+
+**Перед необязательным компонентом — два шага, не один.** `health` (контейнеры, HTTP,
+`webui_db`/`litellm_db`, Redis) валит прогон, если критичный сервис молчит; затем вопрос
+«Установить Hermes?» с дефолтом «да» (ответ «нет» → `/root/.hermes-skip`, позже
+`--only hermes --hermes`). Детали — `references/installer-pitfalls.md`.
 
 `--only`/`--skip` принимают имена шагов; неизвестное имя — ошибка.
 `--skip preflight` вместе со `stack`/`secrets` разрешён и печатает, что
@@ -337,6 +342,11 @@ https-коды доменов и число активных таймеров, �
   чистка только своих `/var/lib/apt/lists/*pgdg*`, http вместо https при зависшем кэше
   Fastly. Диагностика и проверка в чистом контейнере —
   [references/apt-and-fresh-host.md](references/apt-and-fresh-host.md).
+- **Hermes: бинарь в PATH и живой гейтвей — проверять, а не предполагать.** Установщик кладёт
+  бинарь в `~/.local/bin`/`~/.hermes/...`, PATH root там пуст — линковать в `/usr/local/bin`
+  (`ensure_hermes_shim()`); гейтвей поднимать только после `list-unit-files`/`pgrep`, иначе
+  `systemctl --user restart` под `check=False` даёт ложное «перезапущен». Детали —
+  `references/installer-pitfalls.md` → «Hermes после установки».
 - **Креды не вписывать в URL строкой `${TOKEN}@host`.** Такая строка при записи файла
   попадает под маскировку секретов и превращается в обрубок (`x-access-token:${GITH.../}`),
   файл остаётся синтаксически валидным для `bash -n`, а на чистой машине падает

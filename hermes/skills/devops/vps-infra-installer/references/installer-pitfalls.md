@@ -12,6 +12,17 @@
   напрямую: без терминала (CI, cron, ssh без `-t`) прямой тест валит скрипт.
 - Аргументы пробрасываются через `bash -s -- …`; `bootstrap.sh` клонирует в
   `/opt/vps-infra` и делает `exec python3 install.py`.
+- **Вопрос владельцу из `install.py` — только через `/dev/tty`, и открывать его дважды.**
+  `open("/dev/tty", "r+")` падает с `UnsupportedOperation: not seekable`, поэтому нужны два
+  хэндла: `open(path,"w")` для вопроса и `open(path,"r")` для `readline()`. Обычный
+  `input()` при `curl | bash` получает EOF и молча берёт дефолт — вопрос «установить Hermes?»
+  так и не появлялся. Хелпер `ask(question, default)` возвращает `default` при `OSError`
+  (нет терминала) и распознаёт `y/yes/д/да`. Проверять в настоящем псевдотерминале
+  (`pty.fork()`), а не через `pty.openpty()` + `Popen`: без controlling tty `/dev/tty`
+  не открывается и тест показывает дефолт вместо ответа.
+- **Автоматический режим не отменяет вопрос про необязательный компонент.** `--yes` не
+  должен превращать «поставить Hermes?» в тихий пропуск: владелец ждёт предложение с
+  возможностью согласиться или отказаться прямо во время прогона.
 
 ## Файлы, секреты, права
 
@@ -68,6 +79,14 @@
 
 ## Проверки и compose
 
+- **Шаг `health` — отдельный гейт перед необязательным компонентом.** Проверяет каждый
+  сервис из compose (`docker inspect … {{\.State.Status}}|{{.State.Health.Status}}|{{.RestartCount}}`),
+  HTTP-коды (`litellm :4000/health/liveliness`, `webui :8080/health`, searxng), число таблиц
+  в `webui_db`/`litellm_db` и Redis. Redis в стеке **с паролем**: `redis-cli ping` вернёт
+  `NOAUTH`, правильный вызов — `docker exec litellm-redis sh -c 'redis-cli -a "$LITELLM_REDIS_PASSWORD" --no-auth-warning ping'`
+  (пароль берётся из env контейнера, через командную строку хоста не идёт). Падение
+  критичного сервиса — `die()` со списком, а не запуск зависимого шага.
+
 - **Образ с `build:` в compose не тянуть из реестра.** Теги вида
   `esmien/open-terminal-arduino:local` собираются локально и в реестрах не
   существуют: `docker pull` на чистой машине отдаёт `команда завершилась с кодом
@@ -118,6 +137,19 @@
 - Реестр — `backups/postgres/.tg-registry.json` (3 набора на базу), в
   hermes-state уезжает как `host/backups/tg-registry.json`.
 - Части обязаны быть ≤18 МБ (`TG_DOC_LIMIT`): `getFile` отдаёт не более 20 МБ.
+
+## Hermes после установки
+
+- Бинарь ищется в `/root/.local/bin/hermes`, `/root/.hermes/hermes-agent/.hermes/bin/hermes`,
+  `/root/.hermes/hermes-agent/hermes`; найденный линкуется в `/usr/local/bin/hermes`, иначе
+  из новой сессии команда не видна.
+- Гейтвей: user-юнит (`systemctl --user … hermes-gateway.service`) есть не всегда. Порядок —
+  `list-unit-files` → если юнита нет, `pgrep -f 'hermes gateway run'` → если процесса нет,
+  `nohup /usr/local/bin/hermes gateway run >>/var/log/hermes-gateway.log 2>&1 &`. Логи
+  гейтвея смотреть там же: без tty официальный установщик пишет часть ошибок только в файл.
+- После шага Hermes проверять не «команда отработала», а результат: `hermes --version` и
+  `pgrep -af 'hermes gateway'`. `check=False` на системных вызовах здесь — источник ложных
+  «готово» в итоговом отчёте.
 
 ## Проверенный drill (числа)
 
