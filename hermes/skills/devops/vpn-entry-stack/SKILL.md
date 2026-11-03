@@ -5,6 +5,10 @@ description: Use when editing or deploying the VPN entry stack.
 
 # VPN entry stack (VLESS over WebSocket + TLS)
 
+## When to Use
+
+Load this before touching anything that serves VPN clients: adding or removing a route, moving the public host or certificate, regenerating subscriptions, or answering a "VPN keeps dropping / no internet" report. Not for the AI services on the same host — that is `ai-stack`.
+
 The owner's home ISP (MTS, Krasnodar) drops **port 443** and kills **fake-TLS/MTProto** to this server's IP. What works is a *real* TLS handshake on a non-standard port. That single fact drives the whole design — verify it before debugging anything else.
 
 ## Layout
@@ -53,6 +57,14 @@ Never hand-edit the nginx confs — they are generated:
 
 `apply_brand.py` also emits `vpn-compat.conf` for every entry in `legacy_hosts`, each with its own certificate. That is what makes a host switch invisible to users: old subscriptions and links keep working, no re-import needed. Keep old hosts in `legacy_hosts` while their certs auto-renew.
 
+Prerequisites before pointing the entry at a new name:
+
+- The DNS record must exist and resolve from at least two public resolvers **before** certbot runs; HTTP-01 is issued through the port-80 ACME vhost, so a name that does not resolve yet wastes a validation attempt.
+- Under Cloudflare the record is **A → server IP with proxy OFF (grey cloud)**. The orange proxy terminates TLS at the edge, so our own certificate and the per-path WebSocket routing stop matching; Cloudflare does support 8443 if proxying is ever wanted deliberately, but that is a different setup, not a checkbox.
+- A brand-new registered domain has its own Let's Encrypt bucket, so moving the entry to it sidesteps an exhausted bucket on the old name (see Certificates).
+
+Verification after the switch, in one pass: `openssl s_client -servername <new host>` shows the new CN; `https://<host>:8443/` returns `200` and `/<path>` returns `400` (a WS inbound refusing a plain GET — that is the healthy answer); `/sub/<token>` returns `200` with the new host inside the links; a locally dialled Xray client gets a real egress IP; `check-host.net/check-tcp` on the entry port answers from most nodes. Keep `legacy_hosts` in place even when the old zone's DNS is dead — it costs nothing and revives old links if that zone comes back.
+
 ## Subscription
 
 `make_sub.py` renders three formats; nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. The response carries `profile-update-interval: 12` and a `profile-title` that depends on the token: `apply_brand.py` scans `/var/www/esmien-sub/*/kind` and emits `00-esmien-sub-title.conf` with `map $esmien_sub_token $esmien_sub_title` (whitelist token → `Esmien VPN (LTE)`, everything else → `Esmien VPN`) plus a matching `$esmien_sub_fname` map, so downloads are named `esmien-vpn` / `esmien-vpn-lte`. A new token inherits its title from its `kind` file — never hard-code the title in the nginx template, and never let two subscriptions share a display name: the owner tells them apart by the suffix.
@@ -74,6 +86,7 @@ The provider's expiry is in the `subscription-userinfo` response header of any s
 - `certbot_retry.py <host>` parses that hint, sleeps until `retry_after + 3–4s`, re-parses any newer hint, gives up only after 24 h. Log: `/var/log/certbot-retry.log`.
 - `provision_vpn_host.py <host>` wraps it and on success rewrites `brand.json`, rebuilds nginx + subscriptions, reloads, verifies.
 - Its final verification can print `000` if curl lands inside the reload window — re-check manually before believing the switch failed.
+- `qd.je` is a **free subdomain under someone else's registry**, and that is the deeper problem: its DNS is one provider's goodwill. Any name the entry depends on needs authoritative servers that actually answer — measure them (`dig` per NS, 5 tries each) before trusting a provider, and prefer an owned domain whose NS point at a large DNS host. Cheap registrars are fine for this (RU cards work, NS are editable); avoid giveaway TLDs that anti-spam filters already treat as hostile.
 - Wildcard `*.esmien.qd.je` needs DNS-01. DigitalPlat (DNS host, `dns1/dns2.digitalplat.org`) has no publicly reachable API (403/404 on guessed endpoints, paths built dynamically in panel JS), so automation needs either a dashboard token plus its docs or moving the zone to a DNS provider with an open API (deSEC).
 
 ## Upstream subscriptions (relaying nodes)
@@ -89,21 +102,7 @@ Pitfall: Xray evaluates routing top-down. Inbound rules appended at the end land
 
 ## Gemini / geo
 
-Gemini's country is Google's own lookup of the **connection IP**, not the country of a hoster's brand, not DNS, and not the city in ipinfo. Measure it, never guess — run `scripts/gemini_geo_check.py` (packaged with this skill, deployed at `/root/vpn-router/gemini_geo_check.py`):
-
-    python3 gemini_geo_check.py [socks5-host:port]
-
-The Gemini web template embeds Google's verdict in `this.gbar_={CONFIG:[[[0,"www.gstatic.com","<build>","<cc>","<lang>"` — that two-letter `<cc>` is the country Google assigns to the exit. Supported codes work, `ru`/`by`/`ir`/... show the stub. Confirmed cases on this host:
-
-- `138.124.58.x` (AEZA, Paris) → `fr` → works.
-- `77.221.152.x` (AEZA, Paris) → `ru` → stub. Same city, same ASN — the /24 differs.
-- Our own `141.98.166.213` (Tallinn) → `ru` → stub, even though the IP geolocates to Estonia.
-
-Why: Google's country follows the address *registration*, not the machine's location. Our block is `netname EE-HIP-…, country EE` but its RIPE org object is `Baykov Ilya Sergeevich, country RU, Moscow` — hence `ru` despite Tallinn. `77.221.152.x` is the same story (`Aeza-Network, FR` over `AEZA GROUP LLC, RU`), while the working `138.124.58.x` is a legacy `RIPE-ERX` block with no RU org. And `87.121.105.34` shows whois is not the whole answer either (whois SE, ipinfo FI, Google `ru`) — Google blends registries with geofeeds and observed traffic. So a Paris VPS can be "Russia" for Google, and a Tallinn VPS too. Buying an exit is a per-IP lottery: rent (hourly if possible), run the checker, keep only a supported code, otherwise destroy and try another provider/subnet. Two purchase-side rules follow from the whois evidence: prefer a provider whose RIPE/Aria org object is genuinely EU/US (a Russian org marks the whole block `ru` however the netname reads), and expect the big hosters (Hetzner, DigitalOcean, Vultr, OVH) to score badly because VPN resellers have burned their ranges for years — small hosters score better. Hetzner and Scaleway also refuse RU cards, so check payment before falling in love with a plan.
-
-"Smart DNS" services that unblock Gemini work by proxying the flows through their own IPs — DNS is only how they capture and redirect the domains. Changing resolvers alone cannot move the verdict, because the verdict follows the connection IP. Verified through one good exit: default resolver, Yandex DoH (`77.88.8.8`) and Google DoH (`8.8.8.8`) all returned the same `fr`; the bad exit returned `ru` under every resolver.
-
-Route Google domains *and* Google IP ranges through the FR exit and enable `sniffing`; a partial tunnel was not enough — the whole flow must leave through the good IP. IPv6 is the one leak that does flip the verdict, because Google then reads the real address past the tunnel: this host has **no global IPv6 at all** (no address, no default route, `curl -6` → `000`), the `direct` outbound is `UseIPv4`, and generated Clash profiles carry `ipv6: false` both top-level and in `dns` — so the stack itself cannot leak. The remaining vector is a client that bypasses the tunnel for v6; diagnose on the device with `test-ipv6.com` and switch IPv6 off in that client rather than hunting the server.
+Gemini's country is Google's own lookup of the **connection IP** — not the hoster's brand, not DNS, not the city in ipinfo. Measure with `scripts/gemini_geo_check.py [socks5-host:port]`; `fr`/`fi`/`de` work, `ru` is the stub. Our own Tallinn IP reads `ru` because Google follows the address registration, not the machine's location; a reseller's Paris IP can read `ru` for the same reason. "Smart DNS" cannot move the verdict — the verdict follows the IP that carries the flow, so route Google domains *and* IP ranges through the good exit with `sniffing` on. IPv6 is the only leak that flips it; this host has none and the generated profiles set `ipv6: false`, so look at the client, not the server. Full evidence, whois reasoning and exit-buying rules: `references/gemini-geo.md`.
 
 ## Whitelist mode (RU entry)
 
