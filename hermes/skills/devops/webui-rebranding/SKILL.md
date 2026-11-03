@@ -83,6 +83,27 @@ $CH --headless=new --disable-gpu --no-sandbox --hide-scrollbars --window-size=12
 
 `--virtual-time-budget` is what lets the SPA finish hydrating before the shot; without it the screenshot is a white rectangle. If Chromium dies on `libcups.so.2` / `libnss3` / `libgbm1`, install them (`apt-get install -y libcups2 libnss3 libatk-bridge2.0-0 libxkbcommon0 libxcomposite1 libxdamage1 libxrandr2 libgbm1 libpango-1.0-0 libcairo2`) — a one-time host dependency, not a reason to fall back to prose.
 
+## Client icon cache beats any rebuild
+
+A rebuilt image changes nothing on a device that already saw the old mark: browsers and OSes key icons by URL (iOS keys the web clip by page URL, and its icon DB survives "Clear History and Website Data" and deleting the home-screen icon). Prove the server is right before blaming it — download the served file and check the channel spread:
+
+```bash
+curl -s -o /tmp/ati.png https://ai.esmien.ru/static/apple-touch-icon.png
+/usr/bin/python3 - <<'PY'
+from PIL import Image
+im = Image.open("/tmp/ati.png").convert("RGBA")
+px = [p for p in im.resize((64, 64)).getdata() if p[3] > 100]
+spread = max(max(c) - min(c) for c in zip(*[p[:3] for p in px]))
+print("канальный разброс:", spread)   # 0..5 = монохром, >20 = цветной источник
+PY
+```
+
+When the bytes are correct, change the URLs: ship `apple-touch-icon-v2.png`, `favicon-v2.png`, `logo-v2.png` alongside the originals and point the app at the new names in the Dockerfile — `sed` `index.html` (`apple-touch-icon`, `rel="icon"` `favicon.png`) and `main.py` (`/static/logo.png`, which feeds the runtime manifest). Keep `&& grep -q` guards so a renamed upstream tag fails the build loudly. Serve those paths with `Cache-Control: no-cache` in the nginx vhost (`proxy_hide_header Cache-Control` first).
+
+Escalate in this order, cheapest first: new page URL (`?v=2`) for the web clip, full device reboot, and only then a fresh origin (new subdomain) — a new hostname is the one thing no client cache can survive.
+
+Also: `manifest.json` is generated in `main.py`, so `logo.png` padding must satisfy the **maskable** safe zone (content inside the central 80 %; 12 % padding, not 6 %) or Android's circular crop eats the tips of the mark.
+
 ## Rollback
 
 `ai/RESTORE_WEBUI.md`: compose backup `docker-compose.yml.bak.<ts>` restores the stock image, which is pinned by digest in that document; pre-change docker state snapshot in `webui-branding/_state_snapshot/` (`compose.diff.patch`, `branding.sha256`, container/image inspect). Updating the base image = pull `:main`, read the new `RepoDigests`, replace `ARG OPENWEBUI_BASE` in the Dockerfile, rebuild.
