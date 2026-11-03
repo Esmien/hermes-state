@@ -107,12 +107,20 @@ install.py --bot-token … --file-bot-token … --hermes-token …             #
 Шаги идут в фиксированном порядке, каждый идемпотентен:
 `preflight → packages → users → stack → secrets → bundle → fetch → postgres →
 network → images → migrate → restore → data → apps → notifications → beszel →
-units → hardening → tls → verify → health → hermes`.
+units → hardening → tls → verify → health → hermes → postcheck`.
 
 **Перед необязательным компонентом — два шага, не один.** `health` (контейнеры, HTTP,
 `webui_db`/`litellm_db`, Redis) валит прогон, если критичный сервис молчит; затем вопрос
 «Установить Hermes?» с дефолтом «да» (ответ «нет» → `/root/.hermes-skip`, позже
 `--only hermes --hermes`). Детали — `references/installer-pitfalls.md`.
+
+**Финальный шаг `postcheck`.** Ставит одноразовый `hermes-postcheck.timer` (`OnActiveSec`,
+по умолчанию `15min`, флаги `--postcheck-delay`/`--no-postcheck`): через 15 минут после
+развёртывания `hermes-postcheck.sh` гонит `hermes chat --query-file … --oneshot -Q --yolo`
+с промптом «проверь топологию» (контейнеры, HTTP, Postgres, nginx, TLS, таймеры, бэкапы,
+диск, гейтвей), шлёт отчёт владельцу через `hermes send -t telegram -f report.md` и сам
+себя выключает. Промпт обязан запрещать изменения (только чтение) и ограничивать отчёт
+25 строками — иначе агент пришлёт простыню.
 
 `--only`/`--skip` принимают имена шагов; неизвестное имя — ошибка.
 `--skip preflight` вместе со `stack`/`secrets` разрешён и печатает, что
@@ -360,6 +368,21 @@ https-коды доменов и число активных таймеров, �
   readiness-проверка и все SQL-вызовы падают на здоровой базе. При таймауте ожидания писать в
   лог `pg_lsclusters`, `systemctl status postgresql`, хвост `journalctl -u postgresql@<ver>-main` —
   по одной строке «не отвечает» причину не угадать.
+- **После восстановления состояния скиллы надо сверять, а не дополнять.** Официальный
+  установщик Hermes сеет десятки демо-скиллов (`slackbot`, `xurl`, `arxiv`, `automation`,
+  `general`, `software`); `restore_tree` их не удаляет, и в списке рядом с нашими висят
+  чужие. `quarantine_extra_skills()` после раскладки рекурсивно сверяет `~/.hermes/skills`
+  с восстановленным набором и переносит лишнее в `~/.hermes/skills_removed/<дата>/` (не
+  удаляет). Ожидаемый набор: 30 `SKILL.md` в 15 категориях, 5 категорий пустые; на Linux
+  не показываются `apple` (macOS-only).
+- **`--only hermes` без `--restore-hermes` ничего не восстанавливает.** Флаг выставлялся
+  только анкетой preflight, поэтому «дожать шаг» на уже собранной машине молча проверял
+  наличие бинаря и выходил. Теперь явный `--only hermes` означает «развернуть состояние»
+  (отключается `--no-restore-hermes`); в инструкции владельцу всё равно писать флаг явно.
+- **Вопрос из скрипта — только через `/dev/tty`, и двумя `open()`.** При `curl | bash`
+  stdin это труба (`input()` даёт EOF), а `open('/dev/tty','r+')` падает с
+  `UnsupportedOperation: not seekable`. Читать и писать отдельными хендлами; при
+  отсутствии tty возвращать дефолт. Перед вопросом закрывать панель прогресса (`PANE.finish()`).
 - **Токен — необязательный, но если он есть — с доступом к нужному репо.** Репозитории
   публичные, поэтому клон и реестр работают без токена; fine-grained токен, выданный
   только на `vps-infra`, на чужой приватный репо отвечает **404, а не 403**, и любой
