@@ -50,8 +50,9 @@ currently monitored», в `fail2ban.log` нет ни одной строки `Fo
 
 ## Rate limiting nginx
 
-Зоны объявляет `/etc/nginx/conf.d/zz-ratelimit.conf` (include раньше
-`sites-enabled`):
+Зоны объявляет `install.py` в `/etc/nginx/conf.d/zz-ratelimit.conf` (include раньше
+`sites-enabled`); на живом хосте после правок они лежат прямо в `/etc/nginx/nginx.conf`.
+Не верь пути из документации — найди файл: `grep -rn limit_req_zone /etc/nginx/nginx.conf /etc/nginx/conf.d/`.
 
 ```nginx
 limit_req_zone  $binary_remote_addr zone=llm_api:10m    rate=10r/s;

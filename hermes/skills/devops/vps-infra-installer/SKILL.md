@@ -59,7 +59,7 @@ units → hardening → tls → verify → hermes`.
 `python3-systemd`, пишет `/etc/fail2ban/jail.local` (sshd, `maxretry=4`/1ч, бан 1д,
 инкремент до 4 недель, `ignoreip` включает 10/8 + 172.16/12 + 192.168/16 — иначе
 забанит docker) и `/etc/nginx/conf.d/zz-ratelimit.conf` (`llm_api` 10r/s,
-`webui_api` 8r/s, `conn_per_ip`). `vhost_ssl()` добавляет лимиты по порту
+`webui_api` 8r/s, `conn_per_ip`) — **но 8r/s при `burst=30` мало для SPA**: одна загрузка Open WebUI стоит 40–60 запросов к `/api/`, второй F5 подряд уходит в 429 и страница выглядит «не открывается». На живом хосте поднято до `rate=20r/s` + `burst=120`; правя `install.py`, поднимай и там, иначе переустановка вернёт баг (`vps-network-exposure`, `references/fail2ban-and-rate-limits.md`). `vhost_ssl()` добавляет лимиты по порту
 бэкенда: 4000 — server-level, 8080 — только `location /api/` (статика без
 лимита, иначе F5 даёт 429 на чанках). Проверка: `install.py check` печатает
 `fail2ban: active` и `nginx rate-limit: да`.

@@ -75,6 +75,8 @@ Rules: names are plain country names with flags (`🇪🇪 Эстония (Gener
 
 URL shape: `https://<host>:8443/sub/<token>`. The port must be in the URL: plain 443 is blocked for the owner's ISP.
 
+**A `type: select` group is inert unless a rule points at the group, not at a node.** The generated Clash profile ends with `MATCH,<some concrete node>`, so everything unmatched goes there regardless of what the user taps; no rule references the `Esmien VPN` group, which makes the switcher a decoration that only takes effect in the client's GLOBAL mode. The same trap in reverse: anything placed **after** `MATCH` is dead code (a duplicated `IP-CIDR` block after `MATCH` ships silently and never evaluates). Before promising "he can pick a node in the app", search the generated profile (`search_files`) for rules referencing the group name, and end the rule list with `MATCH,<group name>` if the switch is meant to work. The fixed `MATCH,<node>` is the deliberate no-failover posture — changing it is a routing decision for the owner, not a bug fix.
+
 While the entry's DNS is unreliable, ship duplicate nodes addressed by bare IP: `vless(addr=<ip>)` / `clash_proxy(addr=<ip>)` with `server`/`sni`/`Host` still carrying the hostname, so TLS and the WebSocket routing stay valid without any resolver. Pair them with an `http://<ip>/sub/<token>` vhost as an emergency fetch path — that URL exposes the token to the transit provider, so it is a fallback, never the default.
 
 ## Subscription expiry

@@ -68,6 +68,14 @@ Prove it with `dig +short @1.1.1.1 new.example.ru` and `@8.8.8.8`, then delete t
 - Orange cloud terminates TLS at the edge: HTTP-01 answers `530`, per-path WebSocket routing stops matching, and the real client IP arrives only via `CF-Connecting-IP`.
 - CNAME cannot coexist with other records on the name and is not usable at the apex; the orange/edge proxy ports are limited to 80/443 and a handful of others.
 
+## Delegating a borrowed subdomain (rescuing an old zone)
+
+A subdomain you do not own can be moved to a DNS host you control — but **Cloudflare's free plan refuses subdomain zones** ("provide the root domain, not a subdomain"; subdomain zones are an enterprise feature). Free hosts that do accept one: **Bunny** (`kiki.bunny.net` / `coco.bunny.net`, has an API) and **Hurricane Electric** (`dns.he.net`, web UI only).
+
+Order matters, and getting it wrong produces the provider's rejection message rather than a DNS problem: **create the zone first, then set its NS at the parent.** Providers like DigitalPlat verify that the nameservers you entered actually answer authoritatively for the name — pointing them at a host that has no such zone returns "external nameservers are not yet authoritative for this domain" and looks like a propagation delay it is not.
+
+Say plainly that this is a stopgap: the name still belongs to whoever issued it, and their DNS dying is exactly what takes it down. Migrate users to the owned zone on your own schedule, not during their next outage.
+
 ## After a name change
 
 - Grep the whole host for the old name, not just nginx: `grep -rn '<old-host>' /root/deploy /home/ai_service --include='*.env*' --include='*.yml'`. A service answers `200` on the new vhost while its webhook, OAuth redirect or public URL still points at the dead name — the music bot was deaf for days this way. Re-register and confirm the provider's own state (`getWebhookInfo` → `pending_update_count=0`, no `last_error_message`).
