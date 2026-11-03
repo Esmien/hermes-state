@@ -49,6 +49,16 @@ docker compose up -d --force-recreate open-webui      # run backgrounded, then w
 - **`/static/favicon.png` is the in-app brand mark, not `logo.png`** — the sidebar renders it at **22 px** in both themes; `logo.png` only feeds the generated PWA manifest.
 - The manifest is generated at runtime in `backend/open_webui/main.py` from `WEBUI_NAME` with hardcoded `background_color: #343541` and the stock description; `/app/build/manifest.json` is literally `{}`. Brand colour is not wired into UI accents.
 - `<title>` is stock in the raw HTML and becomes `Esmien AI` only after hydration — a FOUC, not a broken rebrand.
+- **From 0.13.0 a welcome landing page greets unauthenticated visitors** on `/`: uppercase eyebrow, «Welcome to your AI home.», stock background video (`/assets/welcome.mp4`), mark taken from `/static/favicon.png`. The eyebrow is **hardcoded in the built bundle** (`_app/immutable/nodes/<hash>.js`, literal `>Open WebUI</div>`), so `WEBUI_NAME` never reaches it — `grep` for `Open WebUI</div>` finds 0 hits only because it is capitalised differently in the search, so search case-sensitively for the exact literal. sed it in the Dockerfile, guarded:
+
+  ```dockerfile
+  RUN for f in /app/build/_app/immutable/nodes/*.js; do \
+          sed -i "s|>Open WebUI</div>|>Esmien AI</div>|g" "$f"; \
+      done \
+   && ! grep -rq ">Open WebUI</div>" /app/build/_app/immutable/nodes/
+  ```
+
+  Leave the stock video and the corner mark alone: the owner's call is that a screen living ~1.5 s is not worth re-branding. Confirm `ESMIEN AI` on a screenshot, not in the bundle.
 
 ## Licence limit (hard constraint)
 
@@ -131,4 +141,22 @@ Prefer end-anchored `sed` on stable upstream strings plus a `&& grep -q` guard i
 
 ## Rollback
 
-`ai/RESTORE_WEBUI.md`: compose backup `docker-compose.yml.bak.<ts>` restores the stock image, which is pinned by digest in that document; pre-change docker state snapshot in `webui-branding/_state_snapshot/` (`compose.diff.patch`, `branding.sha256`, container/image inspect). Updating the base image = pull `:main`, read the new `RepoDigests`, replace `ARG OPENWEBUI_BASE` in the Dockerfile, rebuild.
+`ai/RESTORE_WEBUI.md`: compose backup `docker-compose.yml.bak.<ts>` restores the stock image, which is pinned by digest in that document; pre-change docker state snapshot in `webui-branding/_state_snapshot/` (`compose.diff.patch`, `branding.sha256`, container/image inspect). Updating the base image = pull `:main`, read the new `RepoDigests`, replace `ARG OPENWEBUI_BASE` in the Dockerfile, rebuild — but never on the live stack without the pre-flight below.
+
+## Upstream version bump — pre-flight, not straight to prod
+
+Every release can move a string we sed, and since 0.13.0 it adds brand surfaces of its own. Check the candidate image **before** the running stack sees it:
+
+```bash
+docker pull -q ghcr.io/open-webui/open-webui:vX.Y.Z
+docker inspect --format '{{index .RepoDigests 0}}' ghcr.io/open-webui/open-webui:vX.Y.Z
+docker run --rm --entrypoint sh ghcr.io/open-webui/open-webui:vX.Y.Z -c '
+  grep -n "Open WebUI)'" /app/backend/open_webui/env.py
+  grep -oE "href=\"/static/(favicon|apple-touch)[^\"]*\"" /app/build/index.html | sort -u
+  grep -n "static/logo" /app/backend/open_webui/main.py
+  grep -c ">Open WebUI</div>" /app/build/_app/immutable/nodes/*.js'
+```
+
+Then build the derived image against that digest with `--build-arg OPENWEBUI_BASE=<digest>`, tag it `:X.Y.Z-test`, run it on a spare loopback port (`127.0.0.1:8091`) with `-e WEBUI_NAME="Esmien AI"` and a throwaway `WEBUI_SECRET_KEY`, and screenshot it. A clean build only proves the seds matched; only the screenshot proves the brand still reads. Remove the test container afterwards, keep the image for the rollout.
+
+Full checklist — release notes, security fixes, irreversible migrations, backup, rollout and the post-upgrade verification: [references/upstream-upgrade.md](references/upstream-upgrade.md).

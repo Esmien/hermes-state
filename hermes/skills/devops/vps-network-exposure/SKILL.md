@@ -171,12 +171,21 @@ Full detail (rule ordering, UFW, DNAT, netns drill, gated changes) —
   На 24.04 action — `nftables`: баны в `nft list table inet f2b-table`, **не** в
   `iptables -S INPUT`. Детали —
   [references/fail2ban-and-rate-limits.md](references/fail2ban-and-rate-limits.md).
-- **nginx** (`/etc/nginx/conf.d/zz-ratelimit.conf`, include раньше
-  `sites-enabled`): зоны `llm_api` 10r/s, `webui_api` 8r/s, `conn_per_ip`. `llm.`
-  — server-level `burst=40 nodelay` + `limit_conn 20`; `ai.` — только
-  `location /api/`, `burst=30` + `limit_conn 30`, статика без лимита (иначе F5
-  даёт 429 на чанках). `limit_req_status 429`. В `vps-infra` этих конфигов нет —
-  после переезда их надо переприменять.
+- **nginx** (зоны в `nginx.conf`, `limit_req_zone … zone=webui_api rate=20r/s`):
+  `llm_api` 10r/s, `webui_api` 20r/s, `conn_per_ip`. `llm.` — server-level
+  `burst=40 nodelay` + `limit_conn 20`; `ai.`/`app.` — только `location /api/`,
+  **`burst=120`** + `limit_conn 30`, статика без лимита (иначе F5 даёт 429 на
+  чанках). `limit_req_status 429`. В `vps-infra` этих конфигов нет — после
+  переезда их надо переприменять.
+- **Burst считай по стоимости одной загрузки SPA, а не по «запросам в секунду».**
+  Один refresh Open WebUI — это 40–60 запросов к `/api/` (модели, папки,
+  аватарки, скиллы, сокет). `burst=30` выбирается одним открытием страницы,
+  второй F5 подряд уходит в 429, и владелец видит «сайт перестал открываться»,
+  хотя HTML отдаётся 200 и канал в порядке. Признак в логе: серия `429` на
+  `/api/models`, `/api/v1/folders/shared`,
+  `/api/v1/models/model/profile/image`, при нулевых `limiting requests` в
+  `error.log` (уровень warn пишется не туда, где его ищут). Лечится `burst=120`,
+  а не отключением лимита.
 
 ## VPN и общий 443
 

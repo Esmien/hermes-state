@@ -55,21 +55,31 @@ currently monitored», в `fail2ban.log` нет ни одной строки `Fo
 
 ```nginx
 limit_req_zone  $binary_remote_addr zone=llm_api:10m    rate=10r/s;
-limit_req_zone  $binary_remote_addr zone=webui_api:10m  rate=8r/s;
+limit_req_zone  $binary_remote_addr zone=webui_api:10m  rate=20r/s;
 limit_conn_zone $binary_remote_addr zone=conn_per_ip:10m;
 ```
 
-- `llm.` (`sites-available/llm.esmien.qd.je`): `limit_req zone=llm_api
+- `llm.` (`conf.d/llm.esmien.ru.conf`): `limit_req zone=llm_api
   burst=40 nodelay` + `limit_conn conn_per_ip 20` на весь server.
-- `ai.` (`sites-available/ai.esmien.qd.je`): лимит **только в `location
-  /api/`** (`burst=30`, `limit_conn 30`); статика (`/_app`, `/assets`,
-  `/static`) идёт через `location /` без лимита — иначе массовая загрузка
-  чанков при F5 даёт 429 и страница перестаёт грузиться. Правя конфиг, не
-  поднимай лимит на `/`.
+- `ai.` / `app.` (`conf.d/ai.esmien.ru.conf`, `app.esmien.ru.conf`): лимит **только
+  в `location /api/`** (`burst=120`, `limit_conn 30`); статика (`/_app`,
+  `/assets`, `/static`) идёт через `location /` без лимита — иначе массовая
+  загрузка чанков при F5 даёт 429 и страница перестаёт грузиться. Правя конфиг,
+  не поднимай лимит на `/`.
+- **Размер burst считается по цене одной загрузки SPA.** Открытие Open WebUI —
+  это 40–60 запросов к `/api/` разом (модели, папки, аватарки, скиллы, сокет),
+  поэтому `burst=30` выбирался одним refresh, второй F5 подряд попадал в 429, и
+  фронтенд застревал на пустой странице. Симптом со стороны владельца —
+  «сайт перестал открываться», хотя HTML отдаётся 200. Признак в логе: серия
+  `429` на `/api/models`, `/api/v1/folders/shared`,
+  `/api/v1/models/model/profile/image`; `limiting requests` в `error.log` при
+  этом может не быть — ищи по коду в access-логе, а не по сообщению.
 - `limit_req_status 429` (по умолчанию 503 — для клиента неотличимо от «упало»),
   `limit_req_log_level warn`.
-- Проверено: 60 параллельных → 37×200 / 23×429 на `ai/api`; 80 → 53×200 /
-  27×429 на `llm`; через 3 с снова 200; все контейнеры healthy, статика 200.
+- Проверено: 200 последовательных запросов на `/api/v1/config` после подъёма до
+  `rate=20r/s burst=120` → 200×200, ни одного 429; раньше на этом объёме отказы
+  начинались после тридцатого. Ботов лимит по-прежнему отсекает — они идут без
+  пауз, а ведро восстанавливается по 20 в секунду.
 - **В `vps-infra` этих конфигов нет** — `install.py` генерирует nginx-вхосты
   кодом (и добавляет лимиты по порту бэкенда). После переезда лимиты надо
   переприменять; кандидат на перенос в репо.
