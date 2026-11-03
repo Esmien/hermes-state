@@ -61,7 +61,7 @@ e2f836d92b721494a2dd993a035536a6108b714b9fa4e1840084232bc4ce5f39  ./hermes/skill
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 055726f7b857418c013c4062923acee90280a454d5f12be7760568160c0eba3e  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
 d49fd78d825e8b54685126619c61372e152081ff15cff668d835f446284c7036  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
-2bbd56db1295e2b1974a04c60eba5d3da515c02edb11e7b3dae19e7e3bd90ee8  ./hermes/skills/devops/ai-stack/references/disk-and-memory.md
+5eb4c09aedd786c6f843fc297ffb51726a3470843804c21340d658bf46cdcf0a  ./hermes/skills/devops/ai-stack/references/disk-and-memory.md
 81548cf239d36786d338994016df929475a5abe81057bbabd0f401f3b1d6905f  ./hermes/skills/devops/ai-stack/references/enricher-system-legacy.md
 4ca891acafa249bc7f4cab7c375b4f569cb7f48eae57651fe7edfd4e6133c703  ./hermes/skills/devops/ai-stack/references/enricher-system.md
 8cdb49eee81350e2f6614d24c8e4499efcada0974c9c8b4e163108e1afcb0b3e  ./hermes/skills/devops/ai-stack/references/litellm-model-db.md
@@ -94,7 +94,7 @@ b201d073a6374940cc7a90bf418f3af9f7d5315c67f3f633edcea78012fb8fed  ./hermes/skill
 c2990b8b3dc221c6a14b0909b40d37535cb58fe0d7f4ef50459ee672f4dfbc11  ./hermes/skills/devops/container-incident-response/SKILL.md
 244093d67fc1c519a82fe5fbd107a2cea7b8127de5d5e030001163f9bae0c53f  ./hermes/skills/devops/container-incident-response/references/agent-wakeup.md
 891b02a8d8af2ff6fe959e205bcb8a343270686135367050b673524c31c304e7  ./hermes/skills/devops/container-incident-response/references/detector-and-thresholds.md
-dbe445840ee9330e92fcc1cf8dbcd703b4e32769ca1ee4207bac0e760df5853e  ./hermes/skills/devops/credential-login-verification/SKILL.md
+cc7f2d5b7370ca1ee1dc061bea3a5e02c771b144dbcc3cdf588174393510e882  ./hermes/skills/devops/credential-login-verification/SKILL.md
 65af83d2307a43298474305685d6a0eec08114dfcc0e9ff299ea4c5735bccac9  ./hermes/skills/devops/credential-login-verification/references/open-webui-auth.md
 da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skills/devops/credential-login-verification/scripts/login-path-audit.sh
 31473060303004be1a3979c8b3245a04e68321ff8ffe808fd7f886a6741271e7  ./hermes/skills/devops/docker-compose-traps/SKILL.md
