@@ -3,6 +3,46 @@
 A drop report is answered with measurements, not with a guess. Prove the server end to end
 first; only then look at the client. Each step below produces a number you can quote.
 
+## 0. Resolution — check this before the tunnel
+
+If the client shows **every node as `n/a`** ("ping doesn't even leave") and the entry log holds
+**zero** packets from its IP — not few, zero — the fault is usually the name, not the tunnel. A
+browser on the same phone may still open the entry URL because it serves a cached record while the
+VPN app resolves fresh.
+
+```bash
+for r in 8.8.8.8 1.1.1.1 9.9.9.9; do echo -n "$r "; dig +short +time=4 @$r <host> A; done
+dig +time=5 @8.8.8.8 $RANDOM.<zone> A            # never-used name: proves it is not caching
+```
+
+Resolvers disagreeing (`SERVFAIL` at Google/Quad9, an answer at Cloudflare) means the zone's
+authoritative servers are failing, not that the record is missing — a missing record answers
+`NXDOMAIN` even for a random name. Get the NS list from the delegation itself with `dig +trace`
+(it can differ from what the provider's panel shows) and measure loss on each one:
+
+```bash
+for ns in dns1.provider.org dns2.provider.org; do ok=0
+  for i in $(seq 5); do [ "$(dig +short +time=2 +tries=1 @$ns <host> A | head -1)" = "<expected ip>" ] && ok=$((ok+1)); done
+  echo "$ns $ok/5"; done
+```
+
+A server answering 1–2 of 5 is the bug: validating resolvers collapse it to `SERVFAIL` for every
+client, while caches keep the last good answer alive — the exact "browser opens, app can't ping"
+split. Separately confirm the server itself is reachable (`check-host.net/check-tcp` on the entry
+port; a dozen answering nodes means only the name is broken, so stop suspecting the ISP).
+
+Mitigation while the zone is broken, both validated on this host:
+
+- add duplicates of the main routes with `address = <server IP>` while `sni`/`host` stay the domain,
+  so the certificate still validates — `make_sub.py` builds them as `<route> по IP`;
+- serve the same bundle over plain HTTP on port 80 keyed by IP (`server_name <ip>`, same
+  `$esmien_sub_*` maps) so a client that cannot resolve can still fetch a profile. Say plainly that
+  this exposes the token and is temporary.
+
+The durable fix is DNS-side: repoint the delegation to the NS that actually answers, or move the
+zone to a provider with a working API. A free DNS provider is a single point of failure for the
+whole entry; if its dashboard answers `403` from a datacenter IP, the owner has to change it by hand.
+
 ## 1. Server liveness
 
 ```bash
