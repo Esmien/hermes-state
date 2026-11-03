@@ -39,6 +39,11 @@ copy-paste блок; многошаговые «сначала склониру�
 curl -fsSL https://raw.githubusercontent.com/Esmien/vps-bootstrap/main/bootstrap.sh | sudo bash
 ```
 
+**Формат ответа во время серии падений.** Один экран: причина одной фразой → что
+поправлено → та же одна команда запуска. Без пересказа пройденных шагов, без
+списка «что мы уже сделали» и без инструкций из нескольких блоков — владелец в
+этот момент раздражён и читает только команду и вердикт.
+
 До запуска на машине лежит файл стартовых секретов (`/root/bootstrap.env`, иначе
 `/tmp/bootstrap.env` или `./bootstrap.env`; путь можно задать `VPS_BOOTSTRAP_ENV`):
 
@@ -135,7 +140,11 @@ units → hardening → tls → verify → hermes`.
    Дамп старше 72 ч требует `--force-stale`. Bundle кладёт дампы в
    `backups/postgres/`, свежесть — по mtime.
 3. **`:latest`-образы не обновляются**, если уже есть локально: повторный
-   install не должен молча менять версии. WebUI-образ собирается, если его нет.
+   install не должен молча менять версии. **Образ сервиса, у которого в compose есть
+   `build:`, не тянется из реестра — только собирается.** Такие теги (`esmien/webui:local`,
+   `esmien/open-terminal-arduino:local`) в реестрах не существуют, и `docker pull` на чистой
+   машине падает с rc=1. Список собираемых берётся из `docker compose config --format json`
+   (`compose_build_targets()`), `pull` идёт только по внешним образам.
 4. **Домен `bot.esmien.ru` — это lyria (бот с музыкой), не open-terminal.**
    Порт 8000 на хосте занят `lyria-bot`. open-terminal не публикует порт;
    health проверяется `docker exec open-terminal curl …/health`. Третий домен
