@@ -395,6 +395,12 @@ https-коды доменов и число активных таймеров, �
   `bad substitution` при клоне. Авторизация — заголовком:
   `git -c http.extraheader="Authorization: Basic $(printf '%s' "x-access-token:$TOKEN" | base64 -w0)"`;
   проверять не `bash -n`, а исполнением фрагмента с подставным токеном.
+- **Вопрос про Hermes не должен зависеть от флага `--hermes`.** Условие «спрашивать, только если
+  `args.hermes is None`» означало, что `bootstrap.sh`, который всегда передаёт `--hermes`, проходил
+  шаг молча — владелец видел установку агента без своего участия. Спрашивать всегда, кроме явного
+  `--no-ask-hermes` (для автоматизации); ответ «нет» пишет `/root/.hermes-skip` и выходит до
+  восстановления состояния. Проверка — под настоящим pty (`script -qec …`), а не в не-tty:
+  без терминала `ask()` молча возвращает дефолт «да», и пропуск вопроса выглядит как норма.
 - **`psql` по имени — это perl-обёртка `pg_wrapper`.** `/usr/bin/psql` →
   `/usr/share/postgresql-common/pg_wrapper`; под `sudo -u postgres` на минимальной ВМ она даёт
   `unable to execute /usr/bin/psql: Permission denied`, хотя кластер `online` и сервис `active
