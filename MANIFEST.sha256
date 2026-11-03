@@ -1,6 +1,7 @@
 2a4a654d1fff361215d5fc961ebb5dc4675d5fd5080c650e965146a6136bf6c6  ./.github/workflows/uptime.yml
 c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 35ea2ce6c35c5885147eb165aca14ed3ea94a6912fd2fb8dfe6fd7b323fc2ae8  ./hermes/SOUL.md
+683646459f25cdbbebebf48b674e0be4d96218b4032f7ab129bf0497bcf3f613  ./hermes/agent-hooks/ssh-only-gate.py
 358e637750ea544567b53870efe69154497d321a8061c49a154d3c00c33a194a  ./hermes/config.yaml
 6eb4dc9f0bd517710ba71f47b2e6459144a52b22cb1f31276b0da25f5db7139d  ./hermes/cron/jobs.json
 fc6079629f3f1a802f2e5fe13a6d730bf9deaebd20fc0043ac79e311901cec0c  ./hermes/memories/MEMORY.md
@@ -176,7 +177,7 @@ df8b07b07e5a51df7e28294323319ca4e945fa3a2e7d6291b24957f74109c937  ./host/bin/doc
 f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-guard-postgres.sh
 c146da46593b866352bc6bc439ee1e1cd21754c8818af7993ab140ea011f0954  ./host/bin/hermes-boot-notify.sh
 9c6388452c33f57d635ffbb36e318429fa22545a6e5a6f1d71551320a2678a1e  ./host/bin/hermes-history-backup.py
-ddea00476a2227423c118a45c748e6e7b426970b622d9d8a06928f55aa7a9d16  ./host/bin/hermes-state-backup.sh
+b8f7c9ca9783c86ee8049647f549867ff7d72731a8e146a07c09f0403601be31  ./host/bin/hermes-state-backup.sh
 5249aa0ba7bc85fb2cfaa7357d93c1bde4fc24b9182a71d8df08dbb90f65be5e  ./host/bin/hermes-state-watch.sh
 22ba3afdadc842431f74993b46827aa9513433b82e27810fba6be2304d2e45ff  ./host/bin/litellm-spend-retention.sh
 95655be1c140ce102c02ba9cb73bfea09457869d62419f64ef9677efc48ab087  ./host/bin/litellm-watchdog.py
