@@ -1,7 +1,9 @@
 # kb-sync — git → база знаний Open WebUI
 
-Автосинк четырёх репозиториев (`vps-infra`, `vpn-service`, `music_bot`, `hermes-state`) в базу знаний
-«AI Stack (auto)» (`kb_id` в конфиге). Цель: владельцу не нужно руками скачивать архивы и заливать папку.
+Автосинк четырёх репозиториев (`vps-infra`, `vpn-service`, `vps-bootstrap`, `hermes-state`) в базу знаний
+«AI Stack (auto) v2» (`kb_id` в конфиге). Цель: владельцу не нужно руками скачивать архивы и заливать папку.
+У `vps-infra` в конфиге стоит `exclude: ["assets/vpn"]`: там лежит побайтовая копия `vpn-service`
+(её обновляет автопуш infra-репозитория), и без exclude VPN-файлы попадали в базу под путём `vps-infra`.
 
 ## Файлы
 
