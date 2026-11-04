@@ -2510,4 +2510,5 @@ hooks:
       timeout: 10
       fail_closed: true
 command_allowlist:
+  - script execution via heredoc
   - sudo with combined-flag privilege escalation
