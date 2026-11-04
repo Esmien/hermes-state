@@ -35,11 +35,14 @@ Operator runbook for the same territory, with the per-container inventory: `/hom
 | Pause flag | `/var/lib/docker-autorecover/pause` |
 | Log (decisions, launches, reports) | `/var/log/docker-autorecover.log` |
 | Watchdog of the watchdog, 10 min | `docker-detector-liveness.timer` |
+| LiteLLM gateway watchdog, 60 s (also wakes an agent) + its own liveness check | `litellm-watchdog.timer`, runbook `litellm-fallout-triage` |
 | Disk / inode / backup-freshness alerts, 10 min | `/etc/cron.d/server-monitor` → `notifications/monitor.py alerts` (cron, **not** systemd) |
 | External uptime probe, 15 min | GitHub Actions `.github/workflows/uptime.yml` in `hermes-state` → Telegram + issue |
 | Operator runbook | `/home/ai_service/ai-stack/runbook-containers.md` §9 |
 
 Flow: timer → detector spots an anomaly → writes an evidence dir → `systemd-run` starts `docker-incident-<name>-<ts>.service` → that wakes `hermes chat` with the prompt → the report goes to Telegram from the shell script, not from the agent.
+
+The LiteLLM gateway has the same shape in its own pipeline (`litellm-watchdog.py` → `/var/lib/litellm-incidents/` → `litellm-incident-agent.sh`), because a healthy container can still serve zero model calls. Use `litellm-fallout-triage` for that one; this skill stays about Docker-level failures.
 
 ## Workflow when an incident is yours
 

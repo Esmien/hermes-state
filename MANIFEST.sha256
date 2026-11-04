@@ -92,7 +92,7 @@ b201d073a6374940cc7a90bf418f3af9f7d5315c67f3f633edcea78012fb8fed  ./hermes/skill
 57a2a5e8f2f2395dfb18a9a37ebed061a5272f43b7737f966462483ea4e03f2a  ./hermes/skills/devops/ai-stack/scripts/probe-media-endpoints.py
 5f28a41cf05b85f901f2eceb62a441d72fd71042ea7e992a578d2a8192e72982  ./hermes/skills/devops/ai-stack/scripts/probe-owui-terminal.py
 553accbaf6031aa7df7687b7ecb02213c8eba071b5226f0a974f230c07e86904  ./hermes/skills/devops/ai-stack/templates/mcu-assistant-system-prompt.md
-c2990b8b3dc221c6a14b0909b40d37535cb58fe0d7f4ef50459ee672f4dfbc11  ./hermes/skills/devops/container-incident-response/SKILL.md
+5644d9c0c424c8b962dc699ac7525adbcb976291309cf2d23dd1d7adb877be30  ./hermes/skills/devops/container-incident-response/SKILL.md
 244093d67fc1c519a82fe5fbd107a2cea7b8127de5d5e030001163f9bae0c53f  ./hermes/skills/devops/container-incident-response/references/agent-wakeup.md
 891b02a8d8af2ff6fe959e205bcb8a343270686135367050b673524c31c304e7  ./hermes/skills/devops/container-incident-response/references/detector-and-thresholds.md
 cc7f2d5b7370ca1ee1dc061bea3a5e02c771b144dbcc3cdf588174393510e882  ./hermes/skills/devops/credential-login-verification/SKILL.md
@@ -174,7 +174,7 @@ f3ca9e5152d2ccdda1de46baf415df59ae3b5abd560704d10296579035a8ffe6  ./host/ai-stac
 d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md
 846efb23aba0d86ee3b1086edc19cb47f2cb07426875cfeaaca852f62c8a811f  ./host/ai-stack/runbook.md
 6dd2dab1edc936f098eb65bd2932d38d4c4696ef111e1094f74156e0be9ea1c5  ./host/backups/tg-registry.json
-7cac890fcc48be6cfc3efe302dbab2d018074c270a15481e99b2c464be278184  ./host/bin/docker-detector-liveness.sh
+5ce78d5d8683dfb6500dbc4b2b8f93feb806cf0974322076693d7ac066b032a9  ./host/bin/docker-detector-liveness.sh
 df8b07b07e5a51df7e28294323319ca4e945fa3a2e7d6291b24957f74109c937  ./host/bin/docker-incident-agent.sh
 ec6676d1e7be69864c893f6fd16c13a4dd394765d053b1230387ba84a8da1f26  ./host/bin/docker-incident-detector.py
 f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-guard-postgres.sh
@@ -183,7 +183,7 @@ f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-
 b8f7c9ca9783c86ee8049647f549867ff7d72731a8e146a07c09f0403601be31  ./host/bin/hermes-state-backup.sh
 5249aa0ba7bc85fb2cfaa7357d93c1bde4fc24b9182a71d8df08dbb90f65be5e  ./host/bin/hermes-state-watch.sh
 249ff939ae185cf37c91ef7bdcc926518767213c964e952180be17ab4bfb7377  ./host/bin/litellm-spend-retention.sh
-978fe66ded1340dd7336cac802b57a32420886377890ead91ec2eeff6857eed0  ./host/bin/litellm-watchdog.py
+528803b4b549b524245525698d60bb188f847818332070a95afd3307a38c41aa  ./host/bin/litellm-watchdog.py
 a87e4db1c389f6fb3c41b1dc4dfd0b08e9a969db61e6a2bae46e23cfc4a0f316  ./host/bin/owui-signup-approver.py
 7128ae03df8813658538e9ba264f8e30ab1899b067591eb7df7ddb405a4b4420  ./host/bin/searxng-quality-check.py
 20e3fc7694ca3ccc7ff51882a8cd7fd933a7d7c734fec66f5c1dbc9bdcee2f5c  ./host/bin/secrets-offsite-backup.py
