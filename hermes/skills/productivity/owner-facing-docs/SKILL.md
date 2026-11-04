@@ -33,6 +33,8 @@ Ask or decide from the request, and say which one you wrote:
 
 - **For him** (profile, status, «что ты обо мне знаешь») — full internal detail is fine: hosts, container names, numbers, paths.
 - **«Показать другому»** — redact anything that identifies or exposes the contour: no IPs, domains, paths, container names, service names that map to his infra, no tokens (ever), no internal file names. Keep the engineering substance — what runs, what it survives, what it costs to restore. He may hand this to a colleague, a client or an employer, so assume it leaves the machine.
+- **Never the fabricated-employer history in a redacted document.** The internal profile states it honestly once; a file that may leave the machine must not, because honesty with him is not the same as handing a third party evidence against him. Leave it out and say in the chat reply that you left it out and why — silence on the point looks like an oversight.
+- **Combined requests are normal.** «Кто я и что у нас на сервере, чтобы прочитал другой человек» is one file, not two: the audience rule wins (redacted infra), a short who-he-is section opens it, and the system-overview skeleton carries the rest. State which audience you wrote for, and offer the internal version.
 - **For a hiring funnel** — the document is not the artifact that gets him hired; code, tests and three written cases are. Say that plainly instead of polishing the document.
 
 ## Shape that works for a profile / status document
@@ -83,5 +85,16 @@ himself after seeing the redacted one.
 - **A long document is fine; a padded one is not.** Depth comes from verified numbers and named limits, not from restating the same point in three sections.
 - **Do not narrate the session.** «Я добавил, я поправил, я проверил» belongs in the chat reply; the document describes the system as it stands.
 - **Correct your own earlier claims inside the document.** If a previous version called something a gap and it turned out to be covered, say so in a line — he notices, and silent reversal reads as sloppiness.
-- **Attach, do not paste.** Write the file and send `MEDIA:/abs/path.md`; a 20 KB document pasted into chat is unreadable on a phone.
+- **Attach, do not paste — and know which channel intercepts the tag.** A 20–50 KB document pasted into chat is unreadable on a phone. In a messaging session a `MEDIA:/abs/path.md` line is the delivery; in a **CLI session nothing intercepts `MEDIA:`** (it prints as literal text), so upload through the file bot with the same helper the backup timers use:
+
+```bash
+cd /home/ai_service/notifications && python3 -c "
+import sys, os; sys.path.insert(0, '/home/ai_service/notifications')
+from pathlib import Path; import monitor
+r = monitor.send_document(os.environ['FILE_BOT_TOKEN'], os.environ['BOT_OWNER'],
+                          Path('/root/doc.md'), caption='short caption')
+print(r.get('message_id'), bool(r.get('file_id')))"
+```
+
+  `monitor` loads `notifications/.env` on import, so no secret is typed or printed; a non-empty `file_id` in the return is the receipt (message_id alone only proves the send was accepted). A text document is far under the 50 MB upload limit, so no chunking is needed.
 - **New file when the old one should stay.** If he asks to «собрать новый», write a new path instead of overwriting; overwriting a file this session never read is refused by the writer anyway.

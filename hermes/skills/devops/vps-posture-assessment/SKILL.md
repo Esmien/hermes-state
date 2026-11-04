@@ -26,7 +26,7 @@ Companion skills: `ai-stack` (what is inside the AI stack, and the backup verifi
    `hostnamectl`, `lscpu | grep -E "Model name|^CPU\(s\)"`, `free -h`, `swapon --show`, `df -hT | grep -vE "tmpfs|overlay"`,
    `uptime`, `docker ps --format ...` + `docker stats --no-stream`, `docker system df`,
    `ss -tulpnH`, `systemctl list-unit-files --state=enabled`, `systemctl list-timers`,
-   nginx vhost names in `/etc/nginx/sites-enabled/` + grep `server_name|listen|proxy_pass`, `certbot certificates | grep -E "Domains|Expiry"`,
+   nginx vhost names — they live in `/etc/nginx/conf.d/*.conf` on this host and `sites-enabled/` is empty, so listing it alone reads as «сайтов нет»; grep `server_name|listen|proxy_pass` there, `certbot certificates | grep -E "Domains|Expiry"`,
    `sudo -u postgres psql -Atc "select datname, pg_database_size(...)"`, `du -sh /* /home/* /var/lib/docker`.
    Private addresses and DB sizes are fine to print; `.env` values, tokens and keys never are.
 2. **Map every claim to its own evidence.** Защита = порты + аутентификация + файрвол/стражи + что за периметром.
@@ -73,9 +73,10 @@ Companion skills: `ai-stack` (what is inside the AI stack, and the backup verifi
   `AttributeError: module 'lib' has no attribute 'GEN_EMAIL'` while the same binary works from a clean
   environment and from `certbot.timer`. Unset the variable before declaring a system tool broken.
 - **The external eye does exist — check it before saying «мониторинга снаружи нет».** `.github/workflows/uptime.yml`
-  in the private `hermes-state` repo probes ai/llm every 15 min from a GitHub runner and messages Telegram on
+  in the private `hermes-state` repo (live clone at `/var/lib/hermes-state/repo`, not `/root/hermes-state`) probes ai/llm every 15 min from a GitHub runner and messages Telegram on
   up→down / down→up transitions (state in an open `uptime` issue). `deadman-ping` (healthchecks.io) is the
   unconfigured second contour, and wiring it needs the owner's account URL.
+- **Quote swap in use, not `free`'s «available».** `free -h` shows a comfortable 4.5 GiB available because page cache counts as reclaimable, while the swap file holds ~1.9 GB of 4 — the swap figure is the honest statement of the memory margin and the number that belongs in a document. Name it as a thin margin, not as an outage to fix.
 - **`docker system df`: read the `RECLAIMABLE` column, not TOTAL.** 13.89 GB of build cache with 43 MB
   reclaimable is not «17 GB можно освободить без потерь» — pruning costs a full rebuild of `esmien/webui`
   and the arduino sandbox (6–10 min of the RTO).

@@ -140,7 +140,7 @@ fe6241ba003a9ed5822b33b762b1a506e5a31dfc0e59f25419f87e41934346a0  ./hermes/skill
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
 6089d1d7d5f1cc59b77d4147ea1b2b404175cec3888f095d4bc6e049f2f8391d  ./hermes/skills/devops/vps-network-exposure/scripts/faketls-probe.py
 5e780432952150f90883eff45349e648ab6e3417334b171b7d4215fd1f798ff3  ./hermes/skills/devops/vps-network-exposure/templates/vpn-subscription-generator.py
-ef27f8dcae99ba6b8b38ce1f78521c87132ef8ea9df94aebccf501fd22616dae  ./hermes/skills/devops/vps-posture-assessment/SKILL.md
+d00c4445ffe11d0bbc379116c4d64efe2b9f701f7d2f51f85666ce35fa79d490  ./hermes/skills/devops/vps-posture-assessment/SKILL.md
 d1a75067b4341cc720e209bb7494010cd07d291b625f9924e6240fdf9823e2af  ./hermes/skills/devops/vps-posture-assessment/references/recovery-rto.md
 ee4da44acd0fa13e9866411ecb0a8bcdbf1f810dd3971d07506d8738ecaf6856  ./hermes/skills/devops/webui-ios-icons/SKILL.md
 31b7fd4518ab99d3c7627399f42117eb447791a833605950c6b7bdff52235301  ./hermes/skills/devops/webui-rebranding/SKILL.md
@@ -150,7 +150,7 @@ c27bb2f0f3acd71771de1e7dc2ec27311dced72cbdf3989577c6907928e52645  ./hermes/skill
 fb28a609372460b2788d3b7dbc551985d24d4042057971f4d6345144d2d78caa  ./hermes/skills/note-taking/DESCRIPTION.md
 7aea4e8f89f94ab2876d79898d10a5d4cdab31390c53f72ad6934b071179f826  ./hermes/skills/note-taking/obsidian/SKILL.md
 b5a494a45bfd430bfb3042ee0452a6b88c81481f147ce7fca2c29ed3e93c490a  ./hermes/skills/productivity/DESCRIPTION.md
-a9ee01440ec0e49fb3b8431de06ef59b24dbecb1dd67d9dc0f8e0ddaf04c5b6c  ./hermes/skills/productivity/owner-facing-docs/SKILL.md
+503e99ef1879d6003d3d670d0009c459aa3648848b28c5471b9de770349c686a  ./hermes/skills/productivity/owner-facing-docs/SKILL.md
 a7bc842330a491de5f73cd63e87521e53724d94d4f53949bfa2171beb8200e18  ./hermes/skills/research/DESCRIPTION.md
 e5f2f984b0f6fe22509e84f12877713bedfb3630f13271980b4dfb057d023a98  ./hermes/skills/research/city-relocation-report/SKILL.md
 88f39db6527b8984a0a4d27a1d66f64f0ae0b4e9fcbff3a10180f8fe85a8357e  ./hermes/skills/research/product-vendor-recon/SKILL.md
