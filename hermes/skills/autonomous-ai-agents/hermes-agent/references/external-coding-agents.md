@@ -61,6 +61,18 @@ opencode acp                 # ACP server, for ACP-capable editors
 - **Sandbox the fixer**: git worktree on its own branch, no docker socket, no
   write access to the production tree, a timeout. It emits a diff; it never
   deploys. Validate with `git apply --check` before presenting the patch.
+- **Never run it as root on a live host.** The brakes are properties of the
+  Hermes agent, not of the machine: the `pre_tool_call` gate (ssh-only for a
+  guest), the destructive-action confirmation rule, the output caps and the
+  secret-masking rules all live in the Hermes process. A coding agent launched
+  as root inherits the privileges and none of the brakes — it will not ask
+  «выполняем?» before `docker compose down` or an iptables edit. Run it as an
+  unprivileged user, in a container without the docker socket, scoped to one
+  project directory.
+- **No proof, no result.** A worker's own summary is not evidence: «я убрал всё
+  лишнее, стек теперь ест 1 ГБ» describes a stack that may no longer exist.
+  Demand the diff plus live-state output (`docker ps`, `systemctl status`,
+  `df -h`) and check it yourself before accepting the work.
 - Never let it run a deploy script that restores databases by default.
 
 ## Process hygiene for probes

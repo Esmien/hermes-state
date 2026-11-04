@@ -96,7 +96,7 @@ Profiles use `~/.hermes/profiles/<name>/` with the same layout. When a profile i
 | In-session slash commands | `references/slash-commands.md` |
 | Provider setup, API keys, OAuth | `references/providers-and-models.md` |
 | A prompt/persona that must apply to ONE model only, "промпт к отдельной модели" | `references/per-model-system-prompts.md` |
-| config.yaml sections, skills enable/disable, toolsets, voice/STT/TTS | `references/configuration.md` |
+| config.yaml sections, skills enable/disable, toolsets, voice/STT/TTS, tone/persona (`SOUL.md`, `/personality`), memory char budget | `references/configuration.md` |
 | How skills are chosen/loaded, why a skill never fires, catalog vs disk count | `references/skills-loading.md` |
 | Hard gates on dangerous actions: `pre_tool_call` hooks, fail-closed, state that survives `/new` | `references/agent-guardrails.md` |
 | Restricting ONE gateway user (guest/colleague) to a subset of tools or commands — «он в аллоулите, но только ssh»; also load it whenever a hook must know WHO is asking, because the hook payload carries no platform user id | `references/per-user-access-control.md` + `templates/ssh-only-gate.py` |
@@ -207,6 +207,15 @@ terminal(command="tmux new-session -d -s resumed 'hermes --resume 20260225_14305
 - **"delegate_task is capped at N" reports** — see `references/delegate-task-concurrency-diagnosis.md`. Three real cap paths in Hermes; if none fired, the model is self-limiting and rationalising it as "the runtime caps."
 - **"Can $external_app use my Nous Portal subscription / OAuth?"** — see `references/portal-auth-for-third-party-apps.md`. Walk the user through three layers (plugin-vs-app, what Portal actually exposes, local-broker-proxy option).
 - **Delegating to an external coding agent (opencode/Codex/Claude Code)**, or judging whether the integration is worth it — see `references/external-coding-agents.md`. Headless invocation, measured footprint, the `MemoryMax` cap, and the sandbox rules for unattended fix runs.
+
+### Choosing the cheapest mechanism
+
+When the owner asks «завести под это профиль / саба / отдельный чат?», walk this ladder and stop at the first rung that fits — extra machinery is usually the wrong answer:
+
+1. **Behaviour, tone, procedure** → a skill or `SOUL.md` in the CURRENT profile. Same host access, same repo, same memory, zero setup.
+2. **Work that genuinely needs its own memory, bot, or model route** → a separate profile (`$HERMES_HOME/profiles/<name>/`), and only once sessions actually drown in mixed context.
+3. **Work that is parallel, long, and cheaply verifiable** (bulk research, tests for N modules) → `delegate_task`; long coding missions → an external agent in a worktree (`references/external-coding-agents.md`).
+4. **Anything on a live host** → none of them. A subagent is a second operator with the same privileges and none of the confirmation gates, not an extra capability.
 
 ## Surfaces (quick orientation)
 

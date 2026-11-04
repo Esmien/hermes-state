@@ -110,6 +110,29 @@ from agent.skill_utils import get_disabled_skill_names; from tools.skills_tool i
 print(len(get_disabled_skill_names()))"
 ```
 
+## Persona & tone
+
+Three levers, cheapest first:
+
+| Want | Use | Notes |
+|---|---|---|
+| standing style for every session | `$HERMES_HOME/SOUL.md` | plain-text persona prepended to the system prompt; the right home for tone |
+| a whole different character for one session | `/personality <name>` | built-ins in `hermes_cli/personality.py` (`concise`, `technical`, `teacher`, `kawaii`, `catgirl`, `pirate`, …); custom entries added or an existing one overridden in `config.yaml → personalities:`; the active choice is stored in `display.personality` |
+| one-off ("шути больше") | the message itself | dies with the reply — never treat it as durable |
+
+- **Back up `SOUL.md` before editing** (`cp -a SOUL.md SOUL.md.bak-<reason>`) and write the rule as a terse imperative sentence — it is read as a standing instruction, not as conversation.
+- **Tone edits land only on the NEXT session.** The system prompt is assembled per session, and rewriting it mid-conversation invalidates the prompt-cache prefix. Making the edit and testing it in the same session proves nothing — tell the owner `/new` explicitly.
+- **Prefer `SOUL.md` over a personality for a working profile.** A personality replaces the persona wholesale (a `catgirl` admin is a liability); `SOUL.md` adds to the baseline.
+- **A stylistic permission without a frequency cap becomes a performance.** Unbounded "be funny / be warm / use emojis" makes every reply perform it, and the substance gets rationed to fit the joke. Pair every allowance with (a) a per-reply budget ("at most one line"), (b) the places it is skipped — short factual answers, incident reports, destructive-action confirmations, security warnings. This owner's calibration: dry one-liner at most, never at the expense of the verdict.
+- The existing `SOUL.md` in a working profile already carries the owner's baseline (direct, length proportional to the ask, no filler, plain claims). Extend that text; do not replace it with a fresh persona.
+
+## Memory budget
+
+- Limits live in `config.yaml → memory.memory_char_limit` (2200) and `memory.user_char_limit` (1375), counted in **characters**. The on-disk `$HERMES_HOME/memories/*.md` are UTF-8 **bytes**: Cyrillic costs 2 bytes per char, so a full 2200-char budget reads as ~3–4 KB under `wc -c`. Diagnose from the memory tool's usage line, never from file size — "память сдохла" is usually just a full budget.
+- When the tool reports near-full, work in this order: **dedupe/merge duplicate entries → migrate detail into a skill and leave a one-line pointer → raise the limit last.** Memory is injected into every request: it costs tokens every turn and, worse, each line is read as a standing instruction, so a fat memory turns trivia into policy and the agent loses the ability to prioritise.
+- Batch the edits into ONE `memory` call (remove + replace + add together). It applies atomically against the final budget, so a merge that frees space and the new entry land in the same transaction; separate calls get rejected for overflow.
+- Duplicate subscriptions/credentials entries are the usual bloat: keep one merged entry per subject (plan, route, credential path), not one per conversation that mentioned it.
+
 ## Voice
 
 ### STT (Voice → Text)

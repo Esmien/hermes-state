@@ -19,6 +19,8 @@ Same umbrella covers his **test assignments (take-home)**: he links a repo (usua
 
 Also covers the **market question**: «а есть ли сейчас спрос на X», «стоит ли мне переучиваться», «проверь это направление». Do not answer from general knowledge — count real vacancies and read real requirements (`references/market-demand.md`), then map the findings onto his profile in the same reply.
 
+His hh resume carries **invented employers and dates** (СКБ Контур, Банки.ру). He knows and admits it; he wants the honest verdict on the risk of a tenure check, and he does not ask for the history to be polished toward senior. Never moralise — advise on exposure and on what to do if it comes up.
+
 ## Answer shape — verdict first
 
 Telegram, Russian, bullets (no tables), no preamble, no flattery.
