@@ -20,6 +20,8 @@ Open WebUI, SearXNG, open-terminal, Redis, Nginx + Certbot, бэкапы,
 Telegram-мониторинг, в конце — Hermes (хостовый режим).
 
 Репозиторий: `github.com/Esmien/vps-infra` (**публичный**, секретов внутри нет).
+План перевода установщика на модули-профили (`core` / `agent` / `full`) и карта зависимостей
+стека — `docs/modules-plan.md`; в нём же открытые вопросы, которые решает владелец, а не агент.
 Публичная точка входа для `curl | bash` — отдельный репозиторий `Esmien/vps-bootstrap`,
 в нём лежит только `bootstrap.sh` и README. Оба репозитория читаются без токена: клон идёт
 по обычному https, реестр `file_id` берётся из `raw.githubusercontent.com`, а не из GitHub API
