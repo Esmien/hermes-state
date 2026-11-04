@@ -193,6 +193,7 @@ Two hard rules from this stack:
 - `references/searxng.md` — **SearXNG (web search backend)**. Read when web search returns junk, engines get banned, or the image is upgraded.
 - `references/memory-troubleshooting.md` — **Container memory attribution**. Read when asked "what is eating the RAM" — numbers before causes.
 - `references/upstream-release-review.md` — **Reviewing an upstream release**. Read before applying any version bump; never update unprompted.
+- `references/kb-sync.md` — **git → база знаний Open WebUI**: `kb-sync.py`, таймер раз в 2 часа, протокол `sync/diff` и грабли (общий манифест, дубли контента, пустые файлы).
 - `references/operations.md` — **Operations drills** (recreating a container after a config edit, routine checks).
 - `references/repo-hygiene.md` — **Git hygiene for `ai-stack`** (what must never be committed, commit shape).
 - `references/owui-admin-auth.md` — **Open WebUI admin auth** (`UI_PASSWORD` is LiteLLM's, not WebUI's).

@@ -56,7 +56,7 @@ ac2da2b39f1c355bc76bf35b2cd9e74131ea62030f89781fe82c53ee0b4f029e  ./hermes/skill
 acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skills/career/job-application-review/references/repo-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-136e81aad3f36dead0beb96d6262d92ba90c95809b74f67db5e9fbd083c5bb83  ./hermes/skills/devops/ai-stack/SKILL.md
+e6b1a1a492f2ed8794c59b38834512434c3b0d9c2b423343c2f6e56639784356  ./hermes/skills/devops/ai-stack/SKILL.md
 e2f836d92b721494a2dd993a035536a6108b714b9fa4e1840084232bc4ce5f39  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 055726f7b857418c013c4062923acee90280a454d5f12be7760568160c0eba3e  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
@@ -64,6 +64,7 @@ d49fd78d825e8b54685126619c61372e152081ff15cff668d835f446284c7036  ./hermes/skill
 5eb4c09aedd786c6f843fc297ffb51726a3470843804c21340d658bf46cdcf0a  ./hermes/skills/devops/ai-stack/references/disk-and-memory.md
 81548cf239d36786d338994016df929475a5abe81057bbabd0f401f3b1d6905f  ./hermes/skills/devops/ai-stack/references/enricher-system-legacy.md
 4ca891acafa249bc7f4cab7c375b4f569cb7f48eae57651fe7edfd4e6133c703  ./hermes/skills/devops/ai-stack/references/enricher-system.md
+b0f547c4ffb6465d3ccfbd03cabd193a23086557ec663d3ced1e6963a582d483  ./hermes/skills/devops/ai-stack/references/kb-sync.md
 8cdb49eee81350e2f6614d24c8e4499efcada0974c9c8b4e163108e1afcb0b3e  ./hermes/skills/devops/ai-stack/references/litellm-model-db.md
 ab95b4ac1ada135d305e22e973f2db9fb96e8be86549eca51bb3c7d1c649d066  ./hermes/skills/devops/ai-stack/references/media-pipeline.md
 f8e128849a7415e8960053cc090fa4d6b95cfa5a660e91c753fa30d14be26142  ./hermes/skills/devops/ai-stack/references/memory-troubleshooting.md
