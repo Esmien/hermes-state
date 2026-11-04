@@ -51,6 +51,32 @@ His real asset is a **live production contour on his own VPS** — LiteLLM gatew
 
 He is also pushing a **second framing, and it is the stronger one today**: «обычные бэкендеры не нужны, нужны AI-разработчики» — people who ship working code with agents, integrate external model providers and orchestrate autonomous agents. The agent-oriented ads ask for exactly what his contour already does (MCP tools, tool calling, context management, multi-step scenarios, multi-provider LLM routing, planning/orchestration), so lead with «Python/AI-разработчик, агентные системы» and keep infrastructure as evidence, not as the headline. Do not sell it as a bypass of the years-of-experience filter — say that once and move on. How to measure the demand instead of guessing, and the vocabulary the ads actually use: `references/market-demand.md`.
 
+## Career-direction verdicts («я девопс или разраб?», «стоит ли учить X?»)
+
+Same advisory work as a vacancy review, with a label instead of a posting read. Verdict in the first line — «разработчик с сильным инфра-уклоном», never «или/или» — then split the evidence in two: **есть, но недоказано** (код без команды, ревью, легаси, нагрузки) и **глубина есть, ширина нет** (инфра на одной ноде, без k8s/IaC/публичного облака). Close with what to do next, ranked.
+
+- Judge against the **hiring funnel**, not his self-image: what a screener actually checks. «На DevOps не возьмут» он принимает только когда названа причина (одна нода, нет оркестрации, нет IaC) — называй её.
+- **Never** list his deliberate choices as deficiencies (Prometheus off, no key limits, no fallbacks). If a deliberate choice really blocks a market, phrase it as missing *market* experience with X, not as a hole in his contour.
+- Investment advice gets an **ROI ranking**, cheapest/most-differentiating first, one reason per line. For agent-oriented roles the order is: **evals + tracing** → один публичный агентский кейс с цифрами (тикетов/день, ₽ за прогон, точность) → MCP-сервер над своим стеком → k8s **последним**.
+- Titles are marketing, not professions. «AI-driven разработчик» без одного кейса, выраженного как результат+число, ничего не продаёт — сказать это один раз и перейти к артефакту.
+- **k8s — это галочка про доставку, а не дифференциатор**: агентским ролям нужна оркестрация моделей/инструментов, изоляция прогонов и контроль стоимости, а его прод живёт на compose. Оправдан только если вакансия называет его; тогда выходные на k3d закрывают вопрос.
+
+### Before promising a local k8s cluster
+
+Probe the host first — the result decides k3d vs k3s vs «нужен внешний VPS»:
+
+```bash
+nproc; free -h; df -h /; swapon --show
+ls -l /dev/kvm; systemd-detect-virt        # нет /dev/kvm → локальных VM не будет
+docker info --format '{{.Driver}} {{.CgroupVersion}}'
+docker stats --no-stream --format '{{.Name}}\t{{.MemUsage}}' | head -20
+```
+
+- **k3d** (k8s в Docker, `k3d cluster create --agents 2`) — дефолт: настоящий kubectl/планировщик/Helm/PVC, живёт внутри Docker, сети хоста не трогает, сносится одной командой. Бюджет ~1–1.5 ГБ RAM.
+- **k3s на хосте** — только если он хочет «настоящую» ноду и есть свободная RAM: ~0.6–1 ГБ, и flannel переписывает iptables/маршруты — на этом хосте это риск для VPN-роутера и mtproto-контейнеров. Предупредить до установки, не после.
+- Нет `/dev/kvm` (сам гость KVM) убивает план «VM на ноду» — не предлагать libvirt/Talos в VM.
+- Честный мультинодовый лаб = два дешёвых VPS в РФ (Timeweb/Aeza/RUVDS) под WireGuard; для интервью это сильнее бесплатного ящика, потому что этим он **управляет**, а не пользуется.
+
 ## Hard rules about experience
 
 - **He has no commercial development experience.** Earlier resume versions listed invented employers and dates; he admits this himself and calls his level middle. Do not rewrite, thicken, or defend that history, do not reopen gaps in it, and do not rehearse answers for it.

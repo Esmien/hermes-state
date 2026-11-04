@@ -51,7 +51,7 @@ a63c8f879756854b45373f5d6b1ae0a7fefcdd4a5af840be8a60d83b64724744  ./hermes/skill
 bc8fddd7e5373b074c1c7dd423bb59d6e04769977e8a18354e3a6b3983209994  ./hermes/skills/autonomous-ai-agents/hermes-agent/templates/skin.yaml
 0c3041ebcc9e5d994e5faab572b72017eeab091e374a721800fc79a163e2d9d2  ./hermes/skills/autonomous-ai-agents/hermes-agent/templates/ssh-only-gate.py
 ac2da2b39f1c355bc76bf35b2cd9e74131ea62030f89781fe82c53ee0b4f029e  ./hermes/skills/career/hh-vacancy-research/SKILL.md
-694340fdf02e1bc3dd459849c6bf1227f7bc5d0d90ab0dbb2598235defa08d2a  ./hermes/skills/career/job-application-review/SKILL.md
+8dd59e0459048d469840103b7ab32c6f74c4c90784f67d08f9e394aca0c6da98  ./hermes/skills/career/job-application-review/SKILL.md
 3d28d9ee09f251991ea5399812ba6f4e137be6466787dbc357c7ad79bd736607  ./hermes/skills/career/job-application-review/references/market-demand.md
 acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skills/career/job-application-review/references/repo-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
@@ -111,6 +111,8 @@ f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skill
 8448c5899b2ffab423b675e9ff1c24f808f95fc736d3d010d72fcb8d3007e9c6  ./hermes/skills/devops/llm-route-bench/scripts/code_bench.py
 a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skills/devops/llm-route-bench/scripts/code_bench_hard.py
 b2a2f042ece1a5b57c714b32de75ca876b697b761c92abb0e276acd3ea3688f5  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
+ca25472b50ad83024fb7bcf7338aad4dacb16a24391d54e694f0f9ee85b37b32  ./hermes/skills/devops/ru-access-to-foreign-cloud/SKILL.md
+9863e40dd9c9afc73287285af5bd3aebf53410d153f77bd53859b23721d892a1  ./hermes/skills/devops/ru-access-to-foreign-cloud/references/oracle-cloud.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
 91801cb3e8edfe5883f961cf02f14481d2b29e8be030ee95b97506fd364229da  ./hermes/skills/devops/shell-and-terminal-ux/SKILL.md
