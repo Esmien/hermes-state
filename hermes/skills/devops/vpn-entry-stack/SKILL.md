@@ -124,6 +124,17 @@ Pitfall: Xray evaluates routing top-down. Inbound rules appended at the end land
 
 `import_sub.py` builds the whole relay set idempotently; `probe_sub.py` measures each node (exit IP + Google country) before it goes into the pool. Hysteria2 nodes are unusable — the Xray core does not speak it.
 
+## RU split (banks / gosuslugi / VK / OZON / WB)
+
+The owner's complaint is the VPN on-off toggle: he wants RU services to answer from a Russian address no matter which node is selected. Two layers, both idempotent:
+
+- **Client** — `make_sub.py` renders, after the google rules and before `MATCH`, the `RU_DOMAINS` list then `DOMAIN-SUFFIX,ru` / `DOMAIN-SUFFIX,su` / `GEOIP,RU` → the Moscow node (name resolved by `ru_node()` from `relay_nodes.json`, it carries two U+200B after the flag). Clash/Mihomo only — Happ ignores rules from a subscription.
+- **Server** — `/root/vpn-router/route_ru.py` inserts `domain: ru/su/рф + vk.com, vk.me, vk-cdn.net, userapi.com, mycdn.me, max.ru, ozon.com, wbstatic.net …` → outbound `p15` (the Moscow relay) at `index of the first fr-domain rule + 1`, i.e. **before** every `inboundTag` rule. That is what makes it hold for any selected node, the same shape as the Gemini rule. Re-run it after `import_sub.py` on a rebuild — `make_template.py` drops the rule on purpose (it points at a relay outbound that does not exist in a fresh template, and an unknown outbound makes `xray -test` fail).
+
+Verify by behaviour, not by config: gosuslugi.ru answers `000` from the Estonian and from a foreign exit, `200` through `/general` *and* through `/ws` after the change, while `ipinfo.io/ip` on those same inbounds still returns the untouched exit (no blanket hijack). WB is the best exit proof: `www.wildberries.ru` answers `498` (its own fingerprint challenge — the same `498` comes straight from Estonia) and the body carries `data-req-ip="<node ip>"`. `card.wb.ru` returns `403` from every exit, that is WB, not routing. Sber serves a self-signed cert in the chain to curl on any exit — `http://` answers `200`, browsers with the RU trusted roots are fine.
+
+Pitfall: `xray run -test -c config.json` on the **host** fails with `failed to open geoip.dat` — the host binary has no geo files. Validate with the image instead: `docker run --rm --user 0:0 --entrypoint /usr/local/bin/xray -v /root/vpn-router/config.json:/etc/xray/config.json:ro ghcr.io/xtls/xray-core:latest run -test -c /etc/xray/config.json` (the `--user 0:0` is required, the config is 0600 and the image runs non-root; the runtime container has no shell at all, so `docker exec … sh` is not an option).
+
 ## Gemini / geo
 
 Gemini's country is Google's own lookup of the **connection IP** — not the hoster's brand, not DNS, not the city in ipinfo. Measure with `scripts/gemini_geo_check.py [socks5-host:port]`; `fr`/`fi`/`de` work, `ru` is the stub. Our own Tallinn IP reads `ru` because Google follows the address registration, not the machine's location; a reseller's Paris IP can read `ru` for the same reason. "Smart DNS" cannot move the verdict — the verdict follows the IP that carries the flow, so route Google domains *and* IP ranges through the good exit with `sniffing` on. IPv6 is the only leak that flips it; this host has none and the generated profiles set `ipv6: false`, so look at the client, not the server. Full evidence, whois reasoning and exit-buying rules: `references/gemini-geo.md`.
