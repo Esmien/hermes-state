@@ -112,7 +112,7 @@ a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skill
 b2a2f042ece1a5b57c714b32de75ca876b697b761c92abb0e276acd3ea3688f5  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
-9b61b7fcbd02348978256be47b2cea91b3099a5bf1ec72a68e6763fc4c54035c  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+b8af663696e1d08b00edccc02d33ce619c81ac7fa60bca95718a1428977269c2  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 b27eca178d05f333d2dcc34d9e98b9f1763fea9ae17a7b6fa2eabaa92098a0b1  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
 4d3f6b023d09ef6d7c6e536e9ca4b53bfdcc2d6f7156fe89e761b2c5da924241  ./hermes/skills/devops/vpn-entry-stack/references/domain-and-tls.md
 b3e01208b42620cdf4c4126c8769dffe221fed325ee679ed50065a9e27167782  ./hermes/skills/devops/vpn-entry-stack/references/gemini-geo.md
