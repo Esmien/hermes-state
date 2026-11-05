@@ -3,7 +3,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 95c143aee3f811abd200c4357b58f3d716ba689efda9b6a22b3b0f2035e34cbd  ./hermes/SOUL.md
 683646459f25cdbbebebf48b674e0be4d96218b4032f7ab129bf0497bcf3f613  ./hermes/agent-hooks/ssh-only-gate.py
 ea943e1bed683982c6e897c1ec9c7ddb9fc0ea683de50c6e5aaac717678f36b0  ./hermes/config.yaml
-9d33ca2fd51d74d82fa15bb9d5e18f9f7950314002a26bca5718155240809880  ./hermes/cron/jobs.json
+9c320218da4ef0996dd07b01ac786f775ed63217593b4db35e3ad1497487bc0a  ./hermes/cron/jobs.json
 b53e350b167824b325c211342aa2ce93852bbc8d57a6b2cdc739f3405da2bf3f  ./hermes/memories/MEMORY.md
 62ec8c3f548a39240384bfc7c1067ed3cef4f368c4b04602544620528b0d1e85  ./hermes/memories/USER.md
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
