@@ -46,7 +46,7 @@ Symptom of a missed step: the bot works in DM, stays silent in topics.
 ## Finding the ids
 
 - `thread_id` is the trailing number of `https://t.me/c/<group_internal_id>/<thread_id>`; the chat id is `-100<group_internal_id>`.
-- Cheapest live method: ask the owner to post in the topic and read `inbound message: platform=telegram … chat=<id> thread=<id>` from `~/.hermes/logs/gateway.log` with a bounded grep.
+- Cheapest live method: ask the owner to post once in the topic, then read the paired log lines. `inbound message: … chat=<id> msg='…' reply_to_id=<n>` — in a forum topic `reply_to_id` **equals the thread id** — and `response ready: … session=agent:…:group:<chat>:<thread>`, which states the thread explicitly. Do **not** expect a `thread=` field on the inbound line for supergroups: it is absent there (`reply_to_id` and the session key are the only carriers); `thread=` shows up for DM topics only.
 - Telegram ids live in `.env` — grep key names only, never print values of that file.
 - Telegram's Bot API exposes **no topic-list method** (`getForumTopics` / `getForumTopic` / `getChatTopics` all return 404). Never plan around one; either read the `t.me/c/...` link or take the id from a real inbound message. `getUpdates` on a non-polling bot token is worth one try (forum-creation service messages may still be queued) but returns empty once the queue was consumed.
 - `getChat?chat_id=<group>` **with the bot's own token** proves membership and `is_forum: true`; a bot outside the chat gets `chat not found`. Always run this before blaming Hermes routing for a bot that "is added".
@@ -84,6 +84,8 @@ Explaining the mechanism before telling him his own next step produced «Не п
 ## Notifier side on this VPS
 
 Moving the existing bots into topics is a code change, not a config flip — every sender addresses `BOT_OWNER` (DM) directly. The env-var convention, the list of senders, the task-board pointer trap and the verification commands live in the `telegram-gate-and-bots` skill; load it with this reference when the task is "route alerts into topics" rather than "how do topics work".
+
+A **command** bot (one that long-polls `getUpdates` and answers `/health`) needs two more fixes that alert-only senders don't: authorise the sender (`from.id`), not the chat (a supergroup id is negative and never equals `BOT_OWNER`), and carry the incoming `message_thread_id` into the reply so it lands in the topic instead of General. Same skill, same diagnosis: `journalctl -u <bot>.service | grep -E 'отклонена|409'`.
 
 ## Verification habit
 
