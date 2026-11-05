@@ -32,6 +32,9 @@ The same drift bites automations. Any bot that signs in with a password from `.e
    - `proxy/auth/login_utils.py` → `_sign_in()` decides between `_admin_credentials_match()` (env `UI_USERNAME`/`UI_PASSWORD`, with master key as fallback when `UI_PASSWORD` is unset) and a `LiteLLM_UserTable` row lookup by `user_email` + scrypt password.
    - `disable_env_credential_login: true` in `general_settings` removes the env path entirely; `disable_password_login_when_sso_enabled` removes both.
    - Consequence: env credentials and DB password are **independent doors**. Rotating one does not touch the other.
+   - Turning the env door off (`disable_env_credential_login`), what it does and does not close, where the flag belongs in this stack, and the trap that follows the switch: `references/litellm-admin-ui-auth.md`.
+
+**Before advising the owner to disable the env login path**, walk the order in that reference: prove a working DB `proxy_admin` row first (he sets the password via the invite link, never in chat), then the flag, then verify by effect — not by re-reading the config.
 
 2. **Find the endpoint the UI actually uses — do not guess.** Grep the service log for real traffic:
    ```bash
@@ -66,6 +69,10 @@ The same drift bites automations. Any bot that signs in with a password from `.e
 
 ## Pitfalls
 
+- **A UI-created `proxy_admin` that «can't pick models for keys, only All Proxy Models» has full rights — it is a stale session, not RBAC.** The key form builds its dropdown as `[All Proxy Models]` + the names `/v1/models` returns for the logged-in session key; when that request fails or the cookie expired (`LITELLM_UI_SESSION_DURATION`), only the sentinel option is left. Prove rights from the API by minting a key bound to that `user_id` with the master key (`scripts/probe-litellm-admin-view.py`) — `/model/info` and `/v1/models` come back complete — and cure the symptom with a fresh login. Never «fix» it by editing `user_role`, teams or `LiteLLM_UserTable.models`. `models = {all-proxy-models}` is the *unrestricted* sentinel; it also renders as a red badge in the key list and looks like a fault.
+- **Disabling a login path safely means disabling only that path.** `disable_env_credential_login: true` gates the login form; the master key as an API `Bearer` never enters `authenticate_user`, so it stays a working break-glass (`/user/update` resets a password, `/user/new` recreates an admin) and rollback is «remove the flag, restart». Guard against the opposite mistake too: `disable_password_login_when_sso_enabled` closes username/password *entirely*, so never set it while password login is the only proven door.
+- **LiteLLM keeps `general_settings` in `LiteLLM_Config` but resolves it per key** (`SettingsStore.resolve(yaml_value, db_value)`), so a flag that lives only in `config.yaml` survives the UI rewriting its own DB subset — and an env-var change needs a container recreate while a config.yaml change needs only `docker restart litellm`. Confirm by behaviour, never by reasoning about the merge.
+- **Verify a policy flag by its observable effect, not by reading files back.** The env-login banner decision is exposed on `/health/readiness` as `details.show_env_credential_login_warning`; one call with the master key settles it without handling any password. Look for such an effect endpoint before reaching for a login attempt — trying the disabled credential to «see if it fails» burns the throttle and proves less.
 - **Не объявлять credential мёртвым по тексту ошибки.** Сообщение вида «Credential <name>» в UI/логе называет креденшел, **которым пытались маршрутизировать запрос**, а не подтверждает, что он протух: тот же текст появляется при неверном имени модели и при лимитах апстрима. Перед вердиктом воспроизвести вызов через живой гейтвей и прочитать HTTP-код вместе с телом: `400 Invalid model name passed in model=<X>` — неверное имя группы (не существует как `model_name`), `400 … integer_below_min_value … Expected a value >= 16` — тестовый `max_tokens` ниже минимума апстрима, и только `401`/`403` с текстом про ключ указывает на креды. Проверять на модели, которая точно принадлежит этому креденшелу, и с валидными параметрами; вывод «ключ мёртв» без успешного/неуспешного живого запроса — ложный след, который уводит в перевыпуск рабочих ключей.
 - **A `403` on `POST /login` is CSRF, not a wrong password.** Go panels (3x-ui 3.x, and most cookie-session UIs) embed `<meta name="csrf-token" content="…">` in the login page and require that value in an `X-CSRF-Token` header alongside the session cookie. Fetch the page first, extract the token, then post — a bare post answers 403 with an empty body however correct the password is. Behind a proxy the same 403 appears when the panel's origin check sees a mismatched host: pass `Host $http_host` (port included) and `X-Forwarded-Proto $scheme` from nginx, because `Host $host` drops the port while the browser's `Origin` keeps it. The 3x-ui case, with rotation and a working verification sequence, is written up in the `vpn-entry-stack` skill (its `xui-panel` reference).
 - **A `401` is not proof the password is wrong.** Wrong endpoint, wrong body schema, or a dead legacy route all return `401`. Establish the endpoint from logs first.
@@ -100,5 +107,11 @@ The same drift bites automations. Any bot that signs in with a password from `.e
 2. Old/incorrect password → `401` with a credentials error, not a different failure mode.
 3. Burst of failures → `429` still appears.
 4. `.env` hash == container hash, and container started *after* the file edit.
-5. Every remaining admin row accounted for — check `updated_at` moved, or the row was downgraded/removed.
-6. `default_user_id` (NULL email, NULL password) explicitly dismissed as the internal row, not a door.
+- Every remaining admin row accounted for — check `updated_at` moved, or the row was downgraded/removed.
+- `default_user_id` (NULL email, NULL password) explicitly dismissed as the internal row, not a door.
+
+## References
+
+- `references/open-webui-auth.md` — Open WebUI auth model, status codes, offline bcrypt check.
+- `references/litellm-admin-ui-auth.md` — **LiteLLM Admin UI**: env credential login vs a DB admin row, disabling the env path in this stack, verifying the flag by effect, and the phantom «admin can't select models» symptom.
+- `scripts/probe-litellm-admin-view.py` — probe what a given LiteLLM `user_id` actually sees (`/model/info`, `/v1/models`, key generation), minting and deleting its own probe key; run inside the `litellm` container.
