@@ -15,6 +15,21 @@ sudo -u ai_service git commit -F - <<'MSG' ... MSG
 
 Adding `safe.directory` for root also works but hides that the files are owned by someone else; prefer the account that owns them.
 
+**Root-owned files inside `.git` break the service-account commit.** Past commits run as root leave
+`.git/index`, `.git/refs/heads/*` and loose objects owned by `root`, and `git add` then fails with
+`error: insufficient permission for adding an object to repository database .git/objects` — the
+working tree looks fine, so the message is misleading. Repair instead of switching to root:
+
+```bash
+find /home/ai_service/ai-stack/.git -user root -exec chown ai_service:ai_service {} +
+```
+
+The same class of failure comes from the other side: a file edited by a root-owned tool (or created
+by a root script) becomes `root:root` and the commit fails on it alone — `stat -c '%U:%G %a'` the
+file you just changed and `chown ai_service:ai_service` it back to the mode the tree expects (`644`
+for configs under `ai/`). Both repairs are mechanical and safe; neither needs the owner's approval,
+but say in the report that you touched ownership.
+
 ## What never goes into the commit
 
 `.gitignore` already covers `.env` / `**/.env` / `*secrets*` / `*.pem` / `*.key`, `backups/`, `*.dump*`, `*.sql.gz`, `*.bak*`, `*.log`, `__pycache__`. Two entries are easy to miss and both were added after checking the actual files:

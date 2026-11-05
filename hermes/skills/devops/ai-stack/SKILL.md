@@ -160,6 +160,17 @@ open the stack to answer it — no probes, no log digging, no spend queries. Run
 the ask is explicitly «проверь», «прогони», «сравни»; stack work started on a conceptual question gets
 interrupted, and rightly so.
 
+## Answering the owner «почему медленно»
+
+Жалоба на скорость — это измерение, а не гипотезы: `rt` по URI из лога nginx (у `llm.esmien.ru`
+своего `rt` нет — только счётчики), потом `docker stats`/`load`, и только потом вывод. На этом
+хосте два штатных виновника: вес/кэш админки LiteLLM и один воркер Open WebUI в связке с пачкой
+запросов аватарок. Три правила ответа: **не предлагать сокращать подобранный вручную список
+моделей** (множитель — всплеск запросов, не ассортимент), **не складывать параллельные задержки
+в «итого секунд»** (124×300 мс параллельно — это 1–2 с, а не 37), и **не занимать `litellm-redis`
+под WebUI-воркеры** (он выделенный, 256 MB `noeviction`). Процедура, готовые локации nginx и
+ловушка вставки не в тот `server`-блок — `references/ui-latency.md`.
+
 ## Answering the owner about web search
 
 OWUI's built-in `searxng` path keeps only SERP `title/link/snippet` — it never opens the results, so
@@ -195,6 +206,7 @@ Two hard rules from this stack:
 - `references/backups-notifications.md` — **Backups and notifications**. Read when backups, restore, timers, Telegram notifications.
 - `references/litellm-model-db.md` — **Модели/группы в `litellm_db`**. Read when a model flaps, a group returns 400 from one deployment, or a DB edit (extra_headers, aliases) has to be applied and verified.
 - `references/litellm-admin-auth.md` — **LiteLLM: ownership в `litellm_db`** (ключи/spend/мемберства/авторство моделей переписываются на реального админа; «Created By = Unknown»; вес и кэш админки). Auth-путь (env-дверь, `/v2/login`, сброс пароля) — в skill `credential-login-verification`, его файл `litellm-admin-ui-auth.md`.
+- `references/ui-latency.md` — **«Медленно грузится»: латентность UI/API**. Read when the owner says a page or the chat UI is slow: per-URI `rt` from nginx logs, the two standing causes (LiteLLM admin bundle, single-worker WebUI + avatar burst), the nginx cache locations and the wrong-server-block trap.
 - `references/model-provenance.md` — **Model provenance and cleanup in Open WebUI**. Read when ghost models, dead/disabled presets, model ids that 400 or vanish.
 - `references/media-pipeline.md` — **Media pipeline (images / TTS through LiteLLM)**. Read when image generation, TTS, `cptr`, model routing for media.
 - `references/music-bot-lyria.md` — **Music bot (lyria)**. Read when the separate lyria deployment (its own Postgres/Redis/RabbitMQ).
