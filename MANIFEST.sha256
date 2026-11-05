@@ -192,7 +192,7 @@ ec6676d1e7be69864c893f6fd16c13a4dd394765d053b1230387ba84a8da1f26  ./host/bin/doc
 f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-guard-postgres.sh
 89d6ff8db0bcc42319a1f84d24db0966ef0daa3e97219ec7d9ccd041253129d8  ./host/bin/hermes-boot-notify.sh
 9c6388452c33f57d635ffbb36e318429fa22545a6e5a6f1d71551320a2678a1e  ./host/bin/hermes-history-backup.py
-3b2d8f4af9519cf6e10b29af79cd74085dec1adb9ee57a1058e068f555db4781  ./host/bin/hermes-state-backup.sh
+c2e1279ac86942b5cc3738289391ee83a24a771ff398c6ef3ae3bc2ac259a71b  ./host/bin/hermes-state-backup.sh
 5249aa0ba7bc85fb2cfaa7357d93c1bde4fc24b9182a71d8df08dbb90f65be5e  ./host/bin/hermes-state-watch.sh
 249ff939ae185cf37c91ef7bdcc926518767213c964e952180be17ab4bfb7377  ./host/bin/litellm-spend-retention.sh
 528803b4b549b524245525698d60bb188f847818332070a95afd3307a38c41aa  ./host/bin/litellm-watchdog.py
