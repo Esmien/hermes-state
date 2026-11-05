@@ -4,6 +4,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 683646459f25cdbbebebf48b674e0be4d96218b4032f7ab129bf0497bcf3f613  ./hermes/agent-hooks/ssh-only-gate.py
 8b1b50900a770e4d6e47d41dd63b9814b4a335820c9d8236eb0b7dc352d6a1db  ./hermes/config.yaml
 9c320218da4ef0996dd07b01ac786f775ed63217593b4db35e3ad1497487bc0a  ./hermes/cron/jobs.json
+0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
 f4b7bbd3dd5438ea0267af826a22954a2f1f354834c4e0b2c9c48e43d8159a77  ./hermes/memories/MEMORY.md
 62ec8c3f548a39240384bfc7c1067ed3cef4f368c4b04602544620528b0d1e85  ./hermes/memories/USER.md
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
@@ -201,8 +202,8 @@ bb24baca67f479c8fb1ce9eb41fd9b3c4d1ba41f2bd03a2dda9d809074275eac  ./host/bin/doc
 f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-guard-postgres.sh
 f5186d18965a4d78b34c28daa67c62501a4d3939855de570f95cf0bf77e58943  ./host/bin/hermes-boot-notify.sh
 7de9af808caccd336811b3a1ef54d272be20170dc7cce2239009e61117d5b556  ./host/bin/hermes-history-backup.py
-8e48c5ecb2ce7abf77fae74bc670c37ed1e9dc275a886e110142ed3950b8af5f  ./host/bin/hermes-state-backup.sh
-5249aa0ba7bc85fb2cfaa7357d93c1bde4fc24b9182a71d8df08dbb90f65be5e  ./host/bin/hermes-state-watch.sh
+38919cef0d8832c78038e1968c9b7b141643cba61d58d362511f97d426e55e0d  ./host/bin/hermes-state-backup.sh
+02f6038ca1261df191a8868ae45a7b92daefa0fcccfd5b4f2755333ad71f3972  ./host/bin/hermes-state-watch.sh
 249ff939ae185cf37c91ef7bdcc926518767213c964e952180be17ab4bfb7377  ./host/bin/litellm-spend-retention.sh
 956f0f2f8ae83828267575d4ac6c653e804b4bcce80e75b64b06caf792997aa3  ./host/bin/litellm-watchdog.py
 764bc62ccd10c7a4b51e32012de64fdbe4d329904b2440d7b89019b50d9db979  ./host/bin/owui-signup-approver.py
