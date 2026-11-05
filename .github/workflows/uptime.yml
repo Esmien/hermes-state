@@ -39,8 +39,8 @@ jobs:
               *) fail="$fail $url($code)"; return 1 ;;
             esac
           }
-          check https://ai.esmien.qd.je/ || true
-          check https://llm.esmien.qd.je/health/liveliness || true
+          check https://ai.esmien.ru/ || true
+          check https://llm.esmien.ru/health/liveliness || true
           if [ -n "$fail" ]; then
             echo "state=down" >> "$GITHUB_OUTPUT"
             echo "failed=${fail}" >> "$GITHUB_OUTPUT"
