@@ -38,9 +38,9 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host.
     litellm/config.yaml  gateway settings ONLY (drop_params: true, forward_client_headers, router_settings); model routing lives in litellm_db, not here
     searxng/             settings.yml, limiter.toml, engines/
     webui-branding/      Dockerfile for esmien/webui:local (ARG OPENWEBUI_BASE digest + rebrand sed) and the generated assets; RESTORE_WEBUI.md sits next to it
-    backup-databases.sh  pg_dump helper
+    backup-databases.sh  pg_dump → encrypt (dump-crypto) helper
   backups/               postgres dumps, nginx/certbot archives
-    postgres/<db>_<ts>.dump   retention: newest 3 dumps per DB (backup-databases.sh)
+    postgres/<db>_<ts>.dump.enc   AES-256 encrypted, key /etc/backup-crypto.key; retention: newest 3 per DB
   backup-deploy/         previous configs (.old, nginx/, caddy/)
 ```
 
@@ -140,7 +140,7 @@ sudo ./deploy.sh --skip-tls      # stack only, leave nginx/certbot
 sudo ./deploy.sh --force-stale   # allow dumps older than STALE_HOURS
 ```
 
-DB restore always applies the newest matching dump (`pg_restore --clean --if-exists`), found by mask `backups/postgres/<db>_*.dump` then `backups/<db>_*.dump`.
+DB restore always applies the newest matching dump (`pg_restore --clean --if-exists`), found by mask `backups/postgres/<db>_*.dump` then `backups/<db>_*.dump`. **The dumps on disk are `.dump.enc` now**, so check this step before trusting a `deploy.sh` restore: either feed it a file produced by `dump-crypto decrypt <x.dump.enc> <x.dump>` or extend the mask — an unchanged mask silently finds nothing and the deploy continues on an empty database.
 
 ## .env keys (values are secret — never print)
 

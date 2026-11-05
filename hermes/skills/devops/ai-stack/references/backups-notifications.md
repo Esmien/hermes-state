@@ -29,9 +29,14 @@
 ## Which layer actually detects an offline host
 
 - **The primary external watchdog is the GitHub Actions `uptime.yml` in the private `hermes-state` repo**, not
-  `deadman-ping`. It probes `https://ai.esmien.qd.je/` and `https://llm.esmien.qd.je/health/liveliness` every
+  `deadman-ping`. It probes `https://ai.esmien.ru/` and `https://llm.esmien.ru/health/liveliness` every
   15 min from a runner, keeps state in an open issue labeled `uptime`, and messages Telegram only on the
   up→down and down→up transitions. It depends on repo secrets `TG_TOKEN`/`TG_CHAT`.
+- **«Сервер недоступен снаружи» is a claim about the probe, not automatically about the host.** The workflow
+  kept probing the retired `esmien.qd.je` names long after that zone stopped resolving, so every run reported
+  down while `ai`/`llm` answered 200 from the host. Before debugging the server, open the workflow, read the
+  exact URLs it checks and `getent hosts` each one: a hostname without DNS is a permanent false alarm, and the
+  fix is the URL in `hermes-state`, not anything on the VPS.
 - **`deadman-ping.timer` is the SECOND contour and is not configured**: no `/etc/deadman-ping.url`, no
   `DEADMAN_URL=` key in `notifications/.env`, so the script exits without pinging anything. Since 2026-11 it
   writes one journal line per day (`DEADMAN_URL не задан`) instead of exiting silently. Wiring it needs the
@@ -42,7 +47,7 @@
 
 ## External uptime watchdog (server offline)
 
-- Local alerts die with the host, so `.github/workflows/uptime.yml` in the private `hermes-state` repo probes `https://ai.esmien.qd.je/` and `https://llm.esmien.qd.je/health/liveliness` every 15 min from a GitHub runner and writes to Telegram via `TG_TOKEN`/`TG_CHAT` repo secrets.
+- Local alerts die with the host, so `.github/workflows/uptime.yml` in the private `hermes-state` repo probes `https://ai.esmien.ru/` and `https://llm.esmien.ru/health/liveliness` every 15 min from a GitHub runner and writes to Telegram via `TG_TOKEN`/`TG_CHAT` repo secrets.
 - **State is an open issue labelled `uptime`, not a repository variable** — `GITHUB_TOKEN` gets `403 Resource not accessible by integration` on `/actions/variables`, while `issues: write` works. The `uptime` label must exist or `gh issue create` fails.
 - Grep `monitor.py` for `alerts` before claiming disk alerts are missing: `/etc/cron.d/server-monitor` already runs `monitor.py alerts` every 10 min with `DISK_WARN_PERCENT=85` (that is why 76% was silent), and `INODE_*` plus `MAX_BACKUP_AGE_HOURS` are checked there too.
 
@@ -55,6 +60,7 @@
 - **Telegram side:** the sent parts are `.dump.enc`, and `build_split_instruction` appends the decrypt command (`openssl enc -d … -pass file:offsite.key`) plus the note that the file is encrypted; sha256 is still computed over the encrypted file, so integrity checks stay valid.
 - **Recovery order:** restore `offsite.key` from the notification chat first, then `install -m 0440 -o root -g ai_service /root/.secrets/offsite.key /etc/backup-crypto.key` (or let `install.py` do it — it warns when the offsite key is missing). Without that copy `verify` reports a decrypt failure, not a corrupt dump.
 - **`monitor.py verify` / `/backups` still must run as root** — decryption is fine as `ai_service`, but the restore branch needs passwordless `sudo -u postgres`.
+- **Renaming or reshaping an on-disk artefact means finding every consumer, not the one you are looking at.** Three separate places in `monitor.py` enumerate dumps by glob: `collect_backup_groups`, the backup-age block inside the check that `alerts` runs every 10 min, and `verify_backup`. Changing the write path to `.dump.enc` while only fixing the first left the 10-minute alert shouting «Не найдены файлы бэкапа … по шаблону '*.dump'» against six intact dumps. They now share `backup_glob_patterns(pattern)`, which returns both `<pattern>` and `<pattern>.enc`. Procedure for any such change: `grep -n 'BACKUP_PATTERN\|\.dump' monitor.py` first, patch every hit, then actually run `monitor.py alerts` twice (first run clears the state, second must send nothing) and one `verify` — an unfixed consumer is silent in code review and loud in the owner's Telegram.
 
 ## Backups & notifications
 

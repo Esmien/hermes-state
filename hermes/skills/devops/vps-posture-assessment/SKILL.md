@@ -73,9 +73,13 @@ Companion skills: `ai-stack` (what is inside the AI stack, and the backup verifi
   `AttributeError: module 'lib' has no attribute 'GEN_EMAIL'` while the same binary works from a clean
   environment and from `certbot.timer`. Unset the variable before declaring a system tool broken.
 - **The external eye does exist — check it before saying «мониторинга снаружи нет».** `.github/workflows/uptime.yml`
-  in the private `hermes-state` repo (live clone at `/var/lib/hermes-state/repo`, not `/root/hermes-state`) probes ai/llm every 15 min from a GitHub runner and messages Telegram on
-  up→down / down→up transitions (state in an open `uptime` issue). `deadman-ping` (healthchecks.io) is the
-  unconfigured second contour, and wiring it needs the owner's account URL.
+  in the private `hermes-state` repo (live clone at `/var/lib/hermes-state/repo`, not `/root/hermes-state`) probes
+  `https://ai.esmien.ru/` and `https://llm.esmien.ru/health/liveliness` every 15 min from a GitHub runner and
+  messages Telegram on up→down / down→up transitions (state in an open `uptime` issue). `deadman-ping`
+  (healthchecks.io) is the unconfigured second contour, and wiring it needs the owner's account URL.
+  **Judge the watchdog by its target, not by its verdict:** when it reports «сервер недоступен снаружи», read the
+  URLs inside the workflow and `getent hosts` each one before touching the host — the check spent months probing
+  retired `esmien.qd.je` names that no longer resolve, so it cried «down» while every service answered 200.
 - **Quote swap in use, not `free`'s «available».** `free -h` shows a comfortable 4.5 GiB available because page cache counts as reclaimable, while the swap file holds ~1.9 GB of 4 — the swap figure is the honest statement of the memory margin and the number that belongs in a document. Name it as a thin margin, not as an outage to fix.
 - **`docker system df`: read the `RECLAIMABLE` column, not TOTAL.** 13.89 GB of build cache with 43 MB
   reclaimable is not «17 GB можно освободить без потерь» — pruning costs a full rebuild of `esmien/webui`
@@ -85,6 +89,8 @@ Companion skills: `ai-stack` (what is inside the AI stack, and the backup verifi
   data is how a summary loses credibility.
 - **Harness backup scope:** `hermes-state` carries config/memories/skills/cron/plugins — NOT
   `state.db`/`sessions`. Those now go weekly to the file bot via `hermes-history-backup.timer`.
+
+## Scope decisions (same rule: do not re-argue)
 
 - **Targeted attack is out of scope by design**: an unadvertised family service, no marketing, no public signup funnel worth attacking. Do not model APT-style scenarios and do not sell countermeasures against them.
 - **One VM is a budget constraint, not an oversight**: no money and no point in a cluster for a low-user service with negative ROI. Mitigation he relies on: migration in ~1h with full backup restore, worst case 1 day of data (RPO 24h). Grading a single-VM setup as «нет отказоустойчивости» and leaving it there is nagging — state the terminology once, then the RTO numbers.
