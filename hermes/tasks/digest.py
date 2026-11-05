@@ -1,14 +1,18 @@
 #!/usr/bin/env python3
-"""Доска задач владельца: понедельничная сводка и точечные события в Telegram.
+"""Доска задач владельца в Telegram: одно живое сообщение, которое редактируется.
+
+Правило владельца: работа с задачами — это РЕДАКТИРОВАНИЕ сообщения, а не новые сообщения.
+Новое сообщение отправляется только понедельничной сводкой; оно же становится «живой» доской
+и дальше правится на месте. Если сообщение удалили или оно недоступно для правки, доска
+переотправляется новым сообщением и указатель обновляется.
 
 Файл задач: /root/.hermes/tasks/backlog.md (формат — скилл owner-task-digest).
 Бот: TASK_BOT_TOKEN из /root/.hermes/tasks/.env (не печатать).
 
 Использование:
-  digest.py digest            отправить сводку (так его зовёт таймер)
-  digest.py preview           напечатать сводку, ничего не отправлять
-  digest.py event "текст"     точечное обновление
-  digest.py event --task 1 "текст"
+  digest.py digest     отправить сводку НОВЫМ сообщением (таймер, понедельник) и сделать её живой
+  digest.py refresh    обновить живую доску на месте (fallback — отправить новую)
+  digest.py preview    напечатать сводку, ничего не отправлять
 """
 
 from __future__ import annotations
@@ -20,12 +24,14 @@ import json
 import pathlib
 import re
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
 
 BASE = pathlib.Path(__file__).resolve().parent
 BACKLOG = BASE / "backlog.md"
 ENV = BASE / ".env"
+POINTER = pathlib.Path("/var/lib/hermes-task-board/message.json")
 MSK = dt.timezone(dt.timedelta(hours=3))
 
 # ◻️ todo · ✏️ in progress · ✅ done · ❌ declined/broken/rejected/deleted
@@ -33,8 +39,7 @@ STATUS_ORDER = ["in_progress", "todo", "done", "declined"]
 STATUS_EMOJI = {"todo": "◻️", "in_progress": "✏️", "done": "✅", "declined": "❌"}
 ALIASES = {"pending": "todo", "blocked": "declined", "broken": "declined", "rejected": "declined",
            "deleted": "declined", "cancelled": "declined", "canceled": "declined"}
-TAGS = (("&lt;b&gt;", "<b>"), ("&lt;/b&gt;", "</b>"), ("&lt;i&gt;", "<i>"),
-        ("&lt;/i&gt;", "</i>"), ("&lt;code&gt;", "<code>"), ("&lt;/code&gt;", "</code>"))
+REEDIT_ERRORS = ("message to edit not found", "message can't be edited", "message_id_invalid")
 
 
 def load_env() -> tuple[str, str]:
@@ -92,52 +97,79 @@ def build_digest(tasks: list[dict]) -> str:
     return "\n".join(lines).strip()
 
 
-def send(text: str) -> dict:
-    token, chat_id = load_env()
+def api(method: str, **params) -> dict:
+    token, _ = load_env()
+    body = urllib.parse.urlencode(params).encode()
+    req = urllib.request.Request(f"https://api.telegram.org/bot{token}/{method}", data=body)
+    try:
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            return json.load(resp)
+    except urllib.error.HTTPError as exc:
+        try:
+            return json.load(exc)
+        except Exception:  # noqa: BLE001
+            return {"ok": False, "description": f"HTTP {exc.code}"}
+
+
+def read_pointer() -> dict | None:
+    try:
+        return json.loads(POINTER.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def write_pointer(chat_id: str, message_id: int) -> None:
+    POINTER.parent.mkdir(parents=True, exist_ok=True)
+    POINTER.write_text(json.dumps({"chat_id": chat_id, "message_id": message_id}), encoding="utf-8")
+
+
+def send_new(text: str) -> dict:
+    _, chat_id = load_env()
     if not chat_id:
         raise SystemExit("OWNER_CHAT_ID не задан в .env")
-    data = urllib.parse.urlencode({
-        "chat_id": chat_id,
-        "text": text,
-        "parse_mode": "HTML",
-        "disable_web_page_preview": "true",
-    }).encode()
-    req = urllib.request.Request(f"https://api.telegram.org/bot{token}/sendMessage", data=data)
-    with urllib.request.urlopen(req, timeout=20) as resp:
-        payload = json.load(resp)
-    return {"ok": payload.get("ok"), "message_id": payload.get("result", {}).get("message_id")}
+    payload = api("sendMessage", chat_id=chat_id, text=text,
+                  parse_mode="HTML", disable_web_page_preview="true")
+    message_id = payload.get("result", {}).get("message_id")
+    if payload.get("ok") and message_id:
+        write_pointer(chat_id, message_id)
+    return {"ok": payload.get("ok"), "message_id": message_id, "action": "sent"}
 
 
-def build_event(text: str, task_id: str | None) -> str:
-    now = dt.datetime.now(MSK)
-    task = next((t for t in parse_backlog() if t["id"] == task_id), None) if task_id else None
-    if task:
-        head = f"{STATUS_EMOJI.get(task['status'], '◻️')} <b>#{html.escape(task['id'])}</b> {html.escape(task['title'])}"
-    else:
-        head = "🗂 <b>Обновление задач</b>"
-    body = html.escape(text)
-    for escaped, tag in TAGS:
-        body = body.replace(escaped, tag)
-    return f"{head}\n{body}\n<i>{now:%d.%m %H:%M}</i>"
+def update_board() -> dict:
+    """Правит живое сообщение; если править нечего — отправляет новое и запоминает его."""
+    text = build_digest(parse_backlog())
+    pointer = read_pointer()
+    if not pointer:
+        return send_new(text)
+    payload = api("editMessageText", chat_id=pointer["chat_id"], message_id=pointer["message_id"],
+                  text=text, parse_mode="HTML", disable_web_page_preview="true")
+    if payload.get("ok"):
+        return {"ok": True, "message_id": pointer["message_id"], "action": "edited"}
+    description = str(payload.get("description", "")).lower()
+    if "not modified" in description:
+        return {"ok": True, "message_id": pointer["message_id"], "action": "unchanged"}
+    if any(marker in description for marker in REEDIT_ERRORS):
+        result = send_new(text)
+        result["action"] = "resent"
+        return result
+    return {"ok": False, "description": payload.get("description"), "action": "failed"}
 
 
 def main(argv: list[str]) -> int:
     parser = argparse.ArgumentParser(description="Доска задач владельца")
     sub = parser.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("digest", help="отправить сводку в Telegram")
+    sub.add_parser("digest", help="отправить сводку новым сообщением (понедельник)")
+    sub.add_parser("refresh", help="обновить живую доску на месте")
     sub.add_parser("preview", help="напечатать сводку")
-    ev = sub.add_parser("event", help="отправить точечное обновление")
-    ev.add_argument("text")
-    ev.add_argument("--task", default=None)
     args = parser.parse_args(argv)
 
     if args.cmd == "preview":
         print(build_digest(parse_backlog()))
         return 0
     if args.cmd == "digest":
-        print(json.dumps(send(build_digest(parse_backlog())), ensure_ascii=False))
+        print(json.dumps(send_new(build_digest(parse_backlog())), ensure_ascii=False))
         return 0
-    print(json.dumps(send(build_event(args.text, args.task)), ensure_ascii=False))
+    print(json.dumps(update_board(), ensure_ascii=False))
     return 0
 
 

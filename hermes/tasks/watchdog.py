@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
-"""Страховка доски задач: ловит изменения backlog.md и сама шлёт карточку задачи в Telegram.
+"""Страховка доски задач: ловит изменения backlog.md и ПРАВИТ живое сообщение в Telegram.
 
 Зачем: правило «молчаливых правок нет» не должно зависеть от того, вспомнил агент или нет.
 Path-юнит `hermes-task-board-watch` дёргает этот скрипт на каждое изменение файла; скрипт
-сравнивает статусы с прошлым снимком.
+сравнивает доску с прошлым снимком и, если что-то поменялось, вызывает `digest.update_board`
+— то есть редактирует живое сообщение, а не отправляет новое. Новое сообщение появляется
+только понедельничной сводкой (или если живое сообщение удалили).
 
-Сообщение — ровно та же карточка, что в сводке: эмодзи статуса, #id, суть, путь к файлу.
-Никаких стрелок и слов-статусов: статусов ровно четыре (◻️ ✏️ ✅ ❌), других не выдумывать.
-
-Первый запуск (нет снимка) только пишет baseline — без сообщений.
+Первый запуск (нет снимка) только пишет baseline — без правок и сообщений.
 """
 
 from __future__ import annotations
@@ -25,11 +24,10 @@ spec = importlib.util.spec_from_file_location("digest", TASKS / "digest.py")
 digest = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(digest)  # type: ignore[union-attr]
 
-STATUS_EMOJI = {"todo": "◻️", "in_progress": "✏️", "done": "✅", "declined": "❌"}
-
 
 def snapshot() -> dict[str, dict]:
-    return {t["id"]: {"status": t["status"], "title": t["title"]} for t in digest.parse_backlog()}
+    return {t["id"]: {"status": t["status"], "title": t["title"], "file": t["file"]}
+            for t in digest.parse_backlog()}
 
 
 def load_previous() -> dict[str, dict] | None:
@@ -44,36 +42,21 @@ def save(current: dict[str, dict]) -> None:
     STATE.write_text(json.dumps(current, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def card(task: dict) -> str:
-    return digest.fmt_task(task)
-
-
 def main() -> int:
-    tasks = digest.parse_backlog()
-    current = {t["id"]: {"status": t["status"], "title": t["title"]} for t in tasks}
-    by_id = {t["id"]: t for t in tasks}
-
+    current = snapshot()
     previous = load_previous()
     if previous is None:
         save(current)
         print("baseline written:", len(current))
         return 0
+    if previous == current:
+        print("no changes")
+        return 0
 
-    sent = 0
-    for task_id, task in current.items():
-        old = previous.get(task_id)
-        if old is None or old["status"] != task["status"] or old["title"] != task["title"]:
-            digest.send(card(by_id[task_id]))
-            sent += 1
-
-    for task_id, old in previous.items():
-        if task_id not in current:
-            digest.send(f"❌ <b>#{task_id}</b> {old['title']}")
-            sent += 1
-
+    result = digest.update_board()
     save(current)
-    print("events sent:", sent)
-    return 0
+    print("board updated:", json.dumps(result, ensure_ascii=False))
+    return 0 if result.get("ok") else 1
 
 
 if __name__ == "__main__":

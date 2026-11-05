@@ -18,8 +18,9 @@ A task is added, started, blocked, progressed or closed for the owner — or the
 ## Where things live
 
 - Board: **`/root/.hermes/tasks/backlog.md`** — the single source of truth.
-- Sender: `/root/.hermes/tasks/digest.py` (`digest` | `preview` | `event "text" [--task N]`).
-- **Safety net:** `/root/.hermes/tasks/watchdog.py` + `hermes-task-board-watch.{path,service}` — watches `backlog.md` and, on any change, re-sends the task's card in its current status (same card as the digest: emoji + `#id` + title + `file:`), or `❌` when a task is removed. **No transition arrows and no status words** — the owner defined exactly four statuses (`◻️ ✏️ ✅ ❌`) and nothing else; inventing labels like «в очереди → в работе» is a defect. State: `/var/lib/hermes-task-board/state.json`; the first run only writes the baseline.
+- Sender: `/root/.hermes/tasks/digest.py` — `digest` (send a NEW message; the Monday timer), `refresh` (edit the live board in place), `preview`.
+- **One live message, edited in place.** Task work never sends new messages: status change → `refresh` → `editMessageText` on the stored message id (`/var/lib/hermes-task-board/message.json`). A new message appears only on the Monday digest, and that message becomes the live board. If the owner deleted the message (`message to edit not found` / `message can't be edited`) the sender falls back to a new message and re-points the pointer; `message is not modified` counts as success.
+- **Safety net:** `/root/.hermes/tasks/watchdog.py` + `hermes-task-board-watch.{path,service}` — watches `backlog.md`, compares with a snapshot and calls the same `refresh`, so a forgotten manual refresh still lands. State: `/var/lib/hermes-task-board/state.json`; the first run only writes the baseline. No transition arrows and no status words — statuses are exactly `◻️ ✏️ ✅ ❌`; inventing labels like «в очереди → в работе» is a defect.
 - Bot: `@esmien_agent_todo_bot`, token in `/root/.hermes/tasks/.env` (mode 600, backed up offsite). **Never print it.**
 - Schedule: systemd `hermes-task-digest.timer` — Monday 05:30 UTC = **08:30 MSK**, `Persistent=true`.
 - Both are in the recovery chain: `tasks/` (minus `.env`) → `hermes-state` repo; units → `vps-infra/assets/host/systemd/`.
@@ -41,13 +42,11 @@ file: vps-infra/docs/modules-plan.md
 ## Protocol — every state change notifies
 
 1. Edit `backlog.md` (status, title, file).
-2. Immediately: `python3 /root/.hermes/tasks/digest.py event --task N "что изменилось и почему"`.
-3. New task: append a block, then `event --task N "новая задача: ..."`.
-4. Closing: `status: done` + `event --task N "закрыта: что сделано"`.
+2. Immediately: `python3 /root/.hermes/tasks/digest.py refresh` — edits the live board message. Never `sendMessage` for a task change and never write a separate per-task message.
+3. New task: append a block, then `refresh`.
+4. Closing: `status: done` + `refresh`.
 
-Silent board edits are the failure mode: the owner asked for **every** change in Telegram, not only the Monday brief. One digest a week plus silence in between reads as a dead project. Manual `event` is the primary path (it carries the *why*); the path-unit watcher only guarantees that a forgotten one still arrives, and its message is the bare transition — never rely on it instead of a real update.
-
-After any status change check the effect: `journalctl -u hermes-task-board-watch.service -o cat -n 3` → `events sent: N`.
+Silent board edits are the failure mode: the owner asked for **every** change to show up on the board, not only the Monday brief. Manual `refresh` and the path-unit watcher are the same call, so there is no way to "forget": the watcher fires on any `backlog.md` write. Old and irrelevant messages are the owner's to delete — never try to clean the chat yourself.
 
 ## Checks
 
