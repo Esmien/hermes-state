@@ -6,6 +6,10 @@
 - Config mounted read-only: `ai/searxng/settings.yml`, `ai/searxng/limiter.toml`; `ai/searxng/engines/bing_direct.py` is still bind-mounted into `/usr/local/searxng/searx/engines/` but is **no longer referenced by settings** (Bing serves a JS/CAPTCHA shell to this IP since 2026-10-24). Unused module = harmless dead file; do not wire it back without re-proving `b_algo` results.
 - Consumed by Open WebUI: `web.search.engine=searxng`, `web.search.searxng_query_url=http://searxng:8080/search?q=<query>`, `web.search.result_count=7`. OWUI appends `format=json`, `language`, `pageno`, `categories=''` itself — so `search.formats` must keep `json` and engines must live in category **general** to be used by OWUI.
 
+## Что OWUI берёт из SearXNG
+
+Путь `searxng` в OWUI читает только `results[]` → `link/title/snippet` и страницы не открывает вообще (`retrieval/web/searxng.py`), поэтому качество ответа упирается в сниппеты, а не в движки: чинится открытием страниц, не добавлением движков. Свой бэкенд подставляется единственным швом `web.search.engine=external`; контракт, латентностный бюджет, роль Hermes и зоны доверия — `references/web-search-architecture.md`.
+
 ## The trap that makes search look "dead": bans are keyed by Network object
 
 In searxng 2026.10 `EngineProcessor.__init__` does:

@@ -13,3 +13,5 @@ TG: 214062001 = Владислав (владелец); 917728475 = Игорь �
 Задачи владельца: доска /root/.hermes/tasks/backlog.md, бот @esmien_agent_todo_bot, дайджест Mon 08:30 МСК (systemd hermes-task-digest.timer). Протокол — скилл owner-task-digest: любое изменение статуса сразу событием в TG.
 §
 Мультиагентный концепт (три зоны доверия, эскалация через allowlist-заявки, без docker.sock у гостей): /root/vps-infra/docs/multiagent-tiers.md — реализовывать только по указанию владельца.
+§
+Браузер на хосте есть: lightpanda (`browser.engine`, JS, но без рендера/скринов) + Chromium `/root/.hermes/tools/chromium-1208/chrome-linux64/chrome` (скрины через Chrome); browser-тулсет включён в telegram.

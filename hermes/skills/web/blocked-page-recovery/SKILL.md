@@ -38,6 +38,19 @@ full headless Chromium return the same wall as curl. Skip step 5 entirely and go
 API pivot. When the user needs that exact live page, say plainly that it needs a non-datacenter
 egress — no amount of browser automation changes the verdict.
 
+Driving a local browser yourself (no agent, no Browserbase) — both print rendered DOM to stdout,
+so pipe through a tag strip instead of reading raw markup:
+
+```bash
+lightpanda fetch --dump "<url>" | head -c 2000                      # fast, JS-capable, no pixels
+chrome --headless=new --disable-gpu --no-sandbox \
+  --virtual-time-budget=8000 --dump-dom "<url>" | head -c 2000      # heavier JS / SPA
+```
+
+`lightpanda` has no graphical renderer, so screenshots need the Chrome binary. A browser that
+returns 150–200 KB of DOM has still *succeeded at fetching* — grep that body for the block text
+(`blocked by network security`, `проблема с IP`, `Just a moment`) before parsing it as content.
+
 If the extraction tool declines a URL (backend configured as search-only, or it
 cannot render the page), that is not "page unreadable": fetch the raw HTML with
 curl and parse the embedded state (`application/ld+json`, `__NEXT_DATA__`,

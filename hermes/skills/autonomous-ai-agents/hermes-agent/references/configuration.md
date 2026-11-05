@@ -72,6 +72,15 @@ hermes tools disable image_gen --platform cli
 
 Tool changes take effect at agent build: `/new` or `/reset` in-session (`/reload-skills` for skills), `/restart` for the gateway — never mid-conversation, to preserve prompt caching. Until the rebuild the new tool is simply absent from the running session's tool list — do not retry calling it; finish by the closest available route and give the user the ONE rebuild step they need.
 
+**`config.yaml` is write-protected for the agent.** `patch` / `write_file` on `$HERMES_HOME/config.yaml` is refused («Agent cannot modify security-sensitive configuration»). Go through the CLI — list values take a JSON literal verbatim:
+
+```
+hermes config set platform_toolsets.telegram '["browser", "clarify", "terminal", "web"]'
+hermes config get platform_toolsets.telegram      # read back — the CLI edit also proves the YAML parses
+```
+
+**The gateway cannot be restarted from inside the gateway.** The terminal guard answers «cannot restart or stop the gateway from inside the gateway process» and aborts the call before it runs, because SIGTERM propagates to the child script. Do not dress it up as a background `sleep && restart`, do not spend turns on it: finish the turn, state that the change is written, and hand the owner the single command (`systemctl restart hermes-gateway`) — the new toolset lands in the first session after that restart.
+
 **Verify a toolset by real execution, never by the config echo.** Run a fresh one-shot session that must use the tool and quote what the tool returned:
 
 ```

@@ -57,6 +57,10 @@ file: tasks/docs/modules-plan.md
 
 Silent board edits are the failure mode: the owner asked for **every** change to show up on the board, not only the Monday brief. Manual `refresh` and the path-unit watcher are the same call, so there is no way to "forget": the watcher fires on any `backlog.md` write. Old and irrelevant messages are the owner's to delete — never try to clean the chat yourself.
 
+Ответ `{"action": "unchanged"}` у `refresh` — не сбой: watcher успел обновить карточку первым и сравнил с уже сохранённым состоянием. Проверять надо содержимое `/var/lib/hermes-task-board/state.json` (есть ли новый `#id`/путь), а не код возврата.
+
+**Правка доски и новые планы не попадают в снапшот сами.** `hermes-state-watch` следит за `skills/`, `memories/`, `plugins/`, `hooks/`, `scripts/`, `config.yaml`, `SOUL.md` — каталога `$HERMES_HOME/tasks` в списке нет, в репо он приезжает только прогоном `/usr/local/bin/hermes-state-backup.sh` (или ночным `hermes-state-backup.timer`). Правило владельца «репо = живой хост» значит: после нового дока в `tasks/docs/` и записи в доску сразу прогнать бэкап (он же коммит + push) и подтвердить доставку строкой `✓ pushed <sha>`.
+
 ## Checks
 
 - Format/dry: `python3 /usr/local/bin/task-board-digest.py preview`
