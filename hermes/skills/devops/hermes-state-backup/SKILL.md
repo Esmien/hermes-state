@@ -32,8 +32,14 @@ metadata:
 | log | `/var/log/hermes-state-backup.log` (logrotate weekly, 4 kept) |
 | failure alert | Telegram via `hermes send -t telegram` (works without the gateway running) |
 
-Snapshot layout inside the repo: `hermes/{config.yaml,SOUL.md,memories/,skills/,cron/jobs.json,tasks/,plugins/,hooks/,agent-hooks/,scripts/}`,
+Snapshot layout inside the repo: `hermes/{config.yaml,SOUL.md,memories/,skills/,cron/jobs.json,tasks/,docs/,plugins/,hooks/,agent-hooks/,scripts/}`,
 `host/{bin,systemd,etc,ai-stack,backups}/`, `MANIFEST.sha256`, `README.md`.
+
+`hermes/docs/` (`/root/.hermes/docs/`) — единственный дом для **разборов, замеров и предложений**.
+Черновики не класть в `vps-infra`: там `vps-infra-push.sh` автоматически коммитит и пушит **всё**
+дерево репозитория, поэтому недоделанный документ за считанные минуты становится публичным
+коммитом в recovery-репозитории. Если такое случилось — убирать обычным коммитом с удалением
+(историю force-push'ем не перепи­сывать, если она уже уехала), а сам документ перекладывать в `docs/`.
 
 `hooks/` и `agent-hooks/` — **разные каталоги**, и это не косметика: `agent-hooks/`
 держит предохранители вызовов инструментов (`ssh-only-gate.py` и подобные), на которые

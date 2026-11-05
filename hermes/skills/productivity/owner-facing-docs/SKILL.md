@@ -74,6 +74,17 @@ Redaction for this audience: no addresses, domains, paths, container names or po
 minutes and score tables stay. Close the chat reply with an offer of the internal version — he may want it for
 himself after seeing the redacted one.
 
+## Where the file lives
+
+- Owner-facing deliverables go where he can reach them; **my own** analyses, measurements and proposals go
+  to `/root/.hermes/docs/` (`proposals/` for things offered but not applied). That tree is inside the
+  `hermes-state` snapshot, so it survives the host.
+- **Never write drafts, research or proposals into `vps-infra`.** `vps-infra-push.sh` auto-commits and pushes
+  the whole tree every few minutes, so a half-finished note becomes a public commit in the recovery repo.
+  That repo holds only what actually stands on the host — configs, units, scripts, runbooks.
+- If a draft did land there: remove it with a normal deletion commit, do not rewrite already-pushed history,
+  and keep the document under `~/.hermes/docs/` from then on.
+
 ## Pitfalls
 
 - **Numbers that look authoritative but are not.** LiteLLM's spend log stores an *estimated* price for every
