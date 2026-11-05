@@ -19,6 +19,7 @@ A task is added, started, blocked, progressed or closed for the owner — or the
 
 - Board: **`/root/.hermes/tasks/backlog.md`** — the single source of truth.
 - Sender: `/root/.hermes/tasks/digest.py` (`digest` | `preview` | `event "text" [--task N]`).
+- **Safety net:** `/root/.hermes/tasks/watchdog.py` + `hermes-task-board-watch.{path,service}` — watches `backlog.md` and sends the transition event itself (`✏️ в работе → ✅ закрыта`, «новая задача на доске»), so a forgotten manual notification still reaches the owner. State: `/var/lib/hermes-task-board/state.json`; the first run only writes the baseline.
 - Bot: `@esmien_agent_todo_bot`, token in `/root/.hermes/tasks/.env` (mode 600, backed up offsite). **Never print it.**
 - Schedule: systemd `hermes-task-digest.timer` — Monday 05:30 UTC = **08:30 MSK**, `Persistent=true`.
 - Both are in the recovery chain: `tasks/` (minus `.env`) → `hermes-state` repo; units → `vps-infra/assets/host/systemd/`.
@@ -44,7 +45,9 @@ file: vps-infra/docs/modules-plan.md
 3. New task: append a block, then `event --task N "новая задача: ..."`.
 4. Closing: `status: done` + `event --task N "закрыта: что сделано"`.
 
-Silent board edits are the failure mode: the owner asked for **every** change in Telegram, not only the Monday brief. One digest a week plus silence in between reads as a dead project.
+Silent board edits are the failure mode: the owner asked for **every** change in Telegram, not only the Monday brief. One digest a week plus silence in between reads as a dead project. Manual `event` is the primary path (it carries the *why*); the path-unit watcher only guarantees that a forgotten one still arrives, and its message is the bare transition — never rely on it instead of a real update.
+
+After any status change check the effect: `journalctl -u hermes-task-board-watch.service -o cat -n 3` → `events sent: N`.
 
 ## Checks
 
