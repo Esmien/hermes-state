@@ -80,7 +80,7 @@ e8525d40c1700267f08f96374905373f19fce68225f4a6295ce30b6f0be44074  ./hermes/skill
 cbb06f14ec073a2b9436c977cd60cd31f8e7bb3de6ee7fc7c127454dcedaecc5  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
 3814331f3b5164e615e8503f9d71bb136811e08afc0630b9c69853f7dbf3372c  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
 e2e6b63d29a9c8ea3946f4ce38384b9257fea9f6ad915e944d099366cb8bcbc3  ./hermes/skills/devops/ai-stack/references/searxng.md
-dbb48c16d0326825e6ce3eaaba5ad8a8fa751f35f80a51e7bc27ffab8926a3e2  ./hermes/skills/devops/ai-stack/references/signup-approval.md
+12fbfc726e0cedebc196792352ce22a00412732709909ee78471a57d0f87682e  ./hermes/skills/devops/ai-stack/references/signup-approval.md
 edd659ed101bb0adb507ef894077beac36c3e35d92d3709fb8a788a6d0e2c031  ./hermes/skills/devops/ai-stack/references/updates.md
 dd2d44405b31543453db60080d99f9d8cea5a594cc5c24b5720e14567d5ccb69  ./hermes/skills/devops/ai-stack/references/upstream-release-review.md
 49125d1b1d55cf5d77e47abe02fc8e9dcb372682dcf273644f1a6d3484d88a67  ./hermes/skills/devops/ai-stack/references/web-search-architecture.md
@@ -201,7 +201,7 @@ f5186d18965a4d78b34c28daa67c62501a4d3939855de570f95cf0bf77e58943  ./host/bin/her
 956f0f2f8ae83828267575d4ac6c653e804b4bcce80e75b64b06caf792997aa3  ./host/bin/litellm-watchdog.py
 764bc62ccd10c7a4b51e32012de64fdbe4d329904b2440d7b89019b50d9db979  ./host/bin/owui-signup-approver.py
 9bab0d5f058d8ba6fa6ecfe52872aba6e870b4d8462fae791141b4bf623b417f  ./host/bin/searxng-quality-check.py
-ed0d69fac523cd33dce4d1cbb62084bdce05f3f631fe5aeae609f0378179c62b  ./host/bin/secrets-offsite-backup.py
+dddd1e9d4ddd41e3e3122f6f9bef6266953fc26a5650ec4c800b30c69fc6cb7a  ./host/bin/secrets-offsite-backup.py
 42d76cebc17fefeb9e49a7b007e11aa7a538a359ffdbdcf08585a8c069c8dab6  ./host/bin/tor-rotate.sh
 20ff03e6cf44682eb7cad75deee62e4dc66fe8d981a3ee1d06d3800fab714e04  ./host/bin/webui-compact-images.sh
 ca1757d7ab99976758c4b2fcd095ad52351b667eaad2ea2ed25d54cad7647fab  ./host/bin/webui-data-backup.py
