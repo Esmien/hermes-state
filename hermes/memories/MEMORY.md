@@ -9,3 +9,7 @@ Hermes ходит через Open WebUI-гейтвей (custom, http://127.0.0.1
 uid 1000 = ubuntu (с sudo) — и это же uid пользователя песочницы open-terminal-sandbox; файлы оттуда видны на хосте как ubuntu:ubuntu.
 §
 TG: 214062001 = Владислав (владелец); 917728475 = Игорь — только ssh/scp/sftp (гейт fail_closed). Идентификация, гейт и два бота-нотификатора — скилл telegram-gate-and-bots.
+§
+Задачи владельца: доска /root/.hermes/tasks/backlog.md, бот @esmien_agent_todo_bot, дайджест Mon 08:30 МСК (systemd hermes-task-digest.timer). Протокол — скилл owner-task-digest: любое изменение статуса сразу событием в TG.
+§
+Мультиагентный концепт (три зоны доверия, эскалация через allowlist-заявки, без docker.sock у гостей): /root/vps-infra/docs/multiagent-tiers.md — реализовывать только по указанию владельца.
