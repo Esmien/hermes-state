@@ -19,7 +19,7 @@ A task is added, started, blocked, progressed or closed for the owner — or the
 
 - Board: **`/root/.hermes/tasks/backlog.md`** — the single source of truth.
 - Sender: `/root/.hermes/tasks/digest.py` (`digest` | `preview` | `event "text" [--task N]`).
-- **Safety net:** `/root/.hermes/tasks/watchdog.py` + `hermes-task-board-watch.{path,service}` — watches `backlog.md` and sends the transition event itself (`✏️ в работе → ✅ закрыта`, «новая задача на доске»), so a forgotten manual notification still reaches the owner. State: `/var/lib/hermes-task-board/state.json`; the first run only writes the baseline.
+- **Safety net:** `/root/.hermes/tasks/watchdog.py` + `hermes-task-board-watch.{path,service}` — watches `backlog.md` and, on any change, re-sends the task's card in its current status (same card as the digest: emoji + `#id` + title + `file:`), or `❌` when a task is removed. **No transition arrows and no status words** — the owner defined exactly four statuses (`◻️ ✏️ ✅ ❌`) and nothing else; inventing labels like «в очереди → в работе» is a defect. State: `/var/lib/hermes-task-board/state.json`; the first run only writes the baseline.
 - Bot: `@esmien_agent_todo_bot`, token in `/root/.hermes/tasks/.env` (mode 600, backed up offsite). **Never print it.**
 - Schedule: systemd `hermes-task-digest.timer` — Monday 05:30 UTC = **08:30 MSK**, `Persistent=true`.
 - Both are in the recovery chain: `tasks/` (minus `.env`) → `hermes-state` repo; units → `vps-infra/assets/host/systemd/`.

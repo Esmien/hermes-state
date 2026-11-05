@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
-"""Страховка доски задач: ловит изменения backlog.md и сама шлёт событие в Telegram.
+"""Страховка доски задач: ловит изменения backlog.md и сама шлёт карточку задачи в Telegram.
 
 Зачем: правило «молчаливых правок нет» не должно зависеть от того, вспомнил агент или нет.
 Path-юнит `hermes-task-board-watch` дёргает этот скрипт на каждое изменение файла; скрипт
-сравнивает статусы с прошлым снимком и отправляет по одному короткому сообщению на переход.
+сравнивает статусы с прошлым снимком.
+
+Сообщение — ровно та же карточка, что в сводке: эмодзи статуса, #id, суть, путь к файлу.
+Никаких стрелок и слов-статусов: статусов ровно четыре (◻️ ✏️ ✅ ❌), других не выдумывать.
 
 Первый запуск (нет снимка) только пишет baseline — без сообщений.
 """
@@ -22,7 +25,7 @@ spec = importlib.util.spec_from_file_location("digest", TASKS / "digest.py")
 digest = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(digest)  # type: ignore[union-attr]
 
-LABEL = {"todo": "◻️ в очереди", "in_progress": "✏️ в работе", "done": "✅ закрыта", "declined": "❌ отклонена"}
+STATUS_EMOJI = {"todo": "◻️", "in_progress": "✏️", "done": "✅", "declined": "❌"}
 
 
 def snapshot() -> dict[str, dict]:
@@ -41,8 +44,15 @@ def save(current: dict[str, dict]) -> None:
     STATE.write_text(json.dumps(current, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
+def card(task: dict) -> str:
+    return digest.fmt_task(task)
+
+
 def main() -> int:
-    current = snapshot()
+    tasks = digest.parse_backlog()
+    current = {t["id"]: {"status": t["status"], "title": t["title"]} for t in tasks}
+    by_id = {t["id"]: t for t in tasks}
+
     previous = load_previous()
     if previous is None:
         save(current)
@@ -52,21 +62,13 @@ def main() -> int:
     sent = 0
     for task_id, task in current.items():
         old = previous.get(task_id)
-        if old is None:
-            digest.send(digest.build_event("новая задача на доске", task_id))
-            sent += 1
-        elif old["status"] != task["status"]:
-            text = f"{LABEL.get(old['status'], old['status'])} → <b>{LABEL.get(task['status'], task['status'])}</b>"
-            digest.send(digest.build_event(text, task_id))
-            sent += 1
-        elif old["title"] != task["title"]:
-            digest.send(digest.build_event("уточнена формулировка", task_id))
+        if old is None or old["status"] != task["status"] or old["title"] != task["title"]:
+            digest.send(card(by_id[task_id]))
             sent += 1
 
     for task_id, old in previous.items():
         if task_id not in current:
-            digest.send(digest.build_event("задача снята с доски", None).replace("Обновление задач", "Задача убрана") +
-                        f"\n<i>#{task_id} {old['title']}</i>")
+            digest.send(f"❌ <b>#{task_id}</b> {old['title']}")
             sent += 1
 
     save(current)
