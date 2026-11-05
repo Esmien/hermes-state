@@ -18,7 +18,7 @@ ee5084f2d7ec196488bef2c74248fb3d8328d1b2e3277ddda3f0de9da6fc7131  ./hermes/skill
 e35d4d165daadfd066661df59a202a4159c5df41b77642884d3656830054d6bc  ./hermes/skills/apple/findmy/SKILL.md
 bc68b1648e301409bc25b1084ec26766213ca9f3c1b2fd3d3d6ebe3dbde9e967  ./hermes/skills/apple/imessage/SKILL.md
 7f2427c7112d71235d92f68ba68392a4fed3d28a7636f522deb2748cb44fe7fc  ./hermes/skills/autonomous-ai-agents/DESCRIPTION.md
-b347121cb048de1a211734bf988235c29c14a851bcff546c68fb4e1995e3a010  ./hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md
+5b8c1786eac48df625d7a97126d3f11ee7ed769e205e564f8e3c286fda027948  ./hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md
 cd0b6f0d36322f4a26dd1572bb1e3fa8b5153f1253c1b1d2e21f9475a3d6de88  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/agent-guardrails.md
 70099ca64774cc7e70a33330d180f862cf19a02c0f936dc4c50d51c6d0b73556  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/background-systems.md
 a15c6838f9ac1e35b0e113a66738b3ce27bb6500d31218797467a2f8691341b5  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/cli-reference.md
@@ -41,6 +41,7 @@ ded08718d2eb141262a31b323f8e66eeb40f35e074e1f0e70abb76860891ec92  ./hermes/skill
 f27913f7775915d8065b2dea782197907ff90cf37f07b865135c7f61aee98e83  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/security-privacy.md
 61f694732686b3a8e158996173c9f6bff4034bcf0cbd8ce1933ee8e44dd2107c  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/skills-loading.md
 4442c7bbd1e68b4b55292d0b455505ad0733883dc8acebd3188a6b6bdf089b2b  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/slash-commands.md
+b8c2c7a7285fd265ec8630cda98788c82e22decace71b7e5d8ff3c3f8b980a1e  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/telegram-topics-and-groups.md
 f5a8269a7312173f0caa6736156a3f76d32e56b4e15511e84dc2e902f48e8157  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/themes.md
 70045d9a3dd4f8ff4001b3a7ccfa7f967c130ce89877ee5f052c87752fcd5f5b  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/troubleshooting.md
 20e21aabb757a9d3c7d895db8f05a3782fe8b28feef3768ac5550c8860b4a3db  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/tui-widgets.md

@@ -120,6 +120,7 @@ Profiles use `~/.hermes/profiles/<name>/` with the same layout. When a profile i
 | "Can app X use my Nous Portal subscription/OAuth?" | `references/portal-auth-for-third-party-apps.md` |
 | Delegating to an external coding agent (opencode, Codex CLI, Claude Code), or "should we wire it up?" | `references/external-coding-agents.md` |
 | Connecting a messaging platform (Telegram, Discord, Slack, WhatsApp, …) | docs: `/user-guide/messaging` |
+| Telegram **supergroup with forum topics** — one session per topic, per-topic prompt/skill bindings, cron into a topic, privacy-mode/admin prerequisite | `references/telegram-topics-and-groups.md` |
 
 The reference list above is not the feature list — it is the set of topics that
 need more than their docs page. For everything else Hermes ships, fetch
