@@ -13,7 +13,7 @@ metadata:
 
 ## When to use
 
-A message arrives from an id other than the owner's, the ssh-only gate misbehaves (especially after a Hermes upgrade), a Telegram notification never arrived, or the owner asks who is allowed to do what.
+When a message arrives from an id other than the owner's, the ssh-only gate misbehaves (especially after a Hermes upgrade), a Telegram notification never arrived, the owner wants notifier bots landing in specific forum topics, or the owner asks who is allowed to do what.
 
 ## Who writes
 
@@ -30,5 +30,7 @@ A message arrives from an id other than the owner's, the ssh-only gate misbehave
 
 - `@esmien_vps_notificator_bot` — alerts (`BOT_TOKEN`), `@esmien_ai_backups_bot` — files/backups (`FILE_BOT_TOKEN`). Both live in `/home/ai_service/notifications/.env` (mode 640 root:ai_service); values never printed, `BOT_OWNER=214062001`.
 - Hermes' own messages go through a **third** bot: `TELEGRAM_BOT_TOKEN` in `/root/.hermes/.env` (`@esmien_vps_admin_bot`). «Уведомления приходят» proves only that one.
-- Health check: `scripts/check-notification-bots.py` in the `ai-stack` skill — `getMe` per token, usernames only, plus the `file_id` restore registry.
+- One script sends most of it: `/home/ai_service/notifications/monitor.py` (`monitor` / `backup` subcommands, run by `postgres-backup-notify.service`, timer units). It picks `BOT_TOKEN` for monitoring and `FILE_BOT_TOKEN` for file/backup reports, and addresses `BOT_OWNER`. Disk/inode thresholds and backup dir live in the same `.env` — key names only when inspecting.
+- **Routing a notifier into a forum topic** is a payload field, not a membership: the bot is added to the supergroup once, then every send uses `chat_id=<group id>` + `message_thread_id=<thread_id>`, with `BOT_OWNER` kept as fallback for `sendMessage` when the topic vars are absent. Bot API has no topic-list call — take the `thread_id` from the `t.me/c/...` link or from the agent's `gateway.log` after the owner posts in that topic.
+- Prove membership and forum mode per token with `getMe` + `getChat?chat_id=<group>` (print username / `is_forum` only, never the token). "Bot is in the group" is a fact to verify, not to assume from the owner's UI.
 - After editing `notifications/.env`, restart **every** unit that reads it: the token is loaded into process memory at start, so a unit restarted before the edit keeps polling `getUpdates` 404 until the next restart.

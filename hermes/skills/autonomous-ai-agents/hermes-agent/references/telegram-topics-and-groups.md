@@ -48,6 +48,22 @@ Symptom of a missed step: the bot works in DM, stays silent in topics.
 - `thread_id` is the trailing number of `https://t.me/c/<group_internal_id>/<thread_id>`; the chat id is `-100<group_internal_id>`.
 - Cheapest live method: ask the owner to post in the topic and read `inbound message: platform=telegram … chat=<id> thread=<id>` from `~/.hermes/logs/gateway.log` with a bounded grep.
 - Telegram ids live in `.env` — grep key names only, never print values of that file.
+- Telegram's Bot API exposes **no topic-list method** (`getForumTopics` / `getForumTopic` / `getChatTopics` all return 404). Never plan around one; either read the `t.me/c/...` link or take the id from a real inbound message. `getUpdates` on a non-polling bot token is worth one try (forum-creation service messages may still be queued) but returns empty once the queue was consumed.
+- `getChat?chat_id=<group>` **with the bot's own token** proves membership and `is_forum: true`; a bot outside the chat gets `chat not found`. Always run this before blaming Hermes routing for a bot that "is added".
+
+## "Add this bot to that topic" — what it actually means
+
+A topic is not a chat: a bot cannot be a member of a topic, only of the supergroup. So "add the backups bot to the Backups topic" translates to two host-side steps, not a UI action:
+
+1. The bot must be **in the group** (members list). Check with `getChat` per token.
+2. Every send must carry `message_thread_id=<thread_id>` with `chat_id=<group id>` — that is the whole routing. Nothing binds a topic to a bot, so a topic can equally well be fed by the agent, a cron job, a shell script or a notifier bot.
+
+Consequences worth stating when the owner proposes one bot per task:
+
+- Topics already give one agent N isolated lanes; N separate bots add nothing except N gateways and per-message `@username` routing via `exclusive_bot_mentions`. One agent bot + topics is the cheap default.
+- Several bots in one group **can** be useful for provenance (alerts look like they come from the alerting bot), but each still needs its own `message_thread_id` in every send.
+- Messages posted by other bots are ignored by the agent by default (`TELEGRAM_ALLOW_BOTS` off), so they never wake it as questions — safe to have notifiers post in topics.
+- Shell/Python notifiers written against raw Bot API only need one extra payload field; `hermes send --to telegram:<chat_id>:<thread_id>` covers the ones already going through Hermes.
 
 ## The honest limit to state up front
 
