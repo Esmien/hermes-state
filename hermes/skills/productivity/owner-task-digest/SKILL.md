@@ -23,7 +23,7 @@ A task is added, started, blocked, progressed or closed for the owner — or the
 - **Safety net:** `/root/.hermes/tasks/watchdog.py` + `hermes-task-board-watch.{path,service}` — watches `backlog.md`, compares with a snapshot and calls the same `refresh`, so a forgotten manual refresh still lands. State: `/var/lib/hermes-task-board/state.json`; the first run only writes the baseline. No transition arrows and no status words — statuses are exactly `◻️ ✏️ ✅ ❌`; inventing labels like «в очереди → в работе» is a defect.
 - Bot: `@esmien_agent_todo_bot`, token in `/root/.hermes/tasks/.env` (mode 600, backed up offsite). **Never print it.**
 - Schedule: systemd `hermes-task-digest.timer` — Monday 05:30 UTC = **08:30 MSK**, `Persistent=true`.
-- Both are in the recovery chain: `tasks/` (minus `.env`) → `hermes-state` repo; units → `vps-infra/assets/host/systemd/`.
+- **Ownership:** everything here belongs to the harness, not to infra. Sources of truth live in `/root/.hermes/tasks/` (board, sender, watcher) and `/root/.hermes/units/` (the four systemd units); both are backed up into the `hermes-state` repo. `tasks/install-units.sh` re-installs the units into `/etc/systemd/system` and re-enables the timer and the path unit — run it after restoring a host. Nothing task-related goes into `vps-infra`.
 
 ## Board format (parse contract — digest.py depends on it)
 
