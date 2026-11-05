@@ -26,22 +26,23 @@ A task is added, started, blocked, progressed or closed for the owner — or the
 ## Board format (parse contract — digest.py depends on it)
 
 ```
-## #1 Short title
-status: pending | in_progress | blocked | done
-priority: high | normal | low
-progress: 0..100
-updated: YYYY-MM-DD
-note: one line, no line breaks
+## #1 Краткая суть задачи
+status: todo | in_progress | done | declined
+file: vps-infra/docs/modules-plan.md
 ```
 
-Edit the block, `updated:` to today, then send the event. Never renumber existing tasks — ids are referenced in chat.
+Статусов ровно четыре: `◻️` todo, `✏️` in_progress, `✅` done, `❌` declined (broken/rejected/deleted — тот же `declined`; legacy `pending`/`blocked` парсер понимает, но писать их не надо). **Ни приоритетов, ни прогресс-процентов, ни дат на доске** — владелец потребовал их убрать; не возвращать ни в файл, ни в сообщение.
+
+`file:` — это и есть та самая ссылка внизу сообщения: путь к документу или исходнику, который держит детали и который владелец назовёт, когда захочет контекст. Никогда не указывать туда сообщение чата.
+
+Правка блока → сразу событие. Не перенумеровывать существующие задачи: id живут в чате.
 
 ## Protocol — every state change notifies
 
-1. Edit `backlog.md` (status/priority/progress/note/updated).
+1. Edit `backlog.md` (status, title, file).
 2. Immediately: `python3 /root/.hermes/tasks/digest.py event --task N "что изменилось и почему"`.
 3. New task: append a block, then `event --task N "новая задача: ..."`.
-4. Closing: `status: done` + `progress: 100` + `event --task N "закрыта: что сделано"`.
+4. Closing: `status: done` + `event --task N "закрыта: что сделано"`.
 
 Silent board edits are the failure mode: the owner asked for **every** change in Telegram, not only the Monday brief. One digest a week plus silence in between reads as a dead project.
 
@@ -52,24 +53,22 @@ Silent board edits are the failure mode: the owner asked for **every** change in
 - Timer: `systemctl list-timers hermes-task-digest.timer --no-pager`
 - Last run: `systemctl show hermes-task-digest.service -p Result -p ExecMainStatus`
 
-## Формат сообщений — визуальный артефакт, а не список строк
+## Формат сообщений — лаконично, без наворотов
 
-Владелец оценивает дайджест глазами в Telegram; вариант «аккуратный текст строками» он забраковал. Обязательный минимум:
+Владелец забраковал богатое оформление: прогресс-бары, приоритеты, группы с шапками и счётчики — *«всё шумное, лаконично и понятно, без наворотов»*. Остаётся только это:
 
-- `parse_mode=HTML`, `disable_web_page_preview=true` — Markdown не использовать;
-- шапка `🗂 ПЛАН НЕДЕЛИ` + дата и счётчики, разделитель `──────────────`;
-- группы по статусам с эмодзи: 🔥 в работе, 🧱 заблокировано, 🟡 в очереди, ✅ закрыто;
-- у каждой задачи прогресс-бар `▰▰▰▰▱▱▱▱▱▱ 35%` и приоритет (🔥 высокий / ⚪ обычный / 🧊 низкий);
-- пояснение задачи — в `<blockquote>`, отдельной строкой, а не курсивом в хвосте заголовка;
-- подвал: `🎯 Фокус` (главная задача), `📊 Итог` с общим баром, время МСК;
-- событие по одной задаче — карточка: статус-чип, бар, текст в цитате, время.
+- шапка: `🗂 <b>Задачи</b> · 5 ноября` — и всё;
+- один блок на задачу: эмодзи статуса + `#id` + одна строка сути, следующей строкой путь из `file:` в `<code>`;
+- больше ничего: ни секций, ни итогов, ни процентов, ни «фокуса», ни разделителей.
 
-Экранировать пользовательский текст через `html.escape`, затем возвращать только разрешённые теги (`b`, `i`, `code`): Telegram отклоняет сообщение с «сырыми» `<`/`&`, и не приходит вовсе — молчание выглядит как «таймер не сработал».
+Событие такое же короткое: эмодзи статуса + `#id` + заголовок, одна строка «что изменилось», время. Плейн-текст лучше структуры, когда сообщение в две строки.
 
-После правки формата отправлять живое сообщение и показывать его: дизайн владелец обсуждает по артефакту, а не по описанию. Доставку подтверждать по журналу юнита (`journalctl -u hermes-task-digest.service -o cat | tail -3` → `{"ok": true, "message_id": N}`), а не по `Result=success`.
+`parse_mode=HTML` + `disable_web_page_preview=true`; экранировать текст через `html.escape` и возвращать только `b`/`i`/`code` — Telegram молча отклоняет сообщение с сырыми `<`/`&`, и тишина выглядит как «таймер не сработал».
+
+После правки формата отправлять живое сообщение: владелец обсуждает дизайн по артефакту. Доставку подтверждать по журналу (`journalctl -u hermes-task-digest.service -o cat | tail -3` → `{"ok": true, "message_id": N}`), а не по `Result=success`.
 
 ## Стиль
 
-Board, not prose: groups by status, progress, the note as the one-line «why». No advice, no nagging, no streaks — the owner wants steady progress in a calm tempo and transparency of states, so the digest reports state and stops there.
+Доска, не проза: эмодзи статуса, одна строка сути, путь к файлу. Без советов, без подгоняния, без стриков — владелец хочет спокойный темп и прозрачность состояний, поэтому сообщение сообщает состояние и останавливается.
 
 **Доска живёт только в `backlog.md`.** Список todo-инструмента привязан к сессии и в новой сессии пуст — искать там задачи бессмысленно. Если владелец говорит «вот первая таска» и её нет на доске, смотреть описания в `/root/vps-infra/docs/*.md` (там живут планы и концепты) и спрашивать одной строкой, а не засевать доску догадками.
