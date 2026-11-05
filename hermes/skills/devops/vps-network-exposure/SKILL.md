@@ -162,6 +162,15 @@ Full detail (rule ordering, UFW, DNAT, netns drill, gated changes) —
   `privileged: true` + `pid: host` + `/var/run/docker.sock` + `/:/mnt/host` =
   host-root RCE from inside; name those four facts when proposing removal.
 
+## Cloudflare впереди (orange cloud)
+
+- **Поставить Cloudflare перед хостом** (фильтр ботов, скрыть origin, спам
+  регистраций) — `ai-stack` → `references/cloudflare-proxy.md`: порядок «сначала реальный IP
+  в nginx, потом переключить запись», почему `realip` в этой схеме
+  (`stream` + `proxy_protocol`) не даёт верного адреса и что работает вместо
+  него (`map $http_cf_connecting_ip`), лимиты Free-плана, WAF-правило по UA и
+  риски (100 с → 524, 100 МБ на загрузку, TLS терминируется у CF).
+
 ## fail2ban и rate limiting nginx (установлены 2026-10-31)
 
 - **fail2ban** 1.0.2, `active`/`enabled`: SSH-брутфорс был ~2.5k попыток/сутки.
