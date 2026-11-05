@@ -76,6 +76,23 @@ hermes config set auxiliary.vision.provider <your_provider>
 hermes config set auxiliary.vision.model <model_name>
 ```
 
+### Aux task 401 with the *provider's own* error (stale credential)
+`vision_analyze` (or compression) returns something like `401 Your session has expired or the token is invalid` while the main model keeps answering normally. That is not a Hermes bug and not an outage: the aux task routed to that OpenAI-compatible provider, and the key Hermes holds for it is dead — most often because the other side re-issued its key and invalidated the old one.
+
+1. Split the two failures before touching anything: main-model calls working + aux calls 401 = credential on the aux provider, not config.
+2. Prove it in one request: `GET <base_url>/models` with `Bearer <key from .env>` — 401 confirms a stale key, 200 with a model count confirms the key.
+3. Write the current key into `~/.hermes/.env` **and into every other consumer of that same credential** — the same key routinely lives in a service's own env file, and fixing only one leaves the other broken.
+4. Restart the gateway: Hermes reads `.env` at process start and keeps it in memory, so the edit alone changes nothing mid-session. This is an owner action — `systemctl restart hermes-gateway` — the agent cannot restart its own gateway.
+
+Prevention: an integration that exposes a "create key" endpoint often *regenerates* rather than returns the existing key. Read the current key from the service's own store (DB/UI) instead of minting a new one, and when you must mint, propagate it to all consumers in the same pass.
+
+### Reading a screenshot when vision is unavailable
+Text-first fallback that actually works on phone photos of a monitor: install `tesseract-ocr` + `tesseract-ocr-rus` and Pillow in a throwaway venv, then upscale 3–4x, grayscale and boost contrast (~2x) before OCR with `--psm 6`.
+
+- Whole-frame OCR of a photographed screen returns noise. Crop into horizontal bands (top / middle / bottom), upscale each, and OCR them separately — that recovers UI labels, section headers and button text reliably.
+- Say that the reading came from OCR, and that vision itself is still broken, so the user can judge how much to trust the detail.
+- OCR recovers text only: it cannot tell you which element the user means by «вот этот артефакт». When the reading is ambiguous, name what you see and ask which element is meant instead of guessing.
+
 ### "Reset permissions" / auto-approving everything
 See `references/security-privacy.md` — wipe the "Always allow" stores, don't touch yolo mode.
 

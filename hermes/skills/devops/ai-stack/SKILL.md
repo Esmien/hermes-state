@@ -200,7 +200,7 @@ Two hard rules from this stack:
 - `references/chatgpt-subscription.md` — **ChatGPT/Codex subscription as a LiteLLM route**. Read when asked to expose a ChatGPT Plus/Pro subscription as an API or to add `chatgpt/*` models into Open WebUI.
 - `references/updates.md` — **Updating stack containers**. Read when upgrading one container, rolling tags, LiteLLM upgrade.
 - `references/branding.md` — **Branding (Esmien AI)**. Read when brand assets, image/logo, screenshots.
-- `references/signup-approval.md` — **Signup approval and user administration**. Read when pending signups, the Telegram approver, user roles via the API.
+- `references/signup-approval.md` — **Signup approval, user administration and WebUI auth hardening**. Read when pending signups, the Telegram approver, user roles via the API — and whenever signup/login protection is in play (Turnstile gate, fail2ban jail, rate limits, security headers, MFA, admin API keys and their rotation trap).
 - `references/searxng.md` — **SearXNG (web search backend)**. Read when web search returns junk, engines get banned, or the image is upgraded.
 - `references/cloudflare-proxy.md` — **Cloudflare in front of one of our names**. Read before proxying a vhost, adding WAF/bot rules, or when rate limits suddenly apply to everyone at once.
 - `references/web-search-architecture.md` — **Web search end to end: OWUI `external` contract, shim plan, Hermes's role**. Read when the owner wants search better than SearXNG, or search/answer quality comes up.
