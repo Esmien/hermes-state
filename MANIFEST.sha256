@@ -4,7 +4,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 683646459f25cdbbebebf48b674e0be4d96218b4032f7ab129bf0497bcf3f613  ./hermes/agent-hooks/ssh-only-gate.py
 8b1b50900a770e4d6e47d41dd63b9814b4a335820c9d8236eb0b7dc352d6a1db  ./hermes/config.yaml
 9c320218da4ef0996dd07b01ac786f775ed63217593b4db35e3ad1497487bc0a  ./hermes/cron/jobs.json
-c62b6cabe30146bc19132b219a357b5fcbca8b69ebadbf3425520c50f43ce100  ./hermes/memories/MEMORY.md
+f4b7bbd3dd5438ea0267af826a22954a2f1f354834c4e0b2c9c48e43d8159a77  ./hermes/memories/MEMORY.md
 62ec8c3f548a39240384bfc7c1067ed3cef4f368c4b04602544620528b0d1e85  ./hermes/memories/USER.md
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
 e192a0881a87b24d55161cdc1ee075291f19592316ed88d5a770773ace175718  ./hermes/plugins/muse-persona/persona.md
@@ -152,7 +152,7 @@ fe6241ba003a9ed5822b33b762b1a506e5a31dfc0e59f25419f87e41934346a0  ./hermes/skill
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
 6089d1d7d5f1cc59b77d4147ea1b2b404175cec3888f095d4bc6e049f2f8391d  ./hermes/skills/devops/vps-network-exposure/scripts/faketls-probe.py
 5e780432952150f90883eff45349e648ab6e3417334b171b7d4215fd1f798ff3  ./hermes/skills/devops/vps-network-exposure/templates/vpn-subscription-generator.py
-d00c4445ffe11d0bbc379116c4d64efe2b9f701f7d2f51f85666ce35fa79d490  ./hermes/skills/devops/vps-posture-assessment/SKILL.md
+d76798ad0179b7b1ab214cd0ae3e444d519c65bd80581e7a3c471c1e50777013  ./hermes/skills/devops/vps-posture-assessment/SKILL.md
 d1a75067b4341cc720e209bb7494010cd07d291b625f9924e6240fdf9823e2af  ./hermes/skills/devops/vps-posture-assessment/references/recovery-rto.md
 ee4da44acd0fa13e9866411ecb0a8bcdbf1f810dd3971d07506d8738ecaf6856  ./hermes/skills/devops/webui-ios-icons/SKILL.md
 31b7fd4518ab99d3c7627399f42117eb447791a833605950c6b7bdff52235301  ./hermes/skills/devops/webui-rebranding/SKILL.md
