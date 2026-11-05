@@ -158,6 +158,15 @@ open the stack to answer it — no probes, no log digging, no spend queries. Run
 the ask is explicitly «проверь», «прогони», «сравни»; stack work started on a conceptual question gets
 interrupted, and rightly so.
 
+## Answering the owner about web search
+
+OWUI's built-in `searxng` path keeps only SERP `title/link/snippet` — it never opens the results, so
+answer quality is capped by ~200-char teasers. Engines do not chain: when a custom/external search
+fails, OWUI logs and returns `[]` and the model answers with no context. So «поиск получше» is a
+page-fetching problem, not a model problem, and any «SearXNG как фоллбэк» must live INSIDE the
+replacement service. Contract, hot-path budget, Hermes's role and the trust-zone caveat:
+`references/web-search-architecture.md`.
+
 ## Answering the owner «сервер защищён / отказоустойчив / бэкапы / восстановлю за 30 минут»
 
 A yes/no posture question wants a verdict, evidence per claim, and a short list of what is actually
@@ -191,6 +200,7 @@ Two hard rules from this stack:
 - `references/branding.md` — **Branding (Esmien AI)**. Read when brand assets, image/logo, screenshots.
 - `references/signup-approval.md` — **Signup approval and user administration**. Read when pending signups, the Telegram approver, user roles via the API.
 - `references/searxng.md` — **SearXNG (web search backend)**. Read when web search returns junk, engines get banned, or the image is upgraded.
+- `references/web-search-architecture.md` — **Web search end to end: OWUI `external` contract, shim plan, Hermes's role**. Read when the owner wants search better than SearXNG, or search/answer quality comes up.
 - `references/memory-troubleshooting.md` — **Container memory attribution**. Read when asked "what is eating the RAM" — numbers before causes.
 - `references/upstream-release-review.md` — **Reviewing an upstream release**. Read before applying any version bump; never update unprompted.
 - `references/kb-sync.md` — **git → база знаний Open WebUI**: `kb-sync.py`, таймер раз в 2 часа, протокол `sync/diff` и грабли (общий манифест, дубли контента, пустые файлы).

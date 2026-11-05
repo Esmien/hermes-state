@@ -42,6 +42,8 @@ Good verification targets, cheapest first:
 
 - Docs pages are HTML: when `web_extract` has no extraction backend, `curl -sL <url> -o /tmp/page.html` and strip tags with `re` inside `execute_code` — do the text processing there, not in a `terminal` heredoc, which the command guards can intercept.
 
+- **Installed ≠ attached to this session.** A toolset absent from `platform_toolsets.<platform>` in `config.yaml` means those tools are not on the current surface — it does NOT mean the capability is missing from the host. Check, in this order, before telling anyone a capability does not exist: `platform_toolsets.<platform>`, the relevant config block (e.g. `browser.engine`, `cloud_provider`), the binary on disk (`~/.local/bin/<tool>`, `~/.hermes/tools/*/`, `find / -name <bin> -type f -executable -not -path '/proc/*'`), then `hermes --help` / the source tree. `which <bin>` alone proves nothing — Hermes-managed binaries live under `~/.hermes/tools/` and are not on `PATH`. The fix for a missing surface is adding the toolset name to the platform list, not reinstalling.
+
 Never answer "Hermes can't do that" from memory. Hermes ships far more than this skill body describes, and the index exists so a negative answer is always checkable.
 
 ## Quick Start

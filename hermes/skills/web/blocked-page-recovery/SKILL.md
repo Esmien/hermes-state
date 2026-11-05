@@ -27,8 +27,16 @@ ladder, cheapest first.
 2. archive.today    — domain rotation: archive.ph → .md → .li → .is
 3. Jina Reader      — only if JINA_API_KEY is set  (live server-side render)
 4. API-first pivot  — look for /api/, /graphql, .json, or RSS on the same host
-5. Real browser     — browser tool as the last, most expensive resort
+5. Real browser     — headless Chrome / lightpanda as the last, most expensive resort;
+                     clears JS walls, NOT IP-reputation blocks (next paragraph)
 ```
+
+**Identify the wall before climbing.** A JS challenge or an interstitial is worth a browser; a block
+that names the network is not. If the response says `Доступ ограничен: проблема с IP`, `blocked by
+network security`, `1020`, or answers 439, the site is rejecting the datacenter IP: lightpanda and a
+full headless Chromium return the same wall as curl. Skip step 5 entirely and go to archives or an
+API pivot. When the user needs that exact live page, say plainly that it needs a non-datacenter
+egress — no amount of browser automation changes the verdict.
 
 If the extraction tool declines a URL (backend configured as search-only, or it
 cannot render the page), that is not "page unreadable": fetch the raw HTML with
@@ -111,16 +119,17 @@ rate-limit HTML that looks like a success to a size check alone.
 
 `r.jina.ai` re-renders the live page in a real browser server-side and
 returns markdown. A key is not always required — try one plain request first,
-it frequently returns 200 + markdown anonymously, and it also clears origins
-that 403 a direct curl:
+it still clears some origins that 403 a direct curl:
 
 ```bash
-curl -sL -m 40 "https://r.jina.ai/{URL}" -o page.md   # no key: try first
-curl -s -H "Authorization: Bearer $JINA_API_KEY" "https://r.jina.ai/{URL}"  # if 401/Turnstile
+curl -sL -m 40 "https://r.jina.ai/{URL}" -o page.md   # no key: try first, then VALIDATE the body
+curl -s -H "Authorization: Bearer $JINA_API_KEY" "https://r.jina.ai/{URL}"  # if the anonymous body is a wrapped error
 ```
 
-Handles JS SPAs that archives can't. Skip this route entirely when the env
-var is unset.
+Handles JS SPAs that archives can't. Without a key it is unreliable on
+hard-wall origins — the reply is still HTTP 200, but the body is a wrapped
+error carrying the origin's own block page (see "Fake successes"). Read the
+first ~200 bytes before believing this route worked.
 
 ### 4. API-first pivot
 
@@ -170,6 +179,12 @@ rejects them automatically; reject them manually too:
   original (blocked) URL. Treating that as success creates a fetch loop.
 - **Rate-limit bodies**: archive.today 429 pages are multi-KB HTML. Check for
   the target's actual content (title words, expected strings), not just size.
+- **Jina Reader wrapped errors**: `r.jina.ai` answers **200** when the origin
+  failed, printing `Title: ` (empty), `URL Source: <target>`,
+  `Warning: Target URL returned error 403` (or 439/…) and then the origin's
+  block text as `Markdown Content`. A few hundred bytes of markdown from this
+  route is a failure, not a thin page — grep the body for `Warning: Target URL
+  returned error` before using it.
 
 Detection heuristics the script applies: body under a per-route byte floor;
 meta-refresh/JS-redirect stubs whose target is the original host; interstitial
