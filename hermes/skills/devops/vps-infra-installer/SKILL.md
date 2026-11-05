@@ -395,6 +395,9 @@ https-коды доменов и число активных таймеров, �
   После своего коммита запускать `systemctl start vps-infra-push.service` и проверять факт
   доставки через API (`/repos/<owner>/<repo>/commits?per_page=1` и `contents/<file>`), а не
   по коду возврата. `raw.githubusercontent.com` после пуша до ~5 минут отдаёт CDN-копию.
+  Прямой `git push` из `/root/vps-infra` не проходит: кредов в клоне нет, ответ
+  `fatal: could not read Username for 'https://github.com'`. Пуш — только юнитом
+  `vps-infra-push.service` (он ходит через askpass/токен), прямой пуш не «починить», а обойти.
 - Манифест синхронизации — сами файлы в `assets/host/{bin,systemd}` и
   `assets/host/open-terminal-config`. Новый скрипт/юнит появляется в репо
   только после того, как его туда положили; удалённый с хоста файл из репо

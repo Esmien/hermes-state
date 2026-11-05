@@ -97,6 +97,7 @@ Profiles use `~/.hermes/profiles/<name>/` with the same layout. When a profile i
 | Provider setup, API keys, OAuth | `references/providers-and-models.md` |
 | A prompt/persona that must apply to ONE model only, "промпт к отдельной модели" | `references/per-model-system-prompts.md` |
 | config.yaml sections, skills enable/disable, toolsets, voice/STT/TTS, tone/persona (`SOUL.md`, `/personality`), memory char budget | `references/configuration.md` |
+| Memory is full, an add was rejected, «память задыхается» — dedupe, migrate detail into skills, raise the budget last | `references/memory-curation.md` |
 | How skills are chosen/loaded, why a skill never fires, catalog vs disk count | `references/skills-loading.md` |
 | Hard gates on dangerous actions: `pre_tool_call` hooks, fail-closed, state that survives `/new` | `references/agent-guardrails.md` |
 | Restricting ONE gateway user (guest/colleague) to a subset of tools or commands — «он в аллоулите, но только ssh»; also load it whenever a hook must know WHO is asking, because the hook payload carries no platform user id | `references/per-user-access-control.md` + `templates/ssh-only-gate.py` |

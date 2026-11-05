@@ -32,7 +32,7 @@ metadata:
 | log | `/var/log/hermes-state-backup.log` (logrotate weekly, 4 kept) |
 | failure alert | Telegram via `hermes send -t telegram` (works without the gateway running) |
 
-Snapshot layout inside the repo: `hermes/{config.yaml,SOUL.md,memories/,skills/,cron/jobs.json,plugins/,hooks/,agent-hooks/,scripts/}`,
+Snapshot layout inside the repo: `hermes/{config.yaml,SOUL.md,memories/,skills/,cron/jobs.json,tasks/,plugins/,hooks/,agent-hooks/,scripts/}`,
 `host/{bin,systemd,etc,ai-stack,backups}/`, `MANIFEST.sha256`, `README.md`.
 
 `hooks/` и `agent-hooks/` — **разные каталоги**, и это не косметика: `agent-hooks/`
@@ -96,6 +96,15 @@ Expected idle output in the backup log: `no changes since last snapshot — noth
 ## Adding a new runbook/script to the backup
 
 Append the filename to `HOST_BIN`, `HOST_UNITS` or `HOST_ETC` in the script (the stack runbooks are copied by a loop into `host/ai-stack/`). Missing files are skipped silently (`[[ -f ... ]] && ...`), so the arrays can list units that do not exist on every host. Foreign files that live outside those arrays (e.g. `/etc/hosts`, nginx configs) are **not** backed up — say so instead of promising a full-host snapshot.
+
+**Новый каталог состояния под `$HERMES_HOME` регистрируется в четырёх местах, иначе он теряется молча:**
+
+1. `rsync` строка в snapshot-скрипте (с `--exclude '.env'`, если внутри есть токен) — иначе каталога нет в репо;
+2. путь в `WATCH` у `hermes-state-watch.sh` — иначе правки в нём не запускают снапшот и доезжают только с чужим изменением;
+3. `SOURCES` в `/usr/local/bin/secrets-offsite-backup.py`, если каталог держит `.env` — токен обязан пережить потерю хоста;
+4. изменённые хостовые скрипты — в `vps-infra/assets/host/bin/` (второй recovery-репозиторий), затем пуш.
+
+Проверка после добавления: `git -C /var/lib/hermes-state/repo ls-files <dir>/` показывает файлы, а `git ls-files | grep -c '<dir>/.env'` даёт **0**.
 
 ## Retry after a failed push
 

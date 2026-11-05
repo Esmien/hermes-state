@@ -52,6 +52,24 @@ Silent board edits are the failure mode: the owner asked for **every** change in
 - Timer: `systemctl list-timers hermes-task-digest.timer --no-pager`
 - Last run: `systemctl show hermes-task-digest.service -p Result -p ExecMainStatus`
 
-## Style of the digest
+## Формат сообщений — визуальный артефакт, а не список строк
 
-Board, not prose: status groups, progress %, the note as the one-line "why". No advice, no nagging, no streaks — the owner wants steady progress in a calm tempo and transparency of states, so the digest reports state and stops there.
+Владелец оценивает дайджест глазами в Telegram; вариант «аккуратный текст строками» он забраковал. Обязательный минимум:
+
+- `parse_mode=HTML`, `disable_web_page_preview=true` — Markdown не использовать;
+- шапка `🗂 ПЛАН НЕДЕЛИ` + дата и счётчики, разделитель `──────────────`;
+- группы по статусам с эмодзи: 🔥 в работе, 🧱 заблокировано, 🟡 в очереди, ✅ закрыто;
+- у каждой задачи прогресс-бар `▰▰▰▰▱▱▱▱▱▱ 35%` и приоритет (🔥 высокий / ⚪ обычный / 🧊 низкий);
+- пояснение задачи — в `<blockquote>`, отдельной строкой, а не курсивом в хвосте заголовка;
+- подвал: `🎯 Фокус` (главная задача), `📊 Итог` с общим баром, время МСК;
+- событие по одной задаче — карточка: статус-чип, бар, текст в цитате, время.
+
+Экранировать пользовательский текст через `html.escape`, затем возвращать только разрешённые теги (`b`, `i`, `code`): Telegram отклоняет сообщение с «сырыми» `<`/`&`, и не приходит вовсе — молчание выглядит как «таймер не сработал».
+
+После правки формата отправлять живое сообщение и показывать его: дизайн владелец обсуждает по артефакту, а не по описанию. Доставку подтверждать по журналу юнита (`journalctl -u hermes-task-digest.service -o cat | tail -3` → `{"ok": true, "message_id": N}`), а не по `Result=success`.
+
+## Стиль
+
+Board, not prose: groups by status, progress, the note as the one-line «why». No advice, no nagging, no streaks — the owner wants steady progress in a calm tempo and transparency of states, so the digest reports state and stops there.
+
+**Доска живёт только в `backlog.md`.** Список todo-инструмента привязан к сессии и в новой сессии пуст — искать там задачи бессмысленно. Если владелец говорит «вот первая таска» и её нет на доске, смотреть описания в `/root/vps-infra/docs/*.md` (там живут планы и концепты) и спрашивать одной строкой, а не засевать доску догадками.

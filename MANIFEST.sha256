@@ -19,7 +19,7 @@ ee5084f2d7ec196488bef2c74248fb3d8328d1b2e3277ddda3f0de9da6fc7131  ./hermes/skill
 e35d4d165daadfd066661df59a202a4159c5df41b77642884d3656830054d6bc  ./hermes/skills/apple/findmy/SKILL.md
 bc68b1648e301409bc25b1084ec26766213ca9f3c1b2fd3d3d6ebe3dbde9e967  ./hermes/skills/apple/imessage/SKILL.md
 7f2427c7112d71235d92f68ba68392a4fed3d28a7636f522deb2748cb44fe7fc  ./hermes/skills/autonomous-ai-agents/DESCRIPTION.md
-f16680b673b4911a03aea04db38225c460ae93147a948741887f9c0fae632ebf  ./hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md
+b347121cb048de1a211734bf988235c29c14a851bcff546c68fb4e1995e3a010  ./hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md
 cd0b6f0d36322f4a26dd1572bb1e3fa8b5153f1253c1b1d2e21f9475a3d6de88  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/agent-guardrails.md
 70099ca64774cc7e70a33330d180f862cf19a02c0f936dc4c50d51c6d0b73556  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/background-systems.md
 a15c6838f9ac1e35b0e113a66738b3ce27bb6500d31218797467a2f8691341b5  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/cli-reference.md
@@ -29,6 +29,7 @@ ddf21c555e2258725842b1df86829d3af35025d2cf90c6c20f2b3ac5398c2ca6  ./hermes/skill
 2bd78982684a2612f27756b3e2f7eb744d17f72e523e5586d2b388f6d7db1037  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/desktop-plugins.md
 ee6ca1a172ecb61554248d25e97155c38c8dd18d45ee6bdd7f02f5c88bd69f54  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/error-message-diagnosis.md
 1f1a3db7bf2af80600d1ed2220f205fe7f79a7bdc1ba7df967c5405c19a28ac2  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/external-coding-agents.md
+03bde0b1f1d5abb3b58af962f274608797d27e786ad37290804e1503b2c822ac  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/memory-curation.md
 2f7d11ebe963a83a4e9478c7e7b7d02c1a02e08916eac1d6cd757ba1211d7a2c  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/model-fallback-diagnosis.md
 ded08718d2eb141262a31b323f8e66eeb40f35e074e1f0e70abb76860891ec92  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/native-mcp.md
 9b41c3a92743c10295ad22038f446b0af30d750a7960bc97ba8524794f4cae64  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/per-model-system-prompts.md
@@ -100,7 +101,7 @@ cc7f2d5b7370ca1ee1dc061bea3a5e02c771b144dbcc3cdf588174393510e882  ./hermes/skill
 65af83d2307a43298474305685d6a0eec08114dfcc0e9ff299ea4c5735bccac9  ./hermes/skills/devops/credential-login-verification/references/open-webui-auth.md
 da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skills/devops/credential-login-verification/scripts/login-path-audit.sh
 31473060303004be1a3979c8b3245a04e68321ff8ffe808fd7f886a6741271e7  ./hermes/skills/devops/docker-compose-traps/SKILL.md
-28a5dd72ea1d55de9d0eb9d2ad06fb9d3762e157aa0da14baabe72f5781e583c  ./hermes/skills/devops/hermes-state-backup/SKILL.md
+63884fc047d789ed64fdc55a7ce04ac5b5eadf6959f8d9d31b6cd2fbc6b29368  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
 8ce572465e42f636a46a8c247ceba1fb09e4fec2d90aaa2dbb2c6c73c3a9de54  ./hermes/skills/devops/litellm-fallout-triage/SKILL.md
 4fb3fd3cbd8a1ad357efa9f20b9989daff8778b7b41234b2f80a5e295bc3b970  ./hermes/skills/devops/llm-route-bench/SKILL.md
@@ -131,7 +132,7 @@ f5cf760b862da18ca4eb5f86f3a6bdecb4e1c9c8d02bb5406b082ecf6c7242c3  ./hermes/skill
 27d91d66ae5de17a9f664e9dba7b40ea012152f7147b71d994e9c957707dc7e3  ./hermes/skills/devops/vpn-entry-stack/scripts/test_whitelist.py
 e2e06d92a26070b4617c0489ef8d4bc404b6b78a62369773e11e56152c52971c  ./hermes/skills/devops/vpn-entry-stack/scripts/vpn-cfg.sh
 b636706c41c11c4315a183ec960de6928f79f9581c01fb26bbcc95d44a804a9e  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
-b08cf206312e0f83d98cea0af213c365516796f8d237a5498d47776f820ca7e1  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+789cacb2ac53a73634588d5a1be567569097aaaa464f8aed497c90cad8c90740  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 17d8c01e315a5eec3e51dd1b1e578de7ba90f3486725b8dae7959e80c4e768a8  ./hermes/skills/devops/vps-infra-installer/references/apt-and-fresh-host.md
 868ff72e3d63da39dff7eddf73a1093e96f3fee87c3b280e05b23d764c842c32  ./hermes/skills/devops/vps-infra-installer/references/beszel-and-monitoring.md
 e204f02c8a35e6c876321da47d4c17e87ae5e39458939932ed6281600dbbde1c  ./hermes/skills/devops/vps-infra-installer/references/installer-output-pane.md
@@ -160,7 +161,7 @@ fb28a609372460b2788d3b7dbc551985d24d4042057971f4d6345144d2d78caa  ./hermes/skill
 7aea4e8f89f94ab2876d79898d10a5d4cdab31390c53f72ad6934b071179f826  ./hermes/skills/note-taking/obsidian/SKILL.md
 b5a494a45bfd430bfb3042ee0452a6b88c81481f147ce7fca2c29ed3e93c490a  ./hermes/skills/productivity/DESCRIPTION.md
 503e99ef1879d6003d3d670d0009c459aa3648848b28c5471b9de770349c686a  ./hermes/skills/productivity/owner-facing-docs/SKILL.md
-c7e7942b8c32283195cfc3c28854c1e2e810ea19c42f457063096f9a4fb5751f  ./hermes/skills/productivity/owner-task-digest/SKILL.md
+3826fc15a8c239416243e178e2ad8136581c48adf6f04878b10eb7d5746efad8  ./hermes/skills/productivity/owner-task-digest/SKILL.md
 a7bc842330a491de5f73cd63e87521e53724d94d4f53949bfa2171beb8200e18  ./hermes/skills/research/DESCRIPTION.md
 e5f2f984b0f6fe22509e84f12877713bedfb3630f13271980b4dfb057d023a98  ./hermes/skills/research/city-relocation-report/SKILL.md
 88f39db6527b8984a0a4d27a1d66f64f0ae0b4e9fcbff3a10180f8fe85a8357e  ./hermes/skills/research/product-vendor-recon/SKILL.md
