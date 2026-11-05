@@ -58,7 +58,7 @@ ac2da2b39f1c355bc76bf35b2cd9e74131ea62030f89781fe82c53ee0b4f029e  ./hermes/skill
 acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skills/career/job-application-review/references/repo-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-c2d8de7951bdbf24f3375272caffa256164192b32c428a17af6220f73ca3367e  ./hermes/skills/devops/ai-stack/SKILL.md
+a8be7bcad1850213fe44ac8a7ea27ee07bddac0932de9f02717ef19290e6a94e  ./hermes/skills/devops/ai-stack/SKILL.md
 aca7b89ecdba871a14a674dd16d73ca5f2387936f2e4f2e09e909fe74e84f516  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 055726f7b857418c013c4062923acee90280a454d5f12be7760568160c0eba3e  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
@@ -83,7 +83,7 @@ e8525d40c1700267f08f96374905373f19fce68225f4a6295ce30b6f0be44074  ./hermes/skill
 3814331f3b5164e615e8503f9d71bb136811e08afc0630b9c69853f7dbf3372c  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
 e2e6b63d29a9c8ea3946f4ce38384b9257fea9f6ad915e944d099366cb8bcbc3  ./hermes/skills/devops/ai-stack/references/searxng.md
 cb667d50c244610969a3325ac977e2f037920ba14c25ee8dd97158f5cbb1a506  ./hermes/skills/devops/ai-stack/references/signup-approval.md
-443bf1db92e22acd6a47ffb4199c6f6bac3b9a1c260648a5893bf13d2e7d171c  ./hermes/skills/devops/ai-stack/references/ui-latency.md
+98369c61fd969ddfba9b0f2da18e788a31e81b0d8733cf76a22c8693c0a0baa5  ./hermes/skills/devops/ai-stack/references/ui-latency.md
 edd659ed101bb0adb507ef894077beac36c3e35d92d3709fb8a788a6d0e2c031  ./hermes/skills/devops/ai-stack/references/updates.md
 09a7e84f29e8449087cb50b934b0336848bbb45457f40838a935be290e0dfa3d  ./hermes/skills/devops/ai-stack/references/upstream-release-review.md
 49125d1b1d55cf5d77e47abe02fc8e9dcb372682dcf273644f1a6d3484d88a67  ./hermes/skills/devops/ai-stack/references/web-search-architecture.md

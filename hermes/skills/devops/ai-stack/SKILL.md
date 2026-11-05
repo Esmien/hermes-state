@@ -168,8 +168,10 @@ interrupted, and rightly so.
 запросов аватарок. Три правила ответа: **не предлагать сокращать подобранный вручную список
 моделей** (множитель — всплеск запросов, не ассортимент), **не складывать параллельные задержки
 в «итого секунд»** (124×300 мс параллельно — это 1–2 с, а не 37), и **не занимать `litellm-redis`
-под WebUI-воркеры** (он выделенный, 256 MB `noeviction`). Процедура, готовые локации nginx и
-ловушка вставки не в тот `server`-блок — `references/ui-latency.md`.
+под WebUI-воркеры** (он выделенный, 256 MB `noeviction`). Процедура, профиль по слоям (открытие длинного чата: ядро 44 мс против 1099 КБ ответа), готовые
+локации nginx и ловушка вставки не в тот `server`-блок — `references/ui-latency.md`. Патчи в
+бизнес-логику OWUI не предлагать даже когда выигрыш посчитан: только края (nginx/env/образ), иначе
+это лотерея без тестов.
 
 ## Answering the owner about web search
 
@@ -206,7 +208,7 @@ Two hard rules from this stack:
 - `references/backups-notifications.md` — **Backups and notifications**. Read when backups, restore, timers, Telegram notifications.
 - `references/litellm-model-db.md` — **Модели/группы в `litellm_db`**. Read when a model flaps, a group returns 400 from one deployment, or a DB edit (extra_headers, aliases) has to be applied and verified.
 - `references/litellm-admin-auth.md` — **LiteLLM: ownership в `litellm_db`** (ключи/spend/мемберства/авторство моделей переписываются на реального админа; «Created By = Unknown»; вес и кэш админки). Auth-путь (env-дверь, `/v2/login`, сброс пароля) — в skill `credential-login-verification`, его файл `litellm-admin-ui-auth.md`.
-- `references/ui-latency.md` — **«Медленно грузится»: латентность UI/API**. Read when the owner says a page or the chat UI is slow: per-URI `rt` from nginx logs (websockets out of the stats, `.js.map` = devtools open), the two standing causes (LiteLLM admin bundle, single-worker WebUI + avatar burst), the nginx cache locations and the wrong-server-block trap, plus the «what would a second worker give» answer and the Cloudflare fixed cost.
+- `references/ui-latency.md` — **«Медленно грузится»: латентность UI/API**. Read when the owner says a page or the chat UI is slow: per-URI `rt` from nginx logs (websockets out of the stats, `.js.map` = devtools open), the two standing causes (LiteLLM admin bundle, single-worker WebUI + avatar burst), the nginx cache locations and the wrong-server-block trap, plus the «what would a second worker give» answer, per-layer profiling of a long chat open, and why a chat cache is not worth patching into the app.
 - `references/model-provenance.md` — **Model provenance and cleanup in Open WebUI**. Read when ghost models, dead/disabled presets, model ids that 400 or vanish.
 - `references/media-pipeline.md` — **Media pipeline (images / TTS through LiteLLM)**. Read when image generation, TTS, `cptr`, model routing for media.
 - `references/music-bot-lyria.md` — **Music bot (lyria)**. Read when the separate lyria deployment (its own Postgres/Redis/RabbitMQ).
