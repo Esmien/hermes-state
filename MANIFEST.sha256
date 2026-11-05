@@ -7,7 +7,6 @@ ea943e1bed683982c6e897c1ec9c7ddb9fc0ea683de50c6e5aaac717678f36b0  ./hermes/confi
 b53e350b167824b325c211342aa2ce93852bbc8d57a6b2cdc739f3405da2bf3f  ./hermes/memories/MEMORY.md
 62ec8c3f548a39240384bfc7c1067ed3cef4f368c4b04602544620528b0d1e85  ./hermes/memories/USER.md
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
-ace53680230203597ccc98a4e43af7d78ebd79690b210af403cd5e657dbf5513  ./hermes/plugins/muse-persona/__pycache__/__init__.cpython-314.pyc
 e192a0881a87b24d55161cdc1ee075291f19592316ed88d5a770773ace175718  ./hermes/plugins/muse-persona/persona.md
 b900857a741b20fdc37399ed8eb71191eccec8b0013ed0f2c37a8827342e8fd8  ./hermes/plugins/muse-persona/plugin.yaml
 9547927170b127aac36ed4d208fbc6e6149ad4cc52457a018f16471f8161297e  ./hermes/scripts/backup-verify.sh
