@@ -1463,7 +1463,7 @@ gateway:
 #
 platform_toolsets:
   cli: [browser, clarify, code_execution, context_engine, cronjob, file, memory, session_search, skills, terminal, todo, tts, vision, web]
-  telegram: [clarify, code_execution, context_engine, cronjob, file, memory, session_search, skills, terminal, todo, tts, vision, web]
+  telegram: [browser, clarify, code_execution, context_engine, cronjob, file, memory, session_search, skills, terminal, todo, tts, vision, web]
   discord: [hermes-discord]
   whatsapp: [hermes-whatsapp]
   slack: [hermes-slack]

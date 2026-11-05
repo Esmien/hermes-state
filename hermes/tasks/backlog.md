@@ -12,3 +12,7 @@ file: tasks/docs/modules-plan.md
 ## #2 Мультиагентный контур: три зоны доверия
 status: todo
 file: tasks/docs/multiagent-tiers.md
+
+## #3 Поиск для WebUI: шим с руками + Хермес на эскалации
+status: todo
+file: tasks/docs/web-search-plan.md
