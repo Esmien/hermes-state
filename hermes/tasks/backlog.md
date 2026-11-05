@@ -16,3 +16,7 @@ file: tasks/docs/multiagent-tiers.md
 ## #3 Поиск для WebUI: шим с руками + Хермес на эскалации
 status: todo
 file: tasks/docs/web-search-plan.md
+
+## #4 MCP-развязка медиа-генераций: музыка, картинки, видео из чата
+status: todo
+file: tasks/docs/media-mcp-plan.md
