@@ -81,7 +81,30 @@ Guard: `LiteLLM_DailyUserSpend` has a unique index on
 UPDATE aborts on a collision, which is the right failure mode (rollback, then merge additively
 instead of re-pointing).
 
-## Verifying a change like this
+## Модели: "Created By / Updated At = Unknown"
+
+The Model Management table reads **`model_info.created_by` / `model_info.created_at` / `model_info.updated_at`**
+(column accessors in the UI bundle: `accessorFn: e => e.model_info.created_by`), and only when
+`model_info.db_model` is false does it print "Defined in config". The DB columns
+`LiteLLM_ProxyModelTable.created_by/created_at/updated_at` are **never serialised** by `/model/info`
+and `/v2/model/info` on v1.106.6 — the rows come back as `{model_name, model_info, litellm_params}`
+only — so the UI prints "Unknown" / "Unknown date" no matter what the columns hold. Real data was in
+the columns all along (created_at 2026-10-18). Ownership was rewritten to the admin user anyway, and
+`created_by/created_at/updated_at` were merged into the `model_info` jsonb so a later release can pick
+them up; a restart did NOT make them appear, i.e. the endpoint drops them, not the router cache.
+Do not promise the owner that the Models page will show his name without an upgrade.
+
+## Why the LiteLLM admin UI feels slow (measured)
+
+Backend is not the problem: `/v1/models` 50 ms, `/model/info` 60 ms / 256 KB, `/v2/model/info` 70 ms /
+155 KB, `/model_group/info` 79 ms / 54 KB, `/user/list` 23 ms. The UI itself ships **28 JS chunks,
+2.97 MB total**, and the model page adds ~0.4 MB of JSON; nothing on `/ui/_next/static/` carries a
+`Cache-Control` header, so every visit re-walks ~30 requests (each +~100–150 ms through Cloudflare).
+That is the 3–5 s the owner sees. The fix is caching, not the proxy: `add_header Cache-Control
+"public, max-age=31536000, immutable"` for `location ^~ /ui/_next/static/` in
+`/etc/nginx/conf.d/llm.esmien.ru.conf` (file names are content-hashed) plus a matching Cloudflare
+cache rule. Not applied yet — needs the owner's go-ahead.
+
 
 - Login: `/v2/login` with the DB user → 200; with `admin`/`user` + master key → **401**.
 - `/health/readiness` returns only `{db, status}` here, so it does *not* expose
