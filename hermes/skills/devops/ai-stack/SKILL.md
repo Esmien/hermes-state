@@ -96,9 +96,7 @@ ssh -N -L 8080:127.0.0.1:8080 -L 4000:127.0.0.1:4000 root@<host>
 # http://localhost:8080 — WebUI, http://localhost:4000/ui — LiteLLM
 ```
 
-Логин LiteLLM — `UI_USERNAME`/`UI_PASSWORD` из `ai/.env` (только `grep` ключей, значения в чат не
-выводить); на восстановленной БД пользователи уже есть, а экран первичной регистрации WebUI означает
-пустую `webui_db` — и первый зарегистрированный станет админом.
+Логин LiteLLM — **юзер из БД** (`black.walf16@gmail.com`, роль `proxy_admin`), env-логин по `UI_USERNAME`/`UI_PASSWORD` и мастер-ключу на форме отключён флагом `disable_env_credential_login` (см. `references/litellm-admin-auth.md`). Мастер-ключ остаётся рабочим только как API-bearer — это break-glass. На восстановленной БД пользователи уже есть, а экран первичной регистрации WebUI означает пустую `webui_db` — и первый зарегистрированный станет админом.
 
 ## Domains → backend
 
@@ -196,6 +194,7 @@ Two hard rules from this stack:
 - `references/disk-and-memory.md` — **Memory, disk headroom and DB growth**. Read when disk fills up, RAM climbs, dumps/logs/images grow; open-terminal heap floor.
 - `references/backups-notifications.md` — **Backups and notifications**. Read when backups, restore, timers, Telegram notifications.
 - `references/litellm-model-db.md` — **Модели/группы в `litellm_db`**. Read when a model flaps, a group returns 400 from one deployment, or a DB edit (extra_headers, aliases) has to be applied and verified.
+- `references/litellm-admin-auth.md` — **Админ LiteLLM: вход, ownership ключей**. Read when the UI login, the env-credential banner, admin users, key/spend ownership or a password reset is in play.
 - `references/model-provenance.md` — **Model provenance and cleanup in Open WebUI**. Read when ghost models, dead/disabled presets, model ids that 400 or vanish.
 - `references/media-pipeline.md` — **Media pipeline (images / TTS through LiteLLM)**. Read when image generation, TTS, `cptr`, model routing for media.
 - `references/music-bot-lyria.md` — **Music bot (lyria)**. Read when the separate lyria deployment (its own Postgres/Redis/RabbitMQ).

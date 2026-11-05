@@ -1,0 +1,91 @@
+# LiteLLM admin auth (this host)
+
+Who is admin, how the UI login works, and how to move key/spend ownership off the
+env "Default User" without breaking anything.
+
+## Current state
+
+- The only admin is a **DB user**: `black.walf16@gmail.com` (user_id
+  `b4c63a9b-863f-497c-9f90-5b5745ba4562`), role `proxy_admin`, `models=[all-proxy-models]`.
+- `general_settings.disable_env_credential_login: true` in `ai/litellm/config.yaml`
+  (commit `feat(litellm): disable env credential login…`). Env login is dead: `UI_USERNAME`/
+  `UI_PASSWORD` and the master-key fallback are rejected **on the login form only**.
+- `UI_USERNAME`/`UI_PASSWORD` stay in `ai/.env` on purpose — inert, they are the documented
+  rollback (remove the flag + `docker restart litellm`).
+- **Break-glass: the master key keeps working as an API bearer.** It never goes through
+  `authenticate_user`, so `/user/update`, `/user/new`, `/key/generate`, `/health` all keep
+  working with the UI locked out. Never say "админка потеряна" — a password can always be reset
+  over the API.
+- All keys, spend logs, daily spend aggregates and team memberships were re-pointed from
+  `default_user_id` to that user; `LiteLLM_UserTable.spend` was merged and zeroed on the default
+  row. The `default_user_id` row itself is kept (anchor for keys created by the master key without
+  `user_id`); it now shows 0 keys / 0 spend.
+
+## Traps hit while doing it
+
+1. **`POST /login` takes form data, `/v2/login` takes JSON.** A JSON body posted to `/login`
+   yields "Invalid credentials" (both fields read as the string `"None"`), not a 422. For scripted
+   login use `POST /v2/login {"username", "password"}` → `{token, redirect_url}`; the token is a
+   JWT whose `key` claim is the real session virtual key — use that as the bearer, the JWT itself
+   is not accepted as an API key.
+2. **Password policy**: uppercase + special character are required (`/user/update` answers 400
+   `Password does not meet the required policy`).
+3. **`/user/update` with `password` sets `password_reset_required=true`** (an admin assigning a
+   password forces the user to pick their own). The UI then shows the reset screen instead of the
+   dashboard. To hand over a working login straight away:
+   `update "LiteLLM_UserTable" set password_reset_required=false where user_id='…'`.
+   The HIBP login screen (`screen_login_password_for_breach`) only *fails open* and stamps the same
+   column on a real hit; it does not set it for a clean password.
+4. **A UI-created `proxy_admin` is not crippled.** Verified live on v1.106.6: its session sees
+   `/model/info` = 80 entries, `/v1/models` = 48, `/key/list`, `/user/list`, and can generate a key
+   with an explicit model list. The "only *All Proxy Models* in the dropdown" symptom is client-side:
+   the key form builds its options as `[All Proxy Models] + /v1/models` fetched with the *session*
+   token; a failed or stale fetch leaves just the one entry. Fix = re-login/hard refresh, not
+   permissions.
+5. **Keys created by a proxy admin get no owner unless `user_id` is passed explicitly**
+   (`/key/generate` with the admin session returns `user_id: null`). Keys created with the master
+   key behave the same. That is how unowned keys appear in the Keys page.
+6. **`general_settings` merges per key, not per row**: `SettingsStore.apply_db_row` resolves each
+   key as `resolve(yaml_value, db_value)`, so a flag that exists only in `config.yaml` is honoured
+   even though a `general_settings` row exists in `LiteLLM_Config` (ours holds
+   `store_model_in_db` + `pass_through_endpoints`). No need to write the flag through the API.
+7. **Restart can't be avoided but the redis auth cache is tiny here** — after the ownership rewrite
+   `--scan` shows ~5 keys and none carried `default_user_id`, so no cache purge is needed for this
+   kind of DB edit; a stale window would only mis-attribute a few spend rows.
+
+## Ownership rewrite (repeatable)
+
+Backup first (`sudo -u postgres pg_dump -Fc -d litellm_db -f /tmp/x.dump`, then `install -m 600`
+into `/var/backups/litellm/` — `pg_dump` as postgres cannot write into a root-owned directory).
+
+```sql
+begin;
+update "LiteLLM_VerificationToken"  set user_id='<new>' where user_id='default_user_id';
+update "LiteLLM_SpendLogs"          set "user"='<new>'  where "user"='default_user_id';
+update "LiteLLM_TeamMembership"     set user_id='<new>' where user_id='default_user_id';
+update "LiteLLM_UserTable" t set spend = coalesce(t.spend,0) + coalesce(d.spend,0)
+  from (select spend from "LiteLLM_UserTable" where user_id='default_user_id') d
+  where t.user_id='<new>';
+update "LiteLLM_UserTable" set spend=0 where user_id='default_user_id';
+update "LiteLLM_DailyUserSpend"     set user_id='<new>' where user_id='default_user_id';
+commit;
+```
+
+The key table is **`LiteLLM_VerificationToken`** (there is no `LiteLLM_KeyTable`).
+`/key/list` paginates at 10 by default and hides expired keys — read counts from SQL, not from the
+UI or from one API page. `LiteLLM_AuditLog` and `LiteLLM_UserNotifications` were empty here, no
+rewrite needed; check before running a broader sweep.
+
+Guard: `LiteLLM_DailyUserSpend` has a unique index on
+`(user_id, date, api_key, model, custom_llm_provider, mcp_namespaced_tool_name, endpoint)` — the
+UPDATE aborts on a collision, which is the right failure mode (rollback, then merge additively
+instead of re-pointing).
+
+## Verifying a change like this
+
+- Login: `/v2/login` with the DB user → 200; with `admin`/`user` + master key → **401**.
+- `/health/readiness` returns only `{db, status}` here, so it does *not* expose
+  `show_env_credential_login_warning`; prove the flag through the 401s instead.
+- One real call through a fresh key (`service.deepseek/deepseek-v4.1-flash`, `max_tokens` 20) must
+  show up in `LiteLLM_SpendLogs` under the new `user`, and the probe key must be deleted after.
+- End to end ~2 min; `docker inspect litellm` → `running/healthy` and `/health/liveliness` 200.
