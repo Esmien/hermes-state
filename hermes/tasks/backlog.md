@@ -8,16 +8,16 @@
      updated: YYYY-MM-DD
      note: одна строка, без переносов -->
 
-## #1 k3d-кластер на этом хосте
-status: pending
-priority: normal
-progress: 0
-updated: 2026-11-05
-note: многонодовый k8s в Docker (k3d), без покупки сервера, сносится одной командой
-
-## #2 Обучение: трейсинг и evals для music_bot
+## #1 Модульный установщик: профили core / agent / full
 status: pending
 priority: high
 progress: 0
 updated: 2026-11-05
-note: модуль 1-2 программы agent-engineering-coaching
+note: план из 8 работ в vps-infra/docs/modules-plan.md (коммит 4378521); в профиле agent Hermes идёт напрямую в LiteLLM
+
+## #2 Мультиагентный контур: три зоны доверия
+status: pending
+priority: normal
+progress: 0
+updated: 2026-11-05
+note: концепт в vps-infra/docs/multiagent-tiers.md; эскалация типизированными заявками, allowlist в хуке, гостям без docker.sock
