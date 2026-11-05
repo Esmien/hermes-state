@@ -120,6 +120,8 @@ Adding a service name on a new zone — order matters:
 4. Drop the ACME stub once the real file carries the port-80 block (a copy of the site file already has it) and `nginx -t && systemctl reload nginx`.
 5. Verify with `curl -o /dev/null -w '%{http_code} cert=%{ssl_verify_result}' https://<name>/` — want `200 cert=0`. Then confirm the old name still answers, because the family stays on it until the owner says otherwise.
 
+**Orange-clouding an already-issued name** (putting Cloudflare in front for its bot/WAF layer) is a different procedure from first issuance and has an ordering trap: restore the real client IP *before* flipping the record. Origin topology here is a `stream` block on 443 (`ssl_preread`) that forwards with `proxy_protocol` to the `127.0.0.1:9443` vhosts, and `00-proxy-realip.conf` resolves `$remote_addr` from that hop — once the record is proxied, `$remote_addr` becomes a Cloudflare edge IP and every `limit_req`/`limit_conn` bucket collapses onto one key, i.e. all users share one limit and get 429s together. Procedure, token scopes, free-plan limits and rollback: `references/cloudflare-proxy.md`.
+
 ## Versioning
 
 - **`/home/ai_service/ai-stack` is a git repo** (owner `ai_service`, local user `VPS Admin <admin@esmien.qd.je>`, no remote). Commit compose/config changes there instead of leaving them on disk; run git as `sudo -u ai_service env HOME=/home/ai_service git -C /home/ai_service/ai-stack …` so `.git` stays `ai_service`-owned. Ignored on purpose: `ai/.env` (secrets), `backups/` (dumps), `backup-deploy/` (historical copies, several files are `600 root` and unreadable by `ai_service`), `*.bak*`, logs. `ai/.env.example` lists the key names with `CHANGE_ME` values — keep it in sync when a new `.env` key appears. Tracked baseline: compose (160 lines), `litellm/config.yaml`, searxng files, `deploy.sh`, `backup-databases.sh`, and **`runbook.md`** — the owner-facing incident playbook (симптомы A–E: шлюз недоступен / всплеск отказов / легли оба маршрута Hermes / место и БД / потеря хоста). Update it whenever a recovery procedure changes; it is the durable «что делать в 3 часа ночи» artefact.
@@ -200,6 +202,7 @@ Two hard rules from this stack:
 - `references/branding.md` — **Branding (Esmien AI)**. Read when brand assets, image/logo, screenshots.
 - `references/signup-approval.md` — **Signup approval and user administration**. Read when pending signups, the Telegram approver, user roles via the API.
 - `references/searxng.md` — **SearXNG (web search backend)**. Read when web search returns junk, engines get banned, or the image is upgraded.
+- `references/cloudflare-proxy.md` — **Cloudflare in front of one of our names**. Read before proxying a vhost, adding WAF/bot rules, or when rate limits suddenly apply to everyone at once.
 - `references/web-search-architecture.md` — **Web search end to end: OWUI `external` contract, shim plan, Hermes's role**. Read when the owner wants search better than SearXNG, or search/answer quality comes up.
 - `references/memory-troubleshooting.md` — **Container memory attribution**. Read when asked "what is eating the RAM" — numbers before causes.
 - `references/upstream-release-review.md` — **Reviewing an upstream release**. Read before applying any version bump; never update unprompted.
