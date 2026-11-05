@@ -99,11 +99,12 @@ b201d073a6374940cc7a90bf418f3af9f7d5315c67f3f633edcea78012fb8fed  ./hermes/skill
 5644d9c0c424c8b962dc699ac7525adbcb976291309cf2d23dd1d7adb877be30  ./hermes/skills/devops/container-incident-response/SKILL.md
 244093d67fc1c519a82fe5fbd107a2cea7b8127de5d5e030001163f9bae0c53f  ./hermes/skills/devops/container-incident-response/references/agent-wakeup.md
 891b02a8d8af2ff6fe959e205bcb8a343270686135367050b673524c31c304e7  ./hermes/skills/devops/container-incident-response/references/detector-and-thresholds.md
-3d7dbe4d86ce12d262f13aba0dbe1d9d2d2c28c512b00f5fab396a37add82f59  ./hermes/skills/devops/credential-login-verification/SKILL.md
-226de0826f72ac083174e5a4d8d6003ef91dc5756d18d0be9191e51f1255c450  ./hermes/skills/devops/credential-login-verification/references/litellm-admin-ui-auth.md
+e9c3e7f75b6127c1d594f59275c6b1b8e03bd6ef6fde52ed7a4d2ccd936e2548  ./hermes/skills/devops/credential-login-verification/SKILL.md
+a37ca3450a9e851f57456db7a4104204a1f1c092697fd7a214466f21e5d1acb6  ./hermes/skills/devops/credential-login-verification/references/litellm-admin-ui-auth.md
 65af83d2307a43298474305685d6a0eec08114dfcc0e9ff299ea4c5735bccac9  ./hermes/skills/devops/credential-login-verification/references/open-webui-auth.md
 da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skills/devops/credential-login-verification/scripts/login-path-audit.sh
 c0ecb8227f1460b4674c82762ab1df0deb77e55ad6d09da3bc6db8924fddbbf6  ./hermes/skills/devops/credential-login-verification/scripts/probe-litellm-admin-view.py
+3af99e224dc91eff3c6f4906d0d145dbcd96229f4dcd9355fca5acce1ee62e02  ./hermes/skills/devops/credential-login-verification/scripts/reset-litellm-admin-password.py
 31473060303004be1a3979c8b3245a04e68321ff8ffe808fd7f886a6741271e7  ./hermes/skills/devops/docker-compose-traps/SKILL.md
 63884fc047d789ed64fdc55a7ce04ac5b5eadf6959f8d9d31b6cd2fbc6b29368  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md

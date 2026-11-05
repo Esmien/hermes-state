@@ -40,9 +40,11 @@ The same drift bites automations. Any bot that signs in with a password from `.e
    ```bash
    docker logs litellm --since 30m 2>&1 | grep -E 'POST /(v[0-9]+/)?login'
    ```
-   On LiteLLM 1.105.x the live endpoint is **`POST /v2/login`**; legacy `POST /login` answers `401` **even for correct credentials**. Testing `/login` proves nothing.
+   On LiteLLM the endpoint to test is **`POST /v2/login`** with a **JSON** body. Legacy `POST /login` reads `request.form()`, so a JSON body reaches it as `username="None"` and the answer is a `401` «invalid credentials» **however correct the password is** — a body-format mismatch that reads exactly like a wrong secret. If `/login` must be used, send form-encoded `data={"username":…, "password":…}`, never `json=`.
 
 3. **Parse the right response shape.** v2 returns a `(scheme, token)` pair, so `{"login": true, "token": ...}` does not exist and a naive parser reports failure on success. Judge by HTTP 200 + presence of `token`, not by a `login` field.
+
+   That `token` is a **UI session JWT**, not an API key: sending it as `Authorization: Bearer` answers `401`, and so does the `token=…` cookie on a direct API call. The session's virtual key is inside the claims — base64url-decode the middle JWT segment and use `claims["key"]` (an `sk-…` value) to test what the session can actually do. Claims also give `user_role`, `user_email`, `exp` and `password_reset_required`, which settles «did login succeed as the right principal» without any further probing.
 
 4. **Confirm the credential the container actually holds is the one you think.** File and process drift apart silently:
    ```bash
@@ -101,6 +103,9 @@ The same drift bites automations. Any bot that signs in with a password from `.e
 - **`basic auth` in front of an API is not a fix.** OpenAI-style clients send `Authorization: Bearer`, not HTTP Basic; and ACME renewal (`authenticator = nginx`) breaks unless `/.well-known/acme-challenge/` stays open. Basic auth only on `/ui/` + `/login`, with the ACME location untouched, is the shape that works.
 - **A very strong env password makes nginx basic auth unnecessary.** Say it plainly when true — it saves the owner a fragile change. 238 bits + throttling on `/v2/login` is an adequate gate for a home server.
 
+- **A generated hex secret fails LiteLLM's password policy, and an admin-set password is *meant* to force a reset.** `POST /user/update {user_id, password}` rejects a hex string with `400 … must include an uppercase letter, include a special character`; append a fixed suffix (e.g. `A!`) and then tell the owner the **effective** string once, in one line — «твоя строка + `A!`» — because he cannot log in with what he sent. The same call silently stamps `password_reset_required = true` on the row, so the next login lands on the forced-reset screen instead of the dashboard; that flag, not HIBP, is the usual cause (`last_breach_check_at` is only stamped by the login-time breach check, which fails open and does not block). If the goal is a straight dashboard check, clear it: `update "LiteLLM_UserTable" set password_reset_required=false where user_id='<id>'` — otherwise leave it and let the owner pick his own password.
+- **A secret pasted into chat — especially a group thread — is burned, and the owner needs to hear it in one line.** Do not echo the value back and do not paste it into a diff or a rewritten file; use it from env/`argv` in a throwaway script, print only counts and prefixes, then delete the script. Close with the two concrete follow-ups: change the human password in the UI once logged in, and rotate whatever else came with it (a master key pasted alongside is a bearer credential readable by every member of the thread). Rotating a master key touches every client that holds it — name the dependants before promising it.
+
 ## Verification after rotation
 
 1. New password → `200` + `token` on the live endpoint.
@@ -108,6 +113,7 @@ The same drift bites automations. Any bot that signs in with a password from `.e
 3. Burst of failures → `429` still appears.
 4. `.env` hash == container hash, and container started *after* the file edit.
 - Every remaining admin row accounted for — check `updated_at` moved, or the row was downgraded/removed.
+- For a handover («reset it so I can log in»): `/v2/login` with the delivered password answers `200`, the JWT claims show the right `user_id`/`user_role`, `password_reset_required` is the intended value, and the inner session key returns the full `/v1/models` + `/model/info` lists and a `200` on `/key/generate` with an explicit model list (probe key deleted afterwards). That is the evidence set for «аккаунт полноценный»; a login alone is not.
 - `default_user_id` (NULL email, NULL password) explicitly dismissed as the internal row, not a door.
 
 ## References
@@ -115,3 +121,4 @@ The same drift bites automations. Any bot that signs in with a password from `.e
 - `references/open-webui-auth.md` — Open WebUI auth model, status codes, offline bcrypt check.
 - `references/litellm-admin-ui-auth.md` — **LiteLLM Admin UI**: env credential login vs a DB admin row, disabling the env path in this stack, verifying the flag by effect, and the phantom «admin can't select models» symptom.
 - `scripts/probe-litellm-admin-view.py` — probe what a given LiteLLM `user_id` actually sees (`/model/info`, `/v1/models`, key generation), minting and deleting its own probe key; run inside the `litellm` container.
+- `scripts/reset-litellm-admin-password.py` — reset a DB admin's password over the API (secret via env, never argv), then prove the account is a full `proxy_admin`: `/v2/login` → JWT claims → inner session key → `/v1/models`, `/model/info`, `/key/list`, `/user/list`, throwaway `/key/generate` + delete. Run when the owner says «пароль не помню, сбрось».

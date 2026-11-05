@@ -62,6 +62,39 @@ flag. The owner sets that password himself in the UI (`Internal Users → + Invi
 open the invite link`); an agent resets it with `/user/update` + master key, never with a value typed
 into chat.
 
+## Handing the owner a login when he does not remember the password
+
+The clean path is still the invite link (owner picks the password, agent never sees one). When the
+row already exists and the password is lost, the agent resets it over the API with the master key —
+no DB surgery, no container restart:
+
+```python
+POST /user/update   {"user_id": "<uuid>", "password": "<value>"}      # Authorization: Bearer <master key>
+```
+
+Three things bite here:
+
+- **Policy rejects plain hex.** A generated 64-char hex string comes back `400 … must include an
+  uppercase letter, include a special character`. Append a memorisable suffix (`A!`), keep the rest
+  as the owner sent it, and state the effective string once («твоя строка + `A!`»). He cannot log in
+  with the value he typed, and guessing that is a wasted round-trip.
+- **The reset stamps `password_reset_required = true`.** The flag is what forces the reset screen on
+  next login — HIBP is not involved (`last_breach_check_at` is only stamped by the login-time breach
+  check, which fails open and never blocks). Leave the flag if the owner should choose his own
+  password now; clear it when the ask is «let me into the dashboard»:
+  `update "LiteLLM_UserTable" set password_reset_required=false where user_id='<uuid>'`.
+- **Proof of a working handover is two-stage.** Run `/v2/login` (JSON) and expect `200`; then decode
+  the returned JWT's claims to read `user_id`, `user_role`, `password_reset_required`, `exp`, and take
+  `claims["key"]` — the session's virtual key. The JWT itself is **not** an API bearer (`401`), so use
+  the inner `sk-…` for the probes: `/v1/models`, `/model/info`, `/key/list`, `/user/list`, and a
+  `/key/generate` with an explicit two-model list, deleting that key afterwards. A `200` on login alone
+  proves the password; only the inner-key probes prove the account is the full admin the owner expects.
+
+Report it as a handover, not as a log: what the password is (one line, no commentary), what was
+verified and with what counts, and that the account keeps `proxy_admin` rights. If the owner pasted the
+password or the master key in chat, say in the same reply that it is now in the thread history and
+propose changing it in the UI plus rotating the key — without repeating either value.
+
 ## Phantom permissions: «admin created in the UI can't choose models for keys»
 
 Symptom to expect after switching: the key-creation form's model dropdown offers only
