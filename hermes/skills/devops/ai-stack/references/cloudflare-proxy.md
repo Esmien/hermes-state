@@ -88,9 +88,16 @@ while looking completely successful. Force the edge:
 
   Do **not** put Managed Challenge on that POST: it is an XHR from the SPA signup form — it breaks the
   form for humans while a determined bot spoofs or solves it.
-- A Turnstile widget is not available without app support: Open WebUI 0.12.5 has no captcha code path at
-  all (`references/signup-approval.md`), so a widget + `auth_request` would need a patched frontend build
-  in `ai/webui-branding/` on top of the nginx side.
+- A Turnstile widget is not available without app support: **no Open WebUI version ships a captcha** —
+  neither 0.12.5 nor 0.13.0 has turnstile/hCaptcha/recaptcha or email verification (`grep` over the release
+  tarball). The working shape, in order: (1) JS gate added to the derived image in `ai/webui-branding/`
+  (one `<script>` line into `/app/build/index.html` + the file into `/app/build/static/`) that renders the
+  widget above the submit button of the form holding `input[autocomplete="new-password"]` and attaches the
+  token as `cf-turnstile-response` on `fetch`/XHR to `/api/v1/auths/signup`; (2) a tiny `turnstile-gate`
+  service on 127.0.0.1 (`/config` → sitekey, `/verify` → CF `siteverify`), keys in `/etc/turnstile-gate.env`;
+  (3) nginx `auth_request /_turnstile` on that POST. Keep the gate **inert while the keys are empty** (200 on
+  everything) and fail-open when siteverify is unreachable — otherwise a CF outage closes registration.
+  Widgets must be created in the dashboard: the zone-scoped token's `/accounts` is empty.
 
 ## Risks to state before flipping (free plan)
 
