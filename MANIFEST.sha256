@@ -179,7 +179,7 @@ cfa6128ed67a0224981a2c384ce188bd037e898a95c432465873306b6edb7349  ./hermes/skill
 d45a136df942a16e1503be0b03d4215f1682d16f6703abea1eb4dc6e5fea5e71  ./hermes/skills/web/blocked-page-recovery/scripts/html_to_text.py
 22b996996ae2bf252b31cfd2636231f08936729a381dce7ba8bfa4afb8ffe8c6  ./hermes/skills/web/blocked-page-recovery/scripts/recover_page.py
 a5960751aa1ca7e5b949773cd42620fd9090111b122c23954c81e1b3f347f308  ./hermes/tasks/backlog.md
-5ae65417e7f0aa015b169c4732d964c5cc7176d7379345b02117ab9811dd478b  ./hermes/tasks/digest.py
+4340955cd5e9e32e5588a21434da1ab305c6119d260629aebc3fb9977726c2a0  ./hermes/tasks/digest.py
 f3ca9e5152d2ccdda1de46baf415df59ae3b5abd560704d10296579035a8ffe6  ./host/ai-stack/backup-databases.sh
 d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md
 846efb23aba0d86ee3b1086edc19cb47f2cb07426875cfeaaca852f62c8a811f  ./host/ai-stack/runbook.md

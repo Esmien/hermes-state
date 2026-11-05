@@ -29,11 +29,12 @@ ENV = BASE / ".env"
 MSK = dt.timezone(dt.timedelta(hours=3))
 
 STATUS_ORDER = ["in_progress", "blocked", "pending", "done"]
+STATUS_EMOJI = {"in_progress": "🔥", "blocked": "🧱", "pending": "🟡", "done": "✅"}
 STATUS_TITLE = {
-    "in_progress": "🔴 В работе",
-    "blocked": "🧱 Заблокировано",
-    "pending": "⏳ В очереди",
-    "done": "✅ Закрыто",
+    "in_progress": "В работе",
+    "blocked": "Заблокировано",
+    "pending": "В очереди",
+    "done": "Закрыто",
 }
 STATUS_SHORT = {
     "in_progress": "в работе",
@@ -41,7 +42,9 @@ STATUS_SHORT = {
     "pending": "в очереди",
     "done": "закрыта",
 }
-PRIORITY_MARK = {"high": "🔥", "normal": "", "low": "·"}
+PRIORITY_EMOJI = {"high": "🔥 высокий", "normal": "⚪ обычный", "low": "🧊 низкий"}
+BAR_FULL, BAR_EMPTY = "▰", "▱"
+SEP = "─" * 14
 
 
 def load_env() -> tuple[str, str]:
@@ -80,20 +83,23 @@ def parse_backlog() -> list[dict]:
     return tasks
 
 
+def bar(percent: int) -> str:
+    percent = max(0, min(100, percent))
+    filled = round(percent / 10)
+    return BAR_FULL * filled + BAR_EMPTY * (10 - filled)
+
+
 def fmt_task(task: dict, show_note: bool = True) -> str:
-    title = f"<b>#{html.escape(task['id'])}</b> {html.escape(task['title'])}"
-    marks = []
-    if task["status"] == "in_progress" and task["progress"]:
-        marks.append(f"{task['progress']}%")
-    if task["priority"] == "high":
-        marks.append(PRIORITY_MARK["high"])
-    elif task["priority"] == "low":
-        marks.append("низкий")
-    tail = f" · {' · '.join(m for m in marks if m)}" if marks else ""
-    out = title + tail
+    pct = 100 if task["status"] == "done" else task["progress"]
+    meta = [f"{bar(pct)} <b>{pct}%</b>", PRIORITY_EMOJI.get(task["priority"], "")]
+    lines = [
+        f"{STATUS_EMOJI.get(task['status'], '•')} <b>#{html.escape(task['id'])}</b> "
+        f"{html.escape(task['title'])}",
+        f"    {' · '.join(m for m in meta if m)}",
+    ]
     if show_note and task["note"]:
-        out += f"\n   <i>{html.escape(task['note'])}</i>"
-    return out
+        lines.append(f"<blockquote>{html.escape(task['note'])}</blockquote>")
+    return "\n".join(lines)
 
 
 def build_digest(tasks: list[dict]) -> str:
@@ -105,28 +111,34 @@ def build_digest(tasks: list[dict]) -> str:
               "августа", "сентября", "октября", "ноября", "декабря"]
 
     lines = [
-        "🧭 <b>Задачи на неделю</b>",
-        f"<i>{weekday}, {now.day} {months[now.month - 1]} · "
-        f"{len(active)} активных, {len(done)} закрыто</i>",
-        "━━━━━━━━━━━━━━",
+        "🗂 <b>ПЛАН НЕДЕЛИ</b>",
+        f"<i>{weekday}, {now.day} {months[now.month - 1]} · {len(active)} в работе · {len(done)} закрыто</i>",
+        SEP,
+        "",
     ]
+
     for status in STATUS_ORDER:
         group = [t for t in tasks if t["status"] == status]
         if not group:
             continue
-        lines.append(f"<b>{STATUS_TITLE[status]}</b> ({len(group)})")
+        lines.append(f"{STATUS_EMOJI[status]} <b>{STATUS_TITLE[status].upper()}</b> · {len(group)}")
+        lines.append("")
         for task in group:
             lines.append(fmt_task(task, show_note=(status != "done")))
-        lines.append("")
+            lines.append("")
 
     if not tasks:
-        lines += ["<i>Список пуст.</i>", ""]
+        lines += ["<i>Доска пуста.</i>", ""]
 
+    focus = next((t for t in active if t["priority"] == "high"), active[0] if active else None)
     total = len(tasks)
     done_pct = round(len(done) / total * 100) if total else 0
-    lines.append("━━━━━━━━━━━━━━")
-    lines.append(f"Прогресс: <b>{done_pct}%</b> ({len(done)}/{total})")
-    lines.append(f"<i>Сводка задач · {now:%H:%M} МСК</i>")
+
+    lines.append(SEP)
+    if focus:
+        lines.append(f"🎯 <b>Фокус:</b> #{html.escape(focus['id'])} {html.escape(focus['title'])}")
+    lines.append(f"📊 <b>Итог:</b> {len(done)}/{total} · {bar(done_pct)} <b>{done_pct}%</b>")
+    lines.append(f"<i>обновлено {now:%d.%m %H:%M} МСК</i>")
     return "\n".join(lines).strip()
 
 
@@ -146,18 +158,34 @@ def send(text: str) -> dict:
     return {"ok": payload.get("ok"), "message_id": payload.get("result", {}).get("message_id")}
 
 
+ALLOWED_TAGS = (("&lt;b&gt;", "<b>"), ("&lt;/b&gt;", "</b>"), ("&lt;i&gt;", "<i>"),
+                ("&lt;/i&gt;", "</i>"), ("&lt;code&gt;", "<code>"), ("&lt;/code&gt;", "</code>"))
+
+
 def build_event(text: str, task_id: str | None) -> str:
     now = dt.datetime.now(MSK)
     tasks = parse_backlog()
-    header = "🔄 <b>Обновление задач</b>"
-    if task_id:
-        task = next((t for t in tasks if t["id"] == task_id), None)
-        if task:
-            header = (f"🔄 <b>Задача #{html.escape(task_id)}</b> · "
-                      f"{STATUS_SHORT.get(task['status'], task['status'])}"
-                      + (f" ({task['progress']}%)" if task["status"] == "in_progress" and task["progress"] else ""))
-    body = html.escape(text).replace("&lt;b&gt;", "<b>").replace("&lt;/b&gt;", "</b>").replace("&lt;i&gt;", "<i>").replace("&lt;/i&gt;", "</i>")
-    return f"{header}\n{body}\n<i>{now:%d.%m %H:%M} МСК</i>"
+    task = next((t for t in tasks if t["id"] == task_id), None) if task_id else None
+
+    if task:
+        pct = 100 if task["status"] == "done" else task["progress"]
+        header = [
+            f"{STATUS_EMOJI.get(task['status'], '🔄')} <b>Задача #{html.escape(task['id'])}</b>",
+            f"<i>{html.escape(task['title'])}</i>",
+            f"    {status_chip(task)} · {bar(pct)} <b>{pct}%</b>",
+        ]
+    else:
+        header = ["🔄 <b>ОБНОВЛЕНИЕ ПЛАНА</b>"]
+
+    body = html.escape(text)
+    for escaped, tag in ALLOWED_TAGS:
+        body = body.replace(escaped, tag)
+    parts = header + ["", f"<blockquote>{body}</blockquote>", f"<i>{now:%d.%m %H:%M} МСК</i>"]
+    return "\n".join(parts)
+
+
+def status_chip(task: dict) -> str:
+    return f"{STATUS_EMOJI.get(task['status'], '•')} {STATUS_SHORT.get(task['status'], task['status'])}"
 
 
 def main(argv: list[str]) -> int:
