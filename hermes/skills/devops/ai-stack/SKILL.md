@@ -194,7 +194,7 @@ Two hard rules from this stack:
 - `references/disk-and-memory.md` — **Memory, disk headroom and DB growth**. Read when disk fills up, RAM climbs, dumps/logs/images grow; open-terminal heap floor.
 - `references/backups-notifications.md` — **Backups and notifications**. Read when backups, restore, timers, Telegram notifications.
 - `references/litellm-model-db.md` — **Модели/группы в `litellm_db`**. Read when a model flaps, a group returns 400 from one deployment, or a DB edit (extra_headers, aliases) has to be applied and verified.
-- `references/litellm-admin-auth.md` — **Админ LiteLLM: вход, ownership ключей**. Read when the UI login, the env-credential banner, admin users, key/spend ownership or a password reset is in play.
+- `references/litellm-admin-auth.md` — **LiteLLM: ownership в `litellm_db`** (ключи/spend/мемберства/авторство моделей переписываются на реального админа; «Created By = Unknown»; вес и кэш админки). Auth-путь (env-дверь, `/v2/login`, сброс пароля) — в skill `credential-login-verification`, его файл `litellm-admin-ui-auth.md`.
 - `references/model-provenance.md` — **Model provenance and cleanup in Open WebUI**. Read when ghost models, dead/disabled presets, model ids that 400 or vanish.
 - `references/media-pipeline.md` — **Media pipeline (images / TTS through LiteLLM)**. Read when image generation, TTS, `cptr`, model routing for media.
 - `references/music-bot-lyria.md` — **Music bot (lyria)**. Read when the separate lyria deployment (its own Postgres/Redis/RabbitMQ).

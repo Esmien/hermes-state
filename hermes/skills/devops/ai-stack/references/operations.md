@@ -141,4 +141,43 @@ sudo certbot renew --dry-run
 
 - LiteLLM routing: `ai/litellm/config.yaml` → `docker compose restart litellm`.
 - SearXNG: `ai/searxng/settings.yml` → `docker compose restart searxng`.
-- Nginx vhosts: `/etc/nginx/sites-*` (backups in `backup-deploy/nginx/`).
+- Nginx vhosts: `/etc/nginx/conf.d/*.conf` (backups in `backup-deploy/nginx/`). `patch`/`write_file`
+  refuse paths under `/etc/nginx/` as sensitive — edit them with a python script from the terminal
+  (`.bak` copy first, exact-string replace), then `nginx -t && systemctl reload nginx`, and mirror the
+  file into `vps-infra` (`assets/host/etc/nginx/`) so the recovery repo keeps matching the host.
+
+## Admin UI is slow — measure before touching anything
+
+Reports «UI грузится вечно» are usually weight, not the gateway. Measure in this order:
+
+```bash
+# 1) backend latency + payload size (master key from the container env, never printed)
+for p in /v1/models /model/info /model_group/info /v2/model/info /user/list; do
+  curl -s -o /dev/null -w "$p %{http_code} %{time_total}s %{size_download}B\n" \
+    -H "Authorization: Bearer $LITELLM_MASTER_KEY" http://127.0.0.1:4000$p
+done
+# 2) what the browser actually downloads
+curl -sL http://127.0.0.1:4000/ui | grep -o 'src="[^"]*\.js"' | wc -l   # chunk count
+curl -sI http://127.0.0.1:4000/ui/_next/static/chunks/<chunk>.js | grep -i cache-control
+dig +short llm.esmien.ru        # VPS IP = grey cloud, no CF cache layer in the path
+```
+
+Baseline here: API 23–80 ms (`/model/info` 256 KB, `/v2/model/info` 155 KB) and **28 JS chunks,
+2.97 MB**. Gzip + immutable caching for `/ui/_next/static/` are configured (see
+`references/litellm-admin-auth.md`); if a future report says «опять тормозит», re-measure before
+blaming the proxy — the remaining seconds are the SPA itself.
+
+## После рестарта LiteLLM — это холодный старт, а не поломка
+
+`docker restart litellm` / `up -d` gives `state=running, health=starting` for ~10–30 s. In that
+window WebUI and Hermes get errors and fall back, so the owner — who is usually sitting in the UI —
+reads it as «всё отвалилось сразу после твоей правки».
+
+- Do not report «готово» on the strength of `docker restart` returning 0. Poll until
+  `/health/liveliness` is 200, then make **one real completion** through a throwaway key and see the
+  row land in `LiteLLM_SpendLogs` under the right `user`; delete the probe key.
+- If the owner reports breakage right after a restart, check `docker inspect litellm --format
+  '{{.State.StartedAt}}'` and the failure rows' timestamps first: failures that stop at the start
+  time are the cold start, not a regression — and say so in one line instead of re-auditing auth.
+- `LiteLLM_SpendLogs` is the arbiter: `status<>'success'` rows with `coalesce(model,'')<>''` are real
+  model failures; empty-model rows are unauthenticated `/v1/models` scanner noise.

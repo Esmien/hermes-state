@@ -57,6 +57,11 @@ print(json.load(urllib.request.urlopen(r,timeout=20)).get('details',{}).get('sho
 # True = env login still live and the UI banner is showing; False = flag took effect
 ```
 
+On this install readiness answers only `{db, status}` — no `details` object — so that field comes back
+`None` and proves nothing. Fall back to the effect that cannot be missed: `POST /v2/login` with
+`admin` / `user` plus the master key must answer **401**, while the DB admin still gets `200`. Two
+refused logins settle the flag; reading the config back does not.
+
 Order of operations is not optional: a working DB admin row must exist and be proven **before** the
 flag. The owner sets that password himself in the UI (`Internal Users → + Invite User → proxy_admin →
 open the invite link`); an agent resets it with `/user/update` + master key, never with a value typed

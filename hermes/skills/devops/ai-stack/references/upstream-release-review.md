@@ -35,6 +35,14 @@ For open-webui `read_file` the top ~140 lines — newest-first, one section per 
 
 **Litellm release numbering — stable vs pre-release.** Tags ending `-rc.N` or `-dev.N` are pre-releases; the newest *plain* `vX.Y.Z` is the newest stable. BerriAI's rolling `main-latest` image tag is built from the main branch, so it can serve a **dev** build ahead of the newest stable — check it (step 1's `docker run` probe) and if it does, recommend **pinning the compose image to the newest stable tag** instead of pulling the rolling tag. A patch-level stable bump usually carries only backports; read the two or three linked PRs, they are the whole delta.
 
+**Check the patch release on OUR line before proposing a minor bump.** LiteLLM ships almost daily: a `vX.Y.Z+1` on the version we run is often 3 bullets («Lens/Helm chart», one provider route) and therefore «не обновляемся, нам это ничего не даёт» — say that explicitly, it answers the owner's real question. Only a minor bump (hundreds of bullets) needs the filtering treatment below.
+
+**LiteLLM has no prisma migration files — so «no migrations in the diff» is NOT a risk signal here, unlike Open WebUI.** `git/trees/<tag>?recursive=1` filtered on `prisma/migrations` returns **zero** `.sql` paths on both the running and the newest tag: LiteLLM reconciles the schema against `schema.prisma` at startup (the Rust/ClickHouse migrations under `litellm-rust/` are a different product). Consequences to state in the review:
+
+- a schema change can land silently on the first boot after the bump, with no file to inspect beforehand;
+- the rollback path is therefore **a database dump, not an image tag** — take a fresh `litellm_db` dump before the bump and say the restore step out loud;
+- `LiteLLM_Config`/general_settings rows survive a downgrade, so a bad release can be reverted by tag alone *only if* the schema did not move.
+
 **Fetch raw text with `curl`, not `web_extract`.** `web_extract` here is backed by SearXNG, a search-only backend, and returns "cannot extract URL content" for any URL. Use `curl` (or set `web.extract_backend` to firecrawl/tavily/keenable/exa/parallel if you want `web_extract`).
 
 Similarly, when a check has to run **inside** a container, assume nothing is installed there: use that container's own interpreter (`/app/.venv/bin/python` for litellm) and stdlib `urllib.request` instead of `curl`/`wget`, and read secrets from the container's own env (`os.environ['LITELLM_MASTER_KEY']`) rather than passing them on the command line.
