@@ -5,7 +5,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 ea943e1bed683982c6e897c1ec9c7ddb9fc0ea683de50c6e5aaac717678f36b0  ./hermes/config.yaml
 9d33ca2fd51d74d82fa15bb9d5e18f9f7950314002a26bca5718155240809880  ./hermes/cron/jobs.json
 b53e350b167824b325c211342aa2ce93852bbc8d57a6b2cdc739f3405da2bf3f  ./hermes/memories/MEMORY.md
-697b3961f3c8d706b69efd901399e53da6df6df977c50b69cce9d170fac3d53a  ./hermes/memories/USER.md
+62ec8c3f548a39240384bfc7c1067ed3cef4f368c4b04602544620528b0d1e85  ./hermes/memories/USER.md
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
 ace53680230203597ccc98a4e43af7d78ebd79690b210af403cd5e657dbf5513  ./hermes/plugins/muse-persona/__pycache__/__init__.cpython-314.pyc
 e192a0881a87b24d55161cdc1ee075291f19592316ed88d5a770773ace175718  ./hermes/plugins/muse-persona/persona.md
@@ -179,14 +179,9 @@ cfa6128ed67a0224981a2c384ce188bd037e898a95c432465873306b6edb7349  ./hermes/skill
 6c2d28e6cdf41c471f0d96c3a09bbefde697e98ab7cabb6062c9affd7f412543  ./hermes/skills/web/blocked-page-recovery/SKILL.md
 d45a136df942a16e1503be0b03d4215f1682d16f6703abea1eb4dc6e5fea5e71  ./hermes/skills/web/blocked-page-recovery/scripts/html_to_text.py
 22b996996ae2bf252b31cfd2636231f08936729a381dce7ba8bfa4afb8ffe8c6  ./hermes/skills/web/blocked-page-recovery/scripts/recover_page.py
-57fd8d0be03034ab708f82077b0973d39583cc30689b5a5898efb2f6cc71a818  ./hermes/tasks/backlog.md
-3a31994545c2fdfdb0342e8f00dfc934d82e64a09c4d221e42862f2c38d57a83  ./hermes/tasks/digest.py
-b5aaebebeb8341e5e652cc67ca7e4ee3c7ecb3994a6413d97dfa6cb49193b382  ./hermes/tasks/install-units.sh
-98fa2204d7fa6f7ccf0a689d2372d6a45babcdefb54d8ef441fc9ca0c3632e4d  ./hermes/tasks/watchdog.py
-183999e694511c0a5f163273cb38117b8660374794d2b9d33c00de57811b0294  ./hermes/units/hermes-task-board-watch.path
-b187faa20cc868e7c52ba24d4595612166f7a94352d1e2ebea9dacf2523f4518  ./hermes/units/hermes-task-board-watch.service
-cffd223a6549b205880ac9eb77af7b6c98e8e3939d0dc48ee26347f36692ee0b  ./hermes/units/hermes-task-digest.service
-03d16c3cc0b099da65e396165fc3a2136c8fdbc5db5084244da7c7f025b755aa  ./hermes/units/hermes-task-digest.timer
+b2f87968bb4e1ddb60428fff3db9f6befd491b070f563dae286e7999c001459c  ./hermes/tasks/backlog.md
+cd44df6a854f67449408571c60d009081a33bdf73e66322e9254c9a491984e00  ./hermes/tasks/docs/modules-plan.md
+0262c8b098d9d1cd6932c26d0c97a11b34ab174c1c7618eff5aadc3ad069d8b5  ./hermes/tasks/docs/multiagent-tiers.md
 f3ca9e5152d2ccdda1de46baf415df59ae3b5abd560704d10296579035a8ffe6  ./host/ai-stack/backup-databases.sh
 d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md
 846efb23aba0d86ee3b1086edc19cb47f2cb07426875cfeaaca852f62c8a811f  ./host/ai-stack/runbook.md
@@ -197,7 +192,7 @@ ec6676d1e7be69864c893f6fd16c13a4dd394765d053b1230387ba84a8da1f26  ./host/bin/doc
 f96729163cb7d8c981061e46d0eb24579ac5272df2295ef5d67a5f02b87f20a6  ./host/bin/fw-guard-postgres.sh
 89d6ff8db0bcc42319a1f84d24db0966ef0daa3e97219ec7d9ccd041253129d8  ./host/bin/hermes-boot-notify.sh
 9c6388452c33f57d635ffbb36e318429fa22545a6e5a6f1d71551320a2678a1e  ./host/bin/hermes-history-backup.py
-151135a6de72ecd34488c96471fc997e7abf89aa5568d0e96063dabf6de37d91  ./host/bin/hermes-state-backup.sh
+3b2d8f4af9519cf6e10b29af79cd74085dec1adb9ee57a1058e068f555db4781  ./host/bin/hermes-state-backup.sh
 5249aa0ba7bc85fb2cfaa7357d93c1bde4fc24b9182a71d8df08dbb90f65be5e  ./host/bin/hermes-state-watch.sh
 249ff939ae185cf37c91ef7bdcc926518767213c964e952180be17ab4bfb7377  ./host/bin/litellm-spend-retention.sh
 528803b4b549b524245525698d60bb188f847818332070a95afd3307a38c41aa  ./host/bin/litellm-watchdog.py

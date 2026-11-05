@@ -7,8 +7,8 @@
 
 ## #1 Модульный установщик: профили core / agent / full
 status: todo
-file: vps-infra/docs/modules-plan.md
+file: tasks/docs/modules-plan.md
 
 ## #2 Мультиагентный контур: три зоны доверия
 status: todo
-file: vps-infra/docs/multiagent-tiers.md
+file: tasks/docs/multiagent-tiers.md
