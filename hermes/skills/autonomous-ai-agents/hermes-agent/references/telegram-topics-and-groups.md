@@ -71,6 +71,20 @@ Topics isolate the **conversation** only. Memory, skills, filesystem, root privi
 
 Real isolation (own memory, model route, own persona) = a separate profile (`$HERMES_HOME/profiles/<name>/`) with its own bot token and its own gateway. Several such bots can sit in one supergroup; `exclusive_bot_mentions` (on by default) routes by `@username`.
 
+## Answer shape (owner-facing)
+
+The owner asks this as a how-to, not as a request for an essay:
+
+1. One line of verdict: what is already automatic / what actually has to change.
+2. Numbered «что делать тебе» — only UI actions he performs in Telegram, 1–3 steps, imperative.
+3. What I will do host-side, and the single confirmation you need from him.
+
+Explaining the mechanism before telling him his own next step produced «Не понял ничего. Мне что делать?». If he has to act, the action list is the reply; mechanism goes below it or is dropped.
+
+## Notifier side on this VPS
+
+Moving the existing bots into topics is a code change, not a config flip — every sender addresses `BOT_OWNER` (DM) directly. The env-var convention, the list of senders, the task-board pointer trap and the verification commands live in the `telegram-gate-and-bots` skill; load it with this reference when the task is "route alerts into topics" rather than "how do topics work".
+
 ## Verification habit
 
 When the question is about session routing, read the key builder, don't infer it: run `source /root/.hermes/hermes-agent/activate` then a 3-line `build_session_key` probe. The bare system `python3` lacks the install's deps (`ruamel.yaml`) and fails on import — use the install venv, not `python3` from `$PATH`.
