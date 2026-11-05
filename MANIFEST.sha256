@@ -59,7 +59,7 @@ acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skill
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
 87a069ffcb5c64860b093f6c1ba67638cb71ddafee6f63c70ed897e773b0928c  ./hermes/skills/devops/ai-stack/SKILL.md
-e2f836d92b721494a2dd993a035536a6108b714b9fa4e1840084232bc4ce5f39  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
+7eb2a833de45a1114ab8fd1ec00a842507667c87fa651b920781d0745bd4c2fc  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 055726f7b857418c013c4062923acee90280a454d5f12be7760568160c0eba3e  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
 481d0e1fbf5fbc2df667898dea67de25b173db09eb7de5a341797d09a86c9aa2  ./hermes/skills/devops/ai-stack/references/cloudflare-proxy.md
@@ -185,10 +185,10 @@ bf9d3d344a5962349521d0ca6c3156f781ad6b4a53df9b7696e532f4fda434a0  ./hermes/tasks
 cd44df6a854f67449408571c60d009081a33bdf73e66322e9254c9a491984e00  ./hermes/tasks/docs/modules-plan.md
 0262c8b098d9d1cd6932c26d0c97a11b34ab174c1c7618eff5aadc3ad069d8b5  ./hermes/tasks/docs/multiagent-tiers.md
 2ee26f3d7fc2d8856a743e3a0975d178f853b8c228c2cc7d641ce3544ce1f1b4  ./hermes/tasks/docs/web-search-plan.md
-f3ca9e5152d2ccdda1de46baf415df59ae3b5abd560704d10296579035a8ffe6  ./host/ai-stack/backup-databases.sh
+9a8a4f9270a64de4ca700bb4fe574eeb100a1283facb50dc828d318d6551729c  ./host/ai-stack/backup-databases.sh
 d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md
 846efb23aba0d86ee3b1086edc19cb47f2cb07426875cfeaaca852f62c8a811f  ./host/ai-stack/runbook.md
-9ac575074b016abfcf8fc35c54bf5853cc49fe6213252fb345647a1386d365d4  ./host/backups/tg-registry.json
+ee3e5e5d7840397a93b82ec633085b19b996d0029243f741910cf1190142cc3f  ./host/backups/tg-registry.json
 3d999ff1ff6aaca44eea08c3683eca79b59a573ae5dc8bf9dba668e38a3e6d5f  ./host/bin/docker-detector-liveness.sh
 bb24baca67f479c8fb1ce9eb41fd9b3c4d1ba41f2bd03a2dda9d809074275eac  ./host/bin/docker-incident-agent.sh
 9be678d50f64ee72144f42b07a78643cd40de466e849cba04d27f5a823d6fab6  ./host/bin/docker-incident-detector.py
