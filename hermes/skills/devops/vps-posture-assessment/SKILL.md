@@ -89,6 +89,11 @@ Companion skills: `ai-stack` (what is inside the AI stack, and the backup verifi
   data is how a summary loses credibility.
 - **Harness backup scope:** `hermes-state` carries config/memories/skills/cron/plugins — NOT
   `state.db`/`sessions`. Those now go weekly to the file bot via `hermes-history-backup.timer`.
+- **Prompt injection is not a posture item you can grade as «закрыто».** The model is not a security boundary;
+  grade the deterministic layer instead (egress, tool-call hooks, secret isolation, reader isolation) and say
+  outright that instructions in a system prompt are not protection. Ranking, what is theatre, and what exists on
+  this host — `references/prompt-injection-defense.md`. Never let an LLM-judge or a "prompt that forbids
+  following pages" be counted as a control.
 
 ## Scope decisions (same rule: do not re-argue)
 
@@ -121,5 +126,8 @@ re-argue it in the same answer.
 
 ## References
 
+- `references/prompt-injection-defense.md` — threat surface, the controls that actually hold (egress allowlist,
+  pattern hooks, secret isolation, reader profile), what is theatre, and the honest ceiling with root +
+  `docker.sock`.
 - `references/recovery-rto.md` — measured restore-time budget (полоса, образы, сборки, дампы), what `install.py`
   and `deploy.sh` cover, and what has to be done by hand.

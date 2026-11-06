@@ -32,8 +32,17 @@ metadata:
 | log | `/var/log/hermes-state-backup.log` (logrotate weekly, 4 kept) |
 | failure alert | Telegram via `hermes send -t telegram` (works without the gateway running) |
 
-Snapshot layout inside the repo: `hermes/{config.yaml,SOUL.md,memories/,skills/,cron/jobs.json,tasks/,docs/,plugins/,hooks/,agent-hooks/,scripts/}`,
+Snapshot layout inside the repo: `hermes/{config.yaml,SOUL.md,memories/,skills/,cron/jobs.json,tasks/,docs/,plugins/,hooks/,agent-hooks/,scripts/,bin/,profiles/<name>/{config.yaml,SOUL.md}}`,
 `host/{bin,systemd,etc,ai-stack,backups}/`, `MANIFEST.sha256`, `README.md`.
+
+**Extra Hermes profiles cost an extra line each time they are created.** A profile (`reader` and any later
+isolated role) is state that does not exist on a restored host until something copies it, so the snapshot
+loop needs `profiles/*/config.yaml` + `profiles/*/SOUL.md` and `$HERMES_HOME/bin/` (helper scripts the agent
+calls, e.g. `read-untrusted`). Two mechanical traps: a filtered `rsync` **without** `--delete-excluded` keeps
+files it was told to exclude, and `--include '*/'` materialises every empty runtime directory into the repo —
+use `rsync -a --delete --delete-excluded --prune-empty-dirs --include '*/' --include 'config.yaml'
+--include 'SOUL.md' --exclude '*'`. A profile's `.env` stays out (it holds the gateway key) and is not a
+loss: restore re-adds one line, `grep '^HERMES_CUSTOM_…' /root/.hermes/.env >> <profile>/.env`.
 
 `hermes/docs/` (`/root/.hermes/docs/`) — единственный дом для **разборов, замеров и предложений**.
 Черновики не класть в `vps-infra`: там `vps-infra-push.sh` автоматически коммитит и пушит **всё**
@@ -65,7 +74,8 @@ snapshot-loop реестр остаётся только на умирающем
 ## Deliberately excluded
 
 `.hermes/.env`, `ai-stack/ai/.env`, `state.db`, `sessions/`, `logs/`, `cache/`, `installs/`,
-`hermes-agent/` (the install), `skills/.hub` (51 MB hub clone), `.curator_ledger.jsonl`, `.usage.json`.
+`hermes-agent/` (the install), `skills/.hub` (51 MB hub clone), `.curator_ledger.jsonl`, `.usage.json`,
+`profiles/*/.env`, `profiles/*/{sessions,state.db,logs,cache,skills}/` (bundled skills reseed on install).
 Secrets inside `config.yaml` are `${ENV_VAR}` references only — that is why the file is safe to commit.
 
 ## Rules that keep it safe
@@ -106,6 +116,7 @@ Append the filename to `HOST_BIN`, `HOST_UNITS` or `HOST_ETC` in the script (the
 **Новый каталог состояния под `$HERMES_HOME` регистрируется в четырёх местах, иначе он теряется молча:**
 
 1. `rsync` строка в snapshot-скрипте (с `--exclude '.env'`, если внутри есть токен) — иначе каталога нет в репо;
+   для профилей бери `--delete-excluded --prune-empty-dirs`, иначе исключённое остаётся, а пустые рантайм-каталоги уезжают в репо;
 2. путь в `WATCH` у `hermes-state-watch.sh` — иначе правки в нём не запускают снапшот и доезжают только с чужим изменением;
 3. `SOURCES` в `/usr/local/bin/secrets-offsite-backup.py`, если каталог держит `.env` — токен обязан пережить потерю хоста;
 4. изменённые хостовые скрипты — в `vps-infra/assets/host/bin/` (второй recovery-репозиторий), затем пуш.
