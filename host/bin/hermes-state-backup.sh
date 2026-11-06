@@ -104,7 +104,7 @@ install -m 600 -D "$HERMES_HOME/config.yaml" "$REPO_DIR/hermes/config.yaml"
 # восстановление профиля = файлы + строка ключа, добавленная вручную.
 if [[ -d "$HERMES_HOME/profiles" ]]; then
     rsync -a --delete \
-        --include '*/' --include 'config.yaml' --include 'SOUL.md' --include 'skills/***' \
+        --include '*/' --include 'config.yaml' --include 'SOUL.md' \
         --exclude '*' \
         "$HERMES_HOME/profiles/" "$REPO_DIR/hermes/profiles/"
 fi
