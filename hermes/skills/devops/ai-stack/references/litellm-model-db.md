@@ -60,6 +60,28 @@ except Exception as e: print(getattr(e,'code',e))
 
 Повторить 4 раза подряд; при правке заголовков ждать `200 200 200 200`.
 
+## Как снести провайдера, который живёт в credential
+
+Tokenator (бесплатный прокси) убран с хоста целиком 2026-11-06, и это показало типовую
+ловушку: его деплойменты **не имели `api_base`** — адрес сидел в credential
+(`LiteLLM_CredentialsTable`, имена `Tokenator 1f23/3e39/a2e3/c984`), а деплойменты
+ссылались на него через `litellm_credential_name`. Поэтому `WHERE litellm_params->>'api_base'
+ILIKE '%tokenator%'` возвращает ноль строк, а `/model/info` показывает `api_base: None`.
+
+Порядок сноса:
+
+1. `GET /model/info` → выбрать записи по `litellm_params.litellm_credential_name` (поле в ответе
+   API читаемое, в БД — зашифровано). Для каждой группы проверить, остаётся ли живая нога.
+2. `POST /model/delete {"id": ...}` по каждой такой записи — API применяет сразу, рестарт не нужен.
+3. `DELETE /credentials/<url-encoded name>` — снести сами credential'ы.
+4. Проверить эффект: `GET /model/info` (не должно остаться упоминаний), `GET /v1/models`
+   (нет имён вида `free-*`), и по одному вызову каждой затронутой группы — оставшиеся ноги
+   могут быть мёртвыми (`Model is unavailable`), тогда их надо перевести на рабочую модель
+   через `/model/update` с полным `litellm_params` и `model_info.id`.
+
+Перед удалением — дамп двух таблиц (`pg_dump -t LiteLLM_ProxyModelTable -t LiteLLM_CredentialsTable`),
+удаление деплойментов через API необратимо.
+
 ## Что считать нормой после восстановления дампа
 
 - `/model/info` отдаёт меньше записей, чем есть групп в БД (часть алиасов висит на мёртвых
