@@ -45,9 +45,13 @@ Verify by behaviour: `ip -br addr show esmien0` (expect `198.18.0.1/30`), `curl 
 - Script edited with a placeholder token (`.../sub/ТОКЕН`) plus `set -e` and `curl -f` exits with no
   output at all — reads as «терминал просто закрылся». Keep `set -uo pipefail` (no `-e`) and print an
   explicit message per failure step; give the owner `bash -x` as the debug path.
-- Trailing `\;` in a pasted multi-line block turns `curl https://ipinfo.io/ip;` into
-  `https://ipinfo.io/ip\;` — ipinfo answers `404 {"title":"Wrong ip"}` and it reads like a broken
-  tunnel. Send commands one per line.
+- The owner's zsh turns a pasted `;` into `\;` **inside a heredoc body too**, so a script created with
+  `sudo tee … <<'EOF'` can silently contain `https://api.ipify.org\; echo` — curl then requests a URL
+  ending in `;` and an extra `echo` argument, and `-s` hides the failure as an empty line. After any
+  heredoc-created script, grep it for backslashes (`grep -n '\\' /usr/local/bin/<script>`) before debugging
+  behaviour. Trailing `\;` on a pasted command line has the same effect: `curl https://ipinfo.io/ip;`
+  becomes `https://ipinfo.io/ip\;` and ipinfo answers `404 {"title":"Wrong ip"}`. Send one command per
+  line, never a block joined by `;`.
 - GNOME shows nothing in its VPN list — that is expected, the tunnel lives below the network applet.
   Say it up front so the owner does not go looking for a toggle.
 - No killswitch by default; `strict-route: true` only prevents leaks when the uplink changes. Offer
