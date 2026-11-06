@@ -287,7 +287,7 @@ nginx и сертификатов, такие пункты помечаются 
 ## Переезд (проверенный порядок)
 
 Хост сначала проверяется, потом оплачивается: реестр домена, чья это AS и префикс, что входит
-в цену (выделенный IPv4), серверный ISO вместо desktop —
+в цену (выделенный IPv4), серверный ISO вместо desktop, установка и первый вход на свежей машине —
 [references/host-provider-vetting.md](references/host-provider-vetting.md).
 
 1. Одной командой: положить `bootstrap.env` (GITHUB_TOKEN, SECRETS_KEY, TG_FILE_TOKEN + тестовые

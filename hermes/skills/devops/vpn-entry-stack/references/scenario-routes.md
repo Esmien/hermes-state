@@ -89,6 +89,23 @@ re-measuring.
 - Migrating a live token to this kind is additive: snapshot `md5sum` of `/var/www/esmien-sub/*/*`,
   write `kind=meta`, run `make_sub.py`, prove every other token's files are byte-identical.
 
+## Why the owner says it suddenly got faster
+
+After the switch to one visible node the owner reports the whole web got faster — **including on
+the phone, where no desktop daemon runs**. Do not credit the desktop TUN; the cause is
+server-side: (1) no per-rule node switching on the client, which used to open a *new* WS session
+and re-resolve names on every hop between «Франция» and «Эстония» mid-page; (2) the Google chain
+now stays on one exit, so Google never sees the country change halfway through a session and
+stops re-asking; (3) the old 20+-node list pinged every relay on each refresh and any of them
+could be a dead reseller node. Measured throughput did not change — the number of handshakes and
+country flips did.
+
+When he compares against a third-party subscription that felt slower on «the same France»: a
+reseller's «Франция» is their control server plus a rented IP (sometimes one more hop), sharing an
+oversold uplink with other customers, while our France is an exit *we* dial directly. Offer to
+measure it rather than argue — TCP ping and time-to-first-byte through his node versus ours turns
+it into a number.
+
 ## Rolling it out to everybody
 
 1. Snapshot: `md5sum` every file under `/var/www/esmien-sub/*/*` into a JSON map keyed
@@ -115,6 +132,11 @@ mid-refresh — say that out loud when the family is asked to update their subsc
 - A removed scenario leaves its rule and outbound running on the *drained* container until the
   next flip (that is what blue/green means), so verify the cleanup with a second `apply`, not
   by counting sockets straight after the first.
+- To bring the idle colour onto the current config **without moving traffic**: `docker restart
+  vpn-router-b` (or `vpn-router`, whichever is idle per `vpn-color`) and then
+  `python3 vpn-bluegreen.py probe b` — 24 answers of `400` mean it is safe to flip. Do this after
+  a batch of edits; otherwise the next `apply` restarts a container that is several changes
+  behind, and the flip races that difference.
 - `make_template.py` copied `routing.balancers` and `observatory` verbatim, so the secret-free
   template referenced provider relays a fresh deploy does not have and would not start. Filter
   selectors against the kept outbounds and drop balancers/observatory left empty.
