@@ -13,10 +13,11 @@ whoever taps another node burns the *provider's* subscription traffic and raises
 - Rules, in this order, **before** every `inboundTag` rule:
   1. google domains (`google.com`, `googleapis.com`, `gstatic.com`, `googleusercontent.com`,
      `withgoogle.com`, `google.dev`) → `bal-google`;
-  2. youtube (`youtube.com`, `googlevideo.com`, `ytimg.com`, `youtu.be`,
-     `youtube-nocookie.com`, `ggpht.com`, `yt.be`) → `bal-yt`;
-  3. RU (`.ru/.su/.рф` + RU-only services) → `bal-ru`;
+  2. RU (`.ru/.su/.рф` + RU-only services) → `bal-ru`;
   then the inbound rules, the google-IP block (repointed to `bal-google`) and the catch-all.
+  **YouTube has no scenario**: the owner dropped it after hearing the price — every byte on a
+  relay is the provider's subscription traffic, and ad-free YouTube was not worth it. YouTube
+  rides the Estonian exit with everything else; do not reintroduce it without a direct request.
 - `scenario_routes.py install` builds all of that idempotently; `set-selector <group> <tags…>`
   rewrites one selector (the watchdog's only write).
 
@@ -87,6 +88,13 @@ re-measuring.
 
 ## Pitfalls
 
+- The watchdog must re-read `config.json` **right before writing** and touch only selectors of
+  groups that still exist: a pass that started before someone else edited the config otherwise
+  writes its stale copy back and resurrects a removed balancer/rules. `vpn-cfg apply` and the
+  watchdog share `/var/lock/vpn-config.lock` (`flock`), or two applies overlap.
+- A removed scenario leaves its rule and outbound running on the *drained* container until the
+  next flip (that is what blue/green means), so verify the cleanup with a second `apply`, not
+  by counting sockets straight after the first.
 - `make_template.py` copied `routing.balancers` and `observatory` verbatim, so the secret-free
   template referenced provider relays a fresh deploy does not have and would not start. Filter
   selectors against the kept outbounds and drop balancers/observatory left empty.
