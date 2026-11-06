@@ -103,7 +103,7 @@ install -m 600 -D "$HERMES_HOME/config.yaml" "$REPO_DIR/hermes/config.yaml"
 # собственные скиллы. Никогда .env (ключи), sessions/, state.db, cache/, logs/ —
 # восстановление профиля = файлы + строка ключа, добавленная вручную.
 if [[ -d "$HERMES_HOME/profiles" ]]; then
-    rsync -a --delete \
+    rsync -a --delete --delete-excluded --prune-empty-dirs \
         --include '*/' --include 'config.yaml' --include 'SOUL.md' \
         --exclude '*' \
         "$HERMES_HOME/profiles/" "$REPO_DIR/hermes/profiles/"
