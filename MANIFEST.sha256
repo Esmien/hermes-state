@@ -125,7 +125,7 @@ a50279800395099308a9ee70885353b3e27cb3c4498f0c03c4cf545eb924d3f1  ./hermes/skill
 f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skills/devops/llm-route-bench/scripts/ab_bench.py
 8448c5899b2ffab423b675e9ff1c24f808f95fc736d3d010d72fcb8d3007e9c6  ./hermes/skills/devops/llm-route-bench/scripts/code_bench.py
 a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skills/devops/llm-route-bench/scripts/code_bench_hard.py
-f4ee7ba5f8492f22b027367699a48232723029cd9c3c3b62d57609a80e43e9d7  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
+dee0fd894905b57c13964d4c149f54f83074bafed236a48658c4d95547a8c2cf  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 ca25472b50ad83024fb7bcf7338aad4dacb16a24391d54e694f0f9ee85b37b32  ./hermes/skills/devops/ru-access-to-foreign-cloud/SKILL.md
 9863e40dd9c9afc73287285af5bd3aebf53410d153f77bd53859b23721d892a1  ./hermes/skills/devops/ru-access-to-foreign-cloud/references/oracle-cloud.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
@@ -147,7 +147,7 @@ f5cf760b862da18ca4eb5f86f3a6bdecb4e1c9c8d02bb5406b082ecf6c7242c3  ./hermes/skill
 27d91d66ae5de17a9f664e9dba7b40ea012152f7147b71d994e9c957707dc7e3  ./hermes/skills/devops/vpn-entry-stack/scripts/test_whitelist.py
 e2e06d92a26070b4617c0489ef8d4bc404b6b78a62369773e11e56152c52971c  ./hermes/skills/devops/vpn-entry-stack/scripts/vpn-cfg.sh
 b636706c41c11c4315a183ec960de6928f79f9581c01fb26bbcc95d44a804a9e  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
-7a790b6e3aca5f1eb1a0e36277c51ca5c94f326b51c5f83f785cb3d5cbf12ed6  ./hermes/skills/devops/vps-infra-installer/SKILL.md
+674c2c4e0ab3476b9b9e27d782ec0028bb4a80529daa5016dc1cbe95df942edb  ./hermes/skills/devops/vps-infra-installer/SKILL.md
 17d8c01e315a5eec3e51dd1b1e578de7ba90f3486725b8dae7959e80c4e768a8  ./hermes/skills/devops/vps-infra-installer/references/apt-and-fresh-host.md
 868ff72e3d63da39dff7eddf73a1093e96f3fee87c3b280e05b23d764c842c32  ./hermes/skills/devops/vps-infra-installer/references/beszel-and-monitoring.md
 e204f02c8a35e6c876321da47d4c17e87ae5e39458939932ed6281600dbbde1c  ./hermes/skills/devops/vps-infra-installer/references/installer-output-pane.md

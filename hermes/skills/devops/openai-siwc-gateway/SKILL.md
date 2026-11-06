@@ -44,6 +44,14 @@ replacement. The documented path is SIWC for open-source / locally hosted apps.
   responses bridge does not break tools.
 - Model catalog: `GET /v1/models` returns the account plan models (`visibility == list`).
 - No rate-limit headers come back; quota is invisible, same subscription allowance.
+- **`The ChatGPT user has reached their Subscription Sharing usage limit` — это квота аккаунта, не баг моста.**
+  Текст приходит от OpenAI (в LiteLLM — `BadRequestError`/400 на `/v1/responses`) и означает, что общий
+  allowance подписки выбран для всех клиентов сразу: Codex CLI, OpenCode и этот мост делят один пул.
+  Остаток нигде не читается (ни заголовков, ни `/usage`: `hermes usage` отвечает «нет данных»), поэтому
+  вариантов два — ждать сброса окна или увести клиента на маршрут без подписки. Диагностика по факту:
+  `docker logs litellm | grep -i "Subscription Sharing"` даёт время и модель, `grep -c` — единичный
+  отказ это или цикл ретраев. Если у группы живая только плановая нога (серая `chatgpt/` заблокирована),
+  ошибка идёт прямо в чат — для таких групп держать отдельную fallback-группу на не-плановом провайдере.
 
 ## Building the bridge (stdlib only)
 

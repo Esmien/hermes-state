@@ -506,6 +506,15 @@ https-коды доменов и число активных таймеров, �
   (`ensure_hermes_shim()`); гейтвей поднимать только после `list-unit-files`/`pgrep`, иначе
   `systemctl --user restart` под `check=False` даёт ложное «перезапущен». Детали —
   `references/installer-pitfalls.md` → «Hermes после установки».
+- **Проверка наличия и путь в сгенерированном скрипте должны совпадать.** `step_postcheck` проверял
+  `shutil.which("hermes")` (на хосте это `/root/.local/bin/hermes`), а в тело `hermes-postcheck.sh`
+  писал жёсткий `/usr/local/bin/hermes` — проверка проходила, скрипт падал на `No such file or
+  directory`, отчёт оставался пустым и в Telegram не уходил. Правило: если генерируемый файл
+  вызывает бинарь по абсолютному пути, этот же путь и резолвить при генерации
+  (`hermes_bin = "/usr/local/bin/hermes" if Path(...).is_file() else shutil.which("hermes")`)
+  и подставлять шаблоном; `which()` как единственный guard — не доказательство, что жёсткий путь жив.
+  Симптом в готовом виде: юнит oneshot = inactive/disabled (скрипт сам себя выключил), а в
+  `/var/lib/<name>/report.md` — одна строка с `No such file or directory`.
 - **`set -Eeuo pipefail` + необязательная переменная = `unbound variable` в самом конце прогона.**
   `bootstrap.sh` делал `export GITHUB_KEY="$GITHUB_TOKEN"`, а токен теперь необязателен: прогон
   падал уже после клона репозитория и записи ключа архива, и владелец видел установку, оборвавшуюся
