@@ -65,10 +65,16 @@ re-measuring.
   No client rules at all — the server enforces the scenario anyway.
 - The full text goes into the `clash.yaml` header as `# ` comments (engines ignore comments, the
   file stays readable for whoever opens the profile) and as an `announce` header for Happ.
-- `announce` is base64 of UTF-8 plain text; `apply_brand.py` maps it per token from
-  `<token>/announce`, and an empty value makes nginx drop the header for every other token.
-  Happ shows it as an in-app notice; ~5 lines is the safe size, the long version belongs on the
-  `/u/<token>` landing page.
+- `announce` must be **plain UTF-8 on one line**, not base64: Happ renders a base64 value
+  literally, and the user sees a wall of `8J…` characters in the profile card. A header cannot
+  carry CR/LF, so flatten the text (`" ".join(text.split())`) and keep it ~300 characters;
+  the multi-line version belongs in the `clash.yaml` header and on `/u/<token>`. The page intro
+  needs a real `<ul>` with spacing — `<br>`-joined sentences read as one run-on paragraph.
+- `apply_brand.py` used to build the title/announce maps **before** running `make_sub.py`, so
+  every regeneration shipped the previous text (and the previous filename) to clients while the
+  files on disk were already correct. Render subscriptions first, then build the maps.
+- Never promise a failover time you have not measured: the copy originally said «5–10 секунд»,
+  the real numbers are ~30 s (node dropped from rotation) and 1–2 min (whole group → Estonia).
 - Migrating a live token to this kind is additive: snapshot `md5sum` of `/var/www/esmien-sub/*/*`,
   write `kind=meta`, run `make_sub.py`, prove every other token's files are byte-identical.
 
