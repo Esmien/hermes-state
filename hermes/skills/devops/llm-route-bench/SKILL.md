@@ -209,7 +209,9 @@ harness: `scripts/code_bench.py`.
   is unmeasurable on that route instead of printing `$0.00` as if it were free. Same logic
   in reverse: a probe that errors while the task set passes means the *probe shape* is
   wrong (a reasoning route enforcing a minimum `max_tokens`), not a broken route — raise
-  `max_tokens` and re-probe instead of flagging the route.
+  `max_tokens` and re-probe instead of flagging the route. На малом бюджете рассуждающий маршрут
+  отвечает `200` с пустым `content` и всеми токенами в `reasoning_tokens` — это тоже артефакт
+  бюджета: смотри `finish_reason` и `usage.completion_tokens_details`, прежде чем называть ответ пустым.
 
 ## Files
 

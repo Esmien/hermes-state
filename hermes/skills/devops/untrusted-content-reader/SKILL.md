@@ -41,6 +41,28 @@ All three return one JSON object: `query, answer, quotes[{text,url}], sources[],
 - **Latency and cost are real:** 20–40 s and a few thousand cheap tokens per call. Batch questions into one call instead of five; don't route every snippet.
 - **Quality guard:** the reader quotes verbatim and refuses to invent a quote for the requested URL when the fact lives elsewhere (verified on a vendor page whose price block loads dynamically). When a number matters, ask it for the quote, not the summary.
 
+## Where the reader sits in the defense stack
+
+Когда владелец спрашивает «как защитить тебя от prompt injection» — вердикт первым: **детекция
+инструкций на уровне модели защитой не является**, модель не умеет надёжно отделять данные от
+команд. Граница — только детерминированные слои вне модели, в порядке убывания надёжности:
+
+1. **Возможности процесса** (этот профиль): web-only, без shell/file/skills/memory. Единственный
+   слой, который ограничивает ущерб даже при полностью захваченном контексте.
+2. **Egress**: разрешённые хосты, а не «куда захотелось»; в Hermes для этого есть отдельный
+   механизм (`hermes egress`, iron-proxy), по умолчанию выключен — проверять состояние, а не
+   обещать.
+3. **Детерминированный хук на вызов инструмента** (policy: запрет `rm`, `curl | bash`, записи в
+   `docker.sock`): подтверждения, которые модель просит «по-хорошему», обходятся — захваченную
+   модель уговаривают подтвердить.
+4. **Изоляция секретов**: у агента нет долгоживущих ключей, доступ выдаёт брокер под операцию.
+5. **Маркировка provenance + `injections[]`** — дёшево снижает частоту инцидентов, но не даёт
+   гарантий; продавать это как защиту нельзя.
+
+Честная граница, которую надо назвать вслух: при root и `docker.sock` успешная инъекция на
+исполнителе равна полному захвату хоста, и ридер закрывает это только для контента, прошедшего
+через него. Любой обход («один раз прочитаю страницу своим `web_extract`») этот слой снимает.
+
 ## Pitfalls
 
 - Gateway model ids use dashes, not dots: `deepseek-v41-flash`, while the upstream provider calls it `deepseek-v4.1-flash`. A wrong id answers `Model not found` (HTTP 400) with exit code 0 — check stdout, not `$?`.
