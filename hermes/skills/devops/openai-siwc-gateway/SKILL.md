@@ -97,6 +97,24 @@ Revert: `POST /model/unblock {"model_id": ...}`.
 
 For model inventory and cleanup, see `ai-stack` → `references/model-provenance.md`; the block/unblock procedure is documented above.
 
+## Fallback на другой провайдер (OpenRouter и пр.)
+
+- **Цель fallback — отдельная группа, а не второй деплой в той же.** Клиенты ходят по
+  `/v1/chat/completions`, провайдер сам выбирает путь (`openai/` → `/responses` через мост,
+  `openrouter/` → `/chat/completions`); подменять путь внутри одного деплоя не нужно.
+- **OpenRouter-деплой берёт ключ из `litellm_credential_name: "Openrouter LiteLLM"`.**
+  `OPENROUTER_API_KEY` в контейнере может быть мёртвым (`401 User not found`) — рабочие
+  OR-модели всё равно ходят через credential. Создавая группу, копировать именно
+  `custom_llm_provider: openrouter` + `litellm_credential_name`, иначе получаешь 401.
+- **`/model/block` не действует мгновенно:** роутер продолжает отдавать запросы
+  заблокированному деплою (кэш списка моделей), поэтому «заблокировал → упало → сработал
+  fallback» **не** проверяется. Надёжный тест: временная группа с мёртвым `api_base`
+  (`127.0.0.1:9`) + per-request `fallbacks: [{tmp: [target]}]`; ответ с id `gen-…` означает,
+  что отдал OpenRouter. После теста — `/model/delete` и проверить `count(*)` в
+  `LiteLLM_ProxyModelTable`.
+- Проверка, что YAML реально применился: `/router/settings` отдаёт `fields[]`, и в нём
+  `fallbacks` — а не значение верхнего уровня (верхний уровень `null` ничего не значит).
+
 ## Pitfalls
 
 - **После перезагрузки хоста проверять оба bind, а не `systemctl is-active`.** Юнит стартует
