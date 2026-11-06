@@ -131,6 +131,23 @@ nginx: a second regex location in the `apply_brand.py` TEMPLATE (`^/u/(?<esmien_
 
 Design constraints learned the hard way: inline **SVG** icons, not emoji (a container without an emoji font renders tofu, and the look must not depend on the viewer's fonts); `flex: 1 1 0; min-width: 0` on the button row so the pair cannot overflow; keep every asset inline so the page works over a degraded link. Verify layout by measurement, not by eyeballing a screenshot: headless Chromium enforces a **500 px minimum window width**, so a `--window-size=390` screenshot is a *crop* of a 500 px render and looks falsely clipped — measure `document.documentElement.scrollWidth` against `innerWidth` inside a 390-px iframe harness instead.
 
+## Applying changes without downtime (blue/green)
+
+`vpn-cfg apply` never restarts the container that carries traffic. Two xray containers run side by side: `vpn-router` mounts `config.json` (the canonical file, always the **A** port block) and `vpn-router-b` mounts `config.b.json`, derived from it with every inbound port `+1000` (10081… → 11081…). `/root/vpn-router/vpn-color` holds the active color, and `apply_brand.py` adds the offset when rendering nginx upstreams — so a flip is `nginx -t` + graceful `reload`, nothing more.
+
+`apply` sequence (`/root/vpn-router/vpn-bluegreen.py apply`): lint → `xray -test` on both variants → restart **only the idle color** → poll `http://127.0.0.1:<port><path>` on every inbound of the idle color until all answer `400` → flip → re-probe through nginx, reverting the color file automatically if anything fails. Established sockets stay on the drained container (it keeps running), so a change is invisible to connected clients; the drained one is refreshed at the next apply, when it is the idle target again. `vpn-cfg switch [a|b]` flips traffic without touching a config; `vpn-bluegreen.py status` shows both colors, ports and inbound counts.
+
+Rules that make it safe:
+
+- **`xray -test` does not catch a routing rule pointing at a non-existent `outboundTag`** — it validates and then silently drops that traffic. `vpn-bluegreen.py lint()` is the gate: dangling `outboundTag`/`inboundTag`/`balancerTag`, duplicate tags, duplicate or out-of-range ports, an inbound with no clients, and any `listen` that is not loopback (that last one is the "published raw VLESS" mistake caught at apply time). Keep the lint growing instead of trusting `-test`.
+- A 24-inbound config means 24 direct probes per apply; poll, do not `sleep 6` and hope. A container that answers on 23 of 24 has a broken inbound and must never get the traffic.
+- `docker run` for either color needs `--user 0:0`: configs are 0600 and the image runs non-root, so the container dies with `open /etc/xray/config.json: permission denied` and `restart unless-stopped` turns it into a restart loop.
+- Never edit `/etc/nginx/conf.d/vpn-*.conf` after a flip — they are generated from `brand.json` plus the color file; edit the template in `apply_brand.py` and re-run it.
+- Cost is one extra container of ~12 MB RAM; both are `restart unless-stopped`, so a host reboot brings both back and nginx follows `vpn-color`. This protects against *config work*, not against host death — that still needs a second machine.
+- `import_sub.py` writes new inbounds with A-block ports into `config.json`; B is derived, so a pool rebuild needs no extra bookkeeping. `users.py` edits the same canonical file.
+
+**Proving zero downtime** (the only honest test): start a big download through the tunnel with `--limit-rate` to hold it open ~30 s, run `curl` probe rounds against `/u/<token>` and `/sub/<token>` in a loop, then `vpn-cfg apply` in the middle. Expect the download to finish with the exact byte count, 0 failed probe rounds, and a color change. Measured here: 100 MB intact, 32/32 rounds, ~4 s wall clock.
+
 ## Subscription expiry
 
 The provider's expiry is in the `subscription-userinfo` response header of any subscription URL — `upload=…; download=…; total=…; expire=<unix>`, with `expire=0` meaning no limit. Read it from there; the biller bot and the panel page phrase it differently and go stale.
