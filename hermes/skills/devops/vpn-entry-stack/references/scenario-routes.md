@@ -1,13 +1,14 @@
 # Scenario routing (server-side) and the one-node subscription
 
 The owner's model: **one visible node, every scenario decided by the server**. Google goes to
-France, RU sites to Moscow, YouTube to Albania, everything else exits Estonia. The subscription
-shows a single node — «🇪🇪 Эстония (все сервисы)» — because a second choice is not cosmetic:
-whoever taps another node burns the *provider's* subscription traffic and raises the ban risk.
+France, RU sites to the RU pool, everything else — including YouTube — exits Estonia. The
+subscription shows a single node — «🇪🇪 Эстония (все сервисы)» — because a second choice is not
+cosmetic: whoever taps another node burns the *provider's* subscription traffic and raises the
+ban risk.
 
 ## Config pieces (entry, `config.json`)
 
-- `routing.balancers`: `bal-google`, `bal-ru`, `bal-yt`, strategy `leastPing`.
+- `routing.balancers`: `bal-google`, `bal-ru`, strategy `leastPing`.
 - `observatory`: `subjectSelector` = the scenario outbounds, `probeUrl` gstatic 204,
   `probeInterval: 30s`. Without it `leastPing` has nothing to rank by.
 - Rules, in this order, **before** every `inboundTag` rule:
@@ -37,8 +38,11 @@ delay, shuffled probe order, random target URL and user agent — a fixed rhythm
 nodes is the abuse signature their panels ban for.
 
 Decision: keep the alive nodes of the group; `direct` when none is alive. `SINGLE` groups
-(google, youtube) keep exactly one tag. Writes `config.json` and runs `vpn-cfg apply` **only when
-the selector actually changes**, so a healthy day costs zero restarts.
+(google) keep exactly one tag. Writes `config.json` and runs `vpn-cfg apply` **only when
+the selector actually changes**, so a healthy day costs zero restarts. A temporary manual swap
+(`{"bal-yt": ["p16","direct"]}` in `scenario_override.json`, loaded by `scenario_routes`) is
+how a scenario is re-pointed for a test without editing code — and without the watchdog
+reverting it on its next pass.
 
 Honest latency, do not oversell it: a dead node leaves rotation in ~30 s (observatory), a whole
 dead group falls back to Estonia in ~1–2 min (watchdog). «5–10 секунд» is only true when the
@@ -48,9 +52,8 @@ re-measuring.
 ## Verification (cheap, reversible)
 
 1. Canary rules prove both the rule and the exit: temporarily insert
-   `{"domain":["domain:ipinfo.io"],"balancerTag":"bal-google"}` and
-   `{"domain":["domain:ipify.org"],"balancerTag":"bal-yt"}`, `vpn-cfg apply`, then read the
-   egress through `/general` — `82.148.254.97` (Paris) and `157.22.240.212` (Albania) here.
+   `{"domain":["domain:ipinfo.io"],"balancerTag":"bal-google"}` (and the same shape for any other
+   group), `vpn-cfg apply`, then read the egress through `/general` — `82.148.254.97` (Paris) here.
    Re-running `scenario_routes.py install` drops the canaries; apply again.
 2. Real requests through `/general`: plain host → Estonian IP; `gemini.google.com/app` → `200` and
    no "not available in your country"; `wildberries.ru` → `data-req-ip` carries the RU node.
@@ -85,6 +88,23 @@ re-measuring.
   the `announce` header (Happ) and on `/u/<token>`.
 - Migrating a live token to this kind is additive: snapshot `md5sum` of `/var/www/esmien-sub/*/*`,
   write `kind=meta`, run `make_sub.py`, prove every other token's files are byte-identical.
+
+## Rolling it out to everybody
+
+1. Snapshot: `md5sum` every file under `/var/www/esmien-sub/*/*` into a JSON map keyed
+   `<dir>/<file>`, then write `kind=meta` into each **main** token dir (never the LTE/whitelist
+   dirs — their whole point is direct provider nodes).
+2. `python3 make_sub.py`, then diff the map: only main dirs may change, and every LTE file must be
+   byte-identical. Print per user `узлов в list`, `proxies в clash`, `announce` present.
+3. `python3 apply_brand.py && nginx -t && systemctl reload nginx` — the announce map only gains a
+   token if its `announce` file exists, so check the printed token list.
+4. Prove **each** per-user key still authenticates through the single node: for every token build
+   a throwaway client from the first `list.txt` link (uuid, ws path, sni from the link itself)
+   and `curl -x socks5h://… https://ipinfo.io/ip`. Six users must all return the Estonian exit;
+   a wrong or duplicated uuid shows up as silence, not as an error message.
+
+Old direct node links keep working after the switch (the inbounds still exist), so nobody drops
+mid-refresh — say that out loud when the family is asked to update their subscription.
 
 ## Pitfalls
 

@@ -12,7 +12,8 @@ waits for `esmien0`, then prints the exit IP; `off` stops the unit and reports l
 
 - **No killswitch.** It was offered and refused in plain words («я не защищаюсь, я просто хочу
   пользоваться заблокированными сервисами»): if the tunnel dies, traffic going out directly is
-  acceptable. Never reintroduce nftables blocking unasked.
+  acceptable. Never reintroduce nftables blocking unasked; `strict-route: true` already handles the
+  one leak that matters (uplink change), and anything more is offered as a separate opt-in.
 - The nightly `vpn-sub-update.sh` timer must restart the unit **only when it is active**, otherwise
   `vpn off` is silently undone at 04:00: `systemctl is-active --quiet mihomo && systemctl restart mihomo`.
 - `vpn status` is the one-command health check: service state, `esmien0`, whether FlClash runs, exit IP.
@@ -69,5 +70,3 @@ Verify by behaviour: `ip -br addr show esmien0` (expect `198.18.0.1/30`), `curl 
   line, never a block joined by `;`.
 - GNOME shows nothing in its VPN list — that is expected, the tunnel lives below the network applet.
   Say it up front so the owner does not go looking for a toggle.
-- No killswitch by default; `strict-route: true` only prevents leaks when the uplink changes. Offer
-  nftables separately instead of quietly adding it.
