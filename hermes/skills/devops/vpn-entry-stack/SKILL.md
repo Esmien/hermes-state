@@ -105,6 +105,18 @@ Roll it out **additively**: no credential swap, no re-import for existing client
 
 Rule: any script that builds inbounds (`import_sub.py`) must re-apply `users.json` before writing the config — otherwise new paths authenticate only the legacy UUID and a user's subscription lists nodes that refuse his key.
 
+## Per-user keys (pairs: main + LTE)
+
+`users.json` (0600, gitignored) is the source of truth: `name → {uuid, token, token_lte, title}`. `users.py add <имя>` injects that UUID as a client into **every** vless inbound (`email = "<tag>:<имя>"`), creates two token dirs — main (files `user` + `title`) and LTE (`kind=whitelist`) — then re-renders subs, rewrites the title map, reloads nginx and runs `vpn-cfg apply`. `users.py rm <имя>` drops the clients and **parks** both dirs under `/var/www/esmien-sub/.disabled/<token>.<имя>`; `users.py sync` re-applies users.json after a pool rebuild (`import_sub.py` also calls it).
+
+Rules that make it hold:
+
+- The legacy global UUID is registered as its owner's key (`add … --uuid <legacy> --token <existing> --lte-token <existing>`), never duplicated as a second client in the same inbound: `apply_users` skips a user whose UUID is already present. Two clients with one id in one inbound pass `xray -test` but split stats and are pointless.
+- `make_sub.py` picks the UUID per token dir: a dir with a `user` file uses that person's key, without one it falls back to `/root/mtproto-faketls/ws-client-uuid`. Adding a per-user key therefore leaves every already-issued bundle byte-identical — verify with `md5sum -c` before/after rather than by eye.
+- `profile-title`/filename come from the dir's `title` file and its `kind`; the `(LTE)` filename is decided by `kind`, not by the title string, or «(Имя, LTE)» would download as `esmien-vpn`. Titles must stay distinct: «Esmien VPN (Наташа)» / «Esmien VPN (Наташа, LTE)».
+- The LTE bundle carries the provider's raw «глушилки» links, so its *content* is identical for everyone — separate tokens give separate links, not separate credentials. Say that before promising isolation.
+- Rollback of a single person is `users.py rm`; a full rollback of the feature is `vpn-cfg rollback` plus deleting `user`/`title` files, since the legacy key never moved.
+
 ## Subscription expiry
 
 The provider's expiry is in the `subscription-userinfo` response header of any subscription URL — `upload=…; download=…; total=…; expire=<unix>`, with `expire=0` meaning no limit. Read it from there; the biller bot and the panel page phrase it differently and go stale.
