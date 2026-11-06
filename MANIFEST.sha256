@@ -117,12 +117,13 @@ c0ecb8227f1460b4674c82762ab1df0deb77e55ad6d09da3bc6db8924fddbbf6  ./hermes/skill
 40e4fbf545898350af6f807d6a462f783912cb1170f1e6c102732f5ebc9764bf  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
 8ce572465e42f636a46a8c247ceba1fb09e4fec2d90aaa2dbb2c6c73c3a9de54  ./hermes/skills/devops/litellm-fallout-triage/SKILL.md
-4fb3fd3cbd8a1ad357efa9f20b9989daff8778b7b41234b2f80a5e295bc3b970  ./hermes/skills/devops/llm-route-bench/SKILL.md
+15ad712678a8c4600a3340b198d63df717d7158fa285091b083e392b58846ae1  ./hermes/skills/devops/llm-route-bench/SKILL.md
 2af389e91336a6a8769124ec2d237935d72155963d1549d63eef9def98953691  ./hermes/skills/devops/llm-route-bench/references/access-pricing.md
 a50279800395099308a9ee70885353b3e27cb3c4498f0c03c4cf545eb924d3f1  ./hermes/skills/devops/llm-route-bench/references/code-gen-bench.md
 5334fd44c25091435f60658e94bcbdeab331514c41c0610c0a08b62f0978da1b  ./hermes/skills/devops/llm-route-bench/references/route-fingerprinting.md
 526dacde870f3e344720414506299b8eee6660d537f319cfb0de6bd5801de948  ./hermes/skills/devops/llm-route-bench/references/subscription-routes.md
 f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skills/devops/llm-route-bench/scripts/ab_bench.py
+9d1851b42d0020e65831a250ae71f4e88bc0076a8eae3191b7b472df70c48d97  ./hermes/skills/devops/llm-route-bench/scripts/authenticity_probe.py
 8448c5899b2ffab423b675e9ff1c24f808f95fc736d3d010d72fcb8d3007e9c6  ./hermes/skills/devops/llm-route-bench/scripts/code_bench.py
 a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skills/devops/llm-route-bench/scripts/code_bench_hard.py
 dee0fd894905b57c13964d4c149f54f83074bafed236a48658c4d95547a8c2cf  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
