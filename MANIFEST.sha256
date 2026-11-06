@@ -73,7 +73,7 @@ d49fd78d825e8b54685126619c61372e152081ff15cff668d835f446284c7036  ./hermes/skill
 4ca891acafa249bc7f4cab7c375b4f569cb7f48eae57651fe7edfd4e6133c703  ./hermes/skills/devops/ai-stack/references/enricher-system.md
 1c315ba2178223c854c89d4ebfd7203dde668950719825869f148b49bbab8af8  ./hermes/skills/devops/ai-stack/references/kb-sync.md
 3cb9edced955c679e4ba0709527c07aa425cef75d2bac0c24850aa7ff1cbdd5f  ./hermes/skills/devops/ai-stack/references/litellm-admin-auth.md
-7630a62420c1a91c4c4f250975e6b099d24147a54ea923f08120c8ac1e18d40a  ./hermes/skills/devops/ai-stack/references/litellm-model-db.md
+9a1a175fcd3b1de461f0ee712728317784269ec5c84f28d4ff82ff00aa461919  ./hermes/skills/devops/ai-stack/references/litellm-model-db.md
 ab95b4ac1ada135d305e22e973f2db9fb96e8be86549eca51bb3c7d1c649d066  ./hermes/skills/devops/ai-stack/references/media-pipeline.md
 f8e128849a7415e8960053cc090fa4d6b95cfa5a660e91c753fa30d14be26142  ./hermes/skills/devops/ai-stack/references/memory-troubleshooting.md
 2d849578fcc6ed9e9a090915cebe892a884756fdb541e101804f29dfcade5fd9  ./hermes/skills/devops/ai-stack/references/model-provenance.md

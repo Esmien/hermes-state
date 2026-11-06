@@ -60,27 +60,38 @@ except Exception as e: print(getattr(e,'code',e))
 
 Повторить 4 раза подряд; при правке заголовков ждать `200 200 200 200`.
 
-## Как снести провайдера, который живёт в credential
+## Провайдер, живувший в credential: как он устроен и что с ним стало
 
-Tokenator (бесплатный прокси) убран с хоста целиком 2026-11-06, и это показало типовую
-ловушку: его деплойменты **не имели `api_base`** — адрес сидел в credential
-(`LiteLLM_CredentialsTable`, имена `Tokenator 1f23/3e39/a2e3/c984`), а деплойменты
-ссылались на него через `litellm_credential_name`. Поэтому `WHERE litellm_params->>'api_base'
-ILIKE '%tokenator%'` возвращает ноль строк, а `/model/info` показывает `api_base: None`.
+Провайдер может сидеть **не в `api_base` деплоймента**, а в credential
+(`LiteLLM_CredentialsTable`), на который деплоймент ссылается через `litellm_credential_name`.
+Тогда `WHERE litellm_params->>'api_base' ILIKE '%host%'` возвращает ноль строк, а `/model/info`
+показывает `api_base: None` — искать надо по имени credential. Именно так устроен Tokenator.
 
-Порядок сноса:
+Tokenator с хоста снимали 2026-11-06 днём (12 деплойментов + 4 credential'а) — и в тот же
+вечер вернули по прямой просьбе владельца, только платный (`gemini-4-argon`), в группу
+`google/gemini-4-argon`: четыре ноги `order=1` (simple-shuffle чередует четыре ключа),
+OpenCode-нога `order=5` как следующий приоритет. **Это состояние — намеренное, повторно
+«чистить» его не надо.** Проверено: 8 вызовов подряд разложились по всем четырём ключам,
+ни один не ушёл в OpenCode.
 
-1. `GET /model/info` → выбрать записи по `litellm_params.litellm_credential_name` (поле в ответе
-   API читаемое, в БД — зашифровано). Для каждой группы проверить, остаётся ли живая нога.
-2. `POST /model/delete {"id": ...}` по каждой такой записи — API применяет сразу, рестарт не нужен.
-3. `DELETE /credentials/<url-encoded name>` — снести сами credential'ы.
-4. Проверить эффект: `GET /model/info` (не должно остаться упоминаний), `GET /v1/models`
-   (нет имён вида `free-*`), и по одному вызову каждой затронутой группы — оставшиеся ноги
-   могут быть мёртвыми (`Model is unavailable`), тогда их надо перевести на рабочую модель
-   через `/model/update` с полным `litellm_params` и `model_info.id`.
+Как добавлять ноги с ротацией ключей (процедура, проверенная на этом хосте):
 
-Перед удалением — дамп двух таблиц (`pg_dump -t LiteLLM_ProxyModelTable -t LiteLLM_CredentialsTable`),
-удаление деплойментов через API необратимо.
+1. `POST /credentials` на каждый ключ: `credential_values{api_key, api_base}`,
+   `credential_info{custom_llm_provider: "openai"}`.
+2. `POST /model/new` на каждую ногу: `model: "<имя модели у провайдера>"`,
+   `custom_llm_provider: "openai"`, `litellm_credential_name`, `api_base`, `order: 1`,
+   `timeout: 90`, те же `*_cost_per_token`, что у соседних ног группы.
+3. Существующую ногу перевести на нужный приоритет — `POST /model/update` с ПОЛНЫМ
+   `litellm_params` и `model_info.id` (иначе частичное тело молча оставит старое).
+4. Проверять эффект серией из 8 вызовов: заголовки `x-litellm-model-id` и
+   `x-litellm-model-api-base` показывают, какая нога ответила.
+
+Замеры по этому провайдеру (2026-11-06): платный `gemini-4-argon` отвечает за 6–12 с против
+3–4 с у OpenCode-ноги; `usage.prompt_tokens` он считает примерно вдвое больше реального
+(944 символа → 752 против 375), поэтому по его `usage` нельзя судить ни о лимитах, ни о
+деньгах. Free-пул (`free-*`) даётся только ключам с пополнением за последние 7 дней, иначе
+`429 Free models are for active keys`. На синтетике из 9 задач платный аргон Токанатора
+показал тот же результат, что легитимный маршрут (9/9), — признаков подмены слабой моделью нет.
 
 ## Что считать нормой после восстановления дампа
 
