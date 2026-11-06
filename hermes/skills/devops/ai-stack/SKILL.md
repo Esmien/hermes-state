@@ -217,7 +217,7 @@ Two hard rules from this stack:
 - `references/branding.md` — **Branding (Esmien AI)**. Read when brand assets, image/logo, screenshots.
 - `references/signup-approval.md` — **Signup approval, user administration and WebUI auth hardening**. Read when pending signups, the Telegram approver, user roles via the API — and whenever signup/login protection is in play (Turnstile gate, fail2ban jail, rate limits, security headers, MFA, admin API keys and their rotation trap).
 - `references/searxng.md` — **SearXNG (web search backend)**. Read when web search returns junk, engines get banned, or the image is upgraded.
-- `references/cloudflare-proxy.md` — **Cloudflare in front of one of our names**. Read before proxying a vhost, adding WAF/bot rules, or when rate limits suddenly apply to everyone at once.
+- `references/cloudflare-proxy.md` — **Cloudflare in front of one of our names**. Read before proxying a vhost, adding WAF/bot rules, when rate limits suddenly apply to everyone at once, or when an outside monitor reports the site as down/403 while it is healthy.
 - `references/web-search-architecture.md` — **Web search end to end: OWUI `external` contract, shim plan, Hermes's role**. Read when the owner wants search better than SearXNG, or search/answer quality comes up.
 - `references/memory-troubleshooting.md` — **Container memory attribution**. Read when asked "what is eating the RAM" — numbers before causes.
 - `references/upstream-release-review.md` — **Reviewing an upstream release**. Read before applying any version bump; never update unprompted.

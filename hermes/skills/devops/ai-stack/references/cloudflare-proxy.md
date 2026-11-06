@@ -99,6 +99,23 @@ while looking completely successful. Force the edge:
   everything) and fail-open when siteverify is unreachable — otherwise a CF outage closes registration.
   Widgets must be created in the dashboard: the zone-scoped token's `/accounts` is empty.
 
+## External uptime monitoring through the edge
+
+Any monitor outside the host (GitHub Actions runner, cloud checker) is a **bot** for Cloudflare:
+datacenter ASN + `curl` UA ⇒ 403 generated at the edge, before nginx, while the site is perfectly
+healthy. The alert then reads «VPS не отвечает (403)» with nothing actually broken.
+
+- Probe liveness on a **grey (DNS-only) name**, never through the orange one. Here:
+  `https://llm.esmien.ru/health/liveliness` (nginx + LiteLLM) and `https://llm.esmien.ru/webui-health` —
+  an exact-match location on the llm vhost proxying `127.0.0.1:8080/health`, so WebUI is covered without
+  giving OWUI another public name.
+- Keep one probe through the edge, but accept **200 or 403**: 403 proves Cloudflare + origin DNS are
+  alive; only `000`/`52x` mean down. Probe functions therefore take a list of allowed codes, not `== 200`.
+- `curl -sS` exits 0 on an HTTP 4xx/5xx — a "step succeeded" in CI is not proof that Telegram (or any
+  API) accepted the call. Read the response body (`"ok":true`) before claiming delivery.
+- Bot Fight Mode is dashboard-only (see above), so the monitor cannot be whitelisted by API — probing the
+  origin is the fix, not a CF rule.
+
 ## Risks to state before flipping (free plan)
 
 - **100 s before the first byte** → `524` on long non-streamed responses. OWUI chat streams over SSE, so
