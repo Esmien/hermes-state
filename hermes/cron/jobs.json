@@ -196,16 +196,16 @@
       "schedule_display": "once at 2026-11-06 07:00",
       "repeat": {
         "times": 1,
-        "completed": 0
+        "completed": 1
       },
-      "enabled": true,
-      "state": "scheduled",
+      "enabled": false,
+      "state": "completed",
       "paused_at": null,
       "paused_reason": null,
       "created_at": "2026-11-03T13:35:48.248055+00:00",
-      "next_run_at": "2026-11-06T07:00:00+00:00",
-      "last_run_at": null,
-      "last_status": null,
+      "next_run_at": null,
+      "last_run_at": "2026-11-06T07:06:01.695945+00:00",
+      "last_status": "ok",
       "last_error": null,
       "last_delivery_error": null,
       "last_delivery_unverified": null,
@@ -225,8 +225,10 @@
         "web"
       ],
       "workdir": null,
-      "attach_to_session": true
+      "attach_to_session": true,
+      "run_claim": null,
+      "fire_claim": null
     }
   ],
-  "updated_at": "2026-11-06T03:16:20.989567+00:00"
+  "updated_at": "2026-11-06T07:06:01.697689+00:00"
 }
