@@ -249,6 +249,10 @@ Handing a family subscription the *mobile* plan's keys exposes that plan: one le
 
 Two node kinds are unusable here: `hysteria2` links (Xray core has no such protocol) and nodes whose page yields `com` instead of a country code (Google could not place the address — not a supported verdict). Nodes that return 0 bytes are dead; treat them as absent rather than as blocked.
 
+## Desktop client, always-on (no GUI app)
+
+When a machine must be tunnelled with nothing open and no GNOME VPN profile (that dialog only knows OpenVPN/PPTP/WireGuard), run mihomo as a systemd daemon in TUN mode. Full recipe, merge script shape and the FlClash/`add route 0: file exists` trap: `references/desktop-mihomo-tun.md`.
+
 ## Pitfalls
 
 - The hostname is part of the entry: a flaky free DNS provider (authoritatives answering 1–2 of 5 queries) makes validating resolvers return `SERVFAIL` for every client while browsers keep working from cache — the app then shows all nodes `n/a` and nothing ever reaches the server. Diagnose with `dig` across several resolvers plus a random uncached name, mitigate with IP-address node duplicates and an HTTP-by-IP subscription, and fix the delegation — do not rebuild the tunnel.
