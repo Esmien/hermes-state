@@ -1,0 +1,28 @@
+model:
+  default: deepseek-v41-flash
+  provider: Open WebUI
+  base_url: http://127.0.0.1:8080/api/v1
+  api_key: ${HERMES_CUSTOM_127_0_0_1_8080_API_KEY}
+  api_mode: chat_completions
+  aliases:
+    emergency:
+      model: deepseek-v41-flash
+      provider: opencode-go
+      base_url: https://opencode.ai/inference/go/v1
+      key_env: OPENCODE_GO_API_KEY
+  streaming: false
+custom_providers:
+  - name: Open WebUI
+    base_url: http://127.0.0.1:8080/api/v1
+    key_env: HERMES_CUSTOM_127_0_0_1_8080_API_KEY
+    model: deepseek-v41-flash
+    api_mode: chat_completions
+    models:
+      deepseek-v41-flash:
+        context_length: 200000
+platform_toolsets:
+  cli: [web]
+  telegram: [web]
+memory:
+  enabled: false
+_config_version: 50
