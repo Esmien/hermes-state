@@ -67,14 +67,21 @@ re-measuring.
   file stays readable for whoever opens the profile) and as an `announce` header for Happ.
 - `announce` must be **plain UTF-8 on one line**, not base64: Happ renders a base64 value
   literally, and the user sees a wall of `8J…` characters in the profile card. A header cannot
-  carry CR/LF, so flatten the text (`" ".join(text.split())`) and keep it ~300 characters;
-  the multi-line version belongs in the `clash.yaml` header and on `/u/<token>`. The page intro
-  needs a real `<ul>` with spacing — `<br>`-joined sentences read as one run-on paragraph.
+  carry CR/LF, so flatten the text (`" ".join(text.split())`).
+- Happ draws the announce in a **fixed ~3-line block (~70 chars per line) and truncates silently**
+  — a 313-char text lost half its sentences mid-word. Keep it ≤ ~170 chars, one emoji per block,
+  and put the important line last; the multi-line version belongs in the `clash.yaml` header and
+  on `/u/<token>`. The page intro needs a real `<ul>` with spacing — `<br>`-joined sentences read
+  as one run-on paragraph.
 - `apply_brand.py` used to build the title/announce maps **before** running `make_sub.py`, so
   every regeneration shipped the previous text (and the previous filename) to clients while the
   files on disk were already correct. Render subscriptions first, then build the maps.
 - Never promise a failover time you have not measured: the copy originally said «5–10 секунд»,
   the real numbers are ~30 s (node dropped from rotation) and 1–2 min (whole group → Estonia).
+- Do **not** put Cyrillic in the `clash.yaml` header: FlClash renders YAML comments as the
+  profile description and shows UTF-8 there as mojibake (a screenful of garbage on its home
+  tab). The meta profile opens with a single ASCII `# Esmien VPN` line; readable copy lives in
+  the `announce` header (Happ) and on `/u/<token>`.
 - Migrating a live token to this kind is additive: snapshot `md5sum` of `/var/www/esmien-sub/*/*`,
   write `kind=meta`, run `make_sub.py`, prove every other token's files are byte-identical.
 
