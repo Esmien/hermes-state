@@ -67,6 +67,13 @@ Verification after the switch, in one pass: `openssl s_client -servername <new h
 
 A name change has to reach the **applications**, not just nginx and the subscription. Grep every config on the host for the old name (`grep -rn '<old-host>' /root/deploy /home/ai_service --include='*.env*' --include='*.yml'`) — a webhook base URL, an OAuth redirect or an app's own public URL keeps answering `200` on the new vhost while quietly pointing at the dead one. Then re-register the webhook and confirm the provider's own state (`getWebhookInfo` → `pending_update_count=0`); the music bot sat deaf for days on an old `bot.<old-host>` URL that no TLS or HTTP check would ever flag.
 
+## Scenario routing / one-node subscription
+
+Server-side scenarios (Google→FR/FI, YouTube→AL, RU→Moscow) plus a subscription that exposes
+**one** node, and the jittered watchdog that falls a dead scenario group back to Estonia:
+`references/scenario-routes.md`. Do not offer a user a second node to tap — that is provider
+traffic and ban risk, not a feature.
+
 ## Subscription
 
 `make_sub.py` renders three formats; nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. The response carries `profile-update-interval: 12` and a `profile-title` that depends on the token: `apply_brand.py` scans `/var/www/esmien-sub/*/kind` and emits `00-esmien-sub-title.conf` with `map $esmien_sub_token $esmien_sub_title` (whitelist token → `Esmien VPN (LTE)`, everything else → `Esmien VPN`) plus a matching `$esmien_sub_fname` map, so downloads are named `esmien-vpn` / `esmien-vpn-lte`. A new token inherits its title from its `kind` file — never hard-code the title in the nginx template, and never let two subscriptions share a display name: the owner tells them apart by the suffix.
