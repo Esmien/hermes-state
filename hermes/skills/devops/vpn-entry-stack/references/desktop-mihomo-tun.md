@@ -4,6 +4,21 @@ Owner wants the tunnel up without any app window open and without a GNOME VPN pr
 GNOME's «Добавить VPN» dialog speaks only OpenVPN/PPTP/WireGuard, our entry is VLESS over
 WS+TLS, so the OS dialog is a dead end. Run a daemon instead.
 
+## Toggle: `sudo vpn on|off|status` (`/usr/local/bin/vpn`)
+
+The owner asked for exactly this shape — `on` (Estonia up) and `off` (tunnel down, FlClash free to
+run again), nothing in between. `on` stops FlClash first, refreshes the profile, starts the unit,
+waits for `esmien0`, then prints the exit IP; `off` stops the unit and reports leftovers.
+
+- **No killswitch.** It was offered and refused in plain words («я не защищаюсь, я просто хочу
+  пользоваться заблокированными сервисами»): if the tunnel dies, traffic going out directly is
+  acceptable. Never reintroduce nftables blocking unasked.
+- The nightly `vpn-sub-update.sh` timer must restart the unit **only when it is active**, otherwise
+  `vpn off` is silently undone at 04:00: `systemctl is-active --quiet mihomo && systemctl restart mihomo`.
+- `vpn status` is the one-command health check: service state, `esmien0`, whether FlClash runs, exit IP.
+- The desktop profile can be the one-node `meta` subscription: client-side RU/Google rules must not be
+  re-added there, the entry decides those (see `scenario-routes.md`).
+
 ## Recipe (validated on the owner's laptop, 2026-11)
 
 Binary: `mihomo-linux-amd64-compatible-*.gz` from `MetaCubeX/mihomo` releases (the

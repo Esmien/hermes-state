@@ -139,7 +139,7 @@ a11cea480af1ecd7fb72bb1210d03d7ee0b71ee57e82a0b4e587da117ce8e444  ./hermes/skill
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
 9fd66961ca1021ee4e74f9d1dd8d9ed27ba7b2e234e29f57bee510ffbd6674f1  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 b27eca178d05f333d2dcc34d9e98b9f1763fea9ae17a7b6fa2eabaa92098a0b1  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
-a060167679796b5649b3c6dba9746665f252cb11c77f244742220fb6f5a53f2f  ./hermes/skills/devops/vpn-entry-stack/references/desktop-mihomo-tun.md
+698c9d5be8e34442f0242eeb4d4ed3af338154c8b6bfc82ffe174638edf75f97  ./hermes/skills/devops/vpn-entry-stack/references/desktop-mihomo-tun.md
 4d3f6b023d09ef6d7c6e536e9ca4b53bfdcc2d6f7156fe89e761b2c5da924241  ./hermes/skills/devops/vpn-entry-stack/references/domain-and-tls.md
 b3e01208b42620cdf4c4126c8769dffe221fed325ee679ed50065a9e27167782  ./hermes/skills/devops/vpn-entry-stack/references/gemini-geo.md
 866861e1d39f3106729b0297caad96af736a33173bcb5ce1eba3c07143ff1f1f  ./hermes/skills/devops/vpn-entry-stack/references/linux-always-on-client.md
