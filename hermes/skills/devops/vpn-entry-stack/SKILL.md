@@ -116,6 +116,7 @@ Rules that make it hold:
 - `profile-title`/filename come from the dir's `title` file and its `kind`; the `(LTE)` filename is decided by `kind`, not by the title string, or «(Имя, LTE)» would download as `esmien-vpn`. Titles must stay distinct: «Esmien VPN (Наташа)» / «Esmien VPN (Наташа, LTE)».
 - The LTE bundle carries the provider's raw «глушилки» links, so its *content* is identical for everyone — separate tokens give separate links, not separate credentials. Say that before promising isolation.
 - Rollback of a single person is `users.py rm`; a full rollback of the feature is `vpn-cfg rollback` plus deleting `user`/`title` files, since the legacy key never moved.
+- The roster (who has which token, page URL, and the operations cheat-sheet) lives in `/root/vpn-router/users.md` (0600) — deliberately **outside git**: the owner does not want the people list and their tokens pushed, even to the private repo. Code goes to `Esmien/vpn-service`; `users.json`, `users.md`, `pages_index.json` and the generated subscriptions/pages stay on the host.
 
 ## Landing page per user (/u/)
 
