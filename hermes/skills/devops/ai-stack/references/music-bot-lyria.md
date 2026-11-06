@@ -148,6 +148,26 @@ curl -sS "https://api.telegram.org/bot$T/getWebhookInfo" | python3 -c "import sy
 
 **Проверка промпта без Telegram:** вызвать обогатитель напрямую (`ENRICH_URL` + `ENRICH_TOKEN`, `model: enricher`) и глазами посмотреть JSON; затем проверить, что в `generations.prompt` лежит бриф, а не JSON (`select prompt from generations where id=…`).
 
+## Состояние и тесты (код не переписывать)
+
+**Граница: логику бота править запрещено.** Владелец разрешил только смотреть состояние (контейнеры, очереди, логи), гонять тесты и коммитить/пушить то, что уже лежит в дереве. Найденные дефекты — докладывать списком; исправление — отдельная задача по прямому указанию.
+
+Чек-лист «как оно сейчас» одним проходом:
+
+- `docker ps --filter name=lyria --format '{{.Names}}\t{{.Status}}'` — шесть контейнеров, `healthy` там, где healthcheck есть.
+- Консьюмеры и очереди — команда выше: по `1` на `dev.generation.tasks` и `dev.enricher.tasks`, `*_dead_letter` пустые, `docker exec lyria-redis redis-cli DBSIZE` без аномалий.
+- Свежесть ошибок: `docker logs --since 1h lyria-bot 2>&1 | grep -icE 'AMQPConnectionError|Traceback'` → `0`. Стартовые AMQP-трейсы инцидентом не считаются (правило выше); проверять рецидивы по `--since`, а не по общему счёту в логе.
+- Воркер слушает: последние строки `docker logs -t --tail 40 lyria-generation-worker` содержат `Listening started.`
+- `git -C /root/deploy/music_bot status --short` и `git rev-list --left-right --count origin/master...HEAD` — норма `0 0`; untracked `infra/docker-compose.yml.bak.*` и `__pycache__` не повод для коммита.
+
+**Тесты — только изолированно.** На хосте python 3.14 и нет poetry, проект целится в 3.12, а тестам нужны реальные Postgres/Redis/RabbitMQ: прогон на хосте либо не заведётся, либо полезет в боевую `lyria`-базу. Рабочий путь — `scripts/music-bot-tests.sh`: временная docker-сеть со своими `postgres:17-alpine` / `redis:7-alpine` / `rabbitmq:3-management-alpine`, репозиторий монтируется **read-only** в `/src` и tar-копией переносится в `/work` внутри `python:3.12-slim`, поэтому рабочее дерево и `.venv` не появляются. Скрипт повторяет CI: `ruff check`, `ruff format --check`, `alembic upgrade head`, затем `pytest` дважды (`WEBHOOK_MODE=0` и `WEBHOOK_MODE=1`).
+
+- Зелёный прогон: ruff чисто, миграции без ошибок, ~260 passed / 7 skipped в обоих режимах, покрытие ~84 %. Расхождение — повод посмотреть, что изменилось в дереве, а не «чинить тесты».
+- `-m unit` для ответа «нормально ли всё» мало: интеграционные сценарии в CI идут против настоящих сервисов, изоляция их как раз и даёт.
+- Тестовые контейнеры убирать за собой (скрипт делает это на `EXIT`, `KEEP=1` оставляет их для разбора).
+
+**Про `.env`.** `/root/deploy/music_bot/.env` — единственное место секретов бота и в чат не выводится никогда, даже по прямой просьбе владельца. Вместо отправки предложить: список ключей без значений (`grep -oE '^[A-Za-z_][A-Za-z0-9_]*=' .env | tr -d '='`) как доказательство полноты и `scp root@<host>:/root/deploy/music_bot/.env ./` — забирает сам, шифрование на канале. Заодно проверить права: файл должен быть `600`, а не `644`.
+
 ## E2E прогон пользовательских сценариев
 
 `scripts/lyria-e2e.py` — прогон всех юзер-стори без ручных нажатий: `python3 scripts/lyria-e2e.py` (~10 мин, ~$0.32 = 4 генерации; `--no-generate` — только бесплатные сценарии). Апдейты форжатся на `http://127.0.0.1:8000/webhook`, проверки — по БД `lyria-postgres` и логам.

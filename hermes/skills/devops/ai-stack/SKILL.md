@@ -17,7 +17,7 @@ Load this skill whenever the task touches the AI service stack on this VPS — L
 
 The stack is versioned in git: run git as `ai_service` (root gets `dubious ownership`), know what must never be committed, and match the commit shape the owner expects — `references/repo-hygiene.md`.
 
-LiteLLM / Open WebUI / SearXNG / open-terminal stack, with PostgreSQL 17 + pgvector on the host and Nginx+Certbot for TLS. The music bot (lyria) is a **separate** deployment on the same host — `references/music-bot-lyria.md`; it has its own containers, its own Postgres and is NOT covered by `deploy.sh` or the `postgres-backup` timers.
+LiteLLM / Open WebUI / SearXNG / open-terminal stack, with PostgreSQL 17 + pgvector on the host and Nginx+Certbot for TLS. The music bot (lyria) is a **separate** deployment on the same host — `references/music-bot-lyria.md`; it has its own containers, its own Postgres and is NOT covered by `deploy.sh` or the `postgres-backup` timers. **Its code is off-limits:** the owner allows state checks, test runs and commits/pushes of what is already in the tree — never rewriting the bot's logic. Report defects as a list; fix only on an explicit separate instruction.
 
 ## Location — IMPORTANT
 
@@ -233,3 +233,4 @@ Two hard rules from this stack:
 - `scripts/lyria-enricher-pipe.py` — **исходник OWUI-Pipe `lyria_enricher`** (songwriter + critic + санитайзер, выключен). Держать синхронно с живой функцией: правка в OWUI без копии здесь теряется вместе с БД.
 - `scripts/check-notification-bots.py` — **Telegram notification health** (each bot token via `getMe`, usernames only; plus the `file_id` restore registry with part sizes and age). Run first when the owner says a message never arrived.
 - `scripts/lyria-e2e.py` — **E2E прогон музыкального бота по всем юзер-стори** (форж webhook-апдейтов, FSM-сидинг для кнопок, проверки по БД/логам, сбор mp3). Run when asked «проверь бота / прогони сценарии»; детали и грабли — `references/music-bot-lyria.md`.
+- `scripts/music-bot-tests.sh` — **юнит/интеграционные тесты music_bot в изоляции** (свои pg/redis/rabbitmq, репо read-only, CI-паритет: ruff + alembic + pytest в polling и webhook). Run when asked «прогони тесты» — никогда не на хосте, там python 3.14 без poetry. Baseline и границы — `references/music-bot-lyria.md`.

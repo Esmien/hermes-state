@@ -59,7 +59,7 @@ ac2da2b39f1c355bc76bf35b2cd9e74131ea62030f89781fe82c53ee0b4f029e  ./hermes/skill
 acc74882cdfde5b15b691d82f997096a01bd66c695789ee4438c8a12d40c0cbb  ./hermes/skills/career/job-application-review/references/repo-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-f8cdd0d1ca0022083b51b7221f98bc285a28ac604a1b450e6d68e9909d3ebaed  ./hermes/skills/devops/ai-stack/SKILL.md
+a57d8dce5059346147bb286f398be9fa95046439107bee15a454ef5876eb2609  ./hermes/skills/devops/ai-stack/SKILL.md
 aca7b89ecdba871a14a674dd16d73ca5f2387936f2e4f2e09e909fe74e84f516  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 11adcf8b6d1ac90bdb5baa374156d5feb0ed1361ca0720d4b0058cbaa4aabf4f  ./hermes/skills/devops/ai-stack/references/branding.md
 055726f7b857418c013c4062923acee90280a454d5f12be7760568160c0eba3e  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
@@ -75,7 +75,7 @@ ab95b4ac1ada135d305e22e973f2db9fb96e8be86549eca51bb3c7d1c649d066  ./hermes/skill
 f8e128849a7415e8960053cc090fa4d6b95cfa5a660e91c753fa30d14be26142  ./hermes/skills/devops/ai-stack/references/memory-troubleshooting.md
 2d849578fcc6ed9e9a090915cebe892a884756fdb541e101804f29dfcade5fd9  ./hermes/skills/devops/ai-stack/references/model-provenance.md
 ad042b6fee80f9dde1317d8f976a826abe3f94e539c3577263e53d91cd70efd8  ./hermes/skills/devops/ai-stack/references/model-route-benchmark.md
-5fbd66fb792bfb0365976ca9f446fb048b38d9e6bd2959908e4e4a57bbb93916  ./hermes/skills/devops/ai-stack/references/music-bot-lyria.md
+a659241b1f951d0af94e6b477d997a064cd9f06e9f198793cd4e0ea8f016e8db  ./hermes/skills/devops/ai-stack/references/music-bot-lyria.md
 f8bad498abffe25fe4772a32684b84ade811c945ab02963324049ad2322b4b31  ./hermes/skills/devops/ai-stack/references/operations.md
 23681fed79a731f0e5ac3dbf907087700aedc29fa84c1b54872f7694682b3e76  ./hermes/skills/devops/ai-stack/references/owui-admin-auth.md
 307c869ca136aa155ed4c22710e7e4a230cdc608095f79522426c4a77e683c29  ./hermes/skills/devops/ai-stack/references/owui-data-purge.md
@@ -96,6 +96,7 @@ c2fc4ce4b63f576ee21f3a0065f03f45b85b702159e047fd18083ae345eb0f49  ./hermes/skill
 aa533ed2e2e5916be08dc9424a8c5e230b1ba4112e6d533ce1f2c3687f59640c  ./hermes/skills/devops/ai-stack/scripts/lyria-enricher-pipe.py
 15e38bd3300f880ad623485c61aab9266d4468cbd4f99ad6427b0c43d0ae7e7b  ./hermes/skills/devops/ai-stack/scripts/lyria-enricher-router-pipe.py
 b201d073a6374940cc7a90bf418f3af9f7d5315c67f3f633edcea78012fb8fed  ./hermes/skills/devops/ai-stack/scripts/model-route-bench.py
+69138cb949f90af026905f39643c7ae7e6821f7f3bf074ad85d8148b68b806b2  ./hermes/skills/devops/ai-stack/scripts/music-bot-tests.sh
 36432d6a9677006a068a5ceefbc2e9995a298d98576e58372b92173b77126f44  ./hermes/skills/devops/ai-stack/scripts/probe-approval-guardian.py
 57a2a5e8f2f2395dfb18a9a37ebed061a5272f43b7737f966462483ea4e03f2a  ./hermes/skills/devops/ai-stack/scripts/probe-media-endpoints.py
 5f28a41cf05b85f901f2eceb62a441d72fd71042ea7e992a578d2a8192e72982  ./hermes/skills/devops/ai-stack/scripts/probe-owui-terminal.py
