@@ -130,7 +130,7 @@ d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skill
 4e9f74a0c726e108168c48fd06a6fc009023a6ff4912e9ddbb094ac594b33459  ./hermes/skills/devops/shell-and-terminal-ux/templates/starship.toml
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 a11cea480af1ecd7fb72bb1210d03d7ee0b71ee57e82a0b4e587da117ce8e444  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
-c2c633caf606cc5a3aaef29537c7765942d6d482407092a2fe9373442e5abc11  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+98c0e8a905669d7461f83461a6a03f4b5fb4485c868a20d103bf5115144dee97  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 b27eca178d05f333d2dcc34d9e98b9f1763fea9ae17a7b6fa2eabaa92098a0b1  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
 4d3f6b023d09ef6d7c6e536e9ca4b53bfdcc2d6f7156fe89e761b2c5da924241  ./hermes/skills/devops/vpn-entry-stack/references/domain-and-tls.md
 b3e01208b42620cdf4c4126c8769dffe221fed325ee679ed50065a9e27167782  ./hermes/skills/devops/vpn-entry-stack/references/gemini-geo.md
