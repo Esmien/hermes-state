@@ -99,6 +99,16 @@ For model inventory and cleanup, see `ai-stack` → `references/model-provenance
 
 ## Pitfalls
 
+- **После перезагрузки хоста проверять оба bind, а не `systemctl is-active`.** Юнит стартует
+  раньше, чем docker поднимает `docker0`, `bind(172.17.0.1:4010)` падает с `EADDRNOTAVAIL`,
+  поток умирает молча — юнит остаётся `active`, `127.0.0.1:4010` отвечает, а LiteLLM получает
+  `Cannot connect to host host.docker.internal:4010` / `Connect call failed ('172.17.0.1', 4010)`.
+  Симптом со стороны клиента: модель группы падает с `InternalServerError`, а у групп без
+  `router_settings.fallbacks` — сразу ошибка в чат. Лечение: `After=/Wants=docker.service`
+  в юните **и** повтор bind в `serve()` (сеть может отстать и от этого). Проверка после
+  любого reboot: `ss -ltnp | grep 4010` должен показать **две** строки (`172.17.0.1` и `127.0.0.1`).
+  Копии юнита и `gateway.py` лежат в `vps-infra/assets/host/{systemd,siwc}/` (`auth.json` — нет).
+
 - **`stream` must be read before you force it.** Setting `body['stream'] = True` and then
   deciding "client wanted a stream?" always answers False, so the gateway returns an
   aggregated JSON to a caller that expects SSE. LiteLLM reports it as
