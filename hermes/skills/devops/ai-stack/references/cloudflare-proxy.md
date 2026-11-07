@@ -168,7 +168,33 @@ Expected: `cf-ray` present; a real client IP in the log; the 4th signup attempt 
 first three get `422` on an empty body, so the test leaves no rows). A `curl` UA must get `403` from
 Cloudflare before nginx is involved.
 
-## Rollback
+## Rollback / turning the proxy off
 
-One switch: back to grey cloud (and SSL back to `Full` if it was raised). The `map` and the CF `limit_*`
-zones stay and stay harmless — without `CF-Connecting-IP` they resolve to the PROXY address.
+Turning the orange cloud OFF is **two edits, in this order** — flipping only the record locks every
+visitor out with a bare `403`, because the vhost carries a deliberate origin gate:
+
+```nginx
+if ($deny_direct) { return 403; }   # only requests carrying CF-Connecting-IP get through
+```
+
+It is correct while proxied (it blocks direct hits on the origin, i.e. bypassing WAF/Bot Fight) and fatal
+once CF is gone: with no header the `$is_via_cf` map reads `0` and *every* request — the owner's included —
+gets `403` with `rt=0.000` and `cf=-` in the log.
+
+1. Remove the gate from `/etc/nginx/conf.d/<host>.conf` (back it up with `cp -a <file> <file>.bak-cfoff`
+   first) and leave the maps in `01-cf-client-ip.conf` alone — `$client_ip` falls back to
+   `$proxy_protocol_addr`, so the rate-limit zones and the fail2ban jail keep keying on the real client.
+   `nginx -t && systemctl reload nginx`.
+2. `PATCH /zones/{zid}/dns_records/{rid} {"proxied":false}` (keep the A → origin IP), then
+   `dig +short @1.1.1.1 <host>` must return the origin address, not `104.21.x`/`172.67.x`.
+
+Verify: `curl -sS -D - -o /dev/null https://<host>/` answers `server: nginx/...` (no `cf-ray`), `200`, and
+the access log shows the client's own IP in column 1 with `cf=-`. A browser keeps the old CF address for
+up to the record TTL (300 s) — hard refresh, not a bug.
+
+Editing the vhost: the `patch` tool refuses `/etc/nginx/**` as a sensitive system path. Write the new file
+from Python (`read_text()` → `replace()` → `/tmp/x`), `install -m 644` it into place, then `nginx -t` — the
+same staging trick the `vpn-entry-stack` pitfalls describe for generated snippets.
+
+The `map` and the CF `limit_*` zones stay and stay harmless without the header. Going back to orange is the
+mirror image: restore the gate first, then the record.

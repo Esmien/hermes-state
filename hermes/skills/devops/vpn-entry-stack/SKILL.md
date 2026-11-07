@@ -290,7 +290,12 @@ own profile by design, not drift.
   the same way. Before judging, read the moving parts: `stat -c '%y' /root/vpn-router/config.json`,
   `ls -lt /root/vpn-router/backups/config-*.json | head`, `journalctl -u vpn-scenarios -n 20`, and
   `/root/vpn-router/scenario_state.json`. A ~50/50 alternation in the backups is the signature of the
-  flap, not of a hand edit.
+  flap, not of a hand edit. The same rule covers answering «какая у нас топология?»: build that answer from
+  `scenario_state.json` plus the ws paths the subscriptions actually use
+  (`grep -ho 'path: "[^"]*"' /var/www/esmien-sub/*/clash.yaml | sort | uniq -c`) — an inbound with no
+  `inboundTag` rule of its own is the only thing the catch-all sees, so a `tcp,udp → fr` tail proves nothing
+  about the paths clients really dial. If the owner pushes back on a routing claim you made from a single
+  dump, re-read the live state before defending it: a snapshot is not a topology.
 - The flips look like a defect even when nothing is broken: `PROBE_URLS_RU` mixes `ya.ru` and `mail.ru`
   with a **Google** `connectivitycheck.gstatic.com` picked at random, `http_through` counts only
   `2xx/3xx` as alive, and the TCP pre-check times out at 3 s — so a healthy RU node is declared `DEAD`,
@@ -313,13 +318,25 @@ own profile by design, not drift.
 
 1. **Host uplink** — `curl -s -o /dev/null -w '%{speed_download}' 'https://speed.cloudflare.com/__down?bytes=50000000'`
    (measured here: ~170 MB/s ≈ 1.36 Gbit/s, and `tc -s qdisc` showed `dropped 0`, so the host throttles
-   nobody — a saturated host link is the *least* likely cause).
+   nobody — a saturated host link is the *least* likely cause). Two rules for reading that number: a single stream is
+   **not** the channel (here one stream gives ~0.9–1.8 Gbit/s down but only ~330 Mbit/s up, while 4 parallel
+   streams aggregate ~4.5 Gbit/s down and ~1.2 Gbit/s up — measure the aggregate when the question is «какой
+   у нас канал»), and `__down?bytes=` silently caps at 100 MB: a `bytes=200000000` request came back as **1
+   byte**, so keep probes at 50 MB and repeat them.
 2. **Per-exit throughput** — `scripts/probe-exit-speed.py <tag>`: builds a socks client from that
    outbound, prints exit IP + MB/s, never prints credentials. Measured here: `fr` 10.4 MB/s (Paris),
    `fi` 17.3 MB/s (Helsinki) — borrowed exits are shared with the reseller's other clients, so that is
    the real ceiling for everything routed through them, not the host's gigabit.
 3. **The complaining client** — `ping -c5 <his ip>` (0 % loss / 41 ms here rules out the path) plus the
-   request gaps in the nginx log.
+   plus the request gaps in the nginx log.
+
+   **The owned RU box is the ceiling for everything `.ru`.** `ru1` (217.197.114.197) sits on a hard **100
+   Mbit/s** port: 88–90 Mbit/s down and 81–95 up in one stream, 115 Mbit/s over four streams, 43 ms RTT to
+   Tallinn, and 70–87 Mbit/s end-to-end through the tunnel. So the honest answer to «какой у нас канал» is
+   two numbers: гигабиты on the Estonian host, сотка in Moscow — and the WebUI rides `ru1` whenever the
+   client rule sends `.ru` there, so its ceiling is the 100 Mbit box, not the host. Measuring through the
+   tunnel needs the outbound copied verbatim into a socks-only client (never printed); single-stream numbers
+   there also hide a ~1/3 connection-failure rate, so run a burst before calling an exit healthy.
 
 `vnstat` is installed for per-hour history — **`ens3` only**, because it otherwise auto-adds every
 `veth`/`docker0`/`br-*` and the DB fills with noise:
