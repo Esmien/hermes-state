@@ -29,7 +29,16 @@ Names are `user>>><email>>>traffic>>>uplink|downlink`, plus `inbound>>>tag>>>...
 
 Client emails are `<inboundTag>:<имя>` for per-user keys, but the **legacy/global key has email == its own tag** (`in-general`, `ws-in`). So `email.split(":")[-1]` is the person, and a bare tag means the shared legacy key — label it, never attribute it to one person.
 
-The owner has a profile in `users.json` but **no per-user client in `config.json`**: his devices ride the legacy UUID, so his traffic always lands in the "legacy (общий ключ)" row, mixed with anyone else who has that key. Before telling the owner a person is missing from the dashboard, check `inbounds[in-general].settings.clients` — a name in `users.json` does not mean a name in the live config.
+The owner can have a profile in `users.json` that carries **the legacy UUID itself**. His subscription then silently redistributes the shared key, `users.py sync` answers «клиентов добавлено 0» (the client already exists by id, so nothing is added), and no `in-general:<имя>` client ever appears in `config.json` — his traffic always lands in the shared-key row, mixed with every other device on that key.
+
+How to tell, before blaming the dashboard for a missing person:
+
+1. `inbounds[in-general].settings.clients` — a name in `users.json` does not mean a name in the live config.
+2. Compare ids: the bare-email clients (email == tag) all share one UUID, and `users.json[<name>]['uuid']` equal to it is the diagnosis.
+
+Fix: put a fresh `uuid.uuid4()` into `users.json`, re-run `users.py sync` (it now adds one client per inbound), then `vpn-cfg apply`. The tokens and URLs stay the same — only the profile content changes — so his devices must refresh the subscription, and until each one does, its traffic keeps falling into the shared row. Back up `users.json` first; the old uuid is the shared key and must stay on the bare-email clients.
+
+When a key is shared, never name its row after the guest who happens to hold it. The main key belongs to the owner even after he hands it out, so label it neutrally («Главный ключ (мой + …)») and let him choose the names — a row labelled with someone else's name reads to him as a claim that the guest is the principal.
 
 ## Dashboard
 
@@ -44,6 +53,7 @@ The owner has a profile in `users.json` but **no per-user client in `config.json
 - `/etc/nginx/vpn-stats.htpasswd` must be `root:www-data 0640`; plain `0640 root:root` gives **500** (nginx workers are www-data), not 401.
 - No emoji flags in generated HTML: they render as tofu in headless Chromium and show up in screenshots.
 - Routes with zero traffic are filtered out of the page; an empty `routes` list is legitimate right after a state reset.
+- To show the owner the page, screenshot it without touching basic auth: `python3 -m http.server 9199 --bind 127.0.0.1 --directory /var/www/vpn-stats` in the background, then `/root/.hermes/tools/chromium-1208/chrome-linux64/chrome --headless=new --no-sandbox --disable-gpu --hide-scrollbars --window-size=880,620 --virtual-time-budget=5000 --screenshot=<png> http://127.0.0.1:9199/`, kill the server, and read the PNG back with `vision_analyze` before sending — it catches tofu glyphs, duplicated rows and empty columns that `curl` cannot.
 
 ## Reachable data, cheap
 
