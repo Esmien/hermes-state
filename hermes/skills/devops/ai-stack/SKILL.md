@@ -104,11 +104,17 @@ The public names are moving from the `esmien.qd.je` zone (free DNS whose authori
 
 ```
 ai.esmien.ru    -> 127.0.0.1:8080  (open-webui)   | ai.esmien.qd.je
+app.esmien.ru   -> 127.0.0.1:8080  (тот же open-webui, мимо CF) | —
 llm.esmien.ru   -> 127.0.0.1:4000  (litellm)      | llm.esmien.qd.je
 bot.esmien.ru   -> 127.0.0.1:8000  (music bot)    | bot.esmien.qd.je
 mon.esmien.ru   -> 127.0.0.1:8090  (beszel hub)      | mon.esmien.qd.je
 vpn.esmien.ru:8443 (VPN entry)                    | vpn.esmien.qd.je:8443
 ```
+
+**`ai` — единственное имя в зоне на оранжевом облаке; всё остальное серое.** `app.esmien.ru` — тот
+же самый Open WebUI (тот же шаблон vhost, тот же бэкенд `127.0.0.1:8080`), но мимо Cloudflare: это
+штатный обход, когда CF начинает резать клиента (типичный случай — выход VPN). Проверять «вебуи жив
+или нет» и отвечать владельцу лучше по серому имени: через край видно только решение самого CF.
 
 Adding a service name on a new zone — order matters:
 
