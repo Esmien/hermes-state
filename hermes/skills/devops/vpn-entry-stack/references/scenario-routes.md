@@ -113,6 +113,16 @@ re-measuring.
   the `announce` header (Happ) and on `/u/<token>`.
 - Migrating a live token to this kind is additive: snapshot `md5sum` of `/var/www/esmien-sub/*/*`,
   write `kind=meta`, run `make_sub.py`, prove every other token's files are byte-identical.
+- One-off nodes for one person (typically an owned exit the owner wants to try by dialling it
+  *directly*, no entry in the path): `<token>/extra_nodes.json` — a JSON list of
+  `{"name", "link", "clash", "sing"}`. `build_meta` appends `link` to `list.txt`, `clash` to the
+  `proxies:` block, `name` to the select group and `sing` to the sing-box `outbounds`; without the
+  file the build is byte-identical to before. Verify over HTTP with both User-Agents
+  (`curl` → base64 two links, `-A 'ClashMeta/1.19.33'` → two `- name:` lines) and confirm the
+  other tokens still report one node. Delete the file to roll it back — no other edit needed.
+- A hand-built test client must be restarted after every `apply`: an established WS session keeps
+  talking to the drained colour, so a probe on the old client judges the previous config and the
+  change looks "not applied". Kill the client, start a fresh one, then judge.
 
 ## Why the owner says it suddenly got faster
 

@@ -104,6 +104,18 @@ Only the entry may dial it; a Reality inbound on 443 with no allowlist is an ope
 unused; delete it only in a separate pass, since removing it while a selector still names it trips
 the lint.
 
+## Optional: let one person dial the box directly (bypass the entry)
+
+To test whether a Russian address alone unblocks a service, the owner needs a node whose first hop
+is the box itself — the entry must be out of the path entirely. Second Reality inbound on its own
+port (`8443`, clone of the 443 one, its own `shortId`), plus `ufw allow 8443/tcp`, is enough; no
+nginx, no certificate, no DNS record. Reality answers a wrong client with the `dest` site
+(`www.microsoft.com`), so an open port is a stealth surface, not an auth surface — still say it is
+open and offer to allowlist his home IP. Ship it in **his token only** via `extra_nodes.json`
+(`scenario-routes.md`), then prove it before he taps anything: a throwaway client to
+`<ru-ip>:8443` must return the box address on `ipinfo`, `gosuslugi.ru` `200`. State the caveat
+that this node is a Russian exit — blocked foreign services will *not* work through it.
+
 ## Pitfalls
 
 - **`root` on Ubuntu has no password.** `ssh-copy-id root@<ip>` can never succeed, and the
@@ -112,6 +124,10 @@ the lint.
   the dir / `600` the file); Ubuntu's default `PermitRootLogin prohibit-password` then allows key
   login for root. Ansible-style `ssh <user>@` needs the account created at install time — try the
   distro defaults (`ubuntu`) only after reading `getent passwd` in the console.
+- A VM that falls back to the installer's «Try or install Ubuntu» menu after a successful install
+  is booting the **ISO**, not the disk: detach the image in the provider panel and put the disk
+  first in the boot order. Keep the firmware mode the installer used — a `BIOS grub spacer` in the
+  partition list means a legacy install, and booting it in UEFI mode finds no bootloader.
 - A host without global IPv6 resolves AAAA records and then has nowhere to send them; keep
   `freedom.domainStrategy: "UseIPv4"` on such a box so clients are not left waiting on IPv6
   attempts. `ip -6 addr show scope global` and `ip -6 route get <aaaa>` answer this in one line.
