@@ -11,6 +11,16 @@ Load this before touching anything that serves VPN clients: adding or removing a
 
 The owner's home ISP (MTS, Krasnodar) drops **port 443** and kills **fake-TLS/MTProto** to this server's IP. What works is a *real* TLS handshake on a non-standard port. That single fact drives the whole design — verify it before debugging anything else.
 
+## Reporting to the owner
+
+He runs this stack himself and treats reports as noise unless they answer the question he asked:
+
+- Answer in one line, then at most three or four bullets of substance. The payload — a new subscription URL, a login, a number — goes at the top, bare, without a lead-in.
+- Do not replay the checks you ran, list the files you touched, or volunteer «две оговорки» nobody asked for. A long report earns «да как же ты достал», an invented label earns «не приши лишнее» — the fix is fewer words, not more explanation of the words.
+- When he corrects a name or a label, use his string verbatim and change nothing else in that pass: «просто — Саша. И всё» means exactly that, not «Главный ключ (мой + Саша)».
+- A destructive request stated plainly («снеси нахуй X») is a work order: do it, then say in one line what died with it and how it would come back. Do not re-ask and do not lecture about the risk first.
+- He asks «почему» to get a cause, not a plan: explain the mechanism in two or three lines and stop. Offer the fix as one short question, or just make it when it is obviously what he asked for.
+
 ## Layout
 
 ```
@@ -90,7 +100,7 @@ IP-reputation acceptance test and rollback in `references/owned-ru-exit.md`.
 
 `make_sub.py` renders three formats; nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. The response carries `profile-update-interval: 12` and a `profile-title` that depends on the token: `apply_brand.py` scans `/var/www/esmien-sub/*/kind` and emits `00-esmien-sub-title.conf` with `map $esmien_sub_token $esmien_sub_title` (whitelist token → `Esmien VPN (LTE)`, everything else → `Esmien VPN`) plus a matching `$esmien_sub_fname` map, so downloads are named `esmien-vpn` / `esmien-vpn-lte`. A new token inherits its title from its `kind` file — never hard-code the title in the nginx template, and never let two subscriptions share a display name: the owner tells them apart by the suffix.
 
-Rules: names are plain country names with flags (`🇪🇪 Эстония (General)`, `🇫🇷 Франция (Gemini)`, `🛠 Тест (Develop)`); the brand lives only in the group/profile title. "No clutter" means no junk nodes and no invented groups — it does **not** cap the node list: the owner explicitly ordered every usable upstream node relayed in, so the relay pool ships as **one subscription** on its own token. The whitelist entries are a **second, separate subscription**, not a second group: the owner prefers a separate link for them. `make_sub.py` branches on a `kind` file inside the token dir — a dir whose `kind` reads `whitelist` gets a whitelist-only bundle (`make_sub.py --new-whitelist` creates one) — and the main bundle carries the relayed routes only. Never add a third group or a node class he did not ask for.
+Rules: names are plain country names with flags (`🇪🇪 Эстония (General)`, `🇫🇷 Франция (Gemini)`, `🛠 Тест (Develop)`); the brand lives only in the group/profile title. **The main subscription ships exactly one node** — `🇪🇪 Эстония (все сервисы)` on `/general`, every scenario decided on the server. That is the product: one server, nothing to switch, and no provider traffic caused by a node he happened to tap. The whitelist entries are a **second, separate subscription** (the LTE token) and that one is a list on purpose: it is the bypass for ISP white lists, so never «clean it up» to a single node. `make_sub.py` branches on a `kind` file inside the token dir — `whitelist` → whitelist-only bundle (`make_sub.py --new-whitelist` creates one), missing/`meta` → one node, `full` → the legacy 25-entry list, opt-in only. Full shapes and the bug that shipped the big list by accident: `references/subscription-shapes.md`. Never add a third group or a node class he did not ask for.
 
 URL shape: `https://<host>:8443/sub/<token>`. The port must be in the URL: plain 443 is blocked for the owner's ISP.
 
@@ -145,7 +155,7 @@ must sit **above** the `.ru` line, otherwise the long-tail suffix wins and nothi
 
 ## Per-user keys
 
-Per-person access means each person gets their own UUID and own token; the legacy global key stays in place so already-issued links never break. `/root/vpn-router/users.py` owns it: `add <name>` injects a client into **every** vless inbound (all 24 — a user's bundle ships `/p<i>` nodes too), creates `/var/www/esmien-sub/<token>/{user,title}`, re-renders all bundles and applies. `users.json` (0600, gitignored) is the source of truth; `make_sub.py` picks a token dir's key from its `user` file, so a bundle can no longer carry a key that is not its own.
+Per-person access means each person gets their own UUID and own token. There is **no shared key any more**: the legacy global UUID was deleted from every inbound on the owner's order, so every human — the owner included — authenticates with a personal key. `/root/vpn-router/users.py` owns accounts: `add <name>` injects a client into **every** vless inbound (all 24 — a user's bundle ships `/p<i>` nodes too), creates `/var/www/esmien-sub/<token>/{user,title}`, re-renders all bundles and applies. `users.json` (0600, gitignored) is the source of truth; `make_sub.py` picks a token dir's key from its `user` file, so a bundle can no longer carry a key that is not its own.
 
 Roll it out **additively**: no credential swap, no re-import for existing clients. Snapshot `/var/www/esmien-sub/*/*` with `md5sum` first, prove the legacy bundles are byte-identical afterwards, then probe each key through each route. Full procedure, verification matrix, quota/device-limit reality: `references/per-user-keys.md`.
 
@@ -157,11 +167,11 @@ Rule: any script that builds inbounds (`import_sub.py`) must re-apply `users.jso
 
 Rules that make it hold:
 
-- The legacy global UUID is registered as its owner's key (`add … --uuid <legacy> --token <existing> --lte-token <existing>`), never duplicated as a second client in the same inbound: `apply_users` skips a user whose UUID is already present. Two clients with one id in one inbound pass `xray -test` but split stats and are pointless.
+- A profile must never carry a UUID that some inbound already holds as another client: `apply_users` skips by id, so that person silently shares the other key and their traffic merges into a foreign stats row. `users.json[<name>]['uuid']` equal to a client id that is not `in-general:<name>` is the diagnosis — replace it with a fresh `uuid4()` and `users.py sync`. That is exactly how the owner once ended up riding the shared legacy key while believing he had his own subscription. Shared-key removal and proof that it is dead: `references/subscription-shapes.md`.
 - `make_sub.py` picks the UUID per token dir: a dir with a `user` file uses that person's key, without one it falls back to `/root/mtproto-faketls/ws-client-uuid`. Adding a per-user key therefore leaves every already-issued bundle byte-identical — verify with `md5sum -c` before/after rather than by eye.
 - `profile-title`/filename come from the dir's `title` file and its `kind`; the `(LTE)` filename is decided by `kind`, not by the title string, or an LTE name would download as `esmien-vpn`. Titles must stay distinct **and differ early**: the LTE bundle is `Esmien VPN LTE (Имя)`, never `Esmien VPN (Имя, LTE)` — clients truncate long profile names, and with LTE at the end both profiles look identical until expanded. `users.py retitle` rewrites the existing `title` files in place when the scheme changes.
 - The LTE bundle carries the provider's raw «глушилки» links, so its *content* is identical for everyone — separate tokens give separate links, not separate credentials. Say that before promising isolation.
-- Rollback of a single person is `users.py rm`; a full rollback of the feature is `vpn-cfg rollback` plus deleting `user`/`title` files, since the legacy key never moved.
+- Rollback of a single person is `users.py rm`; a full rollback of the whole feature is `vpn-cfg rollback` plus deleting the `user`/`title`/`kind` files.
 - The roster (who has which token, page URL, and the operations cheat-sheet) lives in `/root/vpn-router/users.md` (0600) — deliberately **outside git**: the owner does not want the people list and their tokens pushed, even to the private repo. Code goes to `Esmien/vpn-service`; `users.json`, `users.md`, `pages_index.json` and the generated subscriptions/pages stay on the host.
 
 ## Landing page per user (/u/)
@@ -185,7 +195,7 @@ while «сколько каждый прокачал» needs xray `StatsService`
 ahead of the `geoip:private` block, and three matching fixes in `vpn-bluegreen.py` (lint must ignore the
 no-clients inbound and the implicit `api` outbound, and `probe_direct()` must skip dokodemo-door or the
 fresh colour reports `24/25` and the flip is refused). Full procedure, query command, email shapes and the
-dashboard design the owner approved: `references/usage-stats.md`.
+dashboard design the owner approved: `references/usage-stats.md`. Dashboard internals — collector, static page, subscription-generator API, delete/reissue, htpasswd and the screenshot loop: `references/stats-dashboard.md`.
 
 ## Applying changes without downtime (blue/green)
 
