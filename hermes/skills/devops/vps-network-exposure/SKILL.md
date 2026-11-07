@@ -170,6 +170,10 @@ Full detail (rule ordering, UFW, DNAT, netns drill, gated changes) —
   (`stream` + `proxy_protocol`) не даёт верного адреса и что работает вместо
   него (`map $http_cf_connecting_ip`), лимиты Free-плана, WAF-правило по UA и
   риски (100 с → 524, 100 МБ на загрузку, TLS терминируется у CF).
+- **CF скорит клиентский IP, а не наш сервер.** Смена выходного узла VPN (свежий
+  датацентровый адрес) сама по себе даёт managed challenge на здоровом origin, а watchdog,
+  дёргающий сценарий между узлами, предъявляет CF новый адрес на каждом скачке — репутация
+  с нуля каждый раз. Если впереди CF, у сценария должен быть один стабильный выход.
 
 ## fail2ban и rate limiting nginx (установлены 2026-10-31)
 
@@ -180,12 +184,29 @@ Full detail (rule ordering, UFW, DNAT, netns drill, gated changes) —
   На 24.04 action — `nftables`: баны в `nft list table inet f2b-table`, **не** в
   `iptables -S INPUT`. Детали —
   [references/fail2ban-and-rate-limits.md](references/fail2ban-and-rate-limits.md).
-- **nginx** (зоны в `nginx.conf`, `limit_req_zone … zone=webui_api rate=20r/s`):
-  `llm_api` 10r/s, `webui_api` 20r/s, `conn_per_ip`. `llm.` — server-level
-  `burst=40 nodelay` + `limit_conn 20`; `ai.`/`app.` — только `location /api/`,
-  **`burst=120`** + `limit_conn 30`, статика без лимита (иначе F5 даёт 429 на
-  чанках). `limit_req_status 429`. В `vps-infra` этих конфигов нет — после
-  переезда их надо переприменять.
+- **nginx** — два набора зон, и путать их нельзя:
+  `conf.d/zz-ratelimit.conf` ключует по `$binary_remote_addr` (`llm_api` 10r/s, `webui_api` 8→20r/s,
+  `conn_per_ip`), а `conf.d/01-cf-client-ip.conf` — по `$client_ip` (CF-Connecting-IP либо PROXY
+  address), потому что без этого за оранжевым облаком все клиенты сливаются в одно ведро. Живой `ai.`
+  живёт на втором наборе: `webui_api_cf` 20r/s + `burst=240`, `limit_conn 60`, отдельные
+  `webui_signin` 10r/m (burst 3) и `webui_signup` 3r/m (burst 2), плюс `if ($owui_banned_ip) → 403`
+  из fail2ban-джейла `owui-auth`. `llm.` — server-level `burst=40 nodelay` + `limit_conn 20`.
+  **У `app.esmien.ru` больше нет ни лимитов, ни проксирования** — это `301` на `ai` (одно приложение
+  = один публичный hostname), поэтому искать там зоны и править их бессмысленно. Статика везде без
+  лимита: одна загрузка SPA — 40–60 запросов к `/api/`, иначе второй F5 даёт 429.
+  `limit_req_status 429`. В `vps-infra` зеркало есть только у `zz-ratelimit.conf` и
+  `01-cf-client-ip.conf` — после переезда остальные вхосты надо переприменять.
+- **«Нас атакуют боты» решается счётом за сутки, а не ощущением.** Сначала объём и состав:
+  `grep -oE '"[A-Z]+ [^"]*" [0-9]{3}' /var/log/nginx/access.log | grep -oE '[0-9]{3}$' | sort | uniq -c | sort -rn`
+  (регэкспом, а не по номеру колонки — в одном файле живут `cfkomb` и combined), затем топ путей у `404`
+  и топ адресов у них. Картина «605 из 4682 за сутки, все на `/.env`, `/wp-config.php`,
+  `/phpinfo.php`, `/storage/logs/laravel.log`, половина с одного IP» — это фоновый шум интернета,
+  а не атака: 3 запроса в минуту не стоят ни WAF, ни оранжевого облака (оно же приносит
+  репутационный challenge легитимному трафику — `ai-stack` → `references/cloudflare-proxy.md`,
+  «Репутация клиентского IP»). Вердикт так и подавать: объём → что шумит → почему закрытый логин
+  и гейт на входе уже держат риск. Дешёвое лечение без прослоек — `return 403` на мусорные пути
+  (`/.env`, `/wp-*`, `/phpinfo.php`, `/*.log`, `/secrets.json`): снимает шум и чистит логи, где
+  иначе настоящий вхосток прячется за сканерами.
 - **Burst считай по стоимости одной загрузки SPA, а не по «запросам в секунду».**
   Один refresh Open WebUI — это 40–60 запросов к `/api/` (модели, папки,
   аватарки, скиллы, сокет). `burst=30` выбирается одним открытием страницы,

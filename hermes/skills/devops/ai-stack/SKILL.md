@@ -103,8 +103,8 @@ ssh -N -L 8080:127.0.0.1:8080 -L 4000:127.0.0.1:4000 root@<host>
 The public names are moving from the `esmien.qd.je` zone (free DNS whose authoritatives fail — see `vpn-entry-stack` for the triage) to the owned **`esmien.ru`** zone on Cloudflare. Both sets are served in parallel until the owner moves the family, so an old and a new name point at the same backend:
 
 ```
-ai.esmien.ru    -> 127.0.0.1:8080  (open-webui)   | ai.esmien.qd.je
-app.esmien.ru   -> 127.0.0.1:8080  (тот же open-webui, мимо CF) | —
+ai.esmien.ru    -> 127.0.0.1:8080  (open-webui — единственный вход) | ai.esmien.qd.je
+app.esmien.ru   -> 301 на ai.esmien.ru (не второй вход)          | —
 llm.esmien.ru   -> 127.0.0.1:4000  (litellm)      | llm.esmien.qd.je
 bot.esmien.ru   -> 127.0.0.1:8000  (music bot)    | bot.esmien.qd.je
 mon.esmien.ru   -> 127.0.0.1:8090  (beszel hub)      | mon.esmien.qd.je
@@ -113,9 +113,19 @@ vpn.esmien.ru:8443 (VPN entry)                    | vpn.esmien.qd.je:8443
 
 **Оранжевого облака в зоне больше нет: `ai` переведён в серый по указанию владельца** — CF отдавал
 HTML-оболочку и не пропускал пачку подресурсов с адресов выходов VPN (диагностика и доказательства —
-`references/cloudflare-proxy.md`, раздел про «через VPN не грузится»). Оба имени, `ai` и `app`, серые и
-ходят прямо на origin, бэкенд один (`127.0.0.1:8080`); `app.esmien.ru` остаётся вторым именем того же
-WebUI — держать его как проверочный путь и не удалять.
+`references/cloudflare-proxy.md`, раздел про «через VPN не грузится»). Оба имени, `ai` и `app`, серые и ходят прямо на
+origin, бэкенд один (`127.0.0.1:8080`). **`app.esmien.ru` — не второй вход, а редирект:** по указанию
+владельца он отдаёт `301` на `ai` с сохранением пути и query, без проксирования и без лимитов
+(два имени одного WebUI = две cookie-сессии, потому что cookie привязана к hostname). Не возвращать
+`app` вторым проксирующим vhost'ом без прямой просьбы. Бэкап прежнего файла — `.bak-before-redirect`.
+Проверка правки: `curl -s -o /dev/null -D- --resolve app.esmien.ru:443:127.0.0.1
+'https://app.esmien.ru/c/x?y=1' | grep -iE '^HTTP|^location'` — ждать `301` и полный путь в `Location`.
+
+**Правка вхоста и проверка после reload.** `write_file` отказывается писать в `/etc/nginx` (sensitive
+system path): писать новый файл в scratch и класть через `cp` (бэкап — `cp -a <file> <file>.bak-<повод>`).
+Сразу после `systemctl reload nginx` первый же `curl` может ответить по **старому** конфигу — прежний
+worker ещё принимает соединения; повторять запрос, а не откатывать правку и не искать «конфиг не
+применился» (симптом обманчив: только что отредактированный vhost отдаёт 200 с телом прежнего).
 
 **Снятие оранжевого облака — два действия, а не одно.** Сначала убрать из вхост-файла гейт
 `if ($deny_direct) { return 403; }` (он пропускает только запросы с `CF-Connecting-IP` и без CF режет
@@ -229,7 +239,7 @@ Two hard rules from this stack:
 - `references/branding.md` — **Branding (Esmien AI)**. Read when brand assets, image/logo, screenshots.
 - `references/signup-approval.md` — **Signup approval, user administration and WebUI auth hardening**. Read when pending signups, the Telegram approver, user roles via the API — and whenever signup/login protection is in play (Turnstile gate, fail2ban jail, rate limits, security headers, MFA, admin API keys and their rotation trap).
 - `references/searxng.md` — **SearXNG (web search backend)**. Read when web search returns junk, engines get banned, or the image is upgraded.
-- `references/cloudflare-proxy.md` — **Cloudflare in front of one of our names**. Read before proxying a vhost, adding WAF/bot rules, when rate limits suddenly apply to everyone at once, or when an outside monitor reports the site as down/403 while it is healthy. Also read when a browser shows `ERR_TIMED_OUT` while `curl` from several vantages gets `200` — Alt-Svc/h3 through a tunnel, section «HTTP/3 (Alt-Svc)».
+- `references/cloudflare-proxy.md` — **Cloudflare in front of one of our names**. Read before proxying a vhost, adding WAF/bot rules, when rate limits suddenly apply to everyone at once, when an outside monitor reports the site as down/403 while it is healthy, or when traffic breaks after the client's egress IP changed (per-IP reputation of VPN exits). Also read when a browser shows `ERR_TIMED_OUT` while `curl` from several vantages gets `200` — Alt-Svc/h3 through a tunnel, section «HTTP/3 (Alt-Svc)».
 - `references/web-search-architecture.md` — **Web search end to end: OWUI `external` contract, shim plan, Hermes's role**. Read when the owner wants search better than SearXNG, or search/answer quality comes up.
 - `references/memory-troubleshooting.md` — **Container memory attribution**. Read when asked "what is eating the RAM" — numbers before causes.
 - `references/upstream-release-review.md` — **Reviewing an upstream release**. Read before applying any version bump; never update unprompted.
