@@ -63,6 +63,11 @@ Updater reads the URL from that file, so a new token is one command, no editing 
 
 ## Pitfalls
 
+- **The owner pastes the info-page URL, not the subscription URL.** Our link sheet shows
+  `…/u/<token>` (the human page) more prominently than `…/sub/<token>`, so `vpn edit` gets `/u/` and
+  answers «200, но это не clash.yaml». The editor must therefore fetch the URL as given, and on
+  200-without-`^proxies:` retry `scheme://hostport/sub/<token>` (same tail) and save whichever works —
+  never just error out and make him find the right link.
 - **Pasted heredocs carry a stray backslash before `;`.** The owner's terminal turned
   `curl … api.ipify.org; echo` into `api.ipify.org\; echo` *inside* a `tee <<'EOF'` body, so the
   script silently requested a URL ending in `;`. Build any script you send him **without a single
