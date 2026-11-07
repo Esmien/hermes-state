@@ -274,26 +274,64 @@ Two node kinds are unusable here: `hysteria2` links (Xray core has no such proto
 
 When a machine must be tunnelled with nothing open and no GNOME VPN profile (that dialog only knows OpenVPN/PPTP/WireGuard), run mihomo as a systemd daemon in TUN mode. Full recipe, merge script shape and the FlClash/`add route 0: file exists` trap: `references/desktop-mihomo-tun.md`.
 
-## Actual routing model — state it before measuring anything
+## Routing is a moving target — a watchdog rewrites it every minute
 
-The owner's model (correct him at your peril): **`fr` and `fi` exist ONLY for Gemini.** Nothing else
-is meant to exit through them. Everyday/chore traffic rides the Finland entry, RU traffic rides his own
-RU server. Measured in `config.json`: `bal-google` = `leastPing` over `fr`, `bal-ru` = `leastPing` over
-`direct`, `direct` is plain `freedom` (our Estonian IP), and the catch-all `network: tcp,udp` rule
-points at **`fr`**. Two consequences to check before answering "what goes where":
+The owner's model: **`fr` and `fi` exist only for Gemini.** RU traffic belongs on `ru1` (his own RU
+VPS), everything else on the Estonian `direct` exit. `/ws` catch-all still points at `fr` — that is his
+own profile by design, not drift.
 
-- the catch-all is what makes a `/ws` client exit via Paris for anything that is neither Google nor RU
-  — if the intent is Finland, that is a routing bug, not a client problem;
-- `ru1` (the owned RU VPS, `217.197.114.197`) exists as an outbound but **no rule references it**, so
-  "RU goes through my RU server" is not what the live config does (`bal-ru` → `direct`). Print the rule
-  table (`routing.rules`, tags only) instead of repeating either the skill or the owner's wording.
+`vpn-scenarios.timer` runs `scenario_fallback.py` **every 60 s** (`OnUnitActiveSec=60s`,
+`RandomizedDelaySec=30`): it probes the exits, rewrites the `bal-google` / `bal-ru` selectors in
+`/root/vpn-router/config.json`, then calls `vpn-cfg apply` itself. That is **not** the disabled
+`vpn-failover.timer` (see «Failover — off»): both units exist, only this one is wired. Consequences:
 
-When the owner complains that "everything on the VPN got slow", the shape of the answer is: server
-uplink vs exit uplink vs his local link, each measured. Uplink here is gigabit (a 50 MB pull from the
-host hits ~170 MB/s), while a borrowed exit gives ~10–17 MB/s per stream and is **shared with the
-reseller's other clients** — so a few people on YouTube through one exit is a plausible cause and a
-saturated host link is not. `vnstat` (installed, monitoring `ens3` only) starts giving per-hour history;
-there is no data for anything before its install date.
+- **Never call the routing "misconfigured" from one read of `config.json`.** The RU selector flips with
+  probe results, so a value read a few minutes ago may already be gone and any note about it goes stale
+  the same way. Before judging, read the moving parts: `stat -c '%y' /root/vpn-router/config.json`,
+  `ls -lt /root/vpn-router/backups/config-*.json | head`, `journalctl -u vpn-scenarios -n 20`, and
+  `/root/vpn-router/scenario_state.json`. A ~50/50 alternation in the backups is the signature of the
+  flap, not of a hand edit.
+- The flips look like a defect even when nothing is broken: `PROBE_URLS_RU` mixes `ya.ru` and `mail.ru`
+  with a **Google** `connectivitycheck.gstatic.com` picked at random, `http_through` counts only
+  `2xx/3xx` as alive, and the TCP pre-check times out at 3 s — so a healthy RU node is declared `DEAD`,
+  RU traffic drops to `direct` (Estonia) and returns minutes later. Read the report line
+  (`ru1:ok(46ms)` vs `ru1:DEAD(-ms)` — the dash means the TCP pre-check failed) before blaming a rule.
+  When changing probe targets, keep them RU-hosted *and* accept any HTTP answer (a `403` from a bank
+  still proves the tunnel works; a `2xx`-only rule marks a live node dead).
+- `config.json` is only the **A** colour's draft: xray reads its config at start, so a rewrite changes
+  nothing until `vpn-cfg apply` derives `config.b.json` (ports +1000), restarts the idle container and
+  flips nginx. Check which side clients really use (`cat /root/vpn-router/vpn-color`,
+  `ss -tn state established | grep -oE ':1[01]0[0-9]{2}'`) — draft and live colour can disagree for
+  hours, and only the live one explains what the owner sees.
+- **Never leave `vpn-cfg apply` behind a 300 s subprocess timeout.** 24 inbounds to probe blow past it,
+  the `TimeoutExpired` traceback kills the unit with `status=1`, and the draft is left in whatever state
+  the probe produced for the next real apply. Applying is an owner decision, not a timer's.
+
+## «Нас не съели ли VPN-клиенты?» — три замера вместо догадок
+
+"Everything on the VPN got slow" is answered by measuring three different links, in this order:
+
+1. **Host uplink** — `curl -s -o /dev/null -w '%{speed_download}' 'https://speed.cloudflare.com/__down?bytes=50000000'`
+   (measured here: ~170 MB/s ≈ 1.36 Gbit/s, and `tc -s qdisc` showed `dropped 0`, so the host throttles
+   nobody — a saturated host link is the *least* likely cause).
+2. **Per-exit throughput** — `scripts/probe-exit-speed.py <tag>`: builds a socks client from that
+   outbound, prints exit IP + MB/s, never prints credentials. Measured here: `fr` 10.4 MB/s (Paris),
+   `fi` 17.3 MB/s (Helsinki) — borrowed exits are shared with the reseller's other clients, so that is
+   the real ceiling for everything routed through them, not the host's gigabit.
+3. **The complaining client** — `ping -c5 <his ip>` (0 % loss / 41 ms here rules out the path) plus the
+   request gaps in the nginx log.
+
+`vnstat` is installed for per-hour history — **`ens3` only**, because it otherwise auto-adds every
+`veth`/`docker0`/`br-*` and the DB fills with noise:
+
+```bash
+apt-get install -y vnstat && systemctl enable --now vnstat
+for i in $(vnstat --json | python3 -c "import json,sys;print(' '.join(x['name'] for x in json.load(sys.stdin)['interfaces'] if x['name']!='ens3'))"); do vnstat --remove -i "$i" --force; done
+systemctl restart vnstat
+```
+
+There is **no** data before its install date — never answer a past-saturation question from it, and say
+plainly that the history starts now.
 
 ## Pitfalls
 
