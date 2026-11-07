@@ -138,7 +138,7 @@ d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 a11cea480af1ecd7fb72bb1210d03d7ee0b71ee57e82a0b4e587da117ce8e444  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-7c8de402f464b004e0ace7a87ea2cacf9ca7845ca7e4dcf2cc81ac41c7f7a5fa  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+8360031bf1d8bda3dbaee88f768d551a9ca0edae42766219ddf7610c20a528b5  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 97520490645fada8067d77da77b631b16d722e14b1242febdf6dcdf921f071fc  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
 f765f76dc5a9e7101614c8d7404991aba0de1070e9164dabab980ef1133a308b  ./hermes/skills/devops/vpn-entry-stack/references/desktop-mihomo-tun.md
 4d3f6b023d09ef6d7c6e536e9ca4b53bfdcc2d6f7156fe89e761b2c5da924241  ./hermes/skills/devops/vpn-entry-stack/references/domain-and-tls.md
@@ -149,6 +149,7 @@ b3e01208b42620cdf4c4126c8769dffe221fed325ee679ed50065a9e27167782  ./hermes/skill
 625480e5e31a642015e3490a1c33f91f7304d13906717789077d25939170888e  ./hermes/skills/devops/vpn-entry-stack/references/router-ops.md
 7854f9c7041a2bb113131ecc17d8827861ec7ba00a71217f226ca09c955889a1  ./hermes/skills/devops/vpn-entry-stack/references/ru-exit-node.md
 d535a49c2ce6d15a4669c05e917403e6c281792cb7046cb881c4fa90845009c1  ./hermes/skills/devops/vpn-entry-stack/references/scenario-routes.md
+5fa6ac663a73889f39a727ae8c321b7f4b681b8df00f8b7223b0e851e5bf7c46  ./hermes/skills/devops/vpn-entry-stack/references/usage-stats.md
 97721e654258560d01bb1ced479ff6a8efe89b2990f13b0108e701c6818394dc  ./hermes/skills/devops/vpn-entry-stack/references/xui-panel.md
 fda24a0d23effbb247cc1d437b7a57fa3a6b7b45861f65dd6d0da3d3b43ff328  ./hermes/skills/devops/vpn-entry-stack/scripts/gemini_geo_check.py
 fe82d1a33902d887eca8a46dcc787385c04c79b332ce6134b47d4eb9d443c166  ./hermes/skills/devops/vpn-entry-stack/scripts/probe-exit-speed.py
