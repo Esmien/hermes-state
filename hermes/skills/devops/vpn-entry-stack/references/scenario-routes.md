@@ -29,6 +29,31 @@ probe latency, not by preference. When a scenario has a primary and a reserve, k
 the selector and let the watchdog promote the reserve; the balancer is then just a named slot.
 RU keeps all three relays (all equivalent) so leastPing genuinely spreads.
 
+## Health checks decide the route, so build them for the node's country
+
+- `observatory.subjectSelector` must list **every** tag a balancer can select. A balancer over a
+tag the observatory never probes gets no health data and forwards nothing: `.ru` requests hang
+until the client times out, while `xray -test` and the lint stay green and the config looks
+perfect. Derive the selector from the union of `PREFERENCE` values at install time instead of a
+hand-written list — otherwise a newly added outbound works when dialled directly and stalls only
+in production.
+- Probe URLs must answer **from the node's country**. `gstatic 204` times out from a RU datacenter,
+so a perfectly healthy RU exit reads DEAD. Keep a per-group pool (`ya.ru`, `mail.ru`, plus a
+connectivity-check URL for RU nodes) and choose the pool by group membership, not once for all.
+- Accept any `2xx`/`3xx` as alive. `ya.ru` and `mail.ru` answer `302`; an exact `{"200","204"}`
+test marks every RU node dead, the watchdog then reverts the group to Estonia every minute, and
+the route is broken by its own monitoring.
+- Two independent health checks exist — observatory (`leastPing`) and the watchdog (selector
+rewrite). Only the watchdog writes `config.json`, so its false DEAD is not a cosmetic log line:
+it rewrites the route, and every rewrite is an `apply` = a container restart. When a scenario
+flaps, read `/var/log/scenario-fallback.log` before touching the config.
+- A group that mixes an owned node with reseller relays flaps forever, because the relays are the
+unstable part, and each flap costs an `apply`. Keep the RU scenario on the owned node with
+`direct` as the only fallback; relays go back in only on an explicit request.
+- Prove the flow reached the node itself, not merely that the page loaded:
+`journalctl -u xray --since -1min | grep 'accepted tcp:www.gosuslugi.ru'` on the exit answers «did
+this node carry it» in one line, and beats inferring it from a `200`.
+
 ## Watchdog (`scenario_fallback.py`, timer 60 s + `RandomizedDelaySec=30`)
 
 Probes every scenario node the way a client would: TCP handshake first (that is what Happ's own
@@ -125,6 +150,13 @@ mid-refresh — say that out loud when the family is asked to update their subsc
 
 ## Pitfalls
 
+- Prove what the container actually loaded, not what is on disk: `docker cp
+  vpn-router:/etc/xray/config.json /tmp/run.json` and compare with `config.json`. The file on disk
+  can already carry the fix while the running pod still serves the previous generation, and every
+  probe then "disproves" a change that is in fact correct.
+- `ls` cheap before blaming the chain: an exit whose own `curl ipinfo.io/ip` answers with its
+  public address is doing `freedom`; if the same address never shows up on the entry's timings,
+  the request is not even leaving through that outbound.
 - The watchdog must re-read `config.json` **right before writing** and touch only selectors of
   groups that still exist: a pass that started before someone else edited the config otherwise
   writes its stale copy back and resurrects a removed balancer/rules. `vpn-cfg apply` and the
@@ -148,3 +180,7 @@ mid-refresh — say that out loud when the family is asked to update their subsc
 - A `meta` subscription kills the client-side rules that used to carry the scenarios: if the
   desktop mihomo profile is rebuilt from that token, do not re-add RU/Google rules there — the
   entry does it now, and two layers drift apart silently.
+- Bound the hunt. If a routing change has not taken effect after two probe rounds, stop and report
+  the three facts instead of iterating: what the running container loaded, what the selector and
+  `observatory.subjectSelector` actually say, and the watchdog's verdict line. A long silent grind
+  on one route reads to the owner as being stuck, and he will ask why it is taking 45 minutes.

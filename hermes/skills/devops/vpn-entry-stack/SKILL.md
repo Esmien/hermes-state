@@ -69,10 +69,20 @@ A name change has to reach the **applications**, not just nginx and the subscrip
 
 ## Scenario routing / one-node subscription
 
-Server-side scenarios (Google→FR/FI, YouTube→AL, RU→Moscow) plus a subscription that exposes
-**one** node, and the jittered watchdog that falls a dead scenario group back to Estonia:
-`references/scenario-routes.md`. Do not offer a user a second node to tap — that is provider
-traffic and ban risk, not a feature.
+Server-side scenarios (Google→FR/FI, RU→Moscow or an owned RU box; YouTube deliberately rides the
+Estonian exit) plus a subscription that exposes **one** node, and the jittered watchdog that falls
+a dead scenario group back to Estonia: `references/scenario-routes.md`. Do not offer a user a
+second node to tap — that is provider traffic and ban risk, not a feature.
+
+Two rules apply to every scenario edit: a balancer tag must also be listed in
+`observatory.subjectSelector` (otherwise `leastPing` has no data for it and the matching requests
+hang while every config check passes), and health checks must accept `2xx`/`3xx` through a URL
+that answers *from that node's country* — a RU exit probed with `gstatic` reads permanently dead.
+Full symptom list and fixes: `references/scenario-routes.md`.
+
+When the RU scenario must stop depending on reseller relays, a small owned Russian VPS with a
+VLESS+Reality inbound wired in as outbound `ru1` is the shape: provisioning, firewall allowlist,
+IP-reputation acceptance test and rollback in `references/owned-ru-exit.md`.
 
 ## Subscription
 
@@ -274,7 +284,7 @@ When a machine must be tunnelled with nothing open and no GNOME VPN profile (tha
 - Writing nginx config through `printf`/heredoc mangles quotes and backslashes (`\"$request\"`, `\\S`), and `nginx -t` then fails on a file that looks fine on screen. Write generated snippets with Python `write_text` (staging under `/tmp` + `install -m 644` when a direct write to `/etc/nginx` is refused), test, then reload — the same trap bites fail2ban filter regexes. Same reason a python heredoc embedded in a compound `cmd1 && python3 - <<EOF` block can silently produce a truncated file (16 bytes, no error): put the generator in its own file and run it.
 - Node names in `relay_nodes.json` carry **zero-width spaces** (the RU flag label has `\u200b\u200b` before `Москва`). Never hard-code such a name into a generated rule: resolve it from the pool by normalized match (`if "Москва" in n["name"].replace("\u200b", "")`) and interpolate the real string. A hardcoded variant compiles fine and ships a rule pointing at a proxy that does not exist — Clash then drops matched traffic to the group/default and the split silently does nothing.
 - The host python has no `pyyaml`. Validate a generated profile in a throwaway venv (`python3 -m venv <scratch>/vy && <scratch>/vy/bin/pip -q install pyyaml`), and check that every rule target appears in `proxies`/`proxy-groups` and that the block sits before `MATCH` — parsing the file back proves the YAML, not the routing, but a dangling target is exactly the failure mode above. `IP-CIDR,…,DIRECT,no-resolve` splits into five comma fields, so do not flag it as a dangling target.
-- `git push` in `/root/vpn-service` has no stored credentials; the host token is `GITHUB_KEY` in `/home/ai_service/ai-stack/ai/.env`, fed through a `GIT_ASKPASS` script that answers `x-access-token` (the same pattern `vps-infra-push.sh` uses). Without it the push dies with `could not read Username for 'https://github.com'` — wire the askpass instead of asking the owner for a token.
+- `git push` in `/root/vpn-service` has no stored credentials; the host token is `GITHUB_KEY` in `/home/ai_service/ai-stack/ai/.env`, fed through a `GIT_ASKPASS` script that answers `x-access-token` (the same pattern `vps-infra-push.sh` uses). Without it the push dies with `could not read Username for 'https://github.com'` — wire the askpass on the first failure, in the same pass, and never surface the token to the owner: piping the value straight from `.env` into the askpass script is allowed, echoing it anywhere is not.
 - `docker stats` reports `0B` for `vpn-router` because it runs on the host network — do not read that as "no traffic".
 - `docker run -p 127.0.0.1:PORT` does not expose extra inbounds: use `--network host` (with `--user 0:0` so the 0600 config is readable).
 - Keep every inbound bound to 127.0.0.1; an inbound on `0.0.0.0` publishes raw VLESS to the internet.
