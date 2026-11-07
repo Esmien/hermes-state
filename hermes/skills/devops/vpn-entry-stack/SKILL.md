@@ -274,8 +274,33 @@ Two node kinds are unusable here: `hysteria2` links (Xray core has no such proto
 
 When a machine must be tunnelled with nothing open and no GNOME VPN profile (that dialog only knows OpenVPN/PPTP/WireGuard), run mihomo as a systemd daemon in TUN mode. Full recipe, merge script shape and the FlClash/`add route 0: file exists` trap: `references/desktop-mihomo-tun.md`.
 
+## Actual routing model — state it before measuring anything
+
+The owner's model (correct him at your peril): **`fr` and `fi` exist ONLY for Gemini.** Nothing else
+is meant to exit through them. Everyday/chore traffic rides the Finland entry, RU traffic rides his own
+RU server. Measured in `config.json`: `bal-google` = `leastPing` over `fr`, `bal-ru` = `leastPing` over
+`direct`, `direct` is plain `freedom` (our Estonian IP), and the catch-all `network: tcp,udp` rule
+points at **`fr`**. Two consequences to check before answering "what goes where":
+
+- the catch-all is what makes a `/ws` client exit via Paris for anything that is neither Google nor RU
+  — if the intent is Finland, that is a routing bug, not a client problem;
+- `ru1` (the owned RU VPS, `217.197.114.197`) exists as an outbound but **no rule references it**, so
+  "RU goes through my RU server" is not what the live config does (`bal-ru` → `direct`). Print the rule
+  table (`routing.rules`, tags only) instead of repeating either the skill or the owner's wording.
+
+When the owner complains that "everything on the VPN got slow", the shape of the answer is: server
+uplink vs exit uplink vs his local link, each measured. Uplink here is gigabit (a 50 MB pull from the
+host hits ~170 MB/s), while a borrowed exit gives ~10–17 MB/s per stream and is **shared with the
+reseller's other clients** — so a few people on YouTube through one exit is a plausible cause and a
+saturated host link is not. `vnstat` (installed, monitoring `ens3` only) starts giving per-hour history;
+there is no data for anything before its install date.
+
 ## Pitfalls
 
+- **Never dump an outbound as JSON.** Trojan credentials live in `settings.servers[].password`, VLESS in
+  `settings.vnext[].users[].id` — a "show me the outbound" print leaks the provider's shared keys and a
+  client UUID straight into the chat. Print tag, protocol, address:port and stream network only, and
+  mask anything whose key matches `pw|password|id|key|token`.
 - The hostname is part of the entry: a flaky free DNS provider (authoritatives answering 1–2 of 5 queries) makes validating resolvers return `SERVFAIL` for every client while browsers keep working from cache — the app then shows all nodes `n/a` and nothing ever reaches the server. Diagnose with `dig` across several resolvers plus a random uncached name, mitigate with IP-address node duplicates and an HTTP-by-IP subscription, and fix the delegation — do not rebuild the tunnel.
 - `check-host.net` verdicts must be read by the shape of the result, not its presence: a failed node returns `[{"error": "Connection timed out"}]`, a successful one `[{"address": …, "time": …}]`. Counting any non-null first element as reachable reports a closed port as open — require `isinstance(r[0], dict) and "time" in r[0]` before drawing conclusions about exposure.
 - The owner floats ideas in passing («выбросим эту Эстонию в помойку», «а если хостинг американский», «ничего не делаем, я образно») — that is thinking aloud, not a work order. Answer the technical question with the trade-off, then wait for an explicit «делай». Do not start a migration, buy a node or rewrite a pool off a hypothetical; he pushes back hard on unrequested initiative.
