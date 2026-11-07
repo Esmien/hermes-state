@@ -145,6 +145,24 @@ healthy. The alert then reads «VPS не отвечает (403)» with nothing a
   (как у остальных хостов зоны), либо WAF skip для известных выходов VPN, либо Bot Fight Mode /
   security level в дашборде — токен зоны этого не умеет.
 
+## HTTP/3 (Alt-Svc) — вторая причина «через тоннель таймаут»
+
+Другой симптом того же семейства: `ERR_TIMED_OUT` в браузере, при том что `curl` с хоста, с RU-хоста и
+через выходы VPN отдаёт `200`, а в логе от этого клиента в этот момент **ноль** запросов. Механизм: в
+ответе края приходит `Alt-Svc: h3=":443"; ma=86400`, Chrome запоминает альтернативу на сутки и на каждый
+заход сначала пробует QUIC поверх **UDP**, который через TUN-тоннель (и через часть RU-провайдеров)
+уходит в чёрную дыру — TCP-фолбэка в этом же заходе не случается, и браузер рисует таймаут.
+
+Как отличить: серое имя того же сервиса в ту же минуту открывается (`app.esmien.ru` за CF никогда не
+был, поэтому у него нет ни `alt-svc`, ни `cf-ray`). Это же объясняет «CF-ное имя плавает, а серое летает»
+при полностью здоровом origin.
+
+Лечение, первое надёжнее: снять оранжевое облако — origin не объявляет h3, и лотерея закрывается
+навсегда; альтернатива — выключить HTTP/3 в настройках зоны. После снятия требовать в ответе **отсутствие**
+`alt-svc` и `cf-ray`: `curl -sS -D - -o /dev/null https://<host>/ | grep -iE 'alt-svc|cf-ray|server:'`.
+Остаточный эффект: Chrome может держать закэшированную альтернативу до конца сессии — после первого
+таймаута он помечает её битой, но надёжнее попросить владельца перезапустить браузер.
+
 ## Risks to state before flipping (free plan)
 
 - **100 s before the first byte** → `524` on long non-streamed responses. OWUI chat streams over SSE, so
@@ -187,6 +205,9 @@ gets `403` with `rt=0.000` and `cf=-` in the log.
    `nginx -t && systemctl reload nginx`.
 2. `PATCH /zones/{zid}/dns_records/{rid} {"proxied":false}` (keep the A → origin IP), then
    `dig +short @1.1.1.1 <host>` must return the origin address, not `104.21.x`/`172.67.x`.
+   Перечитать флаг **до** и после `PATCH`: владелец часто успевает выключить облако сам в дашборде, и
+   тогда `proxied` уже `false` — докладывать подтверждённое состояние, а не «снял». И не включать прокси
+   «на пробу» без прямой просьбы: цена теста — сломанный вебуи у владельца.
 
 Verify: `curl -sS -D - -o /dev/null https://<host>/` answers `server: nginx/...` (no `cf-ray`), `200`, and
 the access log shows the client's own IP in column 1 with `cf=-`. A browser keeps the old CF address for

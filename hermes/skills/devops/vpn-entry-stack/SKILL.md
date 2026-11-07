@@ -118,6 +118,31 @@ Say both caveats up front instead of after the owner finds them: banks often ref
 
 While the entry's DNS is unreliable, ship duplicate nodes addressed by bare IP: `vless(addr=<ip>)` / `clash_proxy(addr=<ip>)` with `server`/`sni`/`Host` still carrying the hostname, so TLS and the WebSocket routing stay valid without any resolver. Pair them with an `http://<ip>/sub/<token>` vhost as an emergency fetch path — that URL exposes the token to the transit provider, so it is a fallback, never the default.
 
+### Owner's own domain — `DIRECT` on the client
+
+`*.esmien.ru` must never ride the tunnel. With the RU block in place, `ai` / `app` / `vpn` / `/sub/` all
+fall into `DOMAIN-SUFFIX,ru` and leave through the Moscow box — 100 Mbit, +43 ms, one vCPU — which is
+exactly the path the owner then describes as "the WebUI is slow / dropped". Add one rule above the RU
+block, in **every** builder of `make_sub.py` (`build_whitelist`, `build_meta` and the default `build()`)
+plus the sing-box mirror of each:
+
+```yaml
+  - DOMAIN-SUFFIX,esmien.ru,DIRECT      # after DOMAIN-SUFFIX,local,DIRECT (or just before MATCH,<group>)
+```
+
+```json
+{"domain_suffix": [".esmien.ru"], "outbound": "direct"}   # first entry of route.rules
+```
+
+Then `python3 make_sub.py` (no args rebuilds every token) and prove it on what clients actually fetch:
+`curl -A 'ClashMeta/1.18' https://<host>:8443/sub/<token> | grep -n 'esmien.ru,DIRECT'`. Clients pick it
+up on their own schedule (`profile-update-interval: 12`), so say plainly that the profile has to be
+refreshed by hand or it waits up to 12 h.
+
+Two rules to state alongside it: `DIRECT` means "the device dials it itself", **not** "bypasses a CDN" —
+while the record is orange the device still lands on Cloudflare and only skips the tunnel; and the rule
+must sit **above** the `.ru` line, otherwise the long-tail suffix wins and nothing changes.
+
 ## Per-user keys
 
 Per-person access means each person gets their own UUID and own token; the legacy global key stays in place so already-issued links never break. `/root/vpn-router/users.py` owns it: `add <name>` injects a client into **every** vless inbound (all 24 — a user's bundle ships `/p<i>` nodes too), creates `/var/www/esmien-sub/<token>/{user,title}`, re-renders all bundles and applies. `users.json` (0600, gitignored) is the source of truth; `make_sub.py` picks a token dir's key from its `user` file, so a bundle can no longer carry a key that is not its own.
@@ -360,7 +385,7 @@ plainly that the history starts now.
 - `check-host.net` verdicts must be read by the shape of the result, not its presence: a failed node returns `[{"error": "Connection timed out"}]`, a successful one `[{"address": …, "time": …}]`. Counting any non-null first element as reachable reports a closed port as open — require `isinstance(r[0], dict) and "time" in r[0]` before drawing conclusions about exposure.
 - The owner floats ideas in passing («выбросим эту Эстонию в помойку», «а если хостинг американский», «ничего не делаем, я образно») — that is thinking aloud, not a work order. Answer the technical question with the trade-off, then wait for an explicit «делай». Do not start a migration, buy a node or rewrite a pool off a hypothetical; he pushes back hard on unrequested initiative.
 - An exit probed with one request tells you nothing about its capacity: a node that accepts the first connection and refuses every following one answers a single `curl` in 0.5 s and still kills a real page load. Fire a burst of ~20 parallel requests at a real asset and compare against a known-good exit **in the same run** — measured here, `/p15` (Moscow) gave 20/20 timeouts at exactly 6 s while `fr` answered 20/20 in 0.5 s, and the same node answered 20/20 a few minutes later, so a single bad round means "degraded now", not "dead". To probe any outbound without its credentials, copy that outbound **verbatim** out of `/root/vpn-router/config.json` into a socks-only client config (never print the UUID), run `/usr/local/bin/xray run -c <cfg>`, and kill by PID. Leaked UUIDs are a real cost of this recipe: build the config in a script that reads `config.json`, never paste the outbound into a terminal command.
-- A user's "the site is down" on one host is rarely the tunnel: check whether the requests reached the app at all before rebuilding anything (`references/client-drop-triage.md`, section 4d).
+- A user's "the site is down" on one host is rarely the tunnel: check whether the requests reached the app at all before rebuilding anything (`references/client-drop-triage.md`, section 4d). Also check that the name **exists**: under a fake-ip client a nonexistent host is handed a `198.18.x.x` and simply hangs, so the browser reports `ERR_TIMED_OUT` instead of "server not found" and the tunnel takes the blame for a bad URL — `dig +short @1.1.1.1 <host>` plus the zone's record list settles it in one step.
 - Probes need no container: `/usr/local/bin/xray run -c <cfg>` in the background (`& pid=$!`) plus `gemini_geo_check.py 127.0.0.1:<socks port>` is the whole recipe. If the binary ever disappears, `docker cp vpn-router:/usr/local/bin/xray` style copy out of a running xray container beats downloading a build.
 - A per-node probe must kill by PID (`… & pid=$!` … `kill $pid`). `pkill -f <cfg>.json` matches the shell that runs the loop itself and the probe stops after the first node; the same trap kills the calling shell when the pattern text appears in its own command line (`pkill -f "tcpdump -i ens3"`), so kill by the PID you started.
 - Before trusting any measurement through a locally started client, confirm nothing older still holds the socks port (`pkill -f "xray run -c /tmp/cli"; pgrep -af "xray run"`). A second client that fails to bind dies silently while the first one keeps answering, so the route you just configured gets judged by the previous config — the tell is an exit IP belonging to a different route.
@@ -370,7 +395,7 @@ plainly that the history starts now.
 - Writing nginx config through `printf`/heredoc mangles quotes and backslashes (`\"$request\"`, `\\S`), and `nginx -t` then fails on a file that looks fine on screen. Write generated snippets with Python `write_text` (staging under `/tmp` + `install -m 644` when a direct write to `/etc/nginx` is refused), test, then reload — the same trap bites fail2ban filter regexes. Same reason a python heredoc embedded in a compound `cmd1 && python3 - <<EOF` block can silently produce a truncated file (16 bytes, no error): put the generator in its own file and run it.
 - Node names in `relay_nodes.json` carry **zero-width spaces** (the RU flag label has `\u200b\u200b` before `Москва`). Never hard-code such a name into a generated rule: resolve it from the pool by normalized match (`if "Москва" in n["name"].replace("\u200b", "")`) and interpolate the real string. A hardcoded variant compiles fine and ships a rule pointing at a proxy that does not exist — Clash then drops matched traffic to the group/default and the split silently does nothing.
 - The host python has no `pyyaml`. Validate a generated profile in a throwaway venv (`python3 -m venv <scratch>/vy && <scratch>/vy/bin/pip -q install pyyaml`), and check that every rule target appears in `proxies`/`proxy-groups` and that the block sits before `MATCH` — parsing the file back proves the YAML, not the routing, but a dangling target is exactly the failure mode above. `IP-CIDR,…,DIRECT,no-resolve` splits into five comma fields, so do not flag it as a dangling target.
-- `git push` in `/root/vpn-service` has no stored credentials; the host token is `GITHUB_KEY` in `/home/ai_service/ai-stack/ai/.env`, fed through a `GIT_ASKPASS` script that answers `x-access-token` (the same pattern `vps-infra-push.sh` uses). Without it the push dies with `could not read Username for 'https://github.com'` — wire the askpass on the first failure, in the same pass, and never surface the token to the owner: piping the value straight from `.env` into the askpass script is allowed, echoing it anywhere is not.
+- `git push` in `/root/vpn-service` has no stored credentials; the host token is `GITHUB_KEY` in `/home/ai_service/ai-stack/ai/.env`, fed through a `GIT_ASKPASS` script that answers `x-access-token` (the same pattern `vps-infra-push.sh` uses). Without it the push dies with `could not read Username for 'https://github.com'` — wire the askpass on the first failure, in the same pass, and never surface the token to the owner: piping the value straight from `.env` into the askpass script is allowed, echoing it anywhere is not. A ready askpass already sits at `/var/lib/vps-infra-autopush/git-askpass.sh` — export `GITHUB_KEY` from the `.env` and point `GIT_ASKPASS` at it. Before copying a live file into `router/`, `diff` it against the repo copy: the repo can lag by a whole feature, not just your edit, so expect unrelated hunks and let the live file win (the recovery repo must match the host, not the other way round).
 - `docker stats` reports `0B` for `vpn-router` because it runs on the host network — do not read that as "no traffic".
 - `docker run -p 127.0.0.1:PORT` does not expose extra inbounds: use `--network host` (with `--user 0:0` so the 0600 config is readable).
 - Keep every inbound bound to 127.0.0.1; an inbound on `0.0.0.0` publishes raw VLESS to the internet.
