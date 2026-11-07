@@ -59,6 +59,14 @@ itself stays untouched except for a 4-line guard right after `set -uo pipefail`:
 `if [ "$1" = edit ] → shift; exec vpn-sub-edit "$@"` — patch it with python3(find + insert), never
 by rewriting the file, so local edits made during the install survive.
 
+Status must show **name + token tail**, not the token alone — the owner does not recognise UUID-like
+strings («я же не буду помнить uuid»). Take the name from the `profile-title` response header (nginx
+serves it per subscription) and store it in `/etc/mihomo/sub.name` next to `sub.url`, so `vpn status`
+prints `Esmien VPN (Игорь) (…c6qM)` and the update time of `config.yaml`. Extras that make it a real
+CLI: `vpn --help`, `vpn` with no args = status, `vpn edit --show`, `vpn edit -` (stdin), completions
+(`/etc/bash_completion.d/vpn`, `/usr/local/share/zsh/site-functions/_vpn`), README in
+`/usr/local/share/doc/vpn/`.
+
 Updater reads the URL from that file, so a new token is one command, no editing of scripts.
 
 ## Pitfalls
