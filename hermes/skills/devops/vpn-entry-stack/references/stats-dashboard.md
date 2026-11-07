@@ -29,6 +29,8 @@ Names are `user>>><email>>>traffic>>>uplink|downlink`, plus `inbound>>>tag>>>...
 
 Client emails are `<inboundTag>:<имя>` for per-user keys, but the **legacy/global key has email == its own tag** (`in-general`, `ws-in`). So `email.split(":")[-1]` is the person, and a bare tag means the shared legacy key — label it, never attribute it to one person.
 
+The owner has a profile in `users.json` but **no per-user client in `config.json`**: his devices ride the legacy UUID, so his traffic always lands in the "legacy (общий ключ)" row, mixed with anyone else who has that key. Before telling the owner a person is missing from the dashboard, check `inbounds[in-general].settings.clients` — a name in `users.json` does not mean a name in the live config.
+
 ## Dashboard
 
 - Collector: `/root/vpn-router/stats_collect.py`, run by `vpn-stats.timer` every 5 min (state `/var/lib/vpn-stats/state.json`, page data `/var/www/vpn-stats/data.json`).
