@@ -43,13 +43,18 @@ connectivity-check URL for RU nodes) and choose the pool by group membership, no
 - Accept any `2xx`/`3xx` as alive. `ya.ru` and `mail.ru` answer `302`; an exact `{"200","204"}`
 test marks every RU node dead, the watchdog then reverts the group to Estonia every minute, and
 the route is broken by its own monitoring.
-- Two independent health checks exist — observatory (`leastPing`) and the watchdog (selector
-rewrite). Only the watchdog writes `config.json`, so its false DEAD is not a cosmetic log line:
-it rewrites the route, and every rewrite is an `apply` = a container restart. When a scenario
-flaps, read `/var/log/scenario-fallback.log` before touching the config.
+- Two independent health checks exist — observatory (`leastPing` + `fallbackTag`) and the watchdog
+  (draft rewrite). **Live failover is the observatory's job now**: `fallbackTag` on each balancer
+  (`bal-google`→`fi`, `bal-ru`→`direct`) makes xray move traffic itself in ~30–60 s when the only
+  node of a group stops answering. The watchdog no longer touches live traffic at all — it writes
+  `config.json` (a draft: xray reads a config only at start) and logs the verdict.
+- **Never let the watchdog call `vpn-cfg apply`.** It holds `/var/lock/vpn-config.lock` for its whole
+  run and `vpn-cfg` takes the same lock with `flock -w 300`, so the child waits for its own parent:
+  every change died after exactly 300 s with a traceback, and nothing was ever applied. The tell in
+  the journal is `применяю …` followed 300 s later by `TimeoutExpired`.
 - A group that mixes an owned node with reseller relays flaps forever, because the relays are the
-unstable part, and each flap costs an `apply`. Keep the RU scenario on the owned node with
-`direct` as the only fallback; relays go back in only on an explicit request.
+  unstable part. Keep the RU scenario on the owned node with `direct` as `fallbackTag`; relays go
+  back in only on an explicit request.
 - Prove the flow reached the node itself, not merely that the page loaded:
 `journalctl -u xray --since -1min | grep 'accepted tcp:www.gosuslugi.ru'` on the exit answers «did
 this node carry it» in one line, and beats inferring it from a `200`.
@@ -63,15 +68,32 @@ delay, shuffled probe order, random target URL and user agent — a fixed rhythm
 nodes is the abuse signature their panels ban for.
 
 Decision: keep the alive nodes of the group; `direct` when none is alive. `SINGLE` groups
-(google) keep exactly one tag. Writes `config.json` and runs `vpn-cfg apply` **only when
-the selector actually changes**, so a healthy day costs zero restarts. A temporary manual swap
-(`{"bal-yt": ["p16","direct"]}` in `scenario_override.json`, loaded by `scenario_routes`) is
-how a scenario is re-pointed for a test without editing code — and without the watchdog
-reverting it on its next pass.
+(google) keep exactly one tag. **Hysteresis: a tag leaves the rotation only after 2 consecutive
+failures in a row** — one bad probe is not a dead node, and the old single-failure rule is what made
+`bal-ru` flap between `ru1` and `direct` every 5–11 minutes. Fail counters live in
+`scenario_state.json` (`fails`). The draft is written only when a selector actually changes; it is
+never applied automatically. A temporary manual swap (`{"bal-yt": ["p16","direct"]}` in
+`scenario_override.json`, loaded by `scenario_routes`) is how a scenario is re-pointed for a test
+without editing code.
 
-Honest latency, do not oversell it: a dead node leaves rotation in ~30 s (observatory), a whole
-dead group falls back to Estonia in ~1–2 min (watchdog). «5–10 секунд» is only true when the
-watchdog interval itself is that tight, so do not put that number in user-facing copy without
+**Probe targets (they decide whether the verdict is honest):**
+
+- RU group → `http://www.tbank.ru/`, `http://www.avito.ru/`, `https://www.gosuslugi.ru/`. Plain HTTP
+  for the first two: their HTTPS pages fail curl's trust check (Russian roots) or take >15 s, while
+  the HTTP answer is a 301 in ~0.2 s. Never probe a RU exit against Google/Cloudflare — that path is
+  slow from Russia on its own and produced false DEADs.
+- **Alive = any HTTP answer except `000`.** A 403/429 from a bank or marketplace proves the path
+  works; treating 2xx/3xx as the only success turns a live node into a dead one.
+- Gemini geo (once per 10–15 min, jittered, ~170 KB gzipped): the unauthenticated `/app` shell is
+  byte-identical from every country and carries **no** "not available in your country" text, so a
+  body-string check cannot work. Read Google's own country from
+  `this.gbar_={CONFIG:[[[0,"www.gstatic.com","<build>","<cc>","<lang>"` — EE answers `ru`
+  (blocked), FR answers `co.uk` (supported). The regex must accept `co.uk`-style codes; `[a-z]{2}`
+  reports the working exit as "check failed".
+
+Honest latency, do not oversell it: a dead node leaves rotation in ~30–60 s (observatory +
+`fallbackTag`), and the watchdog's draft catches up on its next passes. «5–10 секунд» is only true
+when the probe interval itself is that tight — do not put that number into user-facing copy without
 re-measuring.
 
 ## Verification (cheap, reversible)

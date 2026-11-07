@@ -6,7 +6,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 8b1b50900a770e4d6e47d41dd63b9814b4a335820c9d8236eb0b7dc352d6a1db  ./hermes/config.yaml
 7f4fa3bef9f66184a00989df632250b3a826d7a567992bdece5687bbc3bd01a5  ./hermes/cron/jobs.json
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
-b4fed63fe0e06a8255bc3098b0bb1bda3c90d37c8d8e26bd8f89bc6658e7e8e1  ./hermes/docs/vpn-runbook.md
+b16a5bc39a143f491a79129864b6a68420c40f5353cb512bbceec4aafd89e769  ./hermes/docs/vpn-runbook.md
 8eedf9a814539ebd650b9d06131571d1974e47869c33af6ad10eff082750a629  ./hermes/memories/MEMORY.md
 62ec8c3f548a39240384bfc7c1067ed3cef4f368c4b04602544620528b0d1e85  ./hermes/memories/USER.md
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
@@ -148,7 +148,7 @@ b3e01208b42620cdf4c4126c8769dffe221fed325ee679ed50065a9e27167782  ./hermes/skill
 5abb75cc1b48187744e2c7ef3fcff884214d8d841f45bed3055778ee974130e1  ./hermes/skills/devops/vpn-entry-stack/references/per-user-keys.md
 625480e5e31a642015e3490a1c33f91f7304d13906717789077d25939170888e  ./hermes/skills/devops/vpn-entry-stack/references/router-ops.md
 7854f9c7041a2bb113131ecc17d8827861ec7ba00a71217f226ca09c955889a1  ./hermes/skills/devops/vpn-entry-stack/references/ru-exit-node.md
-d5279c43435ff357bea3e5f3910bb34a1d0cb32481e4813d51e711ed7c2d059f  ./hermes/skills/devops/vpn-entry-stack/references/scenario-routes.md
+d535a49c2ce6d15a4669c05e917403e6c281792cb7046cb881c4fa90845009c1  ./hermes/skills/devops/vpn-entry-stack/references/scenario-routes.md
 97721e654258560d01bb1ced479ff6a8efe89b2990f13b0108e701c6818394dc  ./hermes/skills/devops/vpn-entry-stack/references/xui-panel.md
 fda24a0d23effbb247cc1d437b7a57fa3a6b7b45861f65dd6d0da3d3b43ff328  ./hermes/skills/devops/vpn-entry-stack/scripts/gemini_geo_check.py
 fe82d1a33902d887eca8a46dcc787385c04c79b332ce6134b47d4eb9d443c166  ./hermes/skills/devops/vpn-entry-stack/scripts/probe-exit-speed.py
