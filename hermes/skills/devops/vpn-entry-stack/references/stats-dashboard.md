@@ -56,8 +56,11 @@ A block on the same page creates profiles: input name → POST `api/new` → thr
 - Return the links from `users.json` after the call, not by parsing stdout.
 - Validate the name (`^[A-Za-zА-Яа-яЁё0-9 _-]{2,24}$`) — it becomes a directory name under `/var/www/esmien-sub/`.
 - Accept JSON `POST` only: a cross-site form cannot set `Content-Type: application/json` without a preflight the backend never answers.
-- No delete endpoint on purpose — removal stays in the console (`users.py rm`).
-- Verify the generator through the real URL (create a throwaway profile, then `users.py rm` it: tokens move to `/var/www/esmien-sub/.disabled/` and the config is re-applied).
+- Deletion is a second endpoint on the same API: `POST api/del {"name": ...}` shells out to `python3 users.py rm <name>` (same 600 s timeout, whole config re-applied). In the table the button lives in a trailing action cell, and the payload must be the **raw key** the collector emits (`u.key`), not the display label — «Владислав (главный)» is not a profile name and `users.py rm` would fail on it. Emit `key` plus `deletable` from the collector and render the button only when `deletable` is true.
+- The bare-tag row (the shared main key) gets **no** delete button: there is no profile behind it, and deleting there would mean dropping the owner's own legacy key. The owner's own personal row does get one — his call.
+- Confirm destructive UI by typing the name into an inline field (`placeholder` = the exact string to type), not with a bare second click: the row then ends up in a state where a stray tap on a phone cannot destroy someone's connection. Wrong input clears the field and re-prompts.
+- Say plainly what deletion costs: `users.py rm` moves the token directories to `/var/www/esmien-sub/.disabled/`, revokes them, drops the uuid from the config and applies it — the person's tunnel drops mid-apply and their old links die. Recovery means re-adding with the archived uuid and tokens, so it is not a one-click undo.
+- Verify the generator through the real URL (create a throwaway profile, then `users.py rm` it: tokens move to `/var/www/esmien-sub/.disabled/` and the config is re-applied). Do the same for delete: create, delete via `api/del`, and confirm the person is gone from `users.json`, from `config.json` and from `api/users`; deleting a name that does not exist must answer 404, not silently succeed.
 
 ### Pitfalls hit while building it
 
