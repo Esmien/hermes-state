@@ -133,5 +133,16 @@ that this node is a Russian exit — blocked foreign services will *not* work th
   attempts. `ip -6 addr show scope global` and `ip -6 route get <aaaa>` answer this in one line.
 - The RU box's own `freedom` means its exit IP **is** its public IP: verify with `curl ipify` on
   the box first, otherwise "the exit changed" is blamed on the entry.
+- **Disabling SSH password auth silently does not stick on a cloud image.** `PasswordAuthentication no`
+  in a fresh `/etc/ssh/sshd_config.d/99-*.conf` loses to `50-cloud-init.conf` saying `yes`, because sshd
+  keeps the **first** value it reads, not the last. Change the cloud-init file too, add
+  `ssh_pwauth: false` under `/etc/cloud/cloud.cfg.d/` so a reboot does not restore it, then prove it:
+  `sshd -T | grep passwordauthentication` must say `no`, and a `PreferredAuthentications=password
+  PubkeyAuthentication=no` attempt must answer `Permission denied (publickey)`. Confirm `authorized_keys`
+  already holds your key **before** the reload — the console here is a browser tab, not a rescue mode.
+- **Every selector change is a full `vpn-cfg apply`, i.e. a container restart.** Leaving flapping reseller
+  relays beside `ru1` makes the watchdog re-apply roughly once a minute, and each apply restarts the entry.
+  Once the owned box is in place keep the RU group at `[ru1, direct]` and drop the relays; a stable
+  selector with one node is worth more than a pool that twitches.
 - Do not sell the two-hop path as fast: client → Estonia → Moscow adds the measured ping to every
   request, and no config removes it. It is fine for gosuslugi, which is not a speed experience.
