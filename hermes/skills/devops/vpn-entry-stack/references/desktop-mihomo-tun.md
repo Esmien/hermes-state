@@ -48,7 +48,27 @@ traffic would leave outside the tunnel and flip the Gemini/geo verdict.
 Verify by behaviour: `ip -br addr show esmien0` (expect `198.18.0.1/30`), `curl -s https://ipinfo.io/ip`
 → Estonian exit, `curl -s -o /dev/null -w '%{http_code}' http://www.gosuslugi.ru` → 3xx (Moscow relay).
 
+## Subscription token: rotatable, never hardcoded
+
+The token lives in `/etc/mihomo/sub.url` (root, 0600), not in the scripts — rotation is
+`sudo vpn edit <url|token>` (`/usr/local/bin/vpn-sub-edit`): it strips whitespace/quotes,
+extracts the tail of a pasted URL (or builds one from a bare token), fetches it with the
+`ClashMeta` UA to prove 200 + `^proxies:` before writing, prints only the last 4 chars, then
+re-runs the updater if the tunnel is active and **rolls the URL back** if that fails. `vpn`
+itself stays untouched except for a 4-line guard right after `set -uo pipefail`:
+`if [ "$1" = edit ] → shift; exec vpn-sub-edit "$@"` — patch it with python3(find + insert), never
+by rewriting the file, so local edits made during the install survive.
+
+Updater reads the URL from that file, so a new token is one command, no editing of scripts.
+
 ## Pitfalls
+
+- **Pasted heredocs carry a stray backslash before `;`.** The owner's terminal turned
+  `curl … api.ipify.org; echo` into `api.ipify.org\; echo` *inside* a `tee <<'EOF'` body, so the
+  script silently requested a URL ending in `;`. Build any script you send him **without a single
+  `;`** — multi-line `then`/`fi`, `if [ $? -ne 0 ]` instead of `|| { … ; … }`, no `case … ;;` — then
+  verify with `grep -c ';' /usr/local/bin/<script>` (expect 0) and `bash -n`. This removes the whole
+  class of failure instead of asking him to hunt backslashes.
 
 - **A second Clash-family client owns everything.** FlClash/Hiddify sitting in the tray grabs
   `127.0.0.1:7890`, the `FlClashX` interface, `198.18.0.0/30` and routing table 2022. mihomo then
