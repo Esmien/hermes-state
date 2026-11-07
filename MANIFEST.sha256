@@ -146,6 +146,7 @@ b3e01208b42620cdf4c4126c8769dffe221fed325ee679ed50065a9e27167782  ./hermes/skill
 ce1662949c0e663c2d376aa3a3488ac9815b806958b5515694e9ac63bb495141  ./hermes/skills/devops/vpn-entry-stack/references/owned-ru-exit.md
 5abb75cc1b48187744e2c7ef3fcff884214d8d841f45bed3055778ee974130e1  ./hermes/skills/devops/vpn-entry-stack/references/per-user-keys.md
 625480e5e31a642015e3490a1c33f91f7304d13906717789077d25939170888e  ./hermes/skills/devops/vpn-entry-stack/references/router-ops.md
+7854f9c7041a2bb113131ecc17d8827861ec7ba00a71217f226ca09c955889a1  ./hermes/skills/devops/vpn-entry-stack/references/ru-exit-node.md
 d5279c43435ff357bea3e5f3910bb34a1d0cb32481e4813d51e711ed7c2d059f  ./hermes/skills/devops/vpn-entry-stack/references/scenario-routes.md
 97721e654258560d01bb1ced479ff6a8efe89b2990f13b0108e701c6818394dc  ./hermes/skills/devops/vpn-entry-stack/references/xui-panel.md
 fda24a0d23effbb247cc1d437b7a57fa3a6b7b45861f65dd6d0da3d3b43ff328  ./hermes/skills/devops/vpn-entry-stack/scripts/gemini_geo_check.py
