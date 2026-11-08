@@ -4,7 +4,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 683646459f25cdbbebebf48b674e0be4d96218b4032f7ab129bf0497bcf3f613  ./hermes/agent-hooks/ssh-only-gate.py
 8de8aafe34757fdff3e165704d4803a5a054618d11243cad6401fd4cc5483159  ./hermes/bin/read-untrusted
 8b1b50900a770e4d6e47d41dd63b9814b4a335820c9d8236eb0b7dc352d6a1db  ./hermes/config.yaml
-86fcf0148b3ab2887422de4dfecf2a5f2c0556c0aca0e4afad9359e60acc3558  ./hermes/cron/jobs.json
+a23c228f7de7543c1763eb0989f0e05ea588d93f6a55d25230214fd865e0f614  ./hermes/cron/jobs.json
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
 9e21be702a5c9c853afca040a01db25b37fa8b2f51e31c6cfe05ab3020db26e0  ./hermes/docs/vpn-runbook.md
 5a5381d59b0423f9ccdad1235e6b67357d65a1da0ccd474a75d2af3f9aaff144  ./hermes/memories/MEMORY.md
