@@ -90,3 +90,34 @@
 - A Hermes cron job (daily 03:15 UTC / 06:15 MSK, id `3378eb7271b7`) runs the pre-run script `backup-verify.sh`, which runs `monitor.py verify` once and reports to the message bot; the agent only analyses the injected output.
 - Metrics come from `/proc` + stdlib (meminfo/stat/uptime, `os.getloadavg`, `shutil.disk_usage`), with `psutil` only for per-process top-5 and core counts — prefer `/proc` for stability; fall back to `psutil` only if `/proc` is unreadable.
 
+## Gateway watchdog (independent of LiteLLM) — moved from SKILL.md
+
+- **Docker events already cover `die`/`restart`/`oom`, but not "container Up+healthy, traffic dead".** That gap is closed by `/usr/local/bin/litellm-watchdog.py` + `litellm-watchdog.{service,timer}` (root, oneshot every 60 s, `Requires=sysinit.target` only — never add a `Requires=` naming the service, that makes the timer start it at boot). It probes `http://127.0.0.1:4000/health/liveliness` (`FAIL_THRESHOLD=2` consecutive misses ⇒ DOWN alert, plus a recovery alert), reports the container state in the message, and runs a second check over `LiteLLM_SpendLogs`: last 15 min, ≥10 calls and ≥50 % failures (excluding `/v1/models` and `pass_through_endpoint`) ⇒ «всплеск отказов» alert, throttled 30 min. Alerts go straight to the Bot API (BOT_TOKEN/BOT_OWNER from `/home/ai_service/notifications/.env`), so they arrive while the gateway is dead; state `/var/lib/server-monitor/litellm_watchdog_state.json`, log `/var/log/litellm-watchdog.log`. Test with `--test` (real delivery, returns `message_id`), `--no-send` (prints the alert body), or `LITELLM_WATCHDOG_URL=http://127.0.0.1:4999/...` (fake dead endpoint — fires on the 2nd run).
+
+## Two notification bots — neither implies the other
+
+**Two different bots carry the Telegram notifications, and neither implies the other works.** Hermes sends its own messages with `TELEGRAM_BOT_TOKEN` from `/root/.hermes/.env` (`@esmien_vps_admin_bot`); `monitor.py` uses `BOT_TOKEN` / `FILE_BOT_TOKEN` from `/home/ai_service/notifications/.env` (`@esmien_vps_notificator_bot`, `@esmien_ai_backups_bot`). "Уведомления приходят" therefore proves only the Hermes bot. Verify each token on its own with `getMe` (username only, never print the value) before telling the owner a bot is dead — and after editing `notifications/.env`, restart every unit that reads it: the token is copied into the process memory at start, so a service restarted before the edit keeps polling 404 until the next restart (`journalctl -u server-monitor-bot` shows `getUpdates HTTP 404` every 5 s).
+
+## Answering «сервер защищён / отказоустойчив / бэкапы / восстановлю за 30 минут»
+
+## Answering the owner «сервер защищён / отказоустойчив / бэкапы / восстановлю за 30 минут»
+
+A yes/no posture question wants a verdict, evidence per claim, and a short list of what is actually
+left — not a re-inventory essay. Procedure and the accepted-risk list: `vps-posture-assessment` skill.
+Two hard rules from this stack:
+
+- **Never claim the dumps are unverified or unrestorable without reading `references/backups-notifications.md`.**
+  Restore verification exists on two paths: the bot command `/backups` restores the newest dump of each DB
+  into a throwaway `verify_restore_*` database and drops it, and the nightly `monitor.py verify` report does
+  the same at 03:15. What is NOT proof is the nightly `backup` digest («Сохранены бэкапы») — it is an upload
+  receipt only. Answer «прогонялся ли restore» from the verify path, not from `ls backups/` and not from the digest.
+- **Secrets DO have an offsite copy — say it, with the caveat.** `ai/.env` is git-ignored by design, but
+  `secrets-offsite-backup.timer` (Sunday 04:10 UTC) tars every `.env` on the host, encrypts it AES-256-CBC
+  (pbkdf2, key `/root/.secrets/offsite.key`), round-trip verifies decrypt → sha256 → tar listing, and uploads
+  the `.enc` plus a key-name-only inventory to the file bot as `db="secrets_offsite"`. The residual risk is not
+  the archive but its passphrase: it was delivered once into Telegram and exists nowhere else. Never repeat the
+  old line «секреты нигде не лежат» — it is wrong and it scares the owner for nothing.
+
+## Scripts / index entry (moved from SKILL.md)
+
+- `scripts/check-notification-bots.py` — **Telegram notification health** (each bot token via `getMe`, usernames only; plus the `file_id` restore registry with part sizes and age). Run first when the owner says a message never arrived.

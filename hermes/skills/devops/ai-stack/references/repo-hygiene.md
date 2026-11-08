@@ -82,3 +82,11 @@ Order of work around a commit:
 2. Consistency pass over parameters *before* committing: "приведи к консистентности" means the whole file follows one convention with exceptions commented in place.
 3. Commit.
 4. Then make the running state match the repo (recreate the affected services with the incident detector paused), verify, and only afterwards delete the junk copies.
+
+## Git is the source of truth for this stack (moved from SKILL.md)
+
+The stack is versioned in git: run git as `ai_service` (root gets `dubious ownership`), know what must never be committed, and match the commit shape the owner expects — `references/repo-hygiene.md`.
+
+## Versioning: what is tracked, what is ignored
+
+- **`/home/ai_service/ai-stack` is a git repo** (owner `ai_service`, local user `VPS Admin <admin@esmien.qd.je>`, no remote). Commit compose/config changes there instead of leaving them on disk; run git as `sudo -u ai_service env HOME=/home/ai_service git -C /home/ai_service/ai-stack …` so `.git` stays `ai_service`-owned. Ignored on purpose: `ai/.env` (secrets), `backups/` (dumps), `backup-deploy/` (historical copies, several files are `600 root` and unreadable by `ai_service`), `*.bak*`, logs. `ai/.env.example` lists the key names with `CHANGE_ME` values — keep it in sync when a new `.env` key appears. Tracked baseline: compose (160 lines), `litellm/config.yaml`, searxng files, `deploy.sh`, `backup-databases.sh`, and **`runbook.md`** — the owner-facing incident playbook (симптомы A–E: шлюз недоступен / всплеск отказов / легли оба маршрута Hermes / место и БД / потеря хоста). Update it whenever a recovery procedure changes; it is the durable «что делать в 3 часа ночи» artefact.

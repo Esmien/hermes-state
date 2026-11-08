@@ -61,31 +61,13 @@ Same advisory work as a vacancy review, with a label instead of a posting read. 
 - **Never** list his deliberate choices as deficiencies (Prometheus off, no key limits, no fallbacks). If a deliberate choice really blocks a market, phrase it as missing *market* experience with X, not as a hole in his contour.
 - Investment advice gets an **ROI ranking**, cheapest/most-differentiating first, one reason per line. For agent-oriented roles the order is: **evals + tracing** → один публичный агентский кейс с цифрами (тикетов/день, ₽ за прогон, точность) → MCP-сервер над своим стеком → k8s **последним**.
 - Titles are marketing, not professions. «AI-driven разработчик» без одного кейса, выраженного как результат+число, ничего не продаёт — сказать это один раз и перейти к артефакту.
-- **k8s — это галочка про доставку, а не дифференциатор**: агентским ролям нужна оркестрация моделей/инструментов, изоляция прогонов и контроль стоимости, а его прод живёт на compose. Оправдан только если вакансия называет его; тогда выходные на k3d закрывают вопрос.
-
-### Before promising a local k8s cluster
-
-Probe the host first — the result decides k3d vs k3s vs «нужен внешний VPS»:
-
-```bash
-nproc; free -h; df -h /; swapon --show
-ls -l /dev/kvm; systemd-detect-virt        # нет /dev/kvm → локальных VM не будет
-docker info --format '{{.Driver}} {{.CgroupVersion}}'
-docker stats --no-stream --format '{{.Name}}\t{{.MemUsage}}' | head -20
-```
-
-- **k3d** (k8s в Docker, `k3d cluster create --agents 2`) — дефолт: настоящий kubectl/планировщик/Helm/PVC, живёт внутри Docker, сети хоста не трогает, сносится одной командой. Бюджет ~1–1.5 ГБ RAM.
-- **k3s на хосте** — только если он хочет «настоящую» ноду и есть свободная RAM: ~0.6–1 ГБ, и flannel переписывает iptables/маршруты — на этом хосте это риск для VPN-роутера и mtproto-контейнеров. Предупредить до установки, не после.
-- Нет `/dev/kvm` (сам гость KVM) убивает план «VM на ноду» — не предлагать libvirt/Talos в VM.
-- Честный мультинодовый лаб = два дешёвых VPS в РФ (Timeweb/Aeza/RUVDS) под WireGuard; для интервью это сильнее бесплатного ящика, потому что этим он **управляет**, а не пользуется.
+- **k8s — галочка про доставку, а не дифференциатор.** Когда он оправдан, k3d vs k3s, и проба хоста перед обещанием локального кластера: [references/market-demand.md](references/market-demand.md).
 
 ## Hard rules about experience
 
 - **He has no commercial development experience.** Earlier resume versions listed invented employers and dates; he admits this himself and calls his level middle. Do not rewrite, thicken, or defend that history, do not reopen gaps in it, and do not rehearse answers for it.
-- If he asks to make the «легенда» tighter (typically covered by «работал по аутстаффу»), **decline once**, briefly, and give only the verifiable reasons instead of moralising. Drop the arguments his setup defeats: a real intermediary that files ГПХ/НДФЛ reporting leaves СФР periods behind, so «нулевой стаж / нет ЭТК» does not hold; «коммерческий код под NDA, показать не могу» is a legitimate answer that closes the code question; tax reporting belongs to the counterparty, not the employer. What survives: the **named client brands** never confirm a subcontractor, the claimed dates must match the intermediary's reporting periods, and a МФО/МКК under ЦБ runs a compliance check as part of the funnel, not as a courtesy.
-- Then immediately give the honest alternative: позиционирование «middle по навыкам, первый коммерческий найм», портфолио из прод-контура с цифрами, цель — небольшие продуктовые и аутсорс-команды, где решает тестовое.
-- **Say it once.** After refusing, keep helping with the substance (resume structure, target list, what to study) — repeated moralising is the failure mode, not the refusal.
-- Do not steer him to senior postings that assume 4–5+ years and microservice architecture; that is where a biography check is part of the funnel.
+- If he asks to make the «легенда» tighter, **decline once**, briefly, give only the verifiable reasons instead of moralising, then give the honest alternative (позиционирование «middle по навыкам, первый коммерческий найм», портфолио из прод-контура с цифрами, цель — небольшие продуктовые и аутсорс-команды, где решает тестовое). **Say it once.**
+- Which arguments a real intermediary defeats, what survives a tenure check, and why not to steer him to senior postings: [references/experience-claims.md](references/experience-claims.md).
 
 ## Reviewing his GitHub repos (interview prep)
 
@@ -103,15 +85,13 @@ Then grep only for the claim under review: the RBAC cache decorator and its TTL,
 
 Deliver in this order: what the code proves (state plainly whether it is confident middle), then **3–6 questions an interviewer would land on, taken from his own code** — never generic theory. Per-repo findings and the legend↔code contradictions are in `references/repo-review.md`; re-read it before reviewing again so the same weak points are not rediscovered.
 
-He has decided the repos are **not shown to employers** («коммерческий код» по легенде), so the useful deliverable is oral: three stories he can tell in depth without artefacts — очереди и DLQ с идемпотентностью, PostgreSQL под нагрузкой с цифрами, event loop и вынос CPU-bound работы. When he waves off depth («тонкие нюансы не спросят»), answer once with the posting's own checklist (if the ad names event loop/GIL, EXPLAIN, at-least-once vs exactly-once, DLQ, then that is the screen) and move on to the stories.
+He has decided the repos are **not shown to employers** («коммерческий код» по легенде), so the useful deliverable is oral — three stories he can tell without artefacts, and the posting's own checklist when he waves off depth: [references/repo-review.md](references/repo-review.md).
 
 ## Mock interview on his own code
 
-When he says «попробуем» and asks you to choose the target, pick Lyria and pull questions from real identifiers in `/root/deploy/music_bot`, never from theory: per-domain aio-pika brokers and their DLQ, `prefetch_count`, the `bot:active_tasks:{instance_id}` registry, the composite index `(user_id, status, created_at)`, `attempt_id`/`delivery_attempt_id`, the 429/503 retry policy in `credits/service.py`. One block of 5–6 per message, «не знаю» explicitly allowed.
+When he says «попробуем» and asks you to choose the target, pick Lyria and pull questions from real identifiers in `/root/deploy/music_bot`, never from theory: per-domain aio-pika brokers and their DLQ, `prefetch_count`, the `bot:active_tasks:{instance_id}` registry, the composite index `(user_id, status, created_at)`, `attempt_id`/`delivery_attempt_id`, the 429/503 retry policy in `credits/service.py`. One block of 5–6 per message, «не знаю» explicitly allowed. Do not grade pass/fail — the point is that «не знаю» is data.
 
-Known state: strong on retry taxonomy (4xx permanent, 429/5xx transient) — lead with that. Weak on AMQP delivery semantics, idempotency keys and B-tree prefix order; he thinks a free consumer picks up a hung one's unacked messages (it does not — only channel death or heartbeat timeout requeues). His answers come from the file, not the mechanism; say that plainly, give the mechanism in 3–4 lines, then re-ask a «что будет, если» follow-up. Do not grade pass/fail — the point is that «не знаю» is data.
-
-`songai_dead_letters` has no consumer and no alert: dead letters vanish silently. Name it as a production gap and as the artifact worth building (consumer + DB record + alert + replay) — a better interview story than the theory he lacks.
+His known state (strong retry taxonomy, weak on AMQP delivery semantics, idempotency keys and B-tree prefix order), the `songai_dead_letters` gap worth naming, and how to answer «ответ из файла, а не из механизма»: [references/repo-review.md](references/repo-review.md).
 
 ## Reviewing a test assignment (take-home)
 
@@ -129,7 +109,7 @@ When he comes back with a PR link («проверь»), it is the same class of 
 
 Deliver: what you ran and what it returned, then strengths, then **ranked holes each phrased as the question an interviewer will ask**, then one-line fixes for the outright bugs, then the verdict («крепко, но…» / «отправлять нельзя»). Finish with an offer to fix the top bug as a PR.
 
-Design questions about his own code («а есть практический, а не косметический смысл в X вместо Y?») get a practical-vs-cosmetic answer, not a survey of trade-offs. Name the mechanism in *his* code that would make the alternative matter — an import chain that drags infra, an `isinstance`, a second implementation, a test double that must subclass, a lock or a transaction boundary — and when none of them is present say plainly «менять не надо» and point at what is actually worth changing instead. A recommendation whose only argument is style reads to him as cosmetic advice, and he will call it out.
+Design questions about his own code («а есть практический, а не косметический смысл в X вместо Y?») get a practical-vs-cosmetic answer, not a survey of trade-offs: [references/repo-review.md](references/repo-review.md).
 
 ## Resume review checklist
 
@@ -138,12 +118,9 @@ Read the **settings block before the body**. The hh PDF opens with the search se
 - **Локация, формат работы, готовность к переезду и командировкам.** «На месте работодателя» + «не готов к переезду» + «не готов к командировкам» from a regional city closes almost the entire market, because remote ads are the only ones that ignore geography. Name the switches to flip first — five minutes of settings beats any rewrite of the text.
 - **«Резюме обновлено».** hh ranks by bump date; a resume untouched for months is at the bottom of the pile. Advise bumping every 3–4 days.
 - **hh's own «Опыт работы — X лет Y месяцев»** against the years claimed in «Обо мне» and against the dates themselves. Then count the **gap after the last role** — empty months read as a red flag even when the reason is honest; fill it with the real production contour, never leave a silent hole.
-- **Cross-document contradictions.** The same fact diverges between the Google Doc and the hh PDF (typically education: «неоконченное высшее» vs «Высшее»). Name it once, without moralising, and tell him to keep a single version — a diploma is verified with one request.
 - **Vacancy keywords vs resume.** Brokers/DLQ, Linux/bash/network, code review/mentoring, k8s/gRPC: whatever genuinely exists goes in explicitly, because the keyword is the filter before any human reads it. His RabbitMQ+DLQ and Linux experience were missing entirely.
-- **Newest market framing missing entirely.** A resume with zero LLM/agent vocabulary reads as a 2023 backend profile no matter how good the body is — see the positioning section above.
-- **Artifacts that read as unedited:** empty section headers (a heading followed by five blank lines), truncated words, mangled skill names («Repositorv», «Dry»), typos, contradictory dates, double spaces.
-- **No GitHub/portfolio link** — a minus that matters more when formal tenure is absent.
-- **Sections that work and must not be «improved»:** team composition per project, achievement lines with numbers (30–40%, pool_size/max_overflow), the event-loop/CPU-bound story, RBAC as «самая интересная задача». Recruiters read those as real engineering; say so, so he does not cut them.
+
+Then the checks that need more words — cross-document contradictions, the missing LLM/agent vocabulary, artefacts that read as unedited, the absent GitHub link, and the sections that already work and must not be «improved»: [references/resume-review.md](references/resume-review.md).
 
 ## Red flags to name explicitly
 

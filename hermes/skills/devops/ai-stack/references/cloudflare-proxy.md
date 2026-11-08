@@ -244,3 +244,44 @@ same staging trick the `vpn-entry-stack` pitfalls describe for generated snippet
 
 The `map` and the CF `limit_*` zones stay and stay harmless without the header. Going back to orange is the
 mirror image: restore the gate first, then the record.
+
+## Domains → backend: the two zones (moved from SKILL.md)
+
+The public names are moving from the `esmien.qd.je` zone (free DNS whose authoritatives fail — see `vpn-entry-stack` for the triage) to the owned **`esmien.ru`** zone on Cloudflare. Both sets are served in parallel until the owner moves the family, so an old and a new name point at the same backend:
+
+## Vhost rules: grey/orange, app redirect, reload truth, adding a name
+
+**Оранжевого облака в зоне больше нет: `ai` переведён в серый по указанию владельца** — CF отдавал
+HTML-оболочку и не пропускал пачку подресурсов с адресов выходов VPN (диагностика и доказательства —
+`references/cloudflare-proxy.md`, раздел про «через VPN не грузится»). Оба имени, `ai` и `app`, серые и ходят прямо на
+origin, бэкенд один (`127.0.0.1:8080`). **`app.esmien.ru` — не второй вход, а редирект:** по указанию
+владельца он отдаёт `301` на `ai` с сохранением пути и query, без проксирования и без лимитов
+(два имени одного WebUI = две cookie-сессии, потому что cookie привязана к hostname). Не возвращать
+`app` вторым проксирующим vhost'ом без прямой просьбы. Бэкап прежнего файла — `.bak-before-redirect`.
+Проверка правки: `curl -s -o /dev/null -D- --resolve app.esmien.ru:443:127.0.0.1
+'https://app.esmien.ru/c/x?y=1' | grep -iE '^HTTP|^location'` — ждать `301` и полный путь в `Location`.
+
+**Правка вхоста и проверка после reload.** `write_file` отказывается писать в `/etc/nginx` (sensitive
+system path): писать новый файл в scratch и класть через `cp` (бэкап — `cp -a <file> <file>.bak-<повод>`).
+Сразу после `systemctl reload nginx` первый же `curl` может ответить по **старому** конфигу — прежний
+worker ещё принимает соединения; повторять запрос, а не откатывать правку и не искать «конфиг не
+применился» (симптом обманчив: только что отредактированный vhost отдаёт 200 с телом прежнего).
+
+**Снятие оранжевого облака — два действия, а не одно.** Сначала убрать из вхост-файла гейт
+`if ($deny_direct) { return 403; }` (он пропускает только запросы с `CF-Connecting-IP` и без CF режет
+`403` вообще всё, включая владельца), потом `PATCH {"proxied":false}`. Порядок и проверка — в
+`references/cloudflare-proxy.md`; не возвращать гейт, пока запись серая.
+
+Adding a service name on a new zone — order matters:
+
+1. Wait until the A record answers from two public resolvers. Under Cloudflare it must be **grey cloud (DNS only)**: with the orange proxy on, HTTP-01 validation comes back `530` and certbot fails before nginx is even involved. An orange record is only correct if the service is deliberately fronted by Cloudflare (then TLS terminates at the edge and the origin vhost needs no Let's Encrypt cert).
+2. Issue the certificate through a **port-80 ACME stub** for the new name (`location /.well-known/acme-challenge/ { root /var/www/html; }`), `certbot certonly --webroot`. A full vhost cannot be written first — `nginx -t` refuses to load a config whose `ssl_certificate` path does not exist yet.
+3. Then write the real vhost as a copy of the old one with the hostname substituted — same `listen 127.0.0.1:9443 proxy_protocol ssl http2`, same rate-limit zones, timeouts and `X-Forwarded-*`. A new name without its own vhost silently lands on the default server of that listener.
+4. Drop the ACME stub once the real file carries the port-80 block (a copy of the site file already has it) and `nginx -t && systemctl reload nginx`.
+5. Verify with `curl -o /dev/null -w '%{http_code} cert=%{ssl_verify_result}' https://<name>/` — want `200 cert=0`. Then confirm the old name still answers, because the family stays on it until the owner says otherwise.
+
+**Orange-clouding an already-issued name** (putting Cloudflare in front for its bot/WAF layer) is a different procedure from first issuance and has an ordering trap: restore the real client IP *before* flipping the record. Origin topology here is a `stream` block on 443 (`ssl_preread`) that forwards with `proxy_protocol` to the `127.0.0.1:9443` vhosts, and `00-proxy-realip.conf` resolves `$remote_addr` from that hop — once the record is proxied, `$remote_addr` becomes a Cloudflare edge IP and every `limit_req`/`limit_conn` bucket collapses onto one key, i.e. all users share one limit and get 429s together. Procedure, token scopes, free-plan limits and rollback: `references/cloudflare-proxy.md`.
+
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/cloudflare-proxy.md` — **Cloudflare in front of one of our names**. Read before proxying a vhost, adding WAF/bot rules, when rate limits suddenly apply to everyone at once, when an outside monitor reports the site as down/403 while it is healthy, or when traffic breaks after the client's egress IP changed (per-IP reputation of VPN exits). Also read when a browser shows `ERR_TIMED_OUT` while `curl` from several vantages gets `200` — Alt-Svc/h3 through a tunnel, section «HTTP/3 (Alt-Svc)».

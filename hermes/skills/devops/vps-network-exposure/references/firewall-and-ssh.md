@@ -190,3 +190,36 @@ A privileged helper container is exposure of its own kind: `privileged: true`,
 `pid: host`, `/var/run/docker.sock` and `/:/mnt/host` together mean host-root RCE
 from inside the container. When such a container is unused, those four facts are
 the argument for removing it — stronger than any open port.
+
+
+## Привилегированные helper-контейнеры
+
+- **A privileged helper container is exposure of its own kind:**
+  `privileged: true` + `pid: host` + `/var/run/docker.sock` + `/:/mnt/host` =
+  host-root RCE from inside; name those four facts when proposing removal.
+
+
+## sshd: first-match-wins, reload vs restart, loopback check
+
+**sshd is first-match-wins, not last.** `Include /etc/ssh/sshd_config.d/*.conf`
+is line 12 and files apply in lexical order: `50-cloud-init.conf` must be the
+file that sets `PasswordAuthentication`, because `50-*` is read before
+`60-cloudimg-settings.conf`. A new `99-*.conf` would NOT fix a wrong earlier
+value. Verify with `sshd -T`, never from the file alone. Reload, don't restart:
+`sshd -t && systemctl reload ssh`. Loopback check:
+`ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no root@127.0.0.1 true`
+must answer `Permission denied (publickey)`.
+
+
+## Docker-published ports vs INPUT/DOCKER-USER
+
+- **Docker-published ports can bypass `INPUT`.** If `docker-proxy` listens,
+  `INPUT` applies; if it is DNAT-ed straight to the container (no host listener),
+  filter on `DOCKER-USER` — and the cleaner fix is re-publishing as
+  `127.0.0.1:PORT:PORT`. Decide from `ss -tlnp` before claiming «закрыто».
+
+
+## Правка системных файлов из агента
+
+- **`write_file`/`patch` refuse system paths** (`Refusing to write to sensitive
+  system path: /etc/...`): write to `~/.hermes/cache/scratch/`, then `cp`.

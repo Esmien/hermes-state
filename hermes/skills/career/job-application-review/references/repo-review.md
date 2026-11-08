@@ -28,3 +28,21 @@ Two repositories he offers for technical prep. Re-check the specific lines befor
 ## Rule of thumb
 
 His code helps him and his paperwork hurts him. Never propose improving the fiction to match the code — point at the two artefacts that contradict it and keep the technical prep on the parts that are real.
+
+
+## Interview prep without artefacts
+
+He has decided the repos are **not shown to employers** («коммерческий код» по легенде), so the useful deliverable is oral: three stories he can tell in depth without artefacts — очереди и DLQ с идемпотентностью, PostgreSQL под нагрузкой с цифрами, event loop и вынос CPU-bound работы. When he waves off depth («тонкие нюансы не спросят»), answer once with the posting's own checklist (if the ad names event loop/GIL, EXPLAIN, at-least-once vs exactly-once, DLQ, then that is the screen) and move on to the stories.
+
+## Mock interview on his own code
+
+When he says «попробуем» and asks you to choose the target, pick Lyria and pull questions from real identifiers in `/root/deploy/music_bot`, never from theory: per-domain aio-pika brokers and their DLQ, `prefetch_count`, the `bot:active_tasks:{instance_id}` registry, the composite index `(user_id, status, created_at)`, `attempt_id`/`delivery_attempt_id`, the 429/503 retry policy in `credits/service.py`. One block of 5–6 per message, «не знаю» explicitly allowed.
+
+Known state: strong on retry taxonomy (4xx permanent, 429/5xx transient) — lead with that. Weak on AMQP delivery semantics, idempotency keys and B-tree prefix order; he thinks a free consumer picks up a hung one's unacked messages (it does not — only channel death or heartbeat timeout requeues). His answers come from the file, not the mechanism; say that plainly, give the mechanism in 3–4 lines, then re-ask a «что будет, если» follow-up. Do not grade pass/fail — the point is that «не знаю» is data.
+
+`songai_dead_letters` has no consumer and no alert: dead letters vanish silently. Name it as a production gap and as the artifact worth building (consumer + DB record + alert + replay) — a better interview story than the theory he lacks.
+
+
+## Design questions about his own code
+
+Design questions about his own code («а есть практический, а не косметический смысл в X вместо Y?») get a practical-vs-cosmetic answer, not a survey of trade-offs. Name the mechanism in *his* code that would make the alternative matter — an import chain that drags infra, an `isinstance`, a second implementation, a test double that must subclass, a lock or a transaction boundary — and when none of them is present say plainly «менять не надо» and point at what is actually worth changing instead. A recommendation whose only argument is style reads to him as cosmetic advice, and he will call it out.

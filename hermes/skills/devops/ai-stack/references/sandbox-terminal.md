@@ -103,3 +103,11 @@ default, the binding lives on the model row in `webui_db`:
 There is **one container for all granted users** — everyone shares `/workspace` and sees each other's files, and an interactive session is not per-user. Per-user isolation means one container per user (or per group), each with its own volume; memory cost ~ the base image's idle footprint.
 
 Also: the sandbox sits on `stack-net` like every other service, so a shell inside it can reach `litellm:4000`, `open-webui:8080`, `postgres:5432`. Nothing is reachable without credentials, but if that matters, give the sandbox its own network and attach only `open-webui` to both (recreate `open-webui` to change its networks).
+
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/sandbox-terminal.md` — **Песочница `open-terminal-sandbox` для пользователей WebUI** (не-root, read-only, arduino-cli; подключение через `terminal_server.connections` + access_grants; привязка модели через `meta.terminalId`; ловушки `cap_setgid`, root-овский `.arduino15` и heredoc). Готовый системный промпт MCU-ассистента: `templates/mcu-assistant-system-prompt.md`.
+
+## Scripts / index entry (moved from SKILL.md)
+
+- `scripts/probe-owui-terminal.py` — **end-to-end terminal probe** (admin login → feature flags → real `run_command` → `/execute` evidence in open-terminal logs, cleans up its chat). Run after any Open WebUI update.

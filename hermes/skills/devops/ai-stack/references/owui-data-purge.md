@@ -113,3 +113,7 @@ that restored rows will point at files that no longer exist.
   clear the child tables.
 - Family members' chats sit in the same `chat` table — a date-only request is ambiguous about
   them, so make the owner pick the scope in the confirmation.
+
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/owui-data-purge.md` — **Удаление чатов/файлов Open WebUI по дате или юзеру** (`webui_db`: `chat` + `chat_message` + `chat_file`, восстановление маппинга файлов из дампа, пути `file.path` → `webui_data/uploads`, что нельзя трогать). Read before any «снеси диалоги» / «почисти файлы» request.

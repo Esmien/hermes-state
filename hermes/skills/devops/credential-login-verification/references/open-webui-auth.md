@@ -72,3 +72,7 @@ Prefer the option that mutates nothing:
 3. Reset the admin password to the `.env` value — `.env` stays intact, but the owner's web login changes.
 
 After any of them, restart `owui-signup-approver.service` (the script caches the token in-process) and clear the stuck `pending` row. Verify with a real signin through the script's own credential source — HTTP `200`, not just a hash comparison.
+
+## A failing automation is the earliest drift detector
+
+- **A failing automation is the earliest drift detector — and its error text names the emitter.** `signin failed: HTTP 400` from a bot means the credential *that script* reads has drifted; it says nothing about whether the web UI login is broken. `grep -rl "signin failed" /usr/local/bin /home/ai_service` locates the emitter; read its credential loader (`stack_secret(...)`, `admin_email()`) to learn exactly which email and which `.env` key it uses. Prefer the fix that mutates nothing: give the automation its own credential key in its own config and fall back to the shared one. The emitter is usually a **cross-service coupling** — a bot reads `UI_PASSWORD` to sign into a service where that key is not the real password (it is the *other* service's admin credential), so it breaks on the next install pass that regenerates the key while the owner's actual login stays untouched. Only if decoupling does not fit, present the two mutating options as a choice — sync `.env` to the live password (ask the owner for it) or reset the account to the `.env` value.

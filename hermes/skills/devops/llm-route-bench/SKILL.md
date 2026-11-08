@@ -65,14 +65,10 @@ for those tokens. Send `«Скажи одно слово: ок»` with `max_toke
 
 ## What the numbers already showed (Oct 2026)
 
-- Easy tasks (single tool call, arithmetic, needle) do **not** separate models — everything
-  scored 100%. Only constraint/format/parallel-tool tasks discriminate.
-- `anthropic/claude-opus-5.5` via the tokenator «free-claude» proxy injected **2.8k-11k
-  tokens** of a foreign prompt into ordinary calls → failed word-limit and strict-JSON,
-  and cost ~$0.05 per call instead of ~$0.002. The same model on `aider.*`, and sonnet on
-  `openrouter.anthropic/claude-sonnet-5.5`, were clean and scored 8/8.
-- deepseek-v4.1-flash: 8/8 at ~$0.0004 per task — 20-40x cheaper than the broken Claude
-  route with no quality loss on these tasks.
+Easy tasks do **not** separate models (everything 100%); only constraint/format/parallel-tool
+tasks discriminate. The measured log — the «free-claude» proxy injecting 2.8k-11k foreign
+tokens at ~$0.05 a call, and the deepseek route at 8/8 for ~$0.0004 — is in
+[references/route-fingerprinting.md](references/route-fingerprinting.md).
 
 ## Проверка подлинности перепродаваемого маршрута
 
@@ -81,28 +77,17 @@ for those tokens. Send `«Скажи одно слово: ок»` with `max_toke
 названию модели на доверенном маршруте и по 1–2 контролю (средний + слабый). Готовый
 харнесс — `scripts/authenticity_probe.py`; сырые замеры складывай в JSON, таблицу строй из него.
 
-1. **Сначала дешёвые пробы возможностей:** `GET /v1/models` (поле `owned_by`, `context_length`,
-   флаги `reasoning`/`vision`), картинка 1×1 пиксель (заявленный vision), наличие
-   `usage.completion_tokens_details.reasoning_tokens` у рассуждающей модели, иголка в 60k
-   символов. Всё это одна-две копейки и сразу отсекает заглушки.
-2. **Затем жёсткий набор с точными ответами**: математика, где ответ считается кодом
-   (нули факториала, `pow(a,b,m)`, комбинаторика, число-теория), и задачи на код, которые
-   гарнесс **исполняет** скрытыми тестами. Ответ «на глаз» не годятся: у модели может быть
-   верный ход мысли и неверное арифметическое число.
-3. **Сравнивай вердикты по задачам, а не только сумму.** Совпадение «подозрительный ≡
-   доверенный» на всех задачах + провал контролей там, где оба прошли — это и есть ответ.
-   Если подозрительный совпадает с *слабым* контролем, а не с доверенным — модель подменена.
-4. **Говори границы методики.** Набор из 9–12 задач отличает класс модели, а не конкретную
-   сборку: «не хуже настоящего» ≠ «доказано, что это он». Так и формулируй.
-5. **Паритет качества не оправдывает маршрут.** Если обёртка при равном результате даёт 3×
-   латентность, врёт в `usage` и держит мёртвый free-пул — вердикт «модель настоящая, но
-   держать её в группе незачем»: цена и задержка решают, а не одна только схожесть ответов.
+- **Сначала дешёвые пробы возможностей** (`GET /v1/models`, пиксель, `reasoning_tokens`,
+  иголка в 60k), затем жёсткий набор, где ответы считает код; вердикт — по совпадению задач,
+  а не по сумме.
+- **Паритет качества не оправдывает маршрут:** 3× латентность и мёртвый free-пул при равном
+  результате → «модель настоящая, но держать её в группе незачем».
+- **`usage` перепродавца — не измерение, а его собственный счётчик** (искажение до 2×):
+  цена — по сигнатуре провайдера, фингерпринт — по разнице с доверенным маршрутом на одном и
+  том же тексте.
 
-**`usage` перепродавца — не измерение, а его собственный счётчик.** У прокси-обёрток
-`prompt_tokens` может быть искажён (в замерах — почти ровно в 2× на латинице и на кириллице),
-и по нему нельзя ни считать цену, ни судить о лимитах. Для фингерпринта токенизатора — только
-разница с доверенным маршрутом на ОДНОМ И ТОМ ЖЕ тексте (`references/route-fingerprinting.md`),
-цена — по сигнатуре провайдера, а не по `usage` обёртки.
+Полный порядок проб, границы методики («не хуже настоящего» ≠ «доказано, что это он») и как
+формулировать вердикт: [references/route-fingerprinting.md](references/route-fingerprinting.md).
 
 ## Code-generation bench (hidden tests)
 
@@ -142,32 +127,14 @@ harness: `scripts/code_bench.py`.
   недавно не пополненный) ключ отдаёт `429` вида «free models are for active keys» на всех
   `free-*` именах, при этом платное имя того же вендора работает. Перед выводом «модель
   сломалась» проверь и платное, и `free-` имя поодиночке.
-- `opencode/*` groups need the `x-opencode-session` header on **every** endpoint — without it
-  the deployment answers 400 in a way that reads like a bad model name (seen on
-  `/v1/chat/completions`). They also want the Responses API: the
-  channel rejects `/chat/completions` (`Model does not support this protocol`) while
-  `/v1/responses` answers fine. Fix in the deployment: `litellm_params.model =
-  "responses/<model>"` — LiteLLM then bridges chat→responses itself and text tasks start
-  passing. Tools survive only on raw `/v1/responses`: through the bridge the model sees them
-  namespaced (`default.get_pawn_rate`) and answers in prose without ever emitting a
-  `function_call`, so every tool task fails. Agentic work stays on the OpenRouter route.
-  **Деплойменты живут в БД, а не в `config.yaml`** (`LiteLLM_ProxyModelTable`), и в них
-  `litellm_params->>'model'` и `litellm_credential_name` хранятся **зашифрованными** — по
-  строке модели не определить, какой из двух деплойментов группы сидит на OpenCode. Диагноз
-  ставят сравнением с соседними группами: где `x-opencode-session` в `extra_headers` есть, а
-  где нет. Лечение — дописать заголовок **всем** деплойментам группы (OpenRouter лишний
-  игнорирует) и перезапустить контейнер:
-  `UPDATE "LiteLLM_ProxyModelTable" SET litellm_params = jsonb_set(litellm_params,
-  '{extra_headers}', coalesce(litellm_params->'extra_headers','{}'::jsonb) ||
-  '{"x-opencode-session":"litellm-service-session"}'::jsonb), updated_at = now()
-  WHERE model_name='<group>'`.
-  Симптом «флапает через раз» = в группе два деплоймента, один без заголовка: проверять
-  четырьмя подряд вызовами (`200 200 200 200`), а не одним.
+- `opencode/*` groups need the `x-opencode-session` header on **every** endpoint (else a 400
+  that reads like a bad model name) and want the Responses API — through the chat bridge tools
+  fail, so agentic work stays on OpenRouter. Deployments live in the DB, not `config.yaml`, with
+  encrypted `litellm_params->>'model'`: header fix, SQL and the flapping symptom in
+  [references/gateway-route-traps.md](references/gateway-route-traps.md).
 - Meta's `muse-spark-1.3-contributor` via OpenRouter rejects `max_tokens < 16`
   (`max_output_tokens must be >= 16`), so a 5-token probe returns a false 400. The probe uses
   16 and labels unanswered probes `route error`, not `clean`.
-- Tool tasks silently become text tasks if `tools=` is not passed to the agent loop — check
-  `turns=[...]` in the output; `calls=0` on a tool task means the harness bug, not the model.
 - `/model/info` may report cost 0 for a route (free credits). Cost columns then lie: use the
   provider's public price in the report and say it is estimated.
 - A route that answers «ок» fine can still inject on the next call — injection is
@@ -185,13 +152,6 @@ harness: `scripts/code_bench.py`.
   owner says «ты же хуесосил Terra», search the sessions for what was actually said and
   answer from that quote: a false admission rewrites the stack's routing on a misremembered
   fact, and a bare denial without the quote reads as defensiveness.
-- A prompt like «перепиши чисто, поведение сохранить» gets public functions renamed (`total`
-  → `to`) unless the tests call the API by name. Always assert the exact public names, not
-  just the behaviour — the rename is the most common real regression.
-- Numeric unit mismatches (docstring says milliseconds, code sleeps seconds) are invisible to
-  every model acting as reviewer, including the strongest ones. To measure review ability,
-  ask explicitly to compute the value for a few inputs and compare it with the docstring;
-  «найди баг» alone returns stylistic findings and misses the arithmetic.
 - A route can answer with a **different model** than its name promises, and can strip
   reasoning while still doing the work. Neither is visible in the name or in self-description;
   decide with the tokenizer fingerprint in `references/route-fingerprinting.md` (constant delta
@@ -204,14 +164,10 @@ harness: `scripts/code_bench.py`.
   while the API serves `hermes.deepseek/deepseek-v4.1-flash` — resolve every name through
   `GET /api/v1/models` before benching; a guessed id either 404s or silently benchmarks
   a different route.
-- **`hermes.*` routes via Open WebUI strip `usage` (`in=0/out=0` on every call).** Token
-  and cost columns are then unusable — rank by pass rate, then latency, and say the spend
-  is unmeasurable on that route instead of printing `$0.00` as if it were free. Same logic
-  in reverse: a probe that errors while the task set passes means the *probe shape* is
-  wrong (a reasoning route enforcing a minimum `max_tokens`), not a broken route — raise
-  `max_tokens` and re-probe instead of flagging the route. На малом бюджете рассуждающий маршрут
-  отвечает `200` с пустым `content` и всеми токенами в `reasoning_tokens` — это тоже артефакт
-  бюджета: смотри `finish_reason` и `usage.completion_tokens_details`, прежде чем называть ответ пустым.
+- **`hermes.*` routes via Open WebUI strip `usage`** — rank by pass rate then latency and call the
+  spend unmeasurable, never `$0.00`; a low `max_tokens` budget on a reasoning route returns empty
+  `content` with everything in `reasoning_tokens` (check `finish_reason`). Full rule and the
+  probe-shape corollary: [references/gateway-route-traps.md](references/gateway-route-traps.md).
 
 ## Files
 
@@ -225,6 +181,9 @@ harness: `scripts/code_bench.py`.
   the six-task ladder, grading gotchas, cross-review protocol, baseline results.
 - `references/route-fingerprinting.md` — как отличить подмену модели и вырезанные
   рассуждения по `usage.prompt_tokens` и полям ответа, с порядками величин по семействам.
+- `references/gateway-route-traps.md` — `opencode/*` (заголовок сессии, chat→responses бридж,
+  деплойменты в `LiteLLM_ProxyModelTable` с зашифрованными полями) и вырезанный `usage` на
+  `hermes.*`: симптом, SQL-фикс и как проверять.
 - `references/subscription-routes.md` — как узнать, какой upstream и чей биллинг стоит за
   маршрутом, устройство `chatgpt/` (Codex backend + device flow под видом `codex_cli_rs`)
   и официальный OAuth-флоу OpenAI для OSS-клиентов с его обязательными параметрами.

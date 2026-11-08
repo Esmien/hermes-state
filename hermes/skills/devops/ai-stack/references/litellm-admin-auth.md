@@ -132,3 +132,11 @@ That is the 3–5 s the owner sees. The fix is caching, not the proxy: `add_head
 - One real call through a fresh key (`service.deepseek/deepseek-v4.1-flash`, `max_tokens` 20) must
   show up in `LiteLLM_SpendLogs` under the new `user`, and the probe key must be deleted after.
 - End to end ~2 min; `docker inspect litellm` → `running/healthy` and `/health/liveliness` 200.
+
+## The env-credential banner in the Admin UI
+
+It is also the shared *env credential* the Admin UI warns about («Environment-credential login is enabled»). That banner is not a finding to report as a hole on a one-user box — it is a request to replace the static pair with a real `proxy_admin` row and then set `general_settings.disable_env_credential_login: true`. Order (prove the DB admin first), verification by effect (`/health/readiness` → `details.show_env_credential_login_warning`), the `LiteLLM_Config` merge rule, and the phantom «the new admin can pick only All Proxy Models» symptom: skill `credential-login-verification`, file `litellm-admin-ui-auth.md` under its references/. Do not delete `UI_USERNAME`/`UI_PASSWORD` from `.env` for this — with the flag on they are inert, and they are the documented rollback.
+
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/litellm-admin-auth.md` — **LiteLLM: ownership в `litellm_db`** (ключи/spend/мемберства/авторство моделей переписываются на реального админа; «Created By = Unknown»; вес и кэш админки). Auth-путь (env-дверь, `/v2/login`, сброс пароля) — в skill `credential-login-verification`, его файл `litellm-admin-ui-auth.md`.

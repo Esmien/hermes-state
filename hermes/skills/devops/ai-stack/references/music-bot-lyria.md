@@ -208,3 +208,14 @@ docker exec lyria-postgres psql -U lyria -d lyria -tAc "select generation_id,is_
 
 **Уборка:** после прогона в чате десятки тестовых сообщений, снятые клавиатуры и тестовые строки в БД (3 трека + фантомные pending). FSM чистить `/cancel`; чужому пользователю (`OTHER`), у которого тестировали доступ, вернуть `is_authorized=true` (скрипт делает это сам в S1/S11).
 
+## Где бот стоит относительно AI-стека (перенесено из SKILL.md)
+
+LiteLLM / Open WebUI / SearXNG / open-terminal stack, with PostgreSQL 17 + pgvector on the host and Nginx+Certbot for TLS. The music bot (lyria) is a **separate** deployment on the same host — `references/music-bot-lyria.md`; it has its own containers, its own Postgres and is NOT covered by `deploy.sh` or the `postgres-backup` timers. **Its code is off-limits:** the owner allows state checks, test runs and commits/pushes of what is already in the tree — never rewriting the bot's logic. Report defects as a list; fix only on an explicit separate instruction.
+
+## Scripts / index entry (moved from SKILL.md)
+
+- `scripts/lyria-e2e.py` — **E2E прогон музыкального бота по всем юзер-стори** (форж webhook-апдейтов, FSM-сидинг для кнопок, проверки по БД/логам, сбор mp3). Run when asked «проверь бота / прогони сценарии»; детали и грабли — `references/music-bot-lyria.md`.
+
+## Scripts / index entry (moved from SKILL.md)
+
+- `scripts/lyria-enricher-pipe.py` — **исходник OWUI-Pipe `lyria_enricher`** (songwriter + critic + санитайзер, выключен). Держать синхронно с живой функцией: правка в OWUI без копии здесь теряется вместе с БД.

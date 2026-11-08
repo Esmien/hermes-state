@@ -202,3 +202,22 @@ env, конфиги, косметика образа (брендинг пров�
 Тюнинг под этот сценарий (применён): `webui_api_cf` 20 r/s, `burst=240`, `limit_conn conn_per_ip_cf
 60`, `proxy_read_timeout`/`proxy_send_timeout` 600 s. Лимиты на `/v1/models` и логин не трогать —
 там сидят сканеры.
+
+## Answering the owner «почему медленно» (moved from SKILL.md)
+
+## Answering the owner «почему медленно»
+
+Жалоба на скорость — это измерение, а не гипотезы: `rt` по URI из лога nginx (у `llm.esmien.ru`
+своего `rt` нет — только счётчики), потом `docker stats`/`load`, и только потом вывод. На этом
+хосте два штатных виновника: вес/кэш админки LiteLLM и один воркер Open WebUI в связке с пачкой
+запросов аватарок. Три правила ответа: **не предлагать сокращать подобранный вручную список
+моделей** (множитель — всплеск запросов, не ассортимент), **не складывать параллельные задержки
+в «итого секунд»** (124×300 мс параллельно — это 1–2 с, а не 37), и **не занимать `litellm-redis`
+под WebUI-воркеры** (он выделенный, 256 MB `noeviction`). Процедура, профиль по слоям (открытие длинного чата: ядро 44 мс против 1099 КБ ответа), готовые
+локации nginx и ловушка вставки не в тот `server`-блок — `references/ui-latency.md`. Патчи в
+бизнес-логику OWUI не предлагать даже когда выигрыш посчитан: только края (nginx/env/образ), иначе
+это лотерея без тестов.
+
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/ui-latency.md` — **«Медленно грузится»: латентность UI/API**. Read when the owner says a page or the chat UI is slow: per-URI `rt` from nginx logs (websockets out of the stats, `.js.map` = devtools open), the two standing causes (LiteLLM admin bundle, single-worker WebUI + avatar burst), the nginx cache locations and the wrong-server-block trap, plus the «what would a second worker give» answer, per-layer profiling of a long chat open, and why a chat cache is not worth patching into the app.

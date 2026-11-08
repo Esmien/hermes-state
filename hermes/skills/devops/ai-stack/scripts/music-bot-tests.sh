@@ -73,3 +73,7 @@ docker run --rm --network "$NET" -v "$REPO":/src:ro \
 rc=$?
 echo "=== тесты завершились с кодом $rc"
 exit "$rc"
+
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `scripts/music-bot-tests.sh` — **юнит/интеграционные тесты music_bot в изоляции** (свои pg/redis/rabbitmq, репо read-only, CI-паритет: ruff + alembic + pytest в polling и webhook). Run when asked «прогони тесты» — никогда не на хосте, там python 3.14 без poetry. Baseline и границы — `references/music-bot-lyria.md`.

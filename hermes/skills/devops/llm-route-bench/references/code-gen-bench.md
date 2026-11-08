@@ -98,3 +98,15 @@ Muse Spark — фоновый объём (плоская подписка OpenCo
 
 Cross-review: 0 из 16 пар «ревьюер × файл» назвали заложенный дефект единиц; на пустом
 промпте Astra и Terra выдали «багов нет», Sol честно ответил «пришлите код».
+
+## Pitfalls that belong to the harness
+
+- Tool tasks silently become text tasks if `tools=` is not passed to the agent loop — check
+  `turns=[...]` in the output; `calls=0` on a tool task means the harness bug, not the model.
+- A prompt like «перепиши чисто, поведение сохранить» gets public functions renamed (`total`
+  → `to`) unless the tests call the API by name. Always assert the exact public names, not
+  just the behaviour — the rename is the most common real regression.
+- Numeric unit mismatches (docstring says milliseconds, code sleeps seconds) are invisible to
+  every model acting as reviewer, including the strongest ones. To measure review ability,
+  ask explicitly to compute the value for a few inputs and compare it with the docstring;
+  «найди баг» alone returns stylistic findings and misses the arithmetic.

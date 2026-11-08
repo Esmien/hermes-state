@@ -231,3 +231,7 @@ VPN/LAN only, per-consumer virtual keys with rpm/tpm caps, no `0.0.0.0` binding,
 scripted loops (steady identical traffic is what automation looks like; a couple
 of humans typing is not). Do not build features that assume this route survives a
 vendor auth change.
+
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/chatgpt-subscription.md` — **ChatGPT/Codex subscription as a LiteLLM route**. Read when asked to expose a ChatGPT Plus/Pro subscription as an API or to add `chatgpt/*` models into Open WebUI.

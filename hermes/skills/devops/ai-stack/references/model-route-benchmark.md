@@ -64,3 +64,17 @@ One line first: "дело не в модели, у маршрута подмеш
 small table, then the fix — switch the group to the clean credential, or pin the cheap model
 for agentic work. Vladislav accepts a cheap model winning: quote the 20-40x cost gap and the
 equal pass rate plainly, no hedging.
+
+## Answering the owner about models (verdict first, no probes)
+
+## Answering the owner about models
+
+A question like «подходит ли эта модель под задачу», «какой уровень достаточен», «стоит ли брать X»
+wants a **verdict first**: what fits, what does not, and the one trade-off that decides it. Do not
+open the stack to answer it — no probes, no log digging, no spend queries. Run measurements only when
+the ask is explicitly «проверь», «прогони», «сравни»; stack work started on a conceptual question gets
+interrupted, and rightly so.
+
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/model-route-benchmark.md` — **Model / route A/B benchmarking**. Read when the owner says a model underperforms, or before switching a LiteLLM group: hidden-prompt probe (injected system prompts show up as thousands of `prompt_tokens` on a one-line request), discriminating task set, cost per success. Run `scripts/model-route-bench.py [model ...]`.

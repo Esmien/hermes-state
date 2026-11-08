@@ -142,3 +142,45 @@ select user_id, user_email, user_role, models from "LiteLLM_UserTable" order by 
 - Any other `proxy_admin` row with a password hash is a full door regardless of how strong the env
   password is — that is the point of the banner, and it is also why disabling the env path is safe
   once that row is proven.
+
+
+## Code paths of the LiteLLM sign-in (verbatim detail)
+
+   - `proxy/auth/login_utils.py` → `_sign_in()` decides between `_admin_credentials_match()` (env `UI_USERNAME`/`UI_PASSWORD`, with master key as fallback when `UI_PASSWORD` is unset) and a `LiteLLM_UserTable` row lookup by `user_email` + scrypt password.
+   - `disable_env_credential_login: true` in `general_settings` removes the env path entirely; `disable_password_login_when_sso_enabled` removes both.
+   - Consequence: env credentials and DB password are **independent doors**. Rotating one does not touch the other.
+   - Turning the env door off (`disable_env_credential_login`), what it does and does not close, where the flag belongs in this stack, and the trap that follows the switch: `references/litellm-admin-ui-auth.md`.
+
+**Before advising the owner to disable the env login path**, walk the order in that reference: prove a working DB `proxy_admin` row first (he sets the password via the invite link, never in chat), then the flag, then verify by effect — not by re-reading the config.
+
+
+## general_settings: DB subset vs config.yaml
+
+- **LiteLLM keeps `general_settings` in `LiteLLM_Config` but resolves it per key** (`SettingsStore.resolve(yaml_value, db_value)`), so a flag that lives only in `config.yaml` survives the UI rewriting its own DB subset — and an env-var change needs a container recreate while a config.yaml change needs only `docker restart litellm`. Confirm by behaviour, never by reasoning about the merge.
+
+
+## psql quoting from a shell string
+
+- **SQL composed inline in a shell string silently loses `"` quoting.** `psql -c 'select … from "user"'` spliced into a double-quoted shell command arrives as `from user` → `relation "user" does not exist` / `column "email" does not exist`. Pass the statement as its own `argv` element from a Python `subprocess` list, never interpolated into a shell command string.
+
+
+## Login throttling behind the proxy: trusted_proxy_ranges
+
+- **`trusted_proxy_ranges` unset breaks per-IP throttling.** Behind nginx every request arrives from the proxy address (`172.18.0.1`), so the limiter sees one client for the whole internet:
+  `WARNING: login_throttle.py: trusted_proxy_ranges is not set ... limited per source address and username only`.
+  Set it to the proxy ranges so limits apply to the real client IP.
+
+
+## Schema: the only password column
+
+- **`LiteLLM_UserTable.password` is the only password column in the schema** — worth confirming once with `information_schema.columns where column_name in ('password','password_hash')` so there is no third door hiding in a table nobody looks at.
+
+
+## Reading litellm_db from the host, not from a container
+
+- **Reading this DB from the stack's own containers rarely works.** The `litellm` venv has no `psycopg2`, and `lyria-postgres` serves a *different* database (`litellm_db does not exist`). Use a throwaway client on the host network so `127.0.0.1:5432` is the real host Postgres:
+  ```bash
+  docker run --rm --net=host -e PGPASSWORD="$PASS" postgres:17-alpine \
+    psql -h 127.0.0.1 -U litellm -d litellm_db -At -c "<query>"
+  ```
+  Also note compose often builds `DATABASE_URL` from `${LITELLM_DB_PASSWORD}`, so a literal `DATABASE_URL=` line is absent from `.env` and naive parsing silently yields an empty password.

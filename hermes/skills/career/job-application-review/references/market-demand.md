@@ -82,3 +82,30 @@ At 1–2 h/day, to *working* level (not mastery):
 - **Kubernetes** — 2–3 месяца, the most expensive item; without a real cluster it stays paper.
 
 Attach three rules to any such answer: **one topic at a time** (six in parallel = zero in three months), **one topic = one artifact** in the portfolio (a RAG demo with Grafana metrics covers three items at once), and a **decision deadline** — «если за две недели не начал k3s, направление не твоё» — so the choice closes instead of becoming another month of reading.
+
+
+## k8s as a career item
+
+Part of the career-direction answer (SKILL.md); the rule for when a cluster is worth it is in SKILL.md too.
+
+### Before promising a local k8s cluster
+
+Read before offering a local cluster as a study plan or an interview artefact.
+
+Probe the host first — the result decides k3d vs k3s vs «нужен внешний VPS»:
+
+```bash
+nproc; free -h; df -h /; swapon --show
+ls -l /dev/kvm; systemd-detect-virt        # нет /dev/kvm → локальных VM не будет
+docker info --format '{{.Driver}} {{.CgroupVersion}}'
+docker stats --no-stream --format '{{.Name}}\t{{.MemUsage}}' | head -20
+```
+
+- **k3d** (k8s в Docker, `k3d cluster create --agents 2`) — дефолт: настоящий kubectl/планировщик/Helm/PVC, живёт внутри Docker, сети хоста не трогает, сносится одной командой. Бюджет ~1–1.5 ГБ RAM.
+- **k3s на хосте** — только если он хочет «настоящую» ноду и есть свободная RAM: ~0.6–1 ГБ, и flannel переписывает iptables/маршруты — на этом хосте это риск для VPN-роутера и mtproto-контейнеров. Предупредить до установки, не после.
+- Нет `/dev/kvm` (сам гость KVM) убивает план «VM на ноду» — не предлагать libvirt/Talos в VM.
+- Честный мультинодовый лаб = два дешёвых VPS в РФ (Timeweb/Aeza/RUVDS) под WireGuard; для интервью это сильнее бесплатного ящика, потому что этим он **управляет**, а не пользуется.
+
+And the framing rule for the same question:
+
+- **k8s — это галочка про доставку, а не дифференциатор**: агентским ролям нужна оркестрация моделей/инструментов, изоляция прогонов и контроль стоимости, а его прод живёт на compose. Оправдан только если вакансия называет его; тогда выходные на k3d закрывают вопрос.

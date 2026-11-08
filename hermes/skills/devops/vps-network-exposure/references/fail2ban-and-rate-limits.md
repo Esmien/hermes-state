@@ -181,3 +181,83 @@ curl -sS -H 'Accept: application/json' 'https://check-host.net/check-tcp?host=IP
 Правильно — один хоп: `server { listen 443; ssl_preread on; proxy_pass <backend>; proxy_protocol on; }` прямо на TLS-листенер (`listen 127.0.0.1:9443 proxy_protocol ssl`). Бэкенд, который PROXY не понимает (mtproto/mtg), получает свой мелкий хоп-стриппер: `server { listen 127.0.0.1:10445 proxy_protocol; proxy_pass 127.0.0.1:10443; }` — принимает заголовок и отдаёт чистый TCP.
 
 Проверка: запрос с внешнего адреса должен дать этот же адрес в `$remote_addr` access-лога. Если в логе `127.0.0.1` при рабочем сайте — PROXY-цепочка лишняя или не принимается на промежуточном листенере (`wrong version number` у клиента = заголовок уехал в TLS).
+
+
+## Зоны nginx, бёрсты и вердикт по «атаке ботов» (детали из SKILL.md)
+
+- **nginx** — два набора зон, и путать их нельзя:
+  `conf.d/zz-ratelimit.conf` ключует по `$binary_remote_addr` (`llm_api` 10r/s, `webui_api` 8→20r/s,
+  `conn_per_ip`), а `conf.d/01-cf-client-ip.conf` — по `$client_ip` (CF-Connecting-IP либо PROXY
+  address), потому что без этого за оранжевым облаком все клиенты сливаются в одно ведро. Живой `ai.`
+  живёт на втором наборе: `webui_api_cf` 20r/s + `burst=240`, `limit_conn 60`, отдельные
+  `webui_signin` 10r/m (burst 3) и `webui_signup` 3r/m (burst 2), плюс `if ($owui_banned_ip) → 403`
+  из fail2ban-джейла `owui-auth`. `llm.` — server-level `burst=40 nodelay` + `limit_conn 20`.
+  **У `app.esmien.ru` больше нет ни лимитов, ни проксирования** — это `301` на `ai` (одно приложение
+  = один публичный hostname), поэтому искать там зоны и править их бессмысленно. Статика везде без
+  лимита: одна загрузка SPA — 40–60 запросов к `/api/`, иначе второй F5 даёт 429.
+  `limit_req_status 429`. В `vps-infra` зеркало есть только у `zz-ratelimit.conf` и
+  `01-cf-client-ip.conf` — после переезда остальные вхосты надо переприменять.
+- **«Нас атакуют боты» решается счётом за сутки, а не ощущением.** Сначала объём и состав:
+  `grep -oE '"[A-Z]+ [^"]*" [0-9]{3}' /var/log/nginx/access.log | grep -oE '[0-9]{3}$' | sort | uniq -c | sort -rn`
+  (регэкспом, а не по номеру колонки — в одном файле живут `cfkomb` и combined), затем топ путей у `404`
+  и топ адресов у них. Картина «605 из 4682 за сутки, все на `/.env`, `/wp-config.php`,
+  `/phpinfo.php`, `/storage/logs/laravel.log`, половина с одного IP» — это фоновый шум интернета,
+  а не атака: 3 запроса в минуту не стоят ни WAF, ни оранжевого облака (оно же приносит
+  репутационный challenge легитимному трафику — `ai-stack` → `references/cloudflare-proxy.md`,
+  «Репутация клиентского IP»). Вердикт так и подавать: объём → что шумит → почему закрытый логин
+  и гейт на входе уже держат риск. Дешёвое лечение без прослоек — `return 403` на мусорные пути
+  (`/.env`, `/wp-*`, `/phpinfo.php`, `/*.log`, `/secrets.json`): снимает шум и чистит логи, где
+  иначе настоящий вхосток прячется за сканерами.
+
+
+## Сканеры LLM-шлюза: диагностика, мусор в базе, лечение
+
+Диагностика (read-only, минута):
+
+```bash
+awk '{print $1}' /var/log/nginx/access.log | sort | uniq -c | sort -rn | head -5
+# по подозрительному IP — что просили и чем отвечали
+grep -h "^<IP> " /var/log/nginx/access.log | awk '{print $7}' | sort | uniq -c | sort -rn | head
+grep -h "^<IP> " /var/log/nginx/access.log | awk '{print $9}' | sort | uniq -c | sort -rn
+# мусор в базе от неаутентифицированных попыток
+sudo -u postgres /usr/lib/postgresql/17/bin/psql -X -tA -d litellm_db \
+  -c "SELECT date_trunc('hour',\"startTime\"), count(*) FROM \"LiteLLM_SpendLogs\" WHERE model='' GROUP BY 1 ORDER BY 1 DESC LIMIT 6"
+```
+
+Что считать вердиктом: `200` есть только у `/health/liveliness` (он публичный по замыслу), всё
+остальное — `401`/`429`. Тогда это не утечка и не сломанная авторизация, а мусорный трафик.
+Типовая картина: десятки тысяч `GET /v1/models`, единичные пробы путей провайдеров
+(`/cohere`, `/vllm`, `/vertex_ai`, `/azure_ai`, `/gemini`), `/key/info`.
+
+Ущерб — не доступ, а шум: `LiteLLM_SpendLogs` копит сотни тысяч строк с `model=''`, они
+раздувают базу и отчёты по расходам.
+
+Лечение (гейтед, двумя частями):
+
+1. fail2ban-джейл на access-лог `llm.`-хоста: `backend = polling`, фильтр
+   `^<HOST> - - .+ "[^"]+" (401|403|429)`, `maxretry=30`, `findtime=5m`,
+   `bantime=6h` + инкремент. Рецепт — `references/fail2ban-and-rate-limits.md`.
+2. Чистка `DELETE FROM "LiteLLM_SpendLogs" WHERE model=''` и та же чистка в
+   `litellm-spend-retention`, иначе мусор возвращается каждую неделю.
+
+Не предлагать в качестве лечения «перевыпустить ключ OpenCode»: текст ошибки называет
+credential, но запрос пришёл вообще без ключа — это ложный след, который уводит в
+перевыпуск живых кредов.
+
+
+## Бёрст считается по стоимости одного refresh SPA
+
+- **Burst считай по стоимости одной загрузки SPA, а не по «запросам в секунду».**
+  Один refresh Open WebUI — это 40–60 запросов к `/api/` (модели, папки,
+  аватарки, скиллы, сокет). `burst=30` выбирается одним открытием страницы,
+  второй F5 подряд уходит в 429, и владелец видит «сайт перестал открываться»,
+  хотя HTML отдаётся 200 и канал в порядке. Признак в логе: серия `429` на
+  `/api/models`, `/api/v1/folders/shared`,
+  `/api/v1/models/model/profile/image`, при нулевых `limiting requests` в
+  `error.log` (уровень warn пишется не туда, где его ищут). Лечится `burst=120`,
+  а не отключением лимита.
+
+
+## Чем именно вредит мусор сканеров
+
+Ущерб — не доступ, а шум: строки с `model=''` раздувают базу и отчёты по расходам.

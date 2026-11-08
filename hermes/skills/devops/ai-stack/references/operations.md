@@ -181,3 +181,34 @@ reads it as «всё отвалилось сразу после твоей пр�
   time are the cold start, not a regression — and say so in one line instead of re-auditing auth.
 - `LiteLLM_SpendLogs` is the arbiter: `status<>'success'` rows with `coalesce(model,'')<>''` are real
   model failures; empty-model rows are unauthenticated `/v1/models` scanner noise.
+
+## Accessing the stack UI from outside — SSH tunnel only (moved from SKILL.md)
+
+## Смотреть UI снаружи — только через SSH-туннель
+
+`open-webui` (8080) и `litellm` (4000) публикуются на `127.0.0.1`, поэтому с чужой машины
+(и на прогоне без TLS, где nginx вообще не ставится) браузер видит их так:
+
+```bash
+ssh -N -L 8080:127.0.0.1:8080 -L 4000:127.0.0.1:4000 root@<host>
+# http://localhost:8080 — WebUI, http://localhost:4000/ui — LiteLLM
+```
+
+Логин LiteLLM — **юзер из БД** (`black.walf16@gmail.com`, роль `proxy_admin`), env-логин по `UI_USERNAME`/`UI_PASSWORD` и мастер-ключу на форме отключён флагом `disable_env_credential_login` (см. `references/litellm-admin-auth.md`). Мастер-ключ остаётся рабочим только как API-bearer — это break-glass. На восстановленной БД пользователи уже есть, а экран первичной регистрации WebUI означает пустую `webui_db` — и первый зарегистрированный станет админом.
+
+## `/mnt/host`: why a stack container must never be recreated from open-terminal
+
+- The host root is mounted **directly as `/`** — this agent runs on the host root, NOT in a container with a `/mnt/host` bind. **`/mnt/host` does not exist on the host.** Never prefix host paths with `/mnt/host`; use them as-is (`/home/...`, `/etc/...`).
+- **`/mnt/host` exists only inside `open-terminal`** (it mounts `/` there, `cwd=/mnt/host`, docker.sock passed through). An agent driving that web terminal reads `/mnt/host/home/ai_service/...` as valid, but the Docker daemon resolves bind sources on the HOST, where the path is absent — it auto-creates an empty directory there and the container mounts a directory over a file (`IsADirectoryError` crash loop). **Never recreate a stack container from open-terminal's shell or with `/mnt/host` paths**; recovery drill in `references/operations.md`.
+
+## `cptr` removal (do not reintroduce)
+
+> `cptr` (`ghcr.io/open-webui/computer`) was removed from the stack on the owner's instruction: container, image, `/home/ai_service/webui_data/computer`, compose block, `deploy.sh` references (`SITES` entry, `start_apps`, final report), nginx vhost + cert `term.esmien.qd.je`, and the boot-expected list. Nothing should reintroduce it.
+
+## Host exposure: PostgreSQL on `0.0.0.0:5432` (moved from SKILL.md)
+
+- Only 80/443 are deliberate ingress and the compose backends bind 127.0.0.1 — but **that is a per-service setting, not a host guarantee**. The HOST PostgreSQL 17 listens on `0.0.0.0:5432` (`listen_addresses='*'`) and nothing filtered it (`ufw` is `ENABLED=no`, `iptables INPUT` policy ACCEPT), so the port was open to the internet and being brute-forced (`grep -c 'no pg_hba.conf entry' /var/log/postgresql/postgresql-17-main.log` → 41k). It is now guarded by `/usr/local/bin/fw-guard-postgres.sh` + `fw-guard-postgres.service` (only 127.0.0.1 and 172.16.0.0/12 get in). **Never answer «что у нас наружу» from `docker ps` alone** — host services (Postgres, nginx, docker-proxy) are invisible there. Audit/closure procedure: `vps-network-exposure` skill.
+
+## Deploy: the `.dump.enc` restore trap
+
+DB restore always applies the newest matching dump (`pg_restore --clean --if-exists`), found by mask `backups/postgres/<db>_*.dump` then `backups/<db>_*.dump`. **The dumps on disk are `.dump.enc` now**, so check this step before trusting a `deploy.sh` restore: either feed it a file produced by `dump-crypto decrypt <x.dump.enc> <x.dump>` or extend the mask — an unchanged mask silently finds nothing and the deploy continues on an empty database.

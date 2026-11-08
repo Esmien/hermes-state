@@ -43,3 +43,14 @@ Measured boundary to state honestly instead of promising «обход капч»
 Before/after evidence for any rollout: 10–15 real queries scored on «page opened?» and «did the snippet carry real page text?», plus how often the escalation branch fired.
 
 The owner-facing plan — work items, trust-zone rules, acceptance criteria — lives in the harness: `~/.hermes/tasks/docs/web-search-plan.md` (board task #3). This reference holds the facts; that doc holds the plan. When the design changes, update both, and re-run `/usr/local/bin/hermes-state-backup.sh` so the repo copy matches the host.
+
+## Answering the owner about web search (moved from SKILL.md)
+
+## Answering the owner about web search
+
+OWUI's built-in `searxng` path keeps only SERP `title/link/snippet` — it never opens the results, so
+answer quality is capped by ~200-char teasers. Engines do not chain: when a custom/external search
+fails, OWUI logs and returns `[]` and the model answers with no context. So «поиск получше» is a
+page-fetching problem, not a model problem, and any «SearXNG как фоллбэк» must live INSIDE the
+replacement service. Contract, hot-path budget, Hermes's role and the trust-zone caveat:
+`references/web-search-architecture.md`.
