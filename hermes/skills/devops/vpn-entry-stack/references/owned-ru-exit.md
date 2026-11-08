@@ -146,3 +146,31 @@ that this node is a Russian exit — blocked foreign services will *not* work th
   selector with one node is worth more than a pool that twitches.
 - Do not sell the two-hop path as fast: client → Estonia → Moscow adds the measured ping to every
   request, and no config removes it. It is fine for gosuslugi, which is not a speed experience.
+
+## «Бокс перестал открывать ру-сайты» — это чаще бокс, а не сайты
+
+`ru1` going silent is diagnosed in one pass, and the answer is usually "the VM is gone", not
+"sites started blocking us": a site-level block never closes **SSH**. Check in this order:
+
+1. `ru1:ok` → `ru1:DEAD` in the watchdog journal dates the outage to the minute; `-ms` means the TCP
+   pre-check failed, i.e. nothing answers on the port at all.
+2. From the host: `ping` plus `/dev/tcp/<ip>/22` and `/dev/tcp/<ip>/443`. Both closed + 100 % ICMP loss
+   = the machine, not the route.
+3. `check-host.net/check-tcp` on `:22` and `:443` from ~6 nodes ("OK" requires `isinstance(r[0], dict)
+   and "time" in r[0]`). Failing everywhere = global, so our Estonian IP is not the problem.
+4. The provider's **gateway** (`.1` of the subnet) answering while the guest does not separates "their
+   network is up" from "our VM is down": a live gateway plus dead guest = powered off, crashed or
+   suspended at the hypervisor. Ping to host addresses in a provider subnet proves nothing — customer
+   firewalls drop ICMP anyway.
+5. Open the provider's **own site** with `check-host.net` from a **RU node** (`?node=ru2.node.check-host.net`).
+   A provider site that times out from inside Russia too is an incident on their side, not a geo-block —
+   that is the one check that turns "wait it out" into "look for another exit".
+
+While the box is down the RU scenario must sit on the subscription's RU relays (`p15` Москва, `p17`
+Новосиб; `p16` СПб refused `gosuslugi` with a steady `000`) — a silent `direct` fallback means every
+RU site answers from Estonia and the owner reads it as "the VPN broke".
+
+A recovery watchdog belongs in a `no_agent` cron (`~/.hermes/scripts/watch_ru1.py`, every 5 min):
+TCP-probe 22/443 plus the provider's site, keep the last verdict in `~/.hermes/state/ru1-watch.json`,
+and print **only on a transition** — empty stdout sends nothing. State the contract to the owner in one
+line: silence = still down.

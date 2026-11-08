@@ -228,7 +228,57 @@
       "attach_to_session": true,
       "run_claim": null,
       "fire_claim": null
+    },
+    {
+      "id": "e6804e3517c1",
+      "name": "ru1-exit-watch",
+      "prompt": "Watchdog: московский выход 217.197.114.197 и сайт провайдера estt.ru. Молчит, пока состояние не изменилось; сообщает только о переходе (бокс ожил / бокс упал / сайт провайдера поднялся).",
+      "skills": [],
+      "skill": null,
+      "model": null,
+      "provider": null,
+      "base_url": null,
+      "script": "watch_ru1.py",
+      "no_agent": true,
+      "monitor_script": null,
+      "monitor_url": null,
+      "monitor_state": null,
+      "context_from": null,
+      "schedule": {
+        "kind": "interval",
+        "minutes": 5,
+        "display": "every 5m"
+      },
+      "schedule_display": "every 5m",
+      "repeat": {
+        "times": null,
+        "completed": 0
+      },
+      "enabled": true,
+      "state": "scheduled",
+      "paused_at": null,
+      "paused_reason": null,
+      "created_at": "2026-11-08T12:26:39.710934+00:00",
+      "next_run_at": "2026-11-08T12:31:39.718919+00:00",
+      "last_run_at": null,
+      "last_status": null,
+      "last_error": null,
+      "last_delivery_error": null,
+      "last_delivery_unverified": null,
+      "last_failure": null,
+      "failure_streak": 0,
+      "deliver": "origin",
+      "origin": {
+        "platform": "telegram",
+        "chat_id": "-1004410657647",
+        "chat_name": "Esmien VPS",
+        "thread_id": "2",
+        "user_id": "214062001",
+        "scope_id": null
+      },
+      "enabled_toolsets": null,
+      "workdir": null
     }
   ],
-  "updated_at": "2026-11-08T09:30:36.565979+00:00"
+  "updated_at": "2026-11-08T12:27:16.589816+00:00"
 }

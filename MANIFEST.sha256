@@ -4,7 +4,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 683646459f25cdbbebebf48b674e0be4d96218b4032f7ab129bf0497bcf3f613  ./hermes/agent-hooks/ssh-only-gate.py
 8de8aafe34757fdff3e165704d4803a5a054618d11243cad6401fd4cc5483159  ./hermes/bin/read-untrusted
 8b1b50900a770e4d6e47d41dd63b9814b4a335820c9d8236eb0b7dc352d6a1db  ./hermes/config.yaml
-2b526ecf0cc4d8d7f47a2fcf5e59e1cfb210f82a406a95bdad5431bd921ff338  ./hermes/cron/jobs.json
+ebe7d5020215255235d3d34e57cab1e3cd0afecdc20c2a846e8fc3a528e562a8  ./hermes/cron/jobs.json
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
 9e21be702a5c9c853afca040a01db25b37fa8b2f51e31c6cfe05ab3020db26e0  ./hermes/docs/vpn-runbook.md
 5a5381d59b0423f9ccdad1235e6b67357d65a1da0ccd474a75d2af3f9aaff144  ./hermes/memories/MEMORY.md
@@ -14,7 +14,9 @@ e192a0881a87b24d55161cdc1ee075291f19592316ed88d5a770773ace175718  ./hermes/plugi
 b900857a741b20fdc37399ed8eb71191eccec8b0013ed0f2c37a8827342e8fd8  ./hermes/plugins/muse-persona/plugin.yaml
 c5971330405dc8b92bf017f57b6a7e720568be1cc1270248bae29ee4c5b3044e  ./hermes/profiles/reader/SOUL.md
 f6ade3b6b9958181b5dc6dec990aa057d7b5a3d58a509c3459a428889c295472  ./hermes/profiles/reader/config.yaml
+71d05f1be385d2bb4d31649cb979d9f2815b2598a12de74a560b379d4c34499c  ./hermes/scripts/_probe_delivery_test.py
 9547927170b127aac36ed4d208fbc6e6149ad4cc52457a018f16471f8161297e  ./hermes/scripts/backup-verify.sh
+df39344d8dc403f096daccb5b23686b3644e65e85af53c8926aa36118bba5bd2  ./hermes/scripts/watch_ru1.py
 49a899583a852d558603d43b969fbdf788e372a70cb6ec86c73c4af08dd22049  ./hermes/skills/.bundled_manifest
 a053970d855deb4220b40e60dcc613c4c925438177b140957769804dfcef1fea  ./hermes/skills/.curator_state
 c9537e578d68950224dbc09a425497a780e8c3956db9cb38a97b4a9e985516b3  ./hermes/skills/apple/DESCRIPTION.md
@@ -150,7 +152,7 @@ a2b65c124a21a5df8a743621ef32883ecad026a2d99dbeeb1dbdfb8a01f7343f  ./hermes/skill
 4d3f6b023d09ef6d7c6e536e9ca4b53bfdcc2d6f7156fe89e761b2c5da924241  ./hermes/skills/devops/vpn-entry-stack/references/domain-and-tls.md
 b3e01208b42620cdf4c4126c8769dffe221fed325ee679ed50065a9e27167782  ./hermes/skills/devops/vpn-entry-stack/references/gemini-geo.md
 866861e1d39f3106729b0297caad96af736a33173bcb5ce1eba3c07143ff1f1f  ./hermes/skills/devops/vpn-entry-stack/references/linux-always-on-client.md
-89480e54440a8f20c45de81d2a66e19562f58626027728a87ca4ddd0abc6321a  ./hermes/skills/devops/vpn-entry-stack/references/owned-ru-exit.md
+e99a1e1c8ce2ba2e73d038b8652963380bc52e35b99e2d48645dec83843f566a  ./hermes/skills/devops/vpn-entry-stack/references/owned-ru-exit.md
 5abb75cc1b48187744e2c7ef3fcff884214d8d841f45bed3055778ee974130e1  ./hermes/skills/devops/vpn-entry-stack/references/per-user-keys.md
 625480e5e31a642015e3490a1c33f91f7304d13906717789077d25939170888e  ./hermes/skills/devops/vpn-entry-stack/references/router-ops.md
 7854f9c7041a2bb113131ecc17d8827861ec7ba00a71217f226ca09c955889a1  ./hermes/skills/devops/vpn-entry-stack/references/ru-exit-node.md
