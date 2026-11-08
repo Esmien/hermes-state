@@ -1,7 +1,232 @@
 {
-  "updated_at": "2026-11-08T03:00:11Z",
+  "updated_at": "2026-11-08T04:10:42Z",
   "chat_id": "214062001",
   "sets": [
+    {
+      "db": "secrets_offsite",
+      "dump": "secrets_20261108_041040.tar.gz.enc",
+      "size": 12096,
+      "sha256": "03f19162445cced6ab489a9d080ee57a3b54a77732398f172da0d8dcb5d257c8",
+      "created_at": "2026-11-08T04:10:41Z",
+      "chat_id": "214062001",
+      "complete": true,
+      "parts": [
+        {
+          "name": "secrets_20261108_041040.tar.gz.enc",
+          "size": 12096,
+          "sha256": "03f19162445cced6ab489a9d080ee57a3b54a77732398f172da0d8dcb5d257c8",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAyVq7_ZCiTYYX1SyrTB7l8ZI9_-jbAAClbYAAtA0gUs3Ao8EurcijD0E",
+          "message_id": 805
+        }
+      ]
+    },
+    {
+      "db": "webui_data",
+      "dump": "webui_data_files_20261108_040846.tar.gz",
+      "size": 513222712,
+      "sha256": "027e3950d30df0bff662e5c8ce37e32e849f122a3fc3f90251c420ca3840758e",
+      "created_at": "2026-11-08T04:09:07Z",
+      "chat_id": "214062001",
+      "complete": true,
+      "parts": [
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_00",
+          "size": 18329383,
+          "sha256": "fa37f674c838eb8f778dff4a484391ffb7704f04423fcb03c853f8e8eec4d418",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAwdq7_XlpB2Kg7jzgxfuO9udAbDBJwACebYAAtA0gUvkWvu3vjvwfD0E",
+          "message_id": 775
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_01",
+          "size": 18329383,
+          "sha256": "e56f2dd5d38e69a31be1b109ad3b77c5015448a206d82480103b8f686fcc44ec",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAwhq7_Xno27zyIECfh6cAWTjLHd66QACerYAAtA0gUvO14ko74t1_j0E",
+          "message_id": 776
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_02",
+          "size": 18329383,
+          "sha256": "ed9243022fb6b69867ff1541f390811bfa2aee7c6bfeae7bfbf9abf855795dc8",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAwlq7_XoyErJuLAHQZ6E3PXsLaucoAACe7YAAtA0gUuC3sd-GCBDLj0E",
+          "message_id": 777
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_03",
+          "size": 18329383,
+          "sha256": "80741268752686107b618e86d0958dab50db62844d88cf71d3fbe2749fffca2a",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAwpq7_Xqn9UYVXiY6gqcrKAG_NOJXQACfLYAAtA0gUtWpB8anTRLcz0E",
+          "message_id": 778
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_04",
+          "size": 18329383,
+          "sha256": "ba60dc5fe0346d38fe069ae651be4084ffca517b3e93fc8a409b41214d25c650",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAwtq7_XsU5jJ7wk3L51xdKazcyeFygACfbYAAtA0gUvtifT2P86YPD0E",
+          "message_id": 779
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_05",
+          "size": 18329383,
+          "sha256": "ed9ea49b2af9b7ae0ae9ff28d550beb034e9d19d50a67bfc0fb7ff4abc656573",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAwxq7_XuH5y48jf-yobJ1bEShfAqbAACfrYAAtA0gUtrBzvKD8WpUj0E",
+          "message_id": 780
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_06",
+          "size": 18329383,
+          "sha256": "9e2bbaa5f07a815a811744c3d4e7dc73f10e544c87bc66f6326b24b9e7b6e493",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAw1q7_XwN_W_KP-hNfV4b_AoxKs-_wACf7YAAtA0gUtkzc4wll5C8D0E",
+          "message_id": 781
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_07",
+          "size": 18329383,
+          "sha256": "a066fd7e182f47a8ada39e974c4d61a5d8d908a79188eca368d82b5aa8db1a9a",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAw5q7_XxuKqEmpOsqF0uMm7swOOwlAACgLYAAtA0gUthPfJ76ahI2z0E",
+          "message_id": 782
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_08",
+          "size": 18329383,
+          "sha256": "f209607423bf952d1244ad7436982ab2e179c6c6d6a427d3f38d980cabe30104",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAw9q7_Xz3LHnYEI_r70F30nfhzyd7gACgbYAAtA0gUsqTtnMc4FgFD0E",
+          "message_id": 783
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_09",
+          "size": 18329383,
+          "sha256": "028a5e7c4cdb7dc09df1fcc7c647a360fe3686ceae4348381042cc944e0bb2e0",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAxBq7_X1PWg6Z_h1fOqFlEX_864SIwACgrYAAtA0gUvpzIA2IL62ED0E",
+          "message_id": 784
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_10",
+          "size": 18329383,
+          "sha256": "d6e1b3dbd9acb4b58cc7c5b94e7bf889890bd95c2dd5966fcf6fac7a0fc56473",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAxFq7_X3LMqjHK41wkh1BXd2Ew6jpQACg7YAAtA0gUs95pmMB8LUkD0E",
+          "message_id": 785
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_11",
+          "size": 18329383,
+          "sha256": "1d305ee4550a16b38f00b02f61251e2b3119f46e4e2a478f776f65bd17cd8b77",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAxJq7_X57RBAw6MFDmhRUrF1lW3vwQAChLYAAtA0gUtfyoCkKDoxiT0E",
+          "message_id": 786
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_12",
+          "size": 18329383,
+          "sha256": "b3764b444fed36396555498aaeec1f353105c6431372f252b49d6728568dbf79",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAxNq7_X66SXPZ8f4biAUeqoZ-PGAoQAChbYAAtA0gUvaJInydzaF8T0E",
+          "message_id": 787
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_13",
+          "size": 18329383,
+          "sha256": "b04f37e04d2b3a26f7a08bc6fa9020028081ada2981720beb40332db12e152b8",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAxRq7_X8vALpHQLeIVIcNs2SS6mV6AAChrYAAtA0gUuEev8gUvHVPT0E",
+          "message_id": 788
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_14",
+          "size": 18329383,
+          "sha256": "f4f4b48c1685357d10a10b97048becfce1685412f48caa80d90476e449117c88",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAxVq7_X-a3KcA29iFlmVpgks-juUhQACh7YAAtA0gUuNCQwmeDD1Nz0E",
+          "message_id": 789
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_15",
+          "size": 18329383,
+          "sha256": "72729c52c42dc0671955a92f943038d7eccac226e943c29d8a6e80abe1a83ba9",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAxZq7_YAAe743xqf5X0kZTjB1VgySp8AAoi2AALQNIFLw0pxDmLrxbk9BA",
+          "message_id": 790
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_16",
+          "size": 18329382,
+          "sha256": "fc5acb45343df67455fc2fa7ec9177566cb415a2e1c61f38f05416c28dd695c2",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAxdq7_YCq2n-kl-4FWfFvfTJ_44urgACibYAAtA0gUvU4EhiISmpQT0E",
+          "message_id": 791
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_17",
+          "size": 18329382,
+          "sha256": "4186b255990804f4f57e2e316f1832f2279e519d41871ffa15f71ea3baf9e381",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAxhq7_YEYRMmmIuefkopdOAq8g3cVQACirYAAtA0gUtHV3PxUgtopT0E",
+          "message_id": 792
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_18",
+          "size": 18329382,
+          "sha256": "9a6e6857622800dd27954c266e3fdcd70dc78886900370514cdd3e82d75b2e61",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAxlq7_YGwvqyQFT9Hmbp9MmS_xiH9gACi7YAAtA0gUsSvqLIZjvzFj0E",
+          "message_id": 793
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_19",
+          "size": 18329382,
+          "sha256": "be3b6eeb6e987f672b09f97117fed194013f7d5995f088620b8e30436b51e568",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAxpq7_YINniOBF1b3yF9siAOxS7fwgACjLYAAtA0gUtK-_FTOoSN1j0E",
+          "message_id": 794
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_20",
+          "size": 18329382,
+          "sha256": "2f42c28a9da47971c775f871d2cdc7ec2fa72c1143ef67bc8dd5f6ea9cdbb254",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAxtq7_YhSZTaJosm6-CXwZr_aEoGaQACjbYAAtA0gUtJWVknD2ucbj0E",
+          "message_id": 795
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_21",
+          "size": 18329382,
+          "sha256": "1356e7f8b604bb0b25bc5615dee9ae7ec0b37595b7a20d7793b3ee450cec5bf3",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAxxq7_Yk_wismVYMB8FGQRNBoZqFNAACjrYAAtA0gUt8Onwl-Gw5Mz0E",
+          "message_id": 796
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_22",
+          "size": 18329382,
+          "sha256": "f9e1d15b9fc85a19cfd02db4ab9e31d05ca13f3637a22914d65f9076ae7b6973",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAx1q7_YlzP9IOwQtyhmbGwABoo8YoRQAAo-2AALQNIFLFq1JkeR1UGY9BA",
+          "message_id": 797
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_23",
+          "size": 18329382,
+          "sha256": "de2c8ceb880fae4dc3311895cf0bf0958576bf0a4b255c3b3bef54c5d34b1d64",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAx5q7_YngK6iQH-DEB0bqzwLZ57ByQACkLYAAtA0gUsQlwrVdRq07z0E",
+          "message_id": 798
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_24",
+          "size": 18329382,
+          "sha256": "993470f7a76bb5b001d4adbebe9ee7f40ab3876beb548d06d30d91d0e8867ae2",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAx9q7_YpRDNb8_KF9Jnf4mLoJsn-DQACkbYAAtA0gUtq4baWDykBXj0E",
+          "message_id": 799
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_25",
+          "size": 18329382,
+          "sha256": "83e0ebddae4102c2edabe0f9b01435cea7e50306e370f9fc7c7804cd2f77e039",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAyBq7_YrX2clJKaEzkucwD4am3FyjAACkrYAAtA0gUuNnJw0aRf3zz0E",
+          "message_id": 800
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_26",
+          "size": 18329382,
+          "sha256": "4b713f4124a82a50b8a56d8e767d6120cf452a604b44d9999cc3baf52ee1d834",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAyFq7_Yt209meUVfW8lFV8myDTng9wACk7YAAtA0gUtYwBFO-8gE5j0E",
+          "message_id": 801
+        },
+        {
+          "name": "webui_data_files_20261108_040846.tar.gz.part_27",
+          "size": 18329382,
+          "sha256": "3c8049524b004c9ea62f4e175a4c38a820e67d3e3d47602647605ad3da94f088",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACAyJq7_YvEAVkXJiOofrt929I1C0MjwAClLYAAtA0gUslcgMoKR1puD0E",
+          "message_id": 802
+        }
+      ]
+    },
     {
       "db": "litellm_db",
       "dump": "litellm_db_20261108_023004.dump.enc",
