@@ -9,6 +9,12 @@ default because port-80 ACME needed that. A working credential already exists:
 it with `GET /client/v4/user/tokens/verify`. Its scopes cover DNS + zone settings + WAF rules; they do
 **not** cover Bot Fight Mode.
 
+**Read that file with a regex, never `configparser`.** It has no section header, so `ConfigParser.read()`
+raises `MissingSectionHeaderError` **and the traceback echoes the offending line — token included**.
+`re.search(r'dns_cloudflare_api_token\s*=\s*(\S+)', Path('/root/.secrets/cf.ini').read_text())` is the
+whole story. If a script ever does leak it into stdout/chat, treat the token as burnt: say so plainly
+and rotate, because the value now lives in the transcript.
+
 ## Origin topology (why the order matters)
 
 Requests arrive at the `stream` block in `/etc/nginx/nginx.conf` (`listen 443; ssl_preread on`), which
@@ -221,6 +227,18 @@ h3/QUIC (раздел ниже). Два разных сбоя легко нак�
   out loud instead of silently changing who can see the traffic.
 - Local consumers (`Hermes → 127.0.0.1:8080`) bypass the proxy entirely; nothing there changes.
 
+## Проверять тоннельный путь замером, а не правилом
+
+`security level` medium сам по себе ещё не значит, что выходы VPN получат челлендж. Перед тем как
+заводить WAF skip, замерить: собрать socks-клиент из аутбаундов `p15`/`p17` (`config.json` копируется
+verbatim, UUID не печатать) с правилом `inboundTag -> outboundTag` на каждый и запросить
+`curl -x socks5h://127.0.0.1:<port> https://<host>/` по каждому. `200` с телом приложения = край
+пропускает этот адрес, правило не нужно; `403`/HTML-заглушка вместо тела = нужен skip на конкретные
+выходы. В логе это подтверждается тем же IP в первой колонке и `cf=<ray>`.
+
+Тот же замер — единственный способ отличить «CF режет наш выход» от «выход умер»: если через socks
+не отвечает и обычный сайт, дело в узле, а не в зоне.
+
 ## Verify after the flip
 
 ```bash
@@ -230,6 +248,11 @@ for i in 1 2 3 4; do curl -s -o /dev/null -w "$i:%{http_code} " --resolve ai.esm
   -A 'Mozilla/5.0 Chrome/126.0' -X POST -H 'Content-Type: application/json' -d '{}' \
   https://ai.esmien.ru/api/v1/auths/signup; done; echo
 ```
+
+`location =` блоки вхоста (`/_turnstile/config`, `/_turnstile/verify`, любые служебные ручки) существуют
+**только в nginx**: запрос на `127.0.0.1:8080` напрямую возвращает HTML оболочки SPA и выглядит как
+мёртвый гейт. Проверять через вхост: `curl -sk --resolve <host>:443:127.0.0.1
+https://<host>/_turnstile/config` → `{"sitekey": "0x…", "enabled": true}`.
 
 Expected: `cf-ray` present; a real client IP in the log; the 4th signup attempt `429` from nginx (the
 first three get `422` on an empty body, so the test leaves no rows). A `curl` UA must get `403` from
@@ -252,7 +275,10 @@ gets `403` with `rt=0.000` and `cf=-` in the log.
    first) and leave the maps in `01-cf-client-ip.conf` alone — `$client_ip` falls back to
    `$proxy_protocol_addr`, so the rate-limit zones and the fail2ban jail keep keying on the real client.
    `nginx -t && systemctl reload nginx`.
-2. `PATCH /zones/{zid}/dns_records/{rid} {"proxied":false}` (keep the A → origin IP), then
+2. Snapshot the current flags before any flip — `GET …/dns_records` → `[{name, id, proxied}]` into
+   `/root/vpn-router/.cf-proxy-backup.json` (or next to the vhost) — so rollback is a `PATCH` per id and
+   not a guess about what the record used to be.
+3. `PATCH /zones/{zid}/dns_records/{rid} {"proxied":false}` (keep the A → origin IP), then
    `dig +short @1.1.1.1 <host>` must return the origin address, not `104.21.x`/`172.67.x`.
    Перечитать флаг **до** и после `PATCH`: владелец часто успевает выключить облако сам в дашборде, и
    тогда `proxied` уже `false` — докладывать подтверждённое состояние, а не «снял». И не включать прокси
@@ -277,10 +303,11 @@ The name → backend map itself is short and lives in SKILL.md, section «Domain
 
 ## Vhost rules: grey/orange, app redirect, reload truth, adding a name
 
-**Оранжевого облака в зоне больше нет: `ai` переведён в серый по указанию владельца** — CF отдавал
-HTML-оболочку и не пропускал пачку подресурсов с адресов выходов VPN (диагностика и доказательства —
-`references/cloudflare-proxy.md`, раздел про «через VPN не грузится»). Оба имени, `ai` и `app`, серые и ходят прямо на
-origin, бэкенд один (`127.0.0.1:8080`). **`app.esmien.ru` — не второй вход, а редирект:** по указанию
+**Состояние облака меняется по указанию владельца, поэтому читать его из зоны, а не из этого файла.**
+Сегодня `ai` и `app` — оранжевые (владелец: «попробуем с облаком, всё проверим»), остальные имена
+(`llm`, `bot`, `mon`, `stats`, `vpn`) — серые. Бэкенд один (`127.0.0.1:8080`). Серый остаётся мгновенным
+откатом и не отменяется: `proxied` и `modified_on` в `GET /zones/{zid}/dns_records` — единственный
+источник истины, комментарий в вхосте («CF снят намеренно») описывает прошлое решение, а не текущее. **`app.esmien.ru` — не второй вход, а редирект:** по указанию
 владельца он отдаёт `301` на `ai` с сохранением пути и query, без проксирования и без лимитов
 (два имени одного WebUI = две cookie-сессии, потому что cookie привязана к hostname). Не возвращать
 `app` вторым проксирующим vhost'ом без прямой просьбы. Бэкап прежнего файла — `.bak-before-redirect`.
