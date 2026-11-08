@@ -55,6 +55,14 @@ the route is broken by its own monitoring.
 - A group that mixes an owned node with reseller relays flaps forever, because the relays are the
   unstable part. Keep the RU scenario on the owned node with `direct` as `fallbackTag`; relays go
   back in only on an explicit request.
+- When relays do carry `.ru`, pick the tags by **purpose probes**, not by country label: on one pool
+  `p16` (СПб) answered `tbank`/`avito`/`ozon` normally but `gosuslugi` with a steady `000`, so it was
+  dropped and the selector became `p15` (Москва) + `p17` (Новосиб). Probe the sites the owner actually
+  uses, then keep only the tags that pass all of them — a relay that carries half the list is worse
+  than one fewer node, because the failures look intermittent.
+- Measure the observatory path per pool instead of assuming it: the cloudflare `generate_204`
+  **did** answer from reseller RU relays, so `leastPing` ranks them fine even though a bare RU
+  datacenter was expected to time out. The watchdog's own probe targets stay RU-hosted regardless.
 - Prove the flow reached the node itself, not merely that the page loaded:
 `journalctl -u xray --since -1min | grep 'accepted tcp:www.gosuslugi.ru'` on the exit answers «did
 this node carry it» in one line, and beats inferring it from a `200`.
@@ -182,6 +190,12 @@ mid-refresh — say that out loud when the family is asked to update their subsc
 
 ## Pitfalls
 
+- `scenario_override.json` outranks the code and is easy to forget. `install()` reads it into
+  `PREFERENCE`, while the balancer's selector comes from `GROUPS` — two sources feeding one script.
+  A stale pin left from an earlier manual test (`{"bal-ru": ["ru1","direct"]}`) therefore keeps the
+  observatory selector and the watchdog on a node you just removed, while the balancer prints the
+  new tags and everything looks right. Check (and rewrite) the override file in the same pass as the
+  code edit; reading it is enough, and overwriting that JSON needs no separate confirmation.
 - Prove what the container actually loaded, not what is on disk: `docker cp
   vpn-router:/etc/xray/config.json /tmp/run.json` and compare with `config.json`. The file on disk
   can already carry the fix while the running pod still serves the previous generation, and every

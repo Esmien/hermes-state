@@ -73,7 +73,7 @@ vpn.esmien.ru:8443 (VPN entry)                    | vpn.esmien.qd.je:8443
 ```
 
 - **`app.esmien.ru` is not a second entry, it is a `301`** to `ai` (path + query kept, no proxying, no limits) — two names for one WebUI = two cookie sessions.
-- **No orange cloud:** `ai` is grey by the owner's instruction, and un-oranging is **two** actions — drop the `if ($deny_direct) { return 403; }` gate first, then `PATCH {"proxied":false}`.
+- **No orange cloud (owner's instruction — and it costs the direct path):** `ai` is grey, which is what the tunnel path needed, but without CF the owner's ISP has to reach the origin on 443 itself, so «вебуи не открывается БЕЗ впн» arrives within days. On that report read the zone (`proxied` + `modified_on`) and the request sequence in `access.log` (a reload loop = flaky path, not a broken app) **before** touching nginx. Re-enabling means orange **plus** a WAF skip for our own exits. Un-oranging is **two** actions — drop the `if ($deny_direct) { return 403; }` gate first, then `PATCH {"proxied":false}` → [references/cloudflare-proxy.md](references/cloudflare-proxy.md).
 - Vhost edits: `write_file` refuses `/etc/nginx` (stage in scratch, `cp`); after `systemctl reload nginx` the first `curl` may still hit the old worker — repeat it, don't roll back.
 - New name: grey A record answering from two resolvers (orange ⇒ HTTP-01 `530`), cert via port-80 ACME stub + `certbot certonly --webroot`, then a vhost copied from an existing one, verify `200 cert=0`. Procedures and rollback → [references/cloudflare-proxy.md](references/cloudflare-proxy.md).
 
