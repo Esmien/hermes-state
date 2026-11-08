@@ -304,6 +304,13 @@ An exit lifted from someone's paid plan is a shared credential, not a free tunne
 
 A subscription bought **for the server alone** removes the duplicate-client signature (one key, one IP, exactly what the plan expects) and cuts the ban risk a lot, but not to zero: the provider still sees a datacenter origin, and transit/resale is usually forbidden in the terms. Keep a dedicated subscription off the phone and treat it as a layer under an owned VPS, not a replacement.
 
+Two plans, two different roles — measured, not assumed (`scripts/pool_probe.py`, `scripts/inject.py`):
+
+- **«серверная (ретрансляторы)»** carries the relay pool `p1…p19` and is **personal**: 200.0 MB injected through `p1` → +200.9 MB on its counter (0.45 % overhead). Nobody else is on that key.
+- **«мобильная (глушилки)»** carries `fr` and `fi` and is **shared with strangers**: 100.0 MB through `fr` → +100.5 MB, yet the same counter took 5.6 GB in 12 minutes and 258 MB in 3 minutes while the stack pushed ≈0.3 MB in those windows and no family device was on it (their traffic shows on Estonia and the `p*` relays in the stats dashboard). Its purpose is the whitelist bypass, so it is the one path that can die for a reason that is not ours.
+
+Both plans report `total=0` (unlimited) and `upload=0` (download only) — volume is never the constraint, so never argue limits. Standing decision: `fr`/`fi` stay, Gemini rides them only on Gemini requests (automated), and **no migration onto the relay pool is wanted** — do not propose it again.
+
 These sellers are typically **resellers** (arbitrage): one key, but exits on unrelated ASNs (AEZA Paris, PLAY2GO Helsinki). That explains both why they are cheap and why they cannot fix IP reputation — they rent someone else's subnets. Practical consequence: the exit behind a node can change without notice, so re-run the geo checker before blaming our side when Gemini breaks.
 
 **Лимит устройств живёт в заголовке подписки, а не на ноде.** Панель считает `x-hwid` на эндпоинте выдачи, поэтому вытащенный конфиг этот слой просто не проходит: нода видит один UUID и устройств не считает вовсе. Зато трафик по UUID она считает точно (переплата ~0.5 %), поэтому «персональный кред или пул» — измеримый вопрос, а не предмет рассуждений про оптовиков (Usage stats §3).

@@ -4,7 +4,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 683646459f25cdbbebebf48b674e0be4d96218b4032f7ab129bf0497bcf3f613  ./hermes/agent-hooks/ssh-only-gate.py
 8de8aafe34757fdff3e165704d4803a5a054618d11243cad6401fd4cc5483159  ./hermes/bin/read-untrusted
 8b1b50900a770e4d6e47d41dd63b9814b4a335820c9d8236eb0b7dc352d6a1db  ./hermes/config.yaml
-6c7f4b76892d8daf7335953c090975f9b03b33683b14cebd26566d0a59852123  ./hermes/cron/jobs.json
+5f7ff3233749f63859e2ef725f10a4714f9d099e0209af6d6708b633bb0069d1  ./hermes/cron/jobs.json
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
 9e21be702a5c9c853afca040a01db25b37fa8b2f51e31c6cfe05ab3020db26e0  ./hermes/docs/vpn-runbook.md
 5a5381d59b0423f9ccdad1235e6b67357d65a1da0ccd474a75d2af3f9aaff144  ./hermes/memories/MEMORY.md
@@ -144,7 +144,7 @@ d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 a11cea480af1ecd7fb72bb1210d03d7ee0b71ee57e82a0b4e587da117ce8e444  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-92dc18cd713691e151d7e8760769e7b41da554b4431b5cf1d401b54a9d17d00c  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+13412dd4e4679a83a6022e1ecde3f4fc514f452a95feea8e85accf5db9bf7446  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skills/devops/vpn-entry-stack/references/admin-api.md
 97520490645fada8067d77da77b631b16d722e14b1242febdf6dcdf921f071fc  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
 a2b65c124a21a5df8a743621ef32883ecad026a2d99dbeeb1dbdfb8a01f7343f  ./hermes/skills/devops/vpn-entry-stack/references/control-plane.md
