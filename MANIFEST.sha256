@@ -18,7 +18,7 @@ f6ade3b6b9958181b5dc6dec990aa057d7b5a3d58a509c3459a428889c295472  ./hermes/profi
 9547927170b127aac36ed4d208fbc6e6149ad4cc52457a018f16471f8161297e  ./hermes/scripts/backup-verify.sh
 df39344d8dc403f096daccb5b23686b3644e65e85af53c8926aa36118bba5bd2  ./hermes/scripts/watch_ru1.py
 49a899583a852d558603d43b969fbdf788e372a70cb6ec86c73c4af08dd22049  ./hermes/skills/.bundled_manifest
-a053970d855deb4220b40e60dcc613c4c925438177b140957769804dfcef1fea  ./hermes/skills/.curator_state
+1738c38912f66e526f3de55b421ff24991b04815c1cf99608bcd779013a9737b  ./hermes/skills/.curator_state
 c9537e578d68950224dbc09a425497a780e8c3956db9cb38a97b4a9e985516b3  ./hermes/skills/apple/DESCRIPTION.md
 1ba042cb17e3aca06a68415526e926ada464bf873c8592c3326125cd72cb397f  ./hermes/skills/apple/apple-notes/SKILL.md
 ee5084f2d7ec196488bef2c74248fb3d8328d1b2e3277ddda3f0de9da6fc7131  ./hermes/skills/apple/apple-reminders/SKILL.md
