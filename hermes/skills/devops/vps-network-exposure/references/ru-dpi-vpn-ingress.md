@@ -216,7 +216,7 @@ nginx-конфиги и вызывает генератор подписок. С
   nginx-конфиги и подписки генерируй скриптом: смена домена тогда — правка одной
   строки, а не охота за захардкоженным именем по конфигам, ссылкам и подпискам.
   Рецепт, проверка форматов и отзыв токена —
-  [references/ru-dpi-vpn-ingress.md](references/ru-dpi-vpn-ingress.md).
+  [references/ru-dpi-vpn-ingress.md](ru-dpi-vpn-ingress.md).
 - **Сертификат на новый домен — это лимиты, ретрай и переключение в одном скрипте.**
   Бесплатные суффиксы (`*.qd.je`) делят один счётчик LE на всех, поэтому выпуск
   падает с `retry after <UTC>`; ждать надо до этой метки + 3–4 с, перечитывая её
@@ -226,7 +226,7 @@ nginx-конфиги и вызывает генератор подписок. С
   Сейчас один `*.esmien.ru` (DNS-01 через Cloudflare, зона у владельца) закрывает
   все хосты: новый поддомен = DNS-запись + vhost, certbot больше не нужен.
   Рецепт, токен, хук продления и ловушка с `--dry-run` —
-  [references/acme-and-cert-limits.md](references/acme-and-cert-limits.md).
+  [references/acme-and-cert-limits.md](acme-and-cert-limits.md).
 - **Диагностический пробник — временный артефакт.** Пробные vhost'ы на 8097/8098/8099
   и тестовые контейнеры на 8444 после разбора надо снимать: они остаются
   слушать мир и через месяц числятся как «а это что?». Перед удалением проверь,
@@ -234,7 +234,7 @@ nginx-конфиги и вызывает генератор подписок. С
 
 Полная процедура (3x-ui API, диагностика Docker-подключений, MTProto, тесты с
 двух внешних IP, перенос в recovery-репо) —
-[references/vpn-and-https-ingress.md](references/vpn-and-https-ingress.md).
+[references/vpn-and-https-ingress.md](vpn-and-https-ingress.md).
 
 - **Если «VPN не работает у владельца, а с мобильного работает»** — не крути
   протоколы наугад и не переключай подозрения на сервер. Разделяй переменные
@@ -244,7 +244,7 @@ nginx-конфиги и вызывает генератор подписок. С
   по IP, нужен CDN или новый адрес. Плейбук с ловушками (redirect делает пробу
   бесполезной, WARP обычно мёртв с VPS, `qd.je` не принимается Cloudflare,
   Happ-десктоп не ест ссылку — отдавай файлы) —
-  [references/ru-dpi-vpn-ingress.md](references/ru-dpi-vpn-ingress.md).
+  [references/ru-dpi-vpn-ingress.md](ru-dpi-vpn-ingress.md).
 
 
 ## vpn-router, vpn-cfg и почему 3x-ui снесён
@@ -258,7 +258,7 @@ nginx-конфиги и вызывает генератор подписок. С
 сторонах, иначе backend видит loopback.
 
 
-## Fake-TLS (mtg) и рабочий вариант: VLESS + WS + настоящий TLS
+## Fake-TLS (mtg) и рабочий вариант: VLESS + WS + настоящий TLS (перенесено из SKILL.md)
 
 - **Fake-TLS (mtg) не переживает DPI — рукопожатие режется в середине**
   (клиент отдаёт один MSS-сегмент ClientHello, ответа нет), поэтому маскировка
@@ -266,5 +266,5 @@ nginx-конфиги и вызывает генератор подписок. С
   WebSocket + настоящий TLS**, TLS снимает nginx на нестандартном порту.
   Рецепт, проверка туннеля и ловушки (публикация порта из контейнера панели,
   обязательное правило `direct` по умолчанию в xray, недоступный отсюда WARP)
-  — [references/vpn-and-https-ingress.md](references/vpn-and-https-ingress.md);
+  — [references/vpn-and-https-ingress.md](vpn-and-https-ingress.md);
   механика fake-TLS и проверка рукопожатия без телефона — `scripts/faketls-probe.py`.

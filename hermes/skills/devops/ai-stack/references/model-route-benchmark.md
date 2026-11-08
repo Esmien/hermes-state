@@ -65,8 +65,6 @@ small table, then the fix — switch the group to the clean credential, or pin t
 for agentic work. Vladislav accepts a cheap model winning: quote the 20-40x cost gap and the
 equal pass rate plainly, no hedging.
 
-## Answering the owner about models (verdict first, no probes)
-
 ## Answering the owner about models
 
 A question like «подходит ли эта модель под задачу», «какой уровень достаточен», «стоит ли брать X»

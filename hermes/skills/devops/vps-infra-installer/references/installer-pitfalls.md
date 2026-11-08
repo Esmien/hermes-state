@@ -229,7 +229,7 @@
    одной фразой, назови минимальный дифф и спроси разрешение отдельно, отделяя
    «что лежит в репозитории» от «что будет работать здесь».
 
-## Авто-коммит и пуш (механика)
+## Авто-коммит и пуш (копия логики hermes-state)
 
 Репозиторий обновляется сам по факту правки, без таймера:
 
@@ -293,6 +293,24 @@
   не создаваемый установщиком, в `CORE_TIMERS` не ставить — на чистой машине он будет падать
   с трейсбеком; его место в блоке харнесса.
 
+## Шаг `postcheck` снят (решение владельца)
+
+**Шага `postcheck` больше нет** (выпилен 2026-11-06 по решению владельца). Одноразовый
+`hermes-postcheck.timer` запускал через 15 минут после развёртывания полную сессию агента с
+`--yolo` и отправлял отчёт в тему группы. Снят потому, что дублировал шаги `verify`/`health`
+и вотчдоги, срабатывал в самый холодный момент (маршруты LiteLLM ещё не прогреты) и светил
+внутренности сервера всей группе. Проверка после установки — только `verify` + `health`;
+разбор «как прошло» владелец запрашивает в чате, и агент идёт по `REPORT.md` вручную.
+Не возвращать этот таймер без прямой просьбы.
+
+## `REPORT.md` и оговорка про `--skip-tls`
+
+`REPORT.md` в корне репо остаётся единственным источником правды по чек-листу: владелец
+передаёт его агенту фразой «проверь восстановление» (раздел 2) или «проверь бэкапы»
+(раздел 3). Поэтому в самом `REPORT.md` обязательна оговорка: прогон с `--skip-tls` не имеет
+nginx и сертификатов, такие пункты помечаются «шаг пропущен», а не «плохо» — иначе владелец
+читает дыру там, где её нет, и агент рапортует о поломке.
+
 ## Самые дорогие грабли (полные формулировки)
 
 - **Маска токена не должна вернуться в `.env`.** `save_config()` пишет в
@@ -349,12 +367,12 @@
   `apt_update()`: бинарный keyring через `gpg --dearmor`, ретраи на рассинхрон зеркала,
   чистка только своих `/var/lib/apt/lists/*pgdg*`, http вместо https при зависшем кэше
   Fastly. Диагностика и проверка в чистом контейнере —
-  [apt-and-fresh-host.md](apt-and-fresh-host.md).
+  [references/apt-and-fresh-host.md](references/apt-and-fresh-host.md).
 - **Hermes: бинарь в PATH и живой гейтвей — проверять, а не предполагать.** Установщик кладёт
   бинарь в `~/.local/bin`/`~/.hermes/...`, PATH root там пуст — линковать в `/usr/local/bin`
   (`ensure_hermes_shim()`); гейтвей поднимать только после `list-unit-files`/`pgrep`, иначе
   `systemctl --user restart` под `check=False` даёт ложное «перезапущен». Детали —
-  [installer-pitfalls.md](installer-pitfalls.md) → «Hermes после установки».
+  `references/installer-pitfalls.md` → «Hermes после установки».
 - **Проверка наличия и путь в сгенерированном скрипте должны совпадать.** `step_postcheck` проверял
   `shutil.which("hermes")` (на хосте это `/root/.local/bin/hermes`), а в тело `hermes-postcheck.sh`
   писал жёсткий `/usr/local/bin/hermes` — проверка проходила, скрипт падал на `No such file or
@@ -371,10 +389,10 @@
   экспорт-строках и в `&&`-цепочках. Проверка: исполнять фрагмент под тем же `set -Eeuo pipefail`
   и пустым окружением, а не только `bash -n` (синтаксис такой строки валиден).
 - **Креды не вписывать в URL строкой `${TOKEN}@host`.** Такая строка при записи файла
-  попадает под маскировку секретов и превращается в обрубок (`x-access-token:***
+  попадает под маскировку секретов и превращается в обрубок (`x-access-token:${GITH.../}`),
   файл остаётся синтаксически валидным для `bash -n`, а на чистой машине падает
   `bad substitution` при клоне. Авторизация — заголовком:
-  `git -c http.extraheader="Authorization: Basic *** '%s' "x-access-token:*** | base64 -w0)"`;
+  `git -c http.extraheader="Authorization: Basic $(printf '%s' "x-access-token:$TOKEN" | base64 -w0)"`;
   проверять не `bash -n`, а исполнением фрагмента с подставным токеном.
 - **Вопрос про Hermes не должен зависеть от флага `--hermes`.** Условие «спрашивать, только если
   `args.hermes is None`» означало, что `bootstrap.sh`, который всегда передаёт `--hermes`, проходил
@@ -436,14 +454,16 @@
   только на `vps-infra`, на чужой приватный репо отвечает **404, а не 403**, и любой
   fallback на `getUpdates` даёт пустоту (Telegram не отдаёт сообщения старше 24 ч).
   Причины и разбор всех токенов прогона —
-  [restore-drill.md](restore-drill.md) и
-  [installer-pitfalls.md](installer-pitfalls.md).
+  [references/restore-drill.md](references/restore-drill.md) и
+  [references/installer-pitfalls.md](references/installer-pitfalls.md).
 
 Полный список (бинарно-безопасный `write_file`, `ai/.env` и `WEBUI_URL`,
 пропуск `pg_dump` < 1 ч, `--only fetch` без `--infra-dir` и `GITHUB_KEY`,
 `inotifywait` на каталоге, числа проверенного drill, перезапись набора ключей
-в `ai/.env`) — [installer-pitfalls.md](installer-pitfalls.md).
+в `ai/.env`) — [references/installer-pitfalls.md](references/installer-pitfalls.md).
 Читай его перед запуском на живом сервере, изменением синхронизации или
 восстановлением.
 
-
+Устройство живого блока прогресса и способ проверить его отрисовку без экрана —
+[references/installer-output-pane.md](references/installer-output-pane.md) + `scripts/pty-screen-dump.py`.
+Пакеты, apt-ключи и зонды на чистой машине — [references/apt-and-fresh-host.md](references/apt-and-fresh-host.md).

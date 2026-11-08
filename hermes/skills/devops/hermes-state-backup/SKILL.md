@@ -2,7 +2,7 @@
 name: hermes-state-backup
 description: Use when restoring or auditing Hermes' own state backup.
 version: 1.0.0
-author: Hermes VPS Agent
+author: VPS Admin
 license: MIT
 metadata:
   hermes:

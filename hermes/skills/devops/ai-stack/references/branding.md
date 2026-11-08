@@ -13,3 +13,6 @@
 - **Legibility finding for this brand (measured, not guessed):** the crystal dies below ~32 px — at 22 px it is a blob. Of the tested candidates only thick orthogonal geometry survives 20 px (geometric monogram «E» first, hexagon-bracket second); 3-D chrome renders and 25-element «molecule in hexagon» art lose everything, since strokes of 0.5–1 % of the mark become 0.15–0.2 px. Judge designs at the real target size, never from a 500 px export.
 - **Screenshot recipe** (`~/.hermes/cache/scratch/shot/`): `playwright-core` + `npx playwright-core install chromium`, then a 3-line launch script (`--no-sandbox`). The headless shell needs 9 host libs — `libxcomposite1 libxdamage1 libxfixes3 libxrandr2 libasound2t64 libatk1.0-0t64 libatk-bridge2.0-0t64 libatspi2.0-0t64 libgbm1` (installed 2026-10-22). Login: admin **email** from `webui_db."user"` + `OWUI_ADMIN_PASSWORD` from the approver env
 
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/branding.md` — **Branding (Esmien AI)**. Read when brand assets, image/logo, screenshots.

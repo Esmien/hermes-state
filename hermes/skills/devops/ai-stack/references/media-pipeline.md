@@ -25,3 +25,6 @@ Current shape: `image_generation.engine=openai` + `image_generation.model=img.op
 - **Treat `image_generation.enable` and observed traffic as separate facts.** The config flag can read `false` while `/v1/images/generations` answers `200`; find which switch actually governs before "fixing" the flag, and say so.
 - **`edge-tts` (openai-edge-tts) is not a working fallback and is not part of lyria.** It is referenced by nothing (no OWUI config, no bot env), its upstream `wss://speech.platform.bing.com` has answered `403 Invalid response status`, and its API key is the image default `your_api_key_here`. Before counting any container as redundancy, exercise it with a real `/v1/audio/speech` call.
 
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/media-pipeline.md` — **Media pipeline (images / TTS through LiteLLM)**. Read when image generation, TTS, `cptr`, model routing for media.

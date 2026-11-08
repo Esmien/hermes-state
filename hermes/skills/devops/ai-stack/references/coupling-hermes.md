@@ -64,3 +64,6 @@
 - **Inside LiteLLM the same upstream needs the Responses bridge**: deployment `model: openai/responses/<model-id>` (the documented per-model prefix) or `model_info.mode: responses`; a plain `openai/<model-id>` deployment dies with the protocol error. Existing groups `opencode/muse-spark-1.3-contributor` and `hermes.opencode/muse-spark-1.3-contributor` have **no** `x-opencode-session` → `400 MissingSessionID`, and LiteLLM answers «No fallback was attempted» because a BadRequest is not retried across `order` deployments. Two deployments in a group is not evidence the group works — probe it.
 - Probe both wires before wiring anything: same model, same key, `/chat/completions` and `/responses`; the protocol a provider supports decides whether the route must be `openai/responses/…` (LiteLLM) or `api_mode: codex_responses` (Hermes).
 
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/coupling-hermes.md` — **Hermes ↔ AI stack coupling**. Read when any change touching Hermes config, LiteLLM groups/fallback, the gateway or the emergency route.

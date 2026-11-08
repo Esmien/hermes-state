@@ -45,7 +45,7 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host. Owner: user `ai_
 
 | Container | Image | Role |
 |---|---|---|
-| litellm | ghcr.io/berriai/litellm:**v1.106.6** (pinned; `main-latest` is a rolling dev tag — see below) | LLM gateway/proxy |
+| litellm | ghcr.io/berriai/litellm:**v1.106.6** (pinned; `main-latest` is a rolling dev tag — why pinning, and how to bump: `references/updates.md`) | LLM gateway/proxy |
 | litellm-redis | redis:7-alpine, `--requirepass` from `${LITELLM_REDIS_PASSWORD}`, `--maxmemory 256mb --maxmemory-policy noeviction`, no published port | LiteLLM state store (auth cache, rate-limit/token counters, router cooldowns) |
 | open-webui | esmien/webui:local (built locally from `ai/webui-branding/`, derived from OWUI 0.13.0) | chat UI, rebranded «Esmien AI» |
 | searxng | searxng/searxng:latest | web search |
@@ -113,25 +113,27 @@ A question like «подходит ли эта модель под задачу�
 
 ## References (read on demand)
 
-- `references/coupling-hermes.md` — **Hermes ↔ AI stack coupling**. Read when any change touching Hermes config, LiteLLM groups/fallback, the gateway or the emergency route.
+- `references/coupling-hermes.md` — **Hermes ↔ AI stack coupling** (Hermes config, LiteLLM groups/fallback, emergency route).
 - `references/pitfalls.md` — **Pitfalls (AI stack)**. Read when something behaves in a way the docs do not explain.
-- `references/disk-and-memory.md` — **Memory, disk headroom and DB growth**. Read when disk fills up, RAM climbs, dumps/logs/images grow; open-terminal heap floor.
-- `references/backups-notifications.md` — **Backups and notifications**. Read when backups, restore, timers, Telegram notifications.
+- `references/disk-and-memory.md` — **Memory, disk headroom, DB growth** (disk full, RAM climb, open-terminal heap floor).
+- `references/backups-notifications.md` — **Backups, restore, timers, Telegram notifications**.
 - `references/litellm-model-db.md` — **Модели/группы в `litellm_db`**. Read when a model flaps, a group returns 400 from one deployment, or a DB edit (extra_headers, aliases) has to be applied and verified.
 - `references/litellm-admin-auth.md` — **LiteLLM: ownership в `litellm_db`** (ключи/spend/мемберства, «Created By = Unknown», вес и кэш админки). Auth-путь — в skill `credential-login-verification`.
 - `references/ui-latency.md` — **«Медленно грузится»: латентность UI/API** (per-URI `rt`, два штатных виновника, кэш nginx, профиль длинного чата).
-- `references/model-provenance.md` — **Model provenance and cleanup in Open WebUI**. Read when ghost models, dead/disabled presets, model ids that 400 or vanish.
-- `references/media-pipeline.md` — **Media pipeline (images / TTS through LiteLLM)**. Read when image generation, TTS, `cptr`, model routing for media.
+- `references/model-provenance.md` — **Model provenance / cleanup in Open WebUI** (ghost models, dead presets).
+- `references/media-pipeline.md` — **Media pipeline (images / TTS through LiteLLM)**.
+- `references/enricher-system.md` — **System-промпт модели `enricher`** (актуальный). Read before touching it.
+- `references/enricher-system-legacy.md` — **Старый system-промпт `enricher`** (откат на claude-haiku-5.5).
 - `references/music-bot-lyria.md` — **Music bot (lyria)**. Read when the separate lyria deployment (its own Postgres/Redis/RabbitMQ).
 - `references/chatgpt-subscription.md` — **ChatGPT/Codex subscription as a LiteLLM route** (`chatgpt/*` models in WebUI).
-- `references/updates.md` — **Updating stack containers**. Read when upgrading one container, rolling tags, LiteLLM upgrade.
-- `references/branding.md` — **Branding (Esmien AI)**. Read when brand assets, image/logo, screenshots.
+- `references/updates.md` — **Updating stack containers** (one container, rolling tags, LiteLLM).
+- `references/branding.md` — **Branding (Esmien AI)** (assets, image/logo, screenshots).
 - `references/signup-approval.md` — **Signup approval, user administration, WebUI auth hardening** (Turnstile, fail2ban, лимиты, MFA, admin keys).
-- `references/searxng.md` — **SearXNG (web search backend)**. Read when web search returns junk, engines get banned, or the image is upgraded.
+- `references/searxng.md` — **SearXNG (web search backend)**: junk results, banned engines, image upgrade.
 - `references/cloudflare-proxy.md` — **Cloudflare in front of one of our names** (прокси, WAF, лимиты на всех сразу, ложный down, h3/Alt-Svc).
 - `references/web-search-architecture.md` — **Web search end to end: OWUI `external` contract, shim plan, Hermes's role**. Read when the owner wants search better than SearXNG, or search/answer quality comes up.
-- `references/memory-troubleshooting.md` — **Container memory attribution**. Read when asked "what is eating the RAM" — numbers before causes.
-- `references/upstream-release-review.md` — **Reviewing an upstream release**. Read before applying any version bump; never update unprompted.
+- `references/memory-troubleshooting.md` — **Container memory attribution** («what is eating the RAM»).
+- `references/upstream-release-review.md` — **Reviewing an upstream release**; never update unprompted.
 - `references/kb-sync.md` — **git → база знаний Open WebUI**: `kb-sync.py`, таймер раз в 2 часа, `sync/diff`.
 - `references/operations.md` — **Operations drills** (recreating a container after a config edit, routine checks).
 - `references/repo-hygiene.md` — **Git hygiene for `ai-stack`** (what must never be committed, commit shape).
@@ -145,4 +147,5 @@ A question like «подходит ли эта модель под задачу�
 - `scripts/lyria-enricher-pipe.py` — **исходник OWUI-Pipe `lyria_enricher`** (songwriter + critic + санитайзер, выключен).
 - `scripts/check-notification-bots.py` — **Telegram notification health** (each token via `getMe`; `file_id` registry). Run first when a message never arrived.
 - `scripts/lyria-e2e.py` — **E2E прогон музыкального бота по всем юзер-стори** («проверь бота / прогони сценарии»).
+- `scripts/` также: `audit-dead-models.py`, `check-env-parity.sh`, `compact-webui-images.py`, `model-route-bench.py`, `probe-approval-guardian.py`, `probe-media-endpoints.py`.
 - `scripts/music-bot-tests.sh` — **тесты music_bot в изоляции** (свои pg/redis/rabbitmq, CI-паритет: ruff + alembic + pytest). Никогда не на хосте.

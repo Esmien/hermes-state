@@ -249,6 +249,8 @@ mirror image: restore the gate first, then the record.
 
 The public names are moving from the `esmien.qd.je` zone (free DNS whose authoritatives fail — see `vpn-entry-stack` for the triage) to the owned **`esmien.ru`** zone on Cloudflare. Both sets are served in parallel until the owner moves the family, so an old and a new name point at the same backend:
 
+The name → backend map itself is short and lives in SKILL.md, section «Domains → backend»; this file holds the why and the procedures.
+
 ## Vhost rules: grey/orange, app redirect, reload truth, adding a name
 
 **Оранжевого облака в зоне больше нет: `ai` переведён в серый по указанию владельца** — CF отдавал

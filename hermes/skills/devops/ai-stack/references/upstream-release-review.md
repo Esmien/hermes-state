@@ -127,3 +127,7 @@ A review that only lists nice-to-haves without saying "your workarounds remain" 
 ## 4. Apply (only after the user says yes)
 
 See the "Updating one container" section in SKILL.md for the backup → pull → recreate → verify sequence and its two generic traps (foreground guard on `up -d`; benign `audio/voices` 404 in the boot-log grep), plus its **"Updating LiteLLM"** subsection for the three LiteLLM-specific checks (probe the tag's version before pulling, pin a stable tag instead of rolling `main-latest` when the tag ships a dev build, verify with a real completion through the gateway). When the user says "update it if it's safe", report what the update would actually install and choose the newest **stable** release — an unreleased dev build is not "safe" and pinning it or rolling onto it is a decision the user did not ask for.
+
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/upstream-release-review.md` — **Reviewing an upstream release**. Read before applying any version bump; never update unprompted.

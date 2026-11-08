@@ -46,8 +46,6 @@ See `references/operations.md` for status/logs/restart/backup commands, and `ref
 
 ## Facts that get misquoted in summaries
 
-## Facts that get misquoted in summaries
-
 - `GET /model/info` returns **80 entries (aliases) over 43 unique upstream models** — say «80 записей/
   алиасов», never «80 маршрутов»: half of the entries point at the same deployment.
 - **`edge-tts` is an orphan container.** It runs on `stack-net` with no published port, is not in the compose

@@ -34,6 +34,10 @@ The same drift bites automations. Any bot that signs in with a password from `.e
      `user_email` + scrypt password; `disable_env_credential_login: true` removes the env path,
      `disable_password_login_when_sso_enabled` removes both. Вызовы и флаги —
      [references/litellm-admin-ui-auth.md](references/litellm-admin-ui-auth.md).
+
+   **Before advising the owner to disable the env login path**, prove a working DB
+   `proxy_admin` row first (he sets the password via the invite link, never in chat), then the
+   flag, then verify by effect — not by re-reading the config.
 2. **Find the endpoint the UI actually uses — do not guess.** Grep the service log for real traffic:
    ```bash
    docker logs litellm --since 30m 2>&1 | grep -E 'POST /(v[0-9]+/)?login'
@@ -87,6 +91,7 @@ The same drift bites automations. Any bot that signs in with a password from `.e
   ответе, диффе или переписанном файле; одной строкой скажи, что делать: сменить пароль в
   UI и отозвать всё, что пришло вместе с ним, назвав зависимых клиентов. Разбор —
   [references/login-failure-triage.md](references/login-failure-triage.md).
+
 
 
 Полный разбор остальных ловушек — семантика `400`/`401`/`403` и CSRF, дрейф автоматизаций,

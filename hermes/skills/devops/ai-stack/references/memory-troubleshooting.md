@@ -111,3 +111,7 @@ ps -eo pid,rss,cmd | grep -iE 'litellm|prisma'          # includes the Prisma ch
 - **The litellm image has no `curl` and no bare `python`** — only `/app/.venv/bin/python`. So probe the proxy from the host against `127.0.0.1:4000`, or run the venv interpreter with `urllib` inside the container.
 - **`py-spy` on the HOST can attach to the container's Python** (the pid is visible in the host pid namespace): `pip install py-spy` then `py-spy dump --pid <host pid>`. Read it for thread inventory, not for heap: thread names `ThreadPoolExecutor-0_N`, `litellm-logging_N`, `prisma-engine-waitpid-N`, `AnyIO worker thread` with **ever-increasing indices** mean threads are being recreated rather than reused; a stable set of 9–17 threads means the thread count is not your leak (compare against `/proc/<pid>/status` `Threads:`).
 - **`docker exec litellm cat /app/config.yaml` shows the mounted config only** — if it has no `model_list`, model routing lives in the DB; say so instead of "the config has no models, something is broken".
+
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/memory-troubleshooting.md` — **Container memory attribution**. Read when asked "what is eating the RAM" — numbers before causes.

@@ -78,3 +78,6 @@ Order of operations:
 
 When the user says «удали мёртвые», delete only the ones that fail the probe — a disabled-but-working model is a config choice, not garbage. Report counts (dead removed / alive kept), the backup path, and the surviving disabled entries.
 
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/model-provenance.md` — **Model provenance and cleanup in Open WebUI**. Read when ghost models, dead/disabled presets, model ids that 400 or vanish.

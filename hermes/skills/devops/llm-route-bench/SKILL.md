@@ -178,7 +178,7 @@ harness: `scripts/code_bench.py`.
 - `scripts/ab_bench.py` — probe + 8 deterministic tasks + price lookup from `/model/info`.
   Reads `LITELLM_MASTER_KEY` from `/home/ai_service/ai-stack/ai/.env`, never prints it.
 - `references/code-gen-bench.md` — model-name resolution in the gateway, harness design,
-  the six-task ladder, grading gotchas, cross-review protocol, baseline results.
+  the task ladder (easy + hard tier), grading gotchas, cross-review protocol, baseline results.
 - `references/route-fingerprinting.md` — как отличить подмену модели и вырезанные
   рассуждения по `usage.prompt_tokens` и полям ответа, с порядками величин по семействам.
 - `references/gateway-route-traps.md` — `opencode/*` (заголовок сессии, chat→responses бридж,

@@ -96,3 +96,7 @@ Procedure: `docker tag searxng/searxng:latest searxng/searxng:rollback-<version>
 `searxng-quality.timer` (every 30 min) → `/usr/local/bin/searxng-quality-check.py`: two real searches — `google cse` with a dev query (≥5 results) and an unfiltered general search (≥10 results from ≥2 engines). Alert to Telegram after 2 consecutive failures (~1 h), re-alert at most every 6 h, plus a recovery message. State `/var/lib/searxng-quality/state.json`, log `/var/log/searxng-quality.log`, thresholds via `SQ_MIN_CSE` / `SQ_MIN_TOTAL` / `SQ_MIN_ENGINES` / `SQ_FAILS` / `SQ_REALERT`. Drill an outage with `SQ_URL=http://127.0.0.1:4999/search SQ_STATE=/tmp/sq.json … --test` (fake dead endpoint, real Telegram send) — do not test by stopping the real container.
 
 Container healthcheck, `docker-incident-detector` and the LiteLLM watchdog all stay green while every engine is dead; this timer is the only signal that the *search result* still exists.
+
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/searxng.md` — **SearXNG (web search backend)**. Read when web search returns junk, engines get banned, or the image is upgraded.

@@ -44,8 +44,6 @@ Before/after evidence for any rollout: 10–15 real queries scored on «page ope
 
 The owner-facing plan — work items, trust-zone rules, acceptance criteria — lives in the harness: `~/.hermes/tasks/docs/web-search-plan.md` (board task #3). This reference holds the facts; that doc holds the plan. When the design changes, update both, and re-run `/usr/local/bin/hermes-state-backup.sh` so the repo copy matches the host.
 
-## Answering the owner about web search (moved from SKILL.md)
-
 ## Answering the owner about web search
 
 OWUI's built-in `searxng` path keeps only SERP `title/link/snippet` — it never opens the results, so

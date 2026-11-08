@@ -1,6 +1,9 @@
 ---
 name: vpn-entry-stack
 description: Use when editing or deploying the VPN entry stack.
+version: 1.0.0
+author: VPS Admin
+license: MIT
 ---
 
 # VPN entry stack (VLESS over WebSocket + TLS)
@@ -94,7 +97,8 @@ Full symptom list and fixes: `references/scenario-routes.md`.
 
 When the RU scenario must stop depending on reseller relays, a small owned Russian VPS with a
 VLESS+Reality inbound wired in as outbound `ru1` is the shape: provisioning, firewall allowlist,
-IP-reputation acceptance test and rollback in `references/owned-ru-exit.md`.
+IP-reputation acceptance test and rollback in `references/owned-ru-exit.md`; what to check on the
+box before wiring it, and the exit-node pitfalls — `references/ru-exit-node.md`.
 
 ## Subscription
 

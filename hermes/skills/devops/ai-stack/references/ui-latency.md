@@ -203,8 +203,6 @@ env, конфиги, косметика образа (брендинг пров�
 60`, `proxy_read_timeout`/`proxy_send_timeout` 600 s. Лимиты на `/v1/models` и логин не трогать —
 там сидят сканеры.
 
-## Answering the owner «почему медленно» (moved from SKILL.md)
-
 ## Answering the owner «почему медленно»
 
 Жалоба на скорость — это измерение, а не гипотезы: `rt` по URI из лога nginx (у `llm.esmien.ru`

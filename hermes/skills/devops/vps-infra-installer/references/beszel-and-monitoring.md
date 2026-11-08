@@ -67,3 +67,21 @@ Hub+agent в Docker, `/home/ai_service/beszel`, вместе ~20 МБ RAM. Hub �
   `systemctl list-timers certbot`.
 - DNS доменов → IP нового сервера нужно переключить **до** шага `tls`, иначе
   certbot пропустит домен и оставит HTTP-vhost (это не ошибка установщика).
+
+## Текущая конфигурация Beszel, внешнего контура и TLS
+
+- **Beszel** (шаг `beszel`): hub+agent в Docker, `/home/ai_service/beszel`,
+  hub только на `127.0.0.1:8090` (наружу — через `mon.` vhost), связка через
+  unix-сокет `beszel_socket/beszel.sock`, вместе ~20 МБ RAM. Без UI
+  настраивается целиком через PocketBase API; `KEY` — публичный ключ хаба,
+  `TOKEN` — UUID из `fingerprints` (без него агент вечно ловит 401), alerts
+  (Status/CPU/Memory/Disk) создаются только вручную. Команды и грабли —
+  [references/beszel-and-monitoring.md](references/beszel-and-monitoring.md).
+- **Внешний контур**: `.github/workflows/uptime.yml` (cron `*/10`, curl `ai.` и
+  `llm.`, 3 попытки → Telegram), дрилл через `workflow_dispatch` с
+  `extra_url=https://httpbin.org/status/500` (сообщение с префиксом `[ТЕСТ]`).
+  GitHub гасит `schedule` в публичном репо после 60 дней без активности —
+  поэтому `uptime-heartbeat.timer` раз в месяц дописывает
+  `maintainer/uptime-heartbeat.txt`. Второй контур healthchecks.io:
+  `deadman-ping.sh` + таймер, ping-URL в `/etc/deadman-ping.url`.
+- **TLS:** один wildcard `*.esmien.ru` (плюс apex), выпущенный через **DNS-01 Cloudflare** (`esmien-wildcard`, токен `/root/.secrets/cf.ini` 0600, плагин `certbot-dns-cloudflare`, хук продления перезагружает nginx). Новый поддомен = DNS-запись + vhost, certbot больше не запускается, квота Let's Encrypt больше не упирается. Старая зона `qd.je` **выведена из эксплуатации**: её DNS-провайдер перестал отвечать, vhost'ы и сертификаты удалены — не возвращай их в `legacy_hosts` и не чини их certbot'ом. Упор в квоту был нормой для неё, самописные ретрай-таймеры не ставить (решение владельца): выпуском занимается только `certbot.timer`.

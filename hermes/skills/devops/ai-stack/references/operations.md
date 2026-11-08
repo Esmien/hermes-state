@@ -182,9 +182,7 @@ reads it as «всё отвалилось сразу после твоей пр�
 - `LiteLLM_SpendLogs` is the arbiter: `status<>'success'` rows with `coalesce(model,'')<>''` are real
   model failures; empty-model rows are unauthenticated `/v1/models` scanner noise.
 
-## Accessing the stack UI from outside — SSH tunnel only (moved from SKILL.md)
-
-## Смотреть UI снаружи — только через SSH-туннель
+## Смотреть UI снаружи — только через SSH-туннель (tunnel setup moved from SKILL.md)
 
 `open-webui` (8080) и `litellm` (4000) публикуются на `127.0.0.1`, поэтому с чужой машины
 (и на прогоне без TLS, где nginx вообще не ставится) браузер видит их так:

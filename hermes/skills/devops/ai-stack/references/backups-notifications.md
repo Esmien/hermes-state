@@ -98,8 +98,6 @@
 
 **Two different bots carry the Telegram notifications, and neither implies the other works.** Hermes sends its own messages with `TELEGRAM_BOT_TOKEN` from `/root/.hermes/.env` (`@esmien_vps_admin_bot`); `monitor.py` uses `BOT_TOKEN` / `FILE_BOT_TOKEN` from `/home/ai_service/notifications/.env` (`@esmien_vps_notificator_bot`, `@esmien_ai_backups_bot`). "Уведомления приходят" therefore proves only the Hermes bot. Verify each token on its own with `getMe` (username only, never print the value) before telling the owner a bot is dead — and after editing `notifications/.env`, restart every unit that reads it: the token is copied into the process memory at start, so a service restarted before the edit keeps polling 404 until the next restart (`journalctl -u server-monitor-bot` shows `getUpdates HTTP 404` every 5 s).
 
-## Answering «сервер защищён / отказоустойчив / бэкапы / восстановлю за 30 минут»
-
 ## Answering the owner «сервер защищён / отказоустойчив / бэкапы / восстановлю за 30 минут»
 
 A yes/no posture question wants a verdict, evidence per claim, and a short list of what is actually
@@ -121,3 +119,7 @@ Two hard rules from this stack:
 ## Scripts / index entry (moved from SKILL.md)
 
 - `scripts/check-notification-bots.py` — **Telegram notification health** (each bot token via `getMe`, usernames only; plus the `file_id` restore registry with part sizes and age). Run first when the owner says a message never arrived.
+
+## When to read this file (annotated index entry, moved from SKILL.md)
+
+- `references/backups-notifications.md` — **Backups and notifications**. Read when backups, restore, timers, Telegram notifications.

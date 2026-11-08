@@ -108,6 +108,6 @@ Also: the sandbox sits on `stack-net` like every other service, so a shell insid
 
 - `references/sandbox-terminal.md` — **Песочница `open-terminal-sandbox` для пользователей WebUI** (не-root, read-only, arduino-cli; подключение через `terminal_server.connections` + access_grants; привязка модели через `meta.terminalId`; ловушки `cap_setgid`, root-овский `.arduino15` и heredoc). Готовый системный промпт MCU-ассистента: `templates/mcu-assistant-system-prompt.md`.
 
-## Scripts / index entry (moved from SKILL.md)
+## `scripts/probe-owui-terminal.py` (index entry, moved from SKILL.md)
 
 - `scripts/probe-owui-terminal.py` — **end-to-end terminal probe** (admin login → feature flags → real `run_command` → `/execute` evidence in open-terminal logs, cleans up its chat). Run after any Open WebUI update.
