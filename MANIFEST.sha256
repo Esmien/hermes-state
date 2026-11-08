@@ -6,7 +6,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 8b1b50900a770e4d6e47d41dd63b9814b4a335820c9d8236eb0b7dc352d6a1db  ./hermes/config.yaml
 2b526ecf0cc4d8d7f47a2fcf5e59e1cfb210f82a406a95bdad5431bd921ff338  ./hermes/cron/jobs.json
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
-b16a5bc39a143f491a79129864b6a68420c40f5353cb512bbceec4aafd89e769  ./hermes/docs/vpn-runbook.md
+9e21be702a5c9c853afca040a01db25b37fa8b2f51e31c6cfe05ab3020db26e0  ./hermes/docs/vpn-runbook.md
 5a5381d59b0423f9ccdad1235e6b67357d65a1da0ccd474a75d2af3f9aaff144  ./hermes/memories/MEMORY.md
 62ec8c3f548a39240384bfc7c1067ed3cef4f368c4b04602544620528b0d1e85  ./hermes/memories/USER.md
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
