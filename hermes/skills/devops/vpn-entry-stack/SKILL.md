@@ -204,6 +204,8 @@ no-clients inbound and the implicit `api` outbound, and `probe_direct()` must sk
 fresh colour reports `24/25` and the flip is refused). Full procedure, query command, email shapes and the
 dashboard design the owner approved: `references/usage-stats.md`. Dashboard internals — collector, static page, subscription-generator API, delete/reissue, htpasswd and the screenshot loop: `references/stats-dashboard.md`.
 
+«Мой кред персональный или это пул?» — отдельный замер, не рассуждение: инжект известного объёма через выход и дельта `subscription-userinfo` (±0.5 % — один, кратно больше — соседи), принадлежность тега плану тем же способом, ночной профиль — `scripts/night_watch.py`. Рецепт: `references/usage-stats.md` §3.
+
 ## Applying changes without downtime (blue/green)
 
 `vpn-cfg apply` never restarts the container that carries traffic. Two xray containers run side by side: `vpn-router` mounts `config.json` (the canonical file, always the **A** port block) and `vpn-router-b` mounts `config.b.json`, derived from it with every inbound port `+1000` (10081… → 11081…). `/root/vpn-router/vpn-color` holds the active color, and `apply_brand.py` adds the offset when rendering nginx upstreams — so a flip is `nginx -t` + graceful `reload`, nothing more.
@@ -303,6 +305,10 @@ An exit lifted from someone's paid plan is a shared credential, not a free tunne
 A subscription bought **for the server alone** removes the duplicate-client signature (one key, one IP, exactly what the plan expects) and cuts the ban risk a lot, but not to zero: the provider still sees a datacenter origin, and transit/resale is usually forbidden in the terms. Keep a dedicated subscription off the phone and treat it as a layer under an owned VPS, not a replacement.
 
 These sellers are typically **resellers** (arbitrage): one key, but exits on unrelated ASNs (AEZA Paris, PLAY2GO Helsinki). That explains both why they are cheap and why they cannot fix IP reputation — they rent someone else's subnets. Practical consequence: the exit behind a node can change without notice, so re-run the geo checker before blaming our side when Gemini breaks.
+
+**Лимит устройств живёт в заголовке подписки, а не на ноде.** Панель считает `x-hwid` на эндпоинте выдачи, поэтому вытащенный конфиг этот слой просто не проходит: нода видит один UUID и устройств не считает вовсе. Зато трафик по UUID она считает точно (переплата ~0.5 %), поэтому «персональный кред или пул» — измеримый вопрос, а не предмет рассуждений про оптовиков (Usage stats §3).
+
+**Плата за план покупает не доступ, а стабильность креда.** Отзыв приходит и в подписку, и на ноды одним событием: `/france`, `/fi` и весь пул `/p<i>` умирают вместе, а `sub_expiry.py` предупреждает лишь за 3/2/1 день. Экономить здесь не на чем — бесплатный тариф называется «до следующего крона».
 
 ### Turning a plan into a pool
 

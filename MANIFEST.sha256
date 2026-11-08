@@ -144,7 +144,7 @@ d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 a11cea480af1ecd7fb72bb1210d03d7ee0b71ee57e82a0b4e587da117ce8e444  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-ccc4ee1077f116016f6e382983d589938e6f0ea4bbadb55c5d12d83821f54c42  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+92dc18cd713691e151d7e8760769e7b41da554b4431b5cf1d401b54a9d17d00c  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skills/devops/vpn-entry-stack/references/admin-api.md
 97520490645fada8067d77da77b631b16d722e14b1242febdf6dcdf921f071fc  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
 a2b65c124a21a5df8a743621ef32883ecad026a2d99dbeeb1dbdfb8a01f7343f  ./hermes/skills/devops/vpn-entry-stack/references/control-plane.md
@@ -159,10 +159,11 @@ e99a1e1c8ce2ba2e73d038b8652963380bc52e35b99e2d48645dec83843f566a  ./hermes/skill
 e9b7ca2133ba9eb280b0d0c08478e2dce35a39ea262a20e8f16c2a4ea396ad18  ./hermes/skills/devops/vpn-entry-stack/references/scenario-routes.md
 ec35279cc4d2555185979240669ca140d494d78dd0d9d2d940806f40ea4281fb  ./hermes/skills/devops/vpn-entry-stack/references/stats-dashboard.md
 4526685d0a8b869f5ed1fa3a400988703f3c12dd450e50856603c6b0ca2e5577  ./hermes/skills/devops/vpn-entry-stack/references/subscription-shapes.md
-e7106da27e8b428e2be52ec04b43bcf0c42761c78728e635fb43893e26f097e3  ./hermes/skills/devops/vpn-entry-stack/references/usage-stats.md
+b3c29be83de84e7e46dc4cf31d4d3ee881937e01cd436ccc9acea0b3b3eeb119  ./hermes/skills/devops/vpn-entry-stack/references/usage-stats.md
 97721e654258560d01bb1ced479ff6a8efe89b2990f13b0108e701c6818394dc  ./hermes/skills/devops/vpn-entry-stack/references/xui-panel.md
 fda24a0d23effbb247cc1d437b7a57fa3a6b7b45861f65dd6d0da3d3b43ff328  ./hermes/skills/devops/vpn-entry-stack/scripts/gemini_geo_check.py
 91bec41e081a34323bf3347aedcabbcfabb0cfc30345524cf004962188089a9f  ./hermes/skills/devops/vpn-entry-stack/scripts/inject.py
+0ae2ae3a6d963514d08cad2741fa9e462d6d7fd807a86d99f93a67670c0c6d64  ./hermes/skills/devops/vpn-entry-stack/scripts/night_watch.py
 de3ee4cdeff0604ff300c1daf2b159f51b3a900ac3b9982d40d9a0a375082980  ./hermes/skills/devops/vpn-entry-stack/scripts/pool_probe.py
 fe82d1a33902d887eca8a46dcc787385c04c79b332ce6134b47d4eb9d443c166  ./hermes/skills/devops/vpn-entry-stack/scripts/probe-exit-speed.py
 f5cf760b862da18ca4eb5f86f3a6bdecb4e1c9c8d02bb5406b082ecf6c7242c3  ./hermes/skills/devops/vpn-entry-stack/scripts/probe_sub.py
