@@ -29,3 +29,5 @@ Consequences to state in one line, not a paragraph: whoever still used that key 
 ## Owner's own profile — protected, reissue-only
 
 The owner's row is not deletable. In `subgen_api.py` keep a `PROTECTED = {"Владислав"}` set: `POST api/del` answers **403** («только перевыпуск») for those names, and `POST api/reissue` exists instead. Reissue is `users.py rm <name>` followed by `users.py add <name>` — `cmd_add` refuses an existing name, so there is no single command that rotates uuid + tokens in place; two applies in a row are fine and take ~10–40 s. The response carries the fresh `page`/`sub`/`lte` links, and the UI prints them in the same block the generator uses, because the owner needs the new URL immediately (his old link is dead from that moment).
+
+When the question becomes "should all of this live in one service instead of these scripts", see `references/control-plane.md`.

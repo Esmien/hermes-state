@@ -27,6 +27,22 @@ This is not the same class as a chat answer. Chat: short, verdict first, bullets
 - **Plain language over jargon.** Explain a term on first use or drop it. «Копия вне сервера» beats «offsite replication target».
 - **His conscious choices are not defects.** One server, no fallbacks, no key limits, monitoring off — state them as boundaries, never in a list of shortcomings.
 
+## Explaining a plan in chat (not a document)
+
+«Реализуемо?», «норм план или хуйня?», «что думаешь, если я…» — this is a chat answer, and it has its own failure mode: answering in the architecture's own vocabulary. «Да заебал, пиши нормально, половину не понял» is the signal that the terms did the talking instead of the thing.
+
+- **Name the thing, not the layer.** Not «data plane / control plane / рендер / apply / инбаунд», but «туннель — он гоняет трафик», «программа собирает файлы», «применение конфига», «входы». If a term would need a parenthetical, replace the term instead.
+- **One idea per sentence.** A sentence with three commas, a dash and a bracket is two sentences that were never split.
+- **Shape that landed:** что делаем → чего она не делает → где опасное место → сколько времени → что получишь. No nested caveats inside the verdict.
+- **Verdict on its own line**, then the explanation — he decides from the first line whether to read the rest.
+- After he accepts a re-tell, do not drift back into jargon in the next message.
+
+## Writing a spec (ТЗ) for him
+
+- **A spec describes a class of deployments; an inventory describes this stand.** A document that opens with «24 инбаунда, 9 узлов LTE, такой-то домен» and builds its design on those numbers is rejected — «не детерминировано, зависит от нашей конфигурации» — and correctly: it does not survive the next config change. Variable parts (число входов, домен, форма выдачи, набор маршрутов) go into the model and config; today's numbers go into a separate «текущее состояние» section used only as the migration checklist.
+- **Test before shipping:** would the document still be right on a box with ten inbounds and another domain, with no code change? If not, it is an inventory — say so in the title or fix it.
+- **The risky step goes last**, in its own section, with the check that proves it: config application gets a lock, a probe of the new variant and a no-flip rule on failure.
+
 ## Audience
 
 Ask or decide from the request, and say which one you wrote:
