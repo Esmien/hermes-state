@@ -20,3 +20,7 @@ file: tasks/docs/web-search-plan.md
 ## #4 MCP-развязка медиа-генераций: музыка, картинки, видео из чата
 status: todo
 file: tasks/docs/media-mcp-plan.md
+
+## #5 VPN-сервис одним бэкендом: Docker + SQLite, вся логика в одном репо
+status: todo
+file: tasks/docs/vpn-service-rewrite.md
