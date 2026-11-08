@@ -12,12 +12,12 @@ TG: 214062001 = Владислав (владелец); 917728475 = Игорь �
 §
 Задачи владельца: доска /root/.hermes/tasks/backlog.md, бот @esmien_agent_todo_bot, дайджест Mon 08:30 МСК (systemd hermes-task-digest.timer). Протокол — скилл owner-task-digest: любое изменение статуса сразу событием в TG.
 §
-Мультиагентный концепт: /root/vps-infra/docs/multiagent-tiers.md — только по указанию.
-§
 Браузер: lightpanda (JS, без скринов) + Chromium /root/.hermes/tools/chromium-1208/chrome-linux64/chrome (скрины); browser-тулсет в telegram.
 §
-ai.esmien.ru за CF-прокси (SSL strict). realip не работает (stream proxy_protocol + CF): реальный IP = map $client_ip в /etc/nginx/conf.d/01-cf-client-ip.conf, лимиты/логи зонят по нему. CF-токен /root/.secrets/cf.ini зонный — Bot Fight Mode и Turnstile только через дашборд.
+ai.esmien.ru за CF-прокси (SSL strict): realip не работает, реальный IP — map $client_ip в /etc/nginx/conf.d/01-cf-client-ip.conf, лимиты/логи по нему. CF-токен /root/.secrets/cf.ini зонный.
 §
 Принятые риски владельца (НЕ считать недостатками): root-терминал с docker.sock (осознанно, вход только по 256-бит паролю), одна VM без кластера (бюджет, миграция ~1ч, RTO ≤1 сут), целевая атака исключена (приватный сервис), без лимитов на ключи и без алертов. Детали — скилл vps-posture-assessment.
 §
 Мои разборы/предложения — /root/.hermes/docs/ (в репо hermes-state как hermes/docs/). В vps-infra черновики не класть: auto-sync коммитит и пушит всё подряд.
+§
+Инфра-конвенция: nginx ВСЕГДА системный, в докере никогда; xray — системный бинарь; в докере только наш сервис (network_mode host, без docker.sock).
