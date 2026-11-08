@@ -50,6 +50,13 @@ plus an inbound `{"tag":"api-in","listen":"127.0.0.1","port":10185,"protocol":"d
 "outboundTag":"api"}` **at index 0** — ahead of the `geoip:private → blocked` rule, or the api's own
 loopback traffic gets blocked and the query hangs. Loopback only, never published.
 
+**Any builder that rewrites `routing.rules` must keep that rule first.** `scenario_routes.py install`
+collected every `inboundTag` rule into the tail, so the api rule slid down to index 4 — behind
+`geoip:private → blocked` — and the symptom looked nothing like routing: the dashboard banner read
+`последний опрос не удался: failed to dial 127.0.0.1:11185`, `ss` showed that port listening, and the
+*idle* colour still answered on 10185 because it had started on the previous config. Match `api-in`
+before any ip/domain block, and after a flip check the **active** colour's port, not the other one.
+
 `vpn-bluegreen.py` must learn three things in the same pass, or `apply` refuses the flip (correctly, but
 it looks like a broken config):
 
