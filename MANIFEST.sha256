@@ -138,7 +138,8 @@ d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 a11cea480af1ecd7fb72bb1210d03d7ee0b71ee57e82a0b4e587da117ce8e444  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-919a8589d89ac59f49b1f87fc2cd56401e4a247234ec95ada48609af304f4c65  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+02e52c30c6337d8a2413a545678c8cdaef0e021eeefe6d4e21b065246770c571  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skills/devops/vpn-entry-stack/references/admin-api.md
 97520490645fada8067d77da77b631b16d722e14b1242febdf6dcdf921f071fc  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
 2613241c69f0e223b4451a227cb77b0680b8d52c50285aeb48fc7240afefb88f  ./hermes/skills/devops/vpn-entry-stack/references/desktop-mihomo-tun.md
 4d3f6b023d09ef6d7c6e536e9ca4b53bfdcc2d6f7156fe89e761b2c5da924241  ./hermes/skills/devops/vpn-entry-stack/references/domain-and-tls.md
@@ -149,7 +150,7 @@ b3e01208b42620cdf4c4126c8769dffe221fed325ee679ed50065a9e27167782  ./hermes/skill
 625480e5e31a642015e3490a1c33f91f7304d13906717789077d25939170888e  ./hermes/skills/devops/vpn-entry-stack/references/router-ops.md
 7854f9c7041a2bb113131ecc17d8827861ec7ba00a71217f226ca09c955889a1  ./hermes/skills/devops/vpn-entry-stack/references/ru-exit-node.md
 d535a49c2ce6d15a4669c05e917403e6c281792cb7046cb881c4fa90845009c1  ./hermes/skills/devops/vpn-entry-stack/references/scenario-routes.md
-c69a6a868f065af74942a59debd4e3ece58f70ab082f161fe7aa351f0c493a42  ./hermes/skills/devops/vpn-entry-stack/references/stats-dashboard.md
+69833c56d67cb3c870d2b700b807e691930d20499897a61634eec9d1be4d7d0f  ./hermes/skills/devops/vpn-entry-stack/references/stats-dashboard.md
 7d67135b592d31b15bacc1463baef84938b62de3cea2b5772f1c2b001abf9d5a  ./hermes/skills/devops/vpn-entry-stack/references/subscription-shapes.md
 5fa6ac663a73889f39a727ae8c321b7f4b681b8df00f8b7223b0e851e5bf7c46  ./hermes/skills/devops/vpn-entry-stack/references/usage-stats.md
 97721e654258560d01bb1ced479ff6a8efe89b2990f13b0108e701c6818394dc  ./hermes/skills/devops/vpn-entry-stack/references/xui-panel.md
