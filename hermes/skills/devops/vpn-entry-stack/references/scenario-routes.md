@@ -27,7 +27,9 @@ ban risk.
 A `bal-google` over `["fr","fi"]` picked **Finland** over France in practice — leastPing ranks by
 probe latency, not by preference. When a scenario has a primary and a reserve, keep **one** tag in
 the selector and let the watchdog promote the reserve; the balancer is then just a named slot.
-RU keeps all three relays (all equivalent) so leastPing genuinely spreads.
+RU keeps every relay that passed the **purpose probes** below (сейчас `p15` + `p17`), so leastPing
+spreads across nodes that actually serve the sites the owner uses. «All equivalent» is an assumption,
+not a fact: probe before widening the selector.
 
 ## Health checks decide the route, so build them for the node's country
 
@@ -53,8 +55,11 @@ the route is broken by its own monitoring.
   every change died after exactly 300 s with a traceback, and nothing was ever applied. The tell in
   the journal is `применяю …` followed 300 s later by `TimeoutExpired`.
 - A group that mixes an owned node with reseller relays flaps forever, because the relays are the
-  unstable part. Keep the RU scenario on the owned node with `direct` as `fallbackTag`; relays go
-  back in only on an explicit request.
+  unstable part. Prefer the owned node with `direct` as `fallbackTag`; relays go back in only on an
+  explicit request. Exception that already happened: when the owned box is **silent** (TCP to its
+  port dead, provider gateway still answering — see `owned-ru-exit.md`), the RU group lives on the
+  verified relays until it returns, and putting `ru1` back is the owner's call, not an automatic
+  restore.
 - When relays do carry `.ru`, pick the tags by **purpose probes**, not by country label: on one pool
   `p16` (СПб) answered `tbank`/`avito`/`ozon` normally but `gosuslugi` with a steady `000`, so it was
   dropped and the selector became `p15` (Москва) + `p17` (Новосиб). Probe the sites the owner actually
