@@ -341,8 +341,11 @@ When a machine must be tunnelled with nothing open and no GNOME VPN profile (tha
 
 ## Routing is a moving target — a watchdog rewrites it every minute
 
-The owner's model: **`fr` and `fi` exist only for Gemini.** RU traffic belongs on `ru1` (his own RU
-VPS), everything else on the Estonian `direct` exit. `/ws` catch-all still points at `fr` — that is his
+The owner's model: **`fr` and `fi` exist only for Gemini.** RU traffic belongs on the **subscription RU
+nodes (`p15` Moscow, `p17` Novosibirsk; `p16` excluded — Gosuslugi times out)**, everything else on the
+Estonian `direct` exit. The owned `ru1` box (`217.197.114.197`) was **dropped from the rotation by the
+owner** («он объективно дерьмо»): outbound deleted, `bal-ru = [p15, p17]`, observatory `[fi, fr, p15, p17]`.
+Re-adding it means rebuilding the outbound from `references/owned-ru-exit.md`, not just a selector edit. `/ws` catch-all still points at `fr` — that is his
 own profile by design, not drift.
 
 `vpn-scenarios.timer` runs `scenario_fallback.py` **every 60 s** (`OnUnitActiveSec=60s`,
@@ -395,11 +398,12 @@ own profile by design, not drift.
 3. **The complaining client** — `ping -c5 <his ip>` (0 % loss / 41 ms here rules out the path) plus the
    plus the request gaps in the nginx log.
 
-   **The owned RU box is the ceiling for everything `.ru`.** `ru1` (217.197.114.197) sits on a hard **100
-   Mbit/s** port: 88–90 Mbit/s down and 81–95 up in one stream, 115 Mbit/s over four streams, 43 ms RTT to
-   Tallinn, and 70–87 Mbit/s end-to-end through the tunnel. So the honest answer to «какой у нас канал» is
-   two numbers: гигабиты on the Estonian host, сотка in Moscow — and the WebUI rides `ru1` whenever the
-   client rule sends `.ru` there, so its ceiling is the 100 Mbit box, not the host. Measuring through the
+   **The `.ru` ceiling is now whatever the subscription RU nodes give, not the owned box.** `ru1`
+   (217.197.114.197) was a hard **100 Mbit/s** port (88–90 down / 81–95 up in one stream, 43 ms RTT to
+   Tallinn) and it is **no longer in the rotation** — the owner dropped it. Today's `.ru` path is `p15`
+   (Moscow) / `p17` (Novosibirsk) over shared reseller capacity, so the honest answer to «какой у нас канал»
+   is: гигабиты on the Estonian host, and `.ru` depends on the reseller's load — measure it, do not inherit
+   the old 100 Mbit figure. Measuring through the
    tunnel needs the outbound copied verbatim into a socks-only client (never printed); single-stream numbers
    there also hide a ~1/3 connection-failure rate, so run a burst before calling an exit healthy.
 
