@@ -344,9 +344,11 @@ When a machine must be tunnelled with nothing open and no GNOME VPN profile (tha
 
 ## Routing is a moving target — a watchdog rewrites it every minute
 
-The owner's model: **`fr` and `fi` exist only for Gemini.** RU traffic belongs on the **subscription RU
-nodes (`p15` Moscow, `p17` Novosibirsk; `p16` excluded — Gosuslugi times out)**, everything else on the
-Estonian `direct` exit. The owned `ru1` box (`217.197.114.197`) was **dropped from the rotation by the
+The owner's model — and he is **strict** about it: **`fr` and `fi` carry Google/Gemini only; `p15`/`p17` carry `.ru`
+and nothing else; EVERYTHING else goes to the Estonian `direct` exit.** A `catch-all → fr` rule is therefore
+forbidden, including for `/ws` (an old «мой профиль целиком через Францию» leftover — the owner caught it and
+called it out). Rule order that satisfies him: api → private/bittorrent blocks → Google domains → RU domains →
+Google IP ranges → **catch-all `direct`**. The owned `ru1` box (`217.197.114.197`) was **dropped from the rotation by the
 owner** («он объективно дерьмо»): outbound deleted, `bal-ru = [p15, p17]`, observatory `[fi, fr, p15, p17]`.
 Re-adding it means rebuilding the outbound from `references/owned-ru-exit.md`, not just a selector edit. `/ws` catch-all still points at `fr` — that is his
 own profile by design, not drift.
