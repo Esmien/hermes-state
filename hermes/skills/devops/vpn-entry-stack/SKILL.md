@@ -348,7 +348,9 @@ The owner's model — and he is **strict** about it: **`fr` and `fi` carry Googl
 and nothing else; EVERYTHING else goes to the Estonian `direct` exit.** A `catch-all → fr` rule is therefore
 forbidden, including for `/ws` (an old «мой профиль целиком через Францию» leftover — the owner caught it and
 called it out). Rule order that satisfies him: api → private/bittorrent blocks → Google domains → RU domains →
-Google IP ranges → **catch-all `direct`**. The owned `ru1` box (`217.197.114.197`) was **dropped from the rotation by the
+Google IP ranges → **catch-all `direct`**. **Keep the `protocol: bittorrent → blocked` rule**: the owner confirmed
+it stays deliberately — a shared rented IP plus torrent DHT leaks mean abuse tickets and a possible null-route,
+and he prefers to carry no external problems. Removing it needs his explicit word. The owned `ru1` box (`217.197.114.197`) was **dropped from the rotation by the
 owner** («он объективно дерьмо»): outbound deleted, `bal-ru = [p15, p17]`, observatory `[fi, fr, p15, p17]`.
 Re-adding it means rebuilding the outbound from `references/owned-ru-exit.md`, not just a selector edit. `/ws` catch-all still points at `fr` — that is his
 own profile by design, not drift.
