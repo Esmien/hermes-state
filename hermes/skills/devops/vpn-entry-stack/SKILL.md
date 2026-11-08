@@ -31,19 +31,22 @@ client -> nginx TLS (8443 primary, 2087 backup) -> xray container `vpn-router` (
         -> outbound "fr" (external exit) | "direct" (this server)
 ```
 
-Paths (same nginx server blocks):
+Paths (same nginx server blocks). **Only `/ws` and `/general` exist today** — the owner had every other entry
+pruned («нам от подписки нужны только маршруты до Gemini и до ру-сервисов»):
 
 - `/ws` — owner's profile, everything goes through the external FR exit.
-- `/general` — Estonia (direct exit), normal traffic.
-- `/france` — France (external exit), needed for Google/Gemini.
-- `/test` — spare inbound for experiments, routed independently (`inboundTag in-test`).
-- `/fi` — second exit that passes Gemini: `hels.sream-rutube.shop` → `193.233.136.5` (Helsinki, PLAY2GO), Google reports `fi`. Manual switch next to `/france`; no automatic failover.
+- `/general` — Estonia (direct exit), normal traffic; every published subscription points here.
+- `/france`, `/test`, `/fi` — **removed** (were unused; Gemini is reached by the `bal-google` rule from
+  `/general`, not by a separate entry). Re-adding one means inbound + nginx location + rule, in that order.
 
 There is deliberately **no** RU-entry inbound: an earlier `/lte` route (`1.fan-video.study` → Selectel SPb → Helsinki, Google saw it as `ru`) was removed once it was clear the whitelist first hop has to be dialled by the client itself, never by this server. Whitelist entries ship as direct client links only — see Whitelist mode.
 
 3x-ui is **not** part of the stack: container, volume, `/panel/` route, credentials file, panel vhost, its rate-limit zone and fail2ban jail were all removed. It managed two idle inbounds and could not express "this entry -> that exit", which is the whole point of the routing, so it was one public admin surface for nothing. `references/xui-panel.md` keeps only the CSRF/login knowledge in case a UI is ever reintroduced — do not bring a panel back off your own initiative.
 
-Upstreams: 10081 `/ws`, 10082 `/general`, 10083 `/france`, 10084 `/test`, 10086 `/fi`, 10100+i for the relayed `/p<i>` nodes — all bound to 127.0.0.1. Check the real ports with `vpn-cfg status` instead of trusting a number from a report.
+Upstreams: 10081 `/ws`, 10082 `/general`; 10185 is the stats API. The 22 relayed `/p<i>` inbounds and the
+`in-france`/`in-test`/`in-fi` entries were **deleted** along with their passthrough outbounds — the
+subscription now serves only as exits (`fr`, `fi` for Gemini; `p15`, `p17` for `.ru`). Check the real ports
+with `vpn-cfg status` instead of trusting a number from a report.
 
 Adding a route means four coordinated edits, in this order: append an inbound (`tag`, 127.0.0.1, next free port, same client id, `wsSettings.path`) to `config.json`, add the outbound and a routing rule keyed on `inboundTag` **before** the catch-all `tcp,udp → fr` rule, add `paths` + `upstreams` entries to `brand.json`, then `apply_brand.py && nginx -t && systemctl reload nginx && vpn-cfg apply` (not a bare `docker restart` — `apply` proves the routes answer and reverts a broken config). Verify by dialling the new path through the tunnel and checking the egress with ipinfo — not by reading the config back.
 
