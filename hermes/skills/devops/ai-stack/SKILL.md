@@ -62,7 +62,7 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host. Owner: user `ai_
 
 ## Domains → backend
 
-Both zones run in parallel until the owner moves the family, so old and new names point at one backend (`esmien.qd.je` = free DNS with failing authoritatives, see `vpn-entry-stack`; `esmien.ru` = owned, on Cloudflare):
+Both zones run in parallel until the owner moves the family, so old and new names point at one backend (`esmien.qd.je` = free DNS with failing authoritatives, see `vpn-entry-stack`; `esmien.ru` = owned, on Cloudflare). **Read the actual state off disk before trusting this:** on 2026-11-09 `grep -rl qd.je /etc/nginx/{sites-enabled,conf.d}` returned nothing and `deploy.sh` targeted `.ru` only, i.e. the `qd.je` half was already dead there:
 
 ```
 ai.esmien.ru    -> 127.0.0.1:8080  (open-webui — единственный вход) | ai.esmien.qd.je
@@ -80,7 +80,7 @@ vpn.esmien.ru:8443 (VPN entry)                    | vpn.esmien.qd.je:8443
 
 ## Cross-cutting rules and the expensive traps
 
-- **Git is the record:** `sudo -u ai_service env HOME=/home/ai_service git -C /home/ai_service/ai-stack …`; `ai/.env`, `backups/`, `backup-deploy/`, `*.bak*`, logs ignored on purpose; `ai/.env.example` holds the key names with `CHANGE_ME`. `runbook.md` is tracked and owner-facing — update it when a recovery procedure changes.
+- **Git is the record:** `sudo -u ai_service env HOME=/home/ai_service git -C /home/ai_service/ai-stack …` (**no remote** — branch `master` is local-only, so nothing gets pushed and `git commit -a` sweeps unrelated working-tree edits into your commit: stage files by name); `ai/.env`, `backups/`, `backup-deploy/`, `*.bak*`, logs ignored on purpose; `ai/.env.example` holds the key names with `CHANGE_ME`. `runbook.md` is tracked and owner-facing — update it when a recovery procedure changes.
 - **DB restore applies `backups/postgres/<db>_*.dump` — but the dumps are `.dump.enc`**, so an unchanged mask silently finds nothing and the deploy continues on an empty database.
 - **UI from a foreign machine = SSH tunnel only** (`-L 8080:127.0.0.1:8080 -L 4000:127.0.0.1:4000`) → [references/operations.md](references/operations.md).
 - **Docker events miss "Up+healthy, traffic dead"**: `litellm-watchdog.py` + `litellm-watchdog.{service,timer}` (60 s, alerts via Bot API) covers it → [references/backups-notifications.md](references/backups-notifications.md).

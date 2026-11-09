@@ -102,6 +102,8 @@ default, the binding lives on the model row in `webui_db`:
 
 Everyone shares `/workspace` and sees each other's files, and an interactive session is not per-user. Check the blast radius before planning anything: `access_grants` on the connection, read from `select value from config where key='terminal_server.connections'` — `principal_id: "*"` means **every account** on the instance has the sandbox, not just a couple of people. Narrowing `"*"` to the users who actually need it is the cheapest risk reduction available and touches no image.
 
+**The shared sandbox belongs to Игорь, not the owner** (`4848481@gmail.com`, uuid `5760a2b9-fd5f-4d59-96d4-d595f18fb578`, role `user`, created 2026-10-29); the owner's decision is that its `access_grants` become Игорь-only. Its `/workspace` is ~6.7 GB: keep `.arduino15` (~6.3 GB, the toolchain) and `Arduino/` (~49 MB, libraries) plus `~/.local` pip installs; purge the ~350 MB of builds (`school_bell_hybrid_build`, `bell_review_build`, `bell_timer_check`), `.tmp`, `bench*`, sketches, `*.py` drafts, logs, and the duplicate 384 MB `.arduino15` under `/home/user` in the home volume.
+
 ## Per-user separation: what upstream offers, and the owner's gate
 
 `open-terminal` has a native multi-user mode (`OPEN_TERMINAL_MULTI_USER=true`); Open WebUI sends `X-User-Id` on every terminal request (`routers/terminals.py`, `utils/terminals.py`), so the server maps each id to its own Linux account: `useradd -m`, home `/home/<sanitized-id>` at mode `2770`, command and file I/O through `sudo -u`. Files and cwd become per-user, cross-user reads get `Permission denied`.
@@ -109,6 +111,15 @@ Everyone shares `/workspace` and sees each other's files, and an interactive ses
 **The owner rejected it — do not propose it as the fix.** It requires the container to run as `user: 0:0` (provisioning needs privilege inside), so every sandbox user sits behind a root process; upstream's own CAUTION says it is not a security boundary and that a determined user reaches root, and one bad prompt can exhaust the shared 2 GB / 1 CPU for everybody. "Люди, которые случайно могут неправильным запросом положить сервер" is the owner's exact objection. Separation for non-owner users therefore means **one container per user** (own volume, hardening intact: non-root, `cap_drop: ALL`, `read_only`, no docker.sock), or per group when trust is shared; a bad prompt then burns only its own container.
 
 Costs, so the plan is concrete: each idle container ~30 MiB live (the current sandbox reports 30 MiB) against `mem_limit`/`cpus` which are ceilings, not reservations; image layers are shared on disk (one 6 GiB copy regardless of container count); per-user arduino cores come from **hardlinks inside one filesystem**, not `cp -a` copies, or 11 users pay 384 MB each.
+
+### Approved design and decisions (owner, 2026-11-09)
+
+Deployed shape: a template compose + `state.json` (0600, never in git) + a host provisioner on a 60 s systemd timer; the connection is added through the admin API only after the container is `healthy`, with a grant on that one user and `chat_uploads: filesystem`; when the account disappears the connection and container go, the files stay **3 days** and are then removed. Role `pending` gets nothing — provisioning happens only after the account is accepted.
+
+- **1.5 GB RAM + 1 CPU per container** (owner: 11 shares over 4 cores is fair-share, no need to throttle rarely-used users).
+- **Swap must be enabled per container:** `memswap_limit: 2g` on top of a 1.5 GB limit. With `memswap_limit == mem_limit` docker gives the container no swap at all, so the owner's "swap absorbs a 4-user peak" only works after this change. Host swap is 4 GB with ~1 GB already used, `swappiness 10` — a peak buffer, not a guarantee for all 11 (11 × 0.5 GB of container swap > the ~3 GB free).
+- **Disk: LRU cap of 2 GB per user**, accounting excludes the shared toolchain, eviction by `mtime` (`relatime` makes atime useless), TG warning at 1.8 GB and a report of what was removed. Never wipe silently.
+- **Shared toolchain is a read-only bind mount**, not `cp -al` into each workspace: one host directory with packages/binaries/cores mounted at `/opt/toolchain` plus `PATH`/`PYTHONPATH`. Hardlinks only where a writable copy is unavoidable (`ARDUINO_DIRECTORIES_DATA`). Owner's "service container as the system core" idea survives in this form; copies drift in version, a mount cannot.
 
 ### Verified probe for multi-user mode (throwaway container, never the live sandbox)
 
