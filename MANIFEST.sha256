@@ -5,7 +5,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 8de8aafe34757fdff3e165704d4803a5a054618d11243cad6401fd4cc5483159  ./hermes/bin/read-untrusted
 8b1b50900a770e4d6e47d41dd63b9814b4a335820c9d8236eb0b7dc352d6a1db  ./hermes/config.yaml
 a3964a8c1fdbba1b52fd2f993a53a2e1980e5fc9ebf216a9882166e0b298d65a  ./hermes/cron/jobs.json
-835944ef94718ad1fb018fcf141e1c24ba42284144f19f57d424f0c4ffd20277  ./hermes/docs/proposals/sandbox-per-user.md
+6624bae8326a2b7845ffeb7b1f88c78d6724d3e49c6317697054717bd4472c19  ./hermes/docs/proposals/sandbox-per-user.md
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
 9e21be702a5c9c853afca040a01db25b37fa8b2f51e31c6cfe05ab3020db26e0  ./hermes/docs/vpn-runbook.md
 5a5381d59b0423f9ccdad1235e6b67357d65a1da0ccd474a75d2af3f9aaff144  ./hermes/memories/MEMORY.md
@@ -68,7 +68,7 @@ f7b5bb43e8ca9ad5a5181677d0ea74656f6ed4e15b1d431ec877c6017f3a2611  ./hermes/skill
 1ea50fe11e32a4dc16e2f99de0ba87a29006f05b6449611445fb600fae664887  ./hermes/skills/career/job-application-review/references/resume-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-77df6150366687fcacdde88e4fc6e72b4511cd87c4dd98889107db494515773b  ./hermes/skills/devops/ai-stack/SKILL.md
+ba74869776906d3c658a4d43770c4bd40fc5ddb902f7c1c993cae0e47568d82f  ./hermes/skills/devops/ai-stack/SKILL.md
 35f011180b4ddc06606d1bf45df577e34baf6cb7a0aeff203c055d46eed7afbe  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
 d4d2d38f0c3fe3ff53ff7de02ca914cd07b05c1f8700813a0c3fa242b323ed89  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md

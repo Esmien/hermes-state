@@ -80,6 +80,7 @@ vpn.esmien.ru:8443 (VPN entry)                    | vpn.esmien.qd.je:8443
 
 ## Cross-cutting rules and the expensive traps
 
+- **Never put `/dev/null` as a destination** in a symlink/`install`/`ln -sfn` one-liner while cleaning up: it silently unlinks the device node host-wide (every service writing to `null` fails). Restore is `rm -f /dev/null && mknod -m 666 /dev/null c 1 3`; verify with `ls -l /dev/null` → `crw-rw-rw- 1 root root 1, 3`.
 - **Git is the record:** `sudo -u ai_service env HOME=/home/ai_service git -C /home/ai_service/ai-stack …` (**no remote** — branch `master` is local-only, so nothing gets pushed and `git commit -a` sweeps unrelated working-tree edits into your commit: stage files by name); `ai/.env`, `backups/`, `backup-deploy/`, `*.bak*`, logs ignored on purpose; `ai/.env.example` holds the key names with `CHANGE_ME`. `runbook.md` is tracked and owner-facing — update it when a recovery procedure changes.
 - **DB restore applies `backups/postgres/<db>_*.dump` — but the dumps are `.dump.enc`**, so an unchanged mask silently finds nothing and the deploy continues on an empty database.
 - **UI from a foreign machine = SSH tunnel only** (`-L 8080:127.0.0.1:8080 -L 4000:127.0.0.1:4000`) → [references/operations.md](references/operations.md).
