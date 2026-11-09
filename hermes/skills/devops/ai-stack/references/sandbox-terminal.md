@@ -2,6 +2,39 @@
 
 > **LEGACY (2026-11-09).** Общая песочница `open-terminal-sandbox` удалена по указанию владельца: контейнер, образ `esmien/open-terminal-arduino:local`, тома `ai_ot_sandbox_*`, каталог `sandbox_files`, утилита `sandbox-inbox`, блок в compose, исходники `ai/arduino-sandbox/`, соединение в WebUI и ключ в `.env`. Схема заменена на «контейнер на пользователя». Файл оставлен как история решений и грабель (cap_setgid, `.arduino15`, hardlink EXDEV, TMPDIR/noexec) — не восстанавливать по нему ту схему.
 
+## Текущая схема: песочница на пользователя
+
+| Что | Где |
+|---|---|
+| шаблон контейнера | `ai-stack/ai/sandbox-users/template.compose.yml` (в `vps-infra/assets/stack/…` через auto-sync) |
+| provisioner | `/usr/local/bin/sandbox-provisioner.py` + `sandbox-provisioner.{service,timer}` (раз в минуту) |
+| состояние и ключи | `/home/ai_service/sandbox-users/state.json` (0600, в git не идёт) |
+| рабочие каталоги | `/home/ai_service/sandbox/users/<slug>` (uid 1000, 0700) |
+| контейнеры | `ot-u-<slug>`, compose-проект `sb-<slug>` |
+| соединения | по одному на пользователя в `terminal_server.connections`, грант только ему, `chat_uploads: filesystem` |
+
+Лимиты по умолчанию: 1.5 ГБ памяти + 0.5 ГБ свопа (`memswap_limit 2g`), 1 CPU, 256 процессов, `read_only`, `cap_drop ALL` + `SETGID`, не-root `1000:1000`. Квота каталога 2 ГБ (LRU по mtime), исключены `~/.local`, `~/bin`, `~/venv`, `~/.arduino15`, `~/Arduino`. Файлы удалённого пользователя живут 3 дня.
+
+Операции:
+
+```bash
+/usr/local/bin/sandbox-provisioner.py --dry-run        # что скрипт собирается сделать
+/usr/local/bin/sandbox-provisioner.py --only <email>    # один пользователь
+journalctl -u sandbox-provisioner.service -n 30 --no-pager
+```
+
+- **Изменить лимит одному** — править его запись в `state.json` (`mem`, `memswap`, `cpus`), следующий прогон пересоздаст контейнер.
+- **Обновить образ всем** — править дайджест в шаблоне, затем `docker compose -p sb-<slug> up -d` для каждого (или дождаться прогона: `up -d` сам пересоздаст при смене образа).
+- **Проверка живой песочницы** — IP из `docker inspect ot-u-<slug>`, ключ из `state.json`, дальше `curl -H "Authorization: Bearer <key>" http://<ip>:8000/files/cwd` (ожидается `/workspace`).
+- **Добавить системный пакет всем** — только через пересборку образа; внутрь контейнера root не даётся.
+
+Грабли этой схемы:
+- `sync_assets.py` для `/usr/local/bin` и `/etc/systemd/system` работает по манифесту: новый файл сам не появится в репо — его надо один раз положить в `assets/host/{bin,systemd}`.
+- `TMPDIR` из compose в окружение команд `/execute` не доходит (`echo $TMPDIR` пусто), но `HOME=/workspace` доходит; `/tmp` в контейнере — tmpfs с `noexec`.
+- `POST /execute` с `curl` работает, а сборка запроса в `urllib` без явного `method='POST'` может отдать 405 — проверять curl'ом, прежде чем искать баг в API.
+- В базовом образе `ghcr.io/open-webui/open-terminal` маршрут `/` отдаёт 404 (у старого arduino-образа отдавал флаги); флаги смотреть в `/openapi.json`.
+- `du` по каталогу пользователя занижает размер при sparse-файлах, а квота считает `st_size` — расхождение нормально.
+
 `open-terminal` (the main one) is effectively host root: `user: 0:0`, host `/` mounted at `/mnt/host`, `/var/run/docker.sock` passed through. Never grant it to anyone but the owner. The second instance, **`open-terminal-sandbox`**, exists so ordinary WebUI users get shell/file/Arduino tools without any of that.
 
 ## What the sandbox is
