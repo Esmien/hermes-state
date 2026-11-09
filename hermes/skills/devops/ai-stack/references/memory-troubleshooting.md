@@ -68,6 +68,16 @@ Fix and its constraints:
 - `OMP_NUM_THREADS=1` / `MKL_NUM_THREADS=1` cut the thread count that feeds arena creation; they also slow local CPU inference, so only use them when the heavy inference is remote.
 - Add `mem_limit` to the service at the same time: the host's guard is a swapfile, and with `Memory=0` a spike kills whichever container the kernel's `oom_score` picks.
 
+**Count before claiming a comeback.** The signature is countable per process, so «арены вернулись» is a measurement, not an opinion:
+
+```bash
+p=$(ps -eo pid,args | grep <app> | grep -v grep | awk '{print $1}' | head -1)
+echo "threads=$(ls /proc/$p/task | wc -l)"
+awk '/^[0-9a-f]+-[0-9a-f]+ /{split($1,a,"-"); sz=(strtonum("0x"a[2])-strtonum("0x"a[1]))/1048576; hdr=$0} /^Rss:/{if(hdr ~ /rw-p 00000000 00:00 0/ && sz>=63 && sz<=65) c++} END{print "arenas64MiB="c+0}' /proc/$p/smaps
+```
+
+`arenas64MiB=0` with 5–15 threads means the disease is absent right now — say that instead of predicting it. PID 1 is usually `tini`, so find the app pid by name, not by `/proc/1`. **The per-user sandbox containers (`ot-u-*`) carry the same `MALLOC_ARENA_MAX=2` / `PYTHONMALLOC=malloc` / trim+mmap thresholds as the root terminal**, and their `mem_limit` turns any real growth into an OOM of that one sandbox rather than host-wide pressure — so a wide RAM climb on the host is no longer explained by them.
+
 ## 5. Probing a container that has no `ps`
 
 Minimal (python-slim based) images have no `ps`. Walk `/proc` from the host using the container's init PID: read `/proc/<pid>/status` (`VmRSS`), `/proc/<pid>/cmdline`, and recurse through `/proc/<pid>/task/<pid>/children`. Write the walker to a scratch file and run it — building a multi-line script inline inside `docker exec sh -c '...'` through an f-string breaks on the braces/quoting.
