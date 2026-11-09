@@ -98,9 +98,34 @@ default, the binding lives on the model row in `webui_db`:
 - A ready system prompt for an MCU assistant (`/workspace`, compile-before-answer,
   edge-case pass, no fake «прошил»): `templates/mcu-assistant-system-prompt.md`.
 
-## Known limitation
+## Known limitation: one container for all granted users
 
-There is **one container for all granted users** — everyone shares `/workspace` and sees each other's files, and an interactive session is not per-user. Per-user isolation means one container per user (or per group), each with its own volume; memory cost ~ the base image's idle footprint.
+Everyone shares `/workspace` and sees each other's files, and an interactive session is not per-user. Check the blast radius before planning anything: `access_grants` on the connection, read from `select value from config where key='terminal_server.connections'` — `principal_id: "*"` means **every account** on the instance has the sandbox, not just a couple of people. Narrowing `"*"` to the users who actually need it is the cheapest risk reduction available and touches no image.
+
+## Per-user separation: what upstream offers, and the owner's gate
+
+`open-terminal` has a native multi-user mode (`OPEN_TERMINAL_MULTI_USER=true`); Open WebUI sends `X-User-Id` on every terminal request (`routers/terminals.py`, `utils/terminals.py`), so the server maps each id to its own Linux account: `useradd -m`, home `/home/<sanitized-id>` at mode `2770`, command and file I/O through `sudo -u`. Files and cwd become per-user, cross-user reads get `Permission denied`.
+
+**The owner rejected it — do not propose it as the fix.** It requires the container to run as `user: 0:0` (provisioning needs privilege inside), so every sandbox user sits behind a root process; upstream's own CAUTION says it is not a security boundary and that a determined user reaches root, and one bad prompt can exhaust the shared 2 GB / 1 CPU for everybody. "Люди, которые случайно могут неправильным запросом положить сервер" is the owner's exact objection. Separation for non-owner users therefore means **one container per user** (own volume, hardening intact: non-root, `cap_drop: ALL`, `read_only`, no docker.sock), or per group when trust is shared; a bad prompt then burns only its own container.
+
+Costs, so the plan is concrete: each idle container ~30 MiB live (the current sandbox reports 30 MiB) against `mem_limit`/`cpus` which are ceilings, not reservations; image layers are shared on disk (one 6 GiB copy regardless of container count); per-user arduino cores come from **hardlinks inside one filesystem**, not `cp -a` copies, or 11 users pay 384 MB each.
+
+### Verified probe for multi-user mode (throwaway container, never the live sandbox)
+
+```bash
+docker run -d --rm --name ot-mu-probe --user 0:0 --cap-drop ALL \
+  --cap-add CHOWN --cap-add SETUID --cap-add SETGID --cap-add FOWNER --cap-add DAC_OVERRIDE \
+  --security-opt no-new-privileges:true \
+  -e OPEN_TERMINAL_MULTI_USER=true -e OPEN_TERMINAL_API_KEY=probe -e TMPDIR=/tmp \
+  esmien/open-terminal-arduino:local
+IP=$(docker inspect ot-mu-probe --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}')
+curl -s -H 'Authorization: Bearer probe' -H 'X-User-Id: aaaa1111' http://$IP:8000/files/cwd   # {"cwd":"/home/aaaa1111",...}
+```
+
+- Exactly those five capabilities are needed: `useradd` writes `/etc/{passwd,group,shadow}` (so `read_only: true` must go), `chown` needs `CHOWN`, `sudo -u` needs `SETUID`/`SETGID`, `CAP_DAC_OVERRIDE` and `FOWNER` for the non-`-R` ownership fixes. Any smaller set fails at provisioning, not at boot.
+- `/execute` returns only an id; read the output from `/root/.local/state/open-terminal/logs/processes/*.jsonl` inside the container and match the newest file — the process-list endpoint is unreliable for retrieving output.
+- `sudo: unable to send audit message: Operation not permitted` in the output is benign noise under `no-new-privileges`, not a failure.
+- Arduino under multi-user mode: `/usr/local/bin/arduino-cli` works for a provisioned user, but `/home/user/.arduino15` is `0700 user:user` → `Permission denied`, and the compose `ARDUINO_DIRECTORIES_DATA=/workspace/.arduino15` is not writable by them. Needs a `/etc/skel` toolchain plus a per-user data dir, and a per-user `TMPDIR` (`/tmp` is `noexec`, arduino-cli cannot build there) — i.e. real image work, not one env var.
 
 Also: the sandbox sits on `stack-net` like every other service, so a shell inside it can reach `litellm:4000`, `open-webui:8080`, `postgres:5432`. Nothing is reachable without credentials, but if that matters, give the sandbox its own network and attach only `open-webui` to both (recreate `open-webui` to change its networks).
 

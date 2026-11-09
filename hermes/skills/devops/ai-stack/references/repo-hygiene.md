@@ -39,6 +39,14 @@ but say in the report that you touched ownership.
 
 Before `git add -A`, read `git status --porcelain` and check that no new filename looks like a secret or a build artifact. `.dockerignore` and `.gitignore` answer different questions — a file excluded from the image can still leak through git.
 
+## Stage explicit paths — `commit -am` swallows other people's work
+
+The working tree routinely carries uncommitted changes from earlier sessions (script rewrites, domain renames, a new service's compose). `git commit -am` or `git add -A` folds all of it into your commit under your message, which makes the history claim things you never reviewed.
+
+Rule: `git add <exact paths>` for the files this task touched, then look at `git show --stat HEAD` before moving on. If it already happened, undo instead of amending narratives: `git reset --soft HEAD~1 && git reset` (record the tree first — nothing is lost), then stage only your paths and commit again; the foreign changes return to `git status` exactly as they were.
+
+**Adopted-but-uncommitted is drift, not a draft.** A modified script that systemd actually executes (`systemctl cat <unit> | grep ExecStart` points at the working-tree file) is live behaviour; leaving it out of git means the recovery repo restores an older, less safe version. Commit it with a message that says what it now does, even when it is not your change — the standing rule is that the repo matches the live host. Verify before committing new files: read the file for inline secrets (a compose with `${TOKEN}`/`${KEY}` placeholders is fine, `.env` next to it must stay ignored) and diff a deployed copy against the tracked one (`diff -q`) before declaring them identical in the report.
+
 ## `.env` and `.env.example` parity
 
 The example is a contract, not a sample: same **key set in the same order** as the real `.env`. Verify mechanically, never by eye:
