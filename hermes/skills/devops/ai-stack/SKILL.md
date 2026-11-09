@@ -50,7 +50,7 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host. Owner: user `ai_
 | open-webui | esmien/webui:local (built locally from `ai/webui-branding/`, derived from OWUI 0.13.3) | chat UI, rebranded «Esmien AI» |
 | searxng | searxng/searxng:latest | web search |
 | open-terminal | ghcr.io/open-webui/open-terminal:latest | web terminal |
-| open-terminal-sandbox | esmien/open-terminal-arduino:local (built from `ai/arduino-sandbox/`) | не-root песочница для пользователей WebUI: shell, файлы, arduino-cli. По решению владельца превращается в **ядро с тулчейном** (грантов нет), а каждый пользователь получает свой контейнер — `references/sandbox-terminal.md` |
+| — (удалена 2026-11-09) | — | Общая песочница `open-terminal-sandbox` удалена вместе с образом, томами и `sandbox_files`; ядро с тулчейном отменено. Каждый пользователь получает свой контейнер (`template.compose.yml` + provisioner). `references/sandbox-terminal.md` — LEGACY, только история решений и грабель |
 
 > `cptr` (`ghcr.io/open-webui/computer`) was removed on the owner's instruction — container, image, data dir, compose block, `deploy.sh`, nginx vhost + cert, boot list. Nothing should reintroduce it → [references/operations.md](references/operations.md).
 > **open-terminal memory** (heap ratchets, 2g cap, nightly restart): `references/disk-and-memory.md`.

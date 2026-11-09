@@ -1,5 +1,7 @@
 # Sandboxed terminal for Open WebUI users
 
+> **LEGACY (2026-11-09).** Общая песочница `open-terminal-sandbox` удалена по указанию владельца: контейнер, образ `esmien/open-terminal-arduino:local`, тома `ai_ot_sandbox_*`, каталог `sandbox_files`, утилита `sandbox-inbox`, блок в compose, исходники `ai/arduino-sandbox/`, соединение в WebUI и ключ в `.env`. Схема заменена на «контейнер на пользователя». Файл оставлен как история решений и грабель (cap_setgid, `.arduino15`, hardlink EXDEV, TMPDIR/noexec) — не восстанавливать по нему ту схему.
+
 `open-terminal` (the main one) is effectively host root: `user: 0:0`, host `/` mounted at `/mnt/host`, `/var/run/docker.sock` passed through. Never grant it to anyone but the owner. The second instance, **`open-terminal-sandbox`**, exists so ordinary WebUI users get shell/file/Arduino tools without any of that.
 
 ## What the sandbox is
