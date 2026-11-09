@@ -48,7 +48,7 @@ Upstreams: 10081 `/ws`, 10082 `/general`; 10185 is the stats API. The 22 relayed
 subscription now serves only as exits (`fr`, `fi` for Gemini; `p15`, `p17` for `.ru`). Check the real ports
 with `vpn-cfg status` instead of trusting a number from a report.
 
-Adding a route means four coordinated edits, in this order: append an inbound (`tag`, 127.0.0.1, next free port, same client id, `wsSettings.path`) to `config.json`, add the outbound and a routing rule keyed on `inboundTag` **before** the catch-all `tcp,udp → fr` rule, add `paths` + `upstreams` entries to `brand.json`, then `apply_brand.py && nginx -t && systemctl reload nginx && vpn-cfg apply` (not a bare `docker restart` — `apply` proves the routes answer and reverts a broken config). Verify by dialling the new path through the tunnel and checking the egress with ipinfo — not by reading the config back.
+Adding a route means four coordinated edits, in this order: append an inbound (`tag`, 127.0.0.1, next free port, same client id, `wsSettings.path`) to `config.json`, add the outbound and a routing rule keyed on `inboundTag` **before** the catch-all `tcp,udp → direct` rule, add `paths` + `upstreams` entries to `brand.json`, then `apply_brand.py && nginx -t && systemctl reload nginx && vpn-cfg apply` (not a bare `docker restart` — `apply` proves the routes answer and reverts a broken config). Verify by dialling the new path through the tunnel and checking the egress with ipinfo — not by reading the config back.
 
 Files: `/root/vpn-router/{config.json,brand.json,apply_brand.py,make_sub.py,make_template.py,import_sub.py,users.py,probe_sub.py,test_whitelist.py,gemini_geo_check.py,sub_expiry.py,route_ru.py,subs.json,users.json,failover.py,certbot_retry.py,provision_vpn_host.py}`, subscriptions in `/var/www/esmien-sub/<token>/`. Editing, applying and rolling back: `vpn-cfg` (`references/router-ops.md`). Per-user/route traffic counters and «кто пользуется подписками»: `references/usage-stats.md`. When a client reports that the VPN "keeps dropping": `references/client-drop-triage.md` — probe the server end to end before touching anything, and start with DNS: an entry whose name no longer resolves looks exactly like a dead VPN (app can't ping any node, browser still works from cache).
 
@@ -162,7 +162,7 @@ must sit **above** the `.ru` line, otherwise the long-tail suffix wins and nothi
 
 ## Per-user keys
 
-Per-person access means each person gets their own UUID and own token. There is **no shared key any more**: the legacy global UUID was deleted from every inbound on the owner's order, so every human — the owner included — authenticates with a personal key. `/root/vpn-router/users.py` owns accounts: `add <name>` injects a client into **every** vless inbound (all 24 — a user's bundle ships `/p<i>` nodes too), creates `/var/www/esmien-sub/<token>/{user,title}`, re-renders all bundles and applies. `users.json` (0600, gitignored) is the source of truth; `make_sub.py` picks a token dir's key from its `user` file, so a bundle can no longer carry a key that is not its own.
+Per-person access means each person gets their own UUID and own token. There is **no shared key any more**: the legacy global UUID was deleted from every inbound on the owner's order, so every human — the owner included — authenticates with a personal key. `/root/vpn-router/users.py` owns accounts: `add <name>` injects a client into **every** vless inbound (today `/ws` and `/general` only), creates `/var/www/esmien-sub/<token>/{user,title}`, re-renders all bundles and applies. `users.json` (0600, gitignored) is the source of truth; `make_sub.py` picks a token dir's key from its `user` file, so a bundle can no longer carry a key that is not its own.
 
 Roll it out **additively**: no credential swap, no re-import for existing clients. Snapshot `/var/www/esmien-sub/*/*` with `md5sum` first, prove the legacy bundles are byte-identical afterwards, then probe each key through each route. Full procedure, verification matrix, quota/device-limit reality: `references/per-user-keys.md`.
 
@@ -218,7 +218,10 @@ dashboard design the owner approved: `references/usage-stats.md`. Dashboard inte
 Rules that make it safe:
 
 - **`xray -test` does not catch a routing rule pointing at a non-existent `outboundTag`** — it validates and then silently drops that traffic. `vpn-bluegreen.py lint()` is the gate: dangling `outboundTag`/`inboundTag`/`balancerTag`, duplicate tags, duplicate or out-of-range ports, an inbound with no clients, and any `listen` that is not loopback (that last one is the "published raw VLESS" mistake caught at apply time). Keep the lint growing instead of trusting `-test`.
-- A 24-inbound config means 24 direct probes per apply; poll, do not `sleep 6` and hope. A container that answers on 23 of 24 has a broken inbound and must never get the traffic.
+- Every inbound is one direct probe per apply (3 today, 25 before the prune); poll, do not `sleep 6` and hope. A container that answers on all but one has a broken inbound and must never get the traffic.
+- **Removing an inbound means editing the blue-green probe list in the same pass.** `vpn-bluegreen.py probe_nginx()` hard-codes the paths it expects to answer `400`; a deleted path answers `502`, `apply` reads that as «the new colour is broken», flips nginx back and prints `цвет X не отвечает` — the config is fine, the check is stale. Keep the tuple to the live entries (`/general`, `/ws`).
+- **`make_template.py` keeps hard-coded `KEEP_IN`/`KEEP_OUT` sets.** An exit that exists only in the live config but not in `KEEP_OUT` disappears from the recovery template, so a rebuild from it silently has no such route (the RU exits `p15`/`p17` were dropped this way). After any topology change update both sets, re-run the generator, and diff the template's tag lists against `vpn-cfg status`.
+- **Pruning a relayed pool is safe only after reading what the subscriptions publish.** Every token's `list.txt` and `clash.yaml` carries `path=/general`; the `/p<i>` entries existed purely as `inboundTag in-pN → pN` passthrough rules, so inbound and rule go together. Confirm with `grep -ho 'path: "[^"]*"' /var/www/esmien-sub/*/clash.yaml | sort | uniq -c` before deleting, and afterwards prove the survivors: dial `/general` through a real client and read the egress per route.
 - `docker run` for either color needs `--user 0:0`: configs are 0600 and the image runs non-root, so the container dies with `open /etc/xray/config.json: permission denied` and `restart unless-stopped` turns it into a restart loop.
 - Never edit `/etc/nginx/conf.d/vpn-*.conf` after a flip — they are generated from `brand.json` plus the color file; edit the template in `apply_brand.py` and re-run it.
 - Cost is one extra container of ~12 MB RAM; both are `restart unless-stopped`, so a host reboot brings both back and nginx follows `vpn-color`. This protects against *config work*, not against host death — that still needs a second machine.
@@ -297,7 +300,8 @@ When the owner says he does not want to keep a client window open, the shape is 
 
 ## Failover — off, deliberately
 
-The owner removed automatic failover: `vpn-failover.timer` is `disabled`/`inactive` and the default route is pinned to `fr`. Do not re-enable it without an explicit request. Rationale: a silent flip to `direct` keeps the internet alive but leaves geo-gated services refusing in a way that looks like the tunnel works ("connected, but Gemini says no"), which is harder to diagnose than a dead tunnel. With the timer off an exit outage kills `/france`, `/ws` and everything on the default route loudly; `/general` and `/test` stay on `direct` and are unaffected.
+The owner removed automatic failover: `vpn-failover.timer` is `disabled`/`inactive` and the default route is pinned to `direct`. Do not re-enable it without an explicit request. Rationale: a silent flip to `direct` keeps the internet alive but leaves geo-gated services refusing in a way that looks like the tunnel works ("connected, but Gemini says no"), which is harder to diagnose than a dead tunnel. With the timer off an exit outage now costs only the scenario it carries — Google/Gemini falls from `fr` to the
+`fi` fallback and then fails loudly, while everything on `direct` is untouched.
 
 `failover.py` and the unit files stay on disk and in the repo, unwired — re-enabling is `systemctl enable --now vpn-failover.timer`. If a probe is ever restored, keep the cadence irregular (`RandomizedDelaySec=300` on a 15-minute timer) so it does not read as a bot, and test the logic on a copy of the config, never against the live probe host.
 
@@ -352,8 +356,8 @@ Google IP ranges → **catch-all `direct`**. **Keep the `protocol: bittorrent �
 it stays deliberately — a shared rented IP plus torrent DHT leaks mean abuse tickets and a possible null-route,
 and he prefers to carry no external problems. Removing it needs his explicit word. The owned `ru1` box (`217.197.114.197`) was **dropped from the rotation by the
 owner** («он объективно дерьмо»): outbound deleted, `bal-ru = [p15, p17]`, observatory `[fi, fr, p15, p17]`.
-Re-adding it means rebuilding the outbound from `references/owned-ru-exit.md`, not just a selector edit. `/ws` catch-all still points at `fr` — that is his
-own profile by design, not drift.
+Re-adding it means rebuilding the outbound from `references/owned-ru-exit.md`, not just a selector edit. `/ws` is an entry, not an exception: its traffic walks the same rule list, so it also lands on `direct`
+unless the domain matches Google or `.ru`.
 
 `vpn-scenarios.timer` runs `scenario_fallback.py` **every 60 s** (`OnUnitActiveSec=60s`,
 `RandomizedDelaySec=30`): it probes the exits, rewrites the `bal-google` / `bal-ru` selectors in
