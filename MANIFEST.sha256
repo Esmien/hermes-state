@@ -91,7 +91,7 @@ a75500218b095f51dc380fb92091c16c5004bdf3915da193cd0ec7358d70de6f  ./hermes/skill
 5c33219e84e4b7f5d04b079bf8e1d45595cabf3bfa59c234c28801061dc84864  ./hermes/skills/devops/ai-stack/references/owui-task-models.md
 8a69bfb96ab3f785ae029f371d7492a5862c46c4f4ec66e53d9546c385fc1977  ./hermes/skills/devops/ai-stack/references/pitfalls.md
 7e6a9417891e69766d9816809ec46c8eea9273a50306f296c975f7ddc4b652c1  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
-ba86ca9b5da03e53acde3d4a0c433f69e8486b82e0e072ef1fdcce4ac9cc701f  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
+c0dbafabbe9a8515e275ca7bed98ebdab6a67d3feb85c587c5ec821c29a477d7  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
 255f0977a8801e5f17f9a6a7c3b0c207a5a5cd7f72a1b6032a6ed790b31e3f33  ./hermes/skills/devops/ai-stack/references/searxng.md
 23e8a449e6f4133e8f331862152a5ada1e7d65c4a0f67cf25d39d467db12521e  ./hermes/skills/devops/ai-stack/references/signup-approval.md
 9ed6dd0699cbc69da36a60ee6b1174f0230def598d6610d01257d7f66b8116c2  ./hermes/skills/devops/ai-stack/references/ui-latency.md
@@ -206,7 +206,7 @@ c27bb2f0f3acd71771de1e7dc2ec27311dced72cbdf3989577c6907928e52645  ./hermes/skill
 fb28a609372460b2788d3b7dbc551985d24d4042057971f4d6345144d2d78caa  ./hermes/skills/note-taking/DESCRIPTION.md
 7aea4e8f89f94ab2876d79898d10a5d4cdab31390c53f72ad6934b071179f826  ./hermes/skills/note-taking/obsidian/SKILL.md
 b5a494a45bfd430bfb3042ee0452a6b88c81481f147ce7fca2c29ed3e93c490a  ./hermes/skills/productivity/DESCRIPTION.md
-458ef4d9a2a91f9aefc5809b332c3a611cedf71633c983071ec5d6f93164f8be  ./hermes/skills/productivity/owner-facing-docs/SKILL.md
+48415fe0f0434efb8927f3f04ae334710a15751a48ce36855d8b5e754153ad12  ./hermes/skills/productivity/owner-facing-docs/SKILL.md
 1fecce926ecd9c34501819efed9bbad1f689636a10399ab8029fd815f2822842  ./hermes/skills/productivity/owner-task-digest/SKILL.md
 a7bc842330a491de5f73cd63e87521e53724d94d4f53949bfa2171beb8200e18  ./hermes/skills/research/DESCRIPTION.md
 e5f2f984b0f6fe22509e84f12877713bedfb3630f13271980b4dfb057d023a98  ./hermes/skills/research/city-relocation-report/SKILL.md

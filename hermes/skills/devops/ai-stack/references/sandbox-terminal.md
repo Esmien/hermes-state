@@ -45,7 +45,27 @@ POST заменяет весь список — только read-modify-write, 
 
 ## What users can install on their own
 
-The sandbox has full egress (`github`/`pypi`/`downloads.arduino.cc` all 200) and a real toolchain: `git`, `python3`, `pip3`, `gcc`, `g++`, `make`, `cmake`, `node`. User-space installs work without root: `arduino-cli core install/libus install`, `pip3 install --user`, `npm install --prefix ~/.local`. `apt` never works (read-only rootfs, no root) — if a task truly needs system packages, the hardening has to be loosened knowingly.
+The sandbox has full egress (`github`/`pypi`/`downloads.arduino.cc` all 200) and a real toolchain: `git`, `python3`, `pip3`, `gcc`, `g++`, `make`, `cmake`, `node`. User-space installs work without root: `arduino-cli core install/libus install`, `pip3 install --user`, `npm install --prefix ~/.local`. `apt` never works (read-only rootfs, no root).
+
+**«Поставить пакет под задачу» is not a dead end — verified in a throwaway container under the real limits (`--read-only`, `--cap-drop ALL`, uid 1000):**
+
+- `pip3 install --user requests` installs and imports (`requests 2.34.2`), as does `npm install --prefix ~/.local` and any static binary dropped into `~/bin`.
+- `apt-get download` fails (`E: Unable to locate package`) — the image ships no package lists and the lists dir is read-only. `apt-get update` cannot fix it either.
+- The working route for a system package: fetch the `.deb` straight from the pool and unpack it into the user's own tree — no root, no apt.
+  ```bash
+  U=$(curl -fsSL http://deb.debian.org/debian/pool/main/h/hello/ | grep -o 'hello_[^"]*_amd64.deb' | head -1)
+  curl -fsSL -o p.deb "http://deb.debian.org/debian/pool/main/h/hello/$U"
+  dpkg-deb -x p.deb ./pkg && ./pkg/usr/bin/hello      # Hello, world!
+  ```
+  `dpkg`, `dpkg-deb` and `curl` are in the image. Library deps then go through `LD_LIBRARY_PATH` into the extracted tree. Verified end to end with `hello 2.10-2`.
+
+Policy the owner set for this: three tiers — (1) userspace installs are the model's job, so the system prompt must carry the `pip --user` / `npm --prefix` / `dpkg-deb -x` recipes, otherwise the model flails on `apt` and reports failure; (2) changes to the shared toolchain core are admin-only, never a model's decision; (3) a request queue into the core is deferred until users actually ask for system packages.
+
+**LRU eviction must never touch installed tools.** The 2 GB per-user cap counts everything, but eviction skips `.local`, `venv` and `bin`: dropping a pip package because the files are old breaks a working setup. If those directories alone exceed the cap, alert the owner and let him decide.
+
+### Probing the image without touching the live sandbox
+
+Run a throwaway container from the same image: `docker run --rm --user 1000:1000 --read-only --entrypoint sh -v <hostdir>:/workspace --cap-drop ALL --cap-add SETGID -e HOME=/workspace -e TMPDIR=/workspace/.tmp esmien/open-terminal-arduino:local -c '…'`. Two traps: the image **entrypoint mkdirs `/workspace` and dies under `--read-only`** (`mkdir: cannot create directory '/workspace': Permission denied`), so `--entrypoint sh` is required; and a `mktemp -d` host directory is `700 root`, so `chmod 777` it first or uid 1000 cannot write and pip/tmp failures look like image bugs.
 
 Core sizes are not small: `arduino:avr` 384 MB, `esp32:esp32` 6.2 GB after install (multiple Xtensa/RISC-V toolchains). `arduino-cli cache clean` removes ~1.8 GB of staged archives. Budget disk per platform.
 
@@ -120,6 +140,9 @@ Deployed shape: a template compose + `state.json` (0600, never in git) + a host 
 - **Swap must be enabled per container:** `memswap_limit: 2g` on top of a 1.5 GB limit. With `memswap_limit == mem_limit` docker gives the container no swap at all, so the owner's "swap absorbs a 4-user peak" only works after this change. Host swap is 4 GB with ~1 GB already used, `swappiness 10` — a peak buffer, not a guarantee for all 11 (11 × 0.5 GB of container swap > the ~3 GB free).
 - **Disk: LRU cap of 2 GB per user**, accounting excludes the shared toolchain, eviction by `mtime` (`relatime` makes atime useless), TG warning at 1.8 GB and a report of what was removed. Never wipe silently.
 - **Shared toolchain is a read-only bind mount**, not `cp -al` into each workspace: one host directory with packages/binaries/cores mounted at `/opt/toolchain` plus `PATH`/`PYTHONPATH`. Hardlinks only where a writable copy is unavoidable (`ARDUINO_DIRECTORIES_DATA`). Owner's "service container as the system core" idea survives in this form; copies drift in version, a mount cannot.
+- **Keep that mount out of the user's home.** `FILE_BROWSER_ROOT=home` makes the file browser list whatever sits in the home directory, so a toolchain mounted there shows a `system` folder to every user — the owner's rule is that a user sees exactly one directory, his own. Mounting at `/opt/toolchain` also hides the junk left inside the core: the core container gets no grants, so its `/workspace` stays an archive nobody browses.
+- **The existing sandbox becomes the core as it is; Игорь gets a new empty container.** The retro-cleanup was dropped — nothing is deleted and nothing is recompiled for the toolchains, and to him it still looks like a cleanup with the functionality preserved. His old sketches stay inside the core volume, unreachable without a grant.
+- **Idle cost of staying always-on** is ~30 MiB per container, so the aggregate is trivial; the real risk is disk (a user filling `/workspace`) and the VM's shared memory ceiling, not the number of containers.
 
 ### Verified probe for multi-user mode (throwaway container, never the live sandbox)
 
