@@ -33,7 +33,11 @@ journalctl -u sandbox-provisioner.service -n 30 --no-pager
 - `TMPDIR` из compose в окружение команд `/execute` не доходит (`echo $TMPDIR` пусто), но `HOME=/workspace` доходит; `/tmp` в контейнере — tmpfs с `noexec`.
 - `POST /execute` с `curl` работает, а сборка запроса в `urllib` без явного `method='POST'` может отдать 405 — проверять curl'ом, прежде чем искать баг в API.
 - В базовом образе `ghcr.io/open-webui/open-terminal` маршрут `/` отдаёт 404 (у старого arduino-образа отдавал флаги); флаги смотреть в `/openapi.json`.
-- `du` по каталогу пользователя занижает размер при sparse-файлах, а квота считает `st_size` — расхождение нормально.
+- **Защита пакетных каталогов от LRU — только для верхнего уровня.** Условие должно быть `cur == path and entry.name in PROTECTED`; первая версия проверяла `os.path.dirname(cur) == path` и тем самым лезла внутрь `~/.local` и `~/.arduino15`, удаляя пакеты и тулчейны (снесла установку esp32 на 1 ГБ и сам `arduino-cli`). При жалобах «пропали пакеты» — смотреть `journalctl -u sandbox-provisioner` на строки про квоту.
+- **Docker compose интерполирует `$VAR` в `environment:`** — `$HOME` в системном промпте превращался в `/root` хоста. В тексте промпта писать `~/.tmp`, не `$HOME/...`.
+- Файловый браузер ищет папку пользователя так: `GET /files/cwd` → `root.path` (там `/home/user`), а содержимое — `GET /files/list?directory=/home/user` (параметр именно `directory`, не `path`).
+- Окружение команд `/execute` — белый список (`HOME`, `PATH`, `OPEN_TERMINAL_*`): `TMPDIR` и `ARDUINO_DIRECTORIES_DATA` из compose до команд не доходят. Поэтому `/tmp` (tmpfs, `noexec`) валит сборки — в промпте есть подсказка `export TMPDIR=~/.tmp`.
+- Arduino в персональной песочнице: `arduino-cli` статическим бинарём в `~/bin`, данные — в `~/.arduino15` (исключён из квоты); `core install esp32:esp32` ≈ 7.4 ГБ. Для таких юзеров порог алерта поднимается полем `protected_alert_bytes` в `state.json`.
 
 `open-terminal` (the main one) is effectively host root: `user: 0:0`, host `/` mounted at `/mnt/host`, `/var/run/docker.sock` passed through. Never grant it to anyone but the owner. The second instance, **`open-terminal-sandbox`**, exists so ordinary WebUI users get shell/file/Arduino tools without any of that.
 
