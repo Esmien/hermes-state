@@ -29,8 +29,11 @@ not vendored).
 ## Toggle: `sudo vpn on|off|status` (`/usr/local/bin/vpn`)
 
 The owner asked for exactly this shape — `on` (Estonia up) and `off` (tunnel down, FlClash free to
-run again), nothing in between. `on` stops FlClash first, refreshes the profile, starts the unit,
-waits for `esmien0`, then prints the exit IP; `off` stops the unit and reports leftovers.
+run again), nothing in between. `on` releases the mixed-port (7890) and any `FlClash*`/`Hiddify*`
+tunnel **by PID only**: the process that actually holds the port gets SIGTERM, anything else gets a
+refusal with its name and PID — never `pkill -f <word>`, which can kill an editor or installer that
+merely mentions clash. `VPN_KEEP_CLIENTS=1` disables even that. Then it refreshes the profile, starts
+the unit, waits for `esmien0`, then prints the exit IP; `off` stops the unit and reports leftovers.
 
 - **No killswitch.** It was offered and refused in plain words («я не защищаюсь, я просто хочу
   пользоваться заблокированными сервисами»): if the tunnel dies, traffic going out directly is
