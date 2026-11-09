@@ -131,6 +131,14 @@ Verify: `/health/liveliness` → 200, one real completion through the gateway, `
 
 The edited config is usually innocent — check that the added key is supported by the pinned version (e.g. `general_settings.trusted_proxy_ranges` is read by `litellm/proxy/auth/trusted_proxy_utils.py`) before rewriting YAML blind.
 
+## Commits: who owns which repo
+
+- `/home/ai_service/ai-stack` belongs to `ai_service`, so git there runs as that user:
+  `sudo -u ai_service env HOME=/home/ai_service git -c user.name=ai_service -c user.email=ai_service@localhost commit -m '…'`.
+  `/root/vps-infra` is root's — plain `git`.
+- Check `git status --short` in both before staging: `ai-stack` often carries someone else's uncommitted edits (other agents/terminals work in it), so `git add -A` sweeps them into your commit. Stage only the paths you touched.
+- `vps-infra` mirrors the live host automatically (`maintainer/sync_assets.py`, manifest-based) — mirror any host change there in the same pass, and do not drop drafts into it: auto-sync commits and pushes everything under its tree.
+
 ## TLS
 
 ```bash

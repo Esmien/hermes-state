@@ -184,9 +184,11 @@ default, the binding lives on the model row in `webui_db`:
 
 **Когда привязки к модели нет, выбор терминала — клиентский.** Фронт шлёт `terminal_id: $selectedTerminalId` в каждом запросе чата, а инициализирует его из `localStorage.selectedTerminalId` (`Md.set(features.enable_tool_servers ? localStorage.selectedTerminalId ?? null : null)`), дальше подписка пишет выбор обратно в localStorage. Сам чат `terminal_id` в БД не хранит (`select count(*) from chat where chat::jsonb ? 'terminal_id'` → 0), поэтому глобальной ручки «включить всем» нет: выбранный один раз терминал липнет к браузеру, а новый юзер или другой браузер открывает чат с выключенным терминалом — и `write_file`/`read_file` у модели отсутствуют, файлы сохранять некуда. Лечится двумя путями: привязать соединение к модели (`meta.terminalId`, штатный) или патчить фронт в `webui-branding` (по слову владельца; механика — `owui-internals.md`).
 
-## Known limitation: one container for all granted users
+## LEGACY: one container for all granted users
 
-Everyone shares `/workspace` and sees each other's files, and an interactive session is not per-user. Check the blast radius before planning anything: `access_grants` on the connection, read from `select value from config where key='terminal_server.connections'` — `principal_id: "*"` means **every account** on the instance has the sandbox, not just a couple of people. Narrowing `"*"` to the users who actually need it is the cheapest risk reduction available and touches no image.
+> Относится к удалённой общей песочнице; текущая схема — контейнер на пользователя (см. «Текущая схема» выше). Оставлено как история решений.
+
+Everyone shared `/workspace` and saw each other's files, and an interactive session was not per-user. Check the blast radius before planning anything: `access_grants` on the connection, read from `select value from config where key='terminal_server.connections'` — `principal_id: "*"` means **every account** on the instance has the sandbox, not just a couple of people. Narrowing `"*"` to the users who actually need it is the cheapest risk reduction available and touches no image.
 
 **The shared sandbox belongs to Игорь, not the owner** (`4848481@gmail.com`, uuid `5760a2b9-fd5f-4d59-96d4-d595f18fb578`, role `user`, created 2026-10-29); the owner's decision is that its `access_grants` become Игорь-only. Its `/workspace` is ~6.7 GB: keep `.arduino15` (~6.3 GB, the toolchain) and `Arduino/` (~49 MB, libraries) plus `~/.local` pip installs; purge the ~350 MB of builds (`school_bell_hybrid_build`, `bell_review_build`, `bell_timer_check`), `.tmp`, `bench*`, sketches, `*.py` drafts, logs, and the duplicate 384 MB `.arduino15` under `/home/user` in the home volume.
 

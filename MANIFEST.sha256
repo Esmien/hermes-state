@@ -85,14 +85,14 @@ c59c1d19122edc2b769aa8370db797bc17edf118e9b0be10fdbbaf6d8667cc8e  ./hermes/skill
 d32b911740806c58a28870e0ea40448998a6e8745de130a375e717205d4755d1  ./hermes/skills/devops/ai-stack/references/model-provenance.md
 4ac7aac6b3e15b22a09ef8fb8e8b89e91c814835c7a9455f90a086ac9c4f10d7  ./hermes/skills/devops/ai-stack/references/model-route-benchmark.md
 3fca3ad41c3f06e58182aa9df4cea3e69b8fe7110898dcc8b84e21e657699e78  ./hermes/skills/devops/ai-stack/references/music-bot-lyria.md
-4ce8573213cc4a570e6b62122d24d4c8df5cf7727eb2389f09150bcd7ea4f944  ./hermes/skills/devops/ai-stack/references/operations.md
+0ce2bb388f843ef17cf5b9b91c21c089b22a8bed1a4e2344bc401ae2fc98a88b  ./hermes/skills/devops/ai-stack/references/operations.md
 23681fed79a731f0e5ac3dbf907087700aedc29fa84c1b54872f7694682b3e76  ./hermes/skills/devops/ai-stack/references/owui-admin-auth.md
 a75500218b095f51dc380fb92091c16c5004bdf3915da193cd0ec7358d70de6f  ./hermes/skills/devops/ai-stack/references/owui-data-purge.md
 c84dae0745d0192ec73f2fcf39aa825b775faa3b07fb64afcb690cf48146e311  ./hermes/skills/devops/ai-stack/references/owui-internals.md
 5c33219e84e4b7f5d04b079bf8e1d45595cabf3bfa59c234c28801061dc84864  ./hermes/skills/devops/ai-stack/references/owui-task-models.md
 8a69bfb96ab3f785ae029f371d7492a5862c46c4f4ec66e53d9546c385fc1977  ./hermes/skills/devops/ai-stack/references/pitfalls.md
 7e6a9417891e69766d9816809ec46c8eea9273a50306f296c975f7ddc4b652c1  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
-5cfd578808c98d753ed7b04158ba1309a1885ca3dc2d2387b9a9c67ea524a7d2  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
+817aff8a9e102d67de2660857672bcd9f1ec6671ef0d0478215f3974fbcab0b9  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
 255f0977a8801e5f17f9a6a7c3b0c207a5a5cd7f72a1b6032a6ed790b31e3f33  ./hermes/skills/devops/ai-stack/references/searxng.md
 23e8a449e6f4133e8f331862152a5ada1e7d65c4a0f67cf25d39d467db12521e  ./hermes/skills/devops/ai-stack/references/signup-approval.md
 9ed6dd0699cbc69da36a60ee6b1174f0230def598d6610d01257d7f66b8116c2  ./hermes/skills/devops/ai-stack/references/ui-latency.md
