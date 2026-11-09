@@ -17,6 +17,8 @@
 
 Операции:
 
+- **Картинки из Image Generator** (`litellm_image_reference_generator_hy_image_3_5`, workspace-tool в БД) пишутся в `generated_images/` того пользователя, который вызвал тул: тул получает `/sandbox-users` (rw) и `/sandbox-state/state.json` (ro) из чего-то в compose, ищет свой каталог по user id/email, после записи делает chown 1000:1000. Если юзера нет в `state.json` (админ, аноним) — падает на старый `/app/backend/data/generated_images`. Исходник тула в репо: `ai/webui-tools/litellm_image_reference_generator.py`; правится он в БД `tool.content`, правку сразу дублировать в файл.
+
 ```bash
 /usr/local/bin/sandbox-provisioner.py --dry-run        # что скрипт собирается сделать
 /usr/local/bin/sandbox-provisioner.py --only <email>    # один пользователь
