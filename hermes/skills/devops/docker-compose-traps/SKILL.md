@@ -103,12 +103,14 @@ Every service in `ai/docker-compose.yml` carries the same shape — copy it inst
 
 ## Memory limits need both numbers
 
-`mem_limit` alone lets Docker grant `2 × mem_limit` of swap. Always set `memswap_limit` equal to `mem_limit` (see `litellm`: 3.5g / 3.5g) and verify:
+`mem_limit` alone lets Docker grant `2 × mem_limit` of swap. For stack services that must die fast rather than swap (`litellm`: 3.5g / 3.5g), set `memswap_limit` equal to `mem_limit` and verify:
 
 ```bash
 docker inspect <c> --format '{{.HostConfig.Memory}}/{{.HostConfig.MemoryReservation}}/{{.HostConfig.MemorySwap}}'
 cat /sys/fs/cgroup/system.slice/docker-<id>.scope/memory.swap.max   # expect 0
 ```
+
+**Equal values mean no swap at all** (swap allowance = `memswap_limit − mem_limit`), so do not apply that rule to a workload that is supposed to absorb a peak: per-user sandboxes run 1536m + 512m of swap on purpose (`memswap_limit: 2g`), because with `==` a spike is killed instantly instead of being swapped out while the owner kills the offender.
 
 Changing limits requires a recreate (or `docker update --memory-swap` live).
 
@@ -117,7 +119,8 @@ Changing limits requires a recreate (or `docker update --memory-swap` live).
 - **A scratch stack beside production**: a second compose project (`docker compose -p <name> up`) is safe only if *every* published host port is overridden through the file's own `${VAR:-default}` env vars — 5432, 5672 and 8000 are already owned by the host Postgres and the `ai` stack. Ports published as `127.0.0.1:<port>:<port>` are reachable from the host but **not** from another container via the bridge gateway (`172.x.0.1:<port>` refuses); a helper container that needs them must join `<project>_default` and use the compose service name (`postgres:5432`).
 - `docker exec` with a heredoc **needs `-i`** — without it the command exits 0 with empty output (looks like a silent success).
 - Images pinned only by tag (`:main`, `:latest`) move under you. `webui-branding` and `litellm` are pinned deliberately (digest / `vX.Y.Z`) — keep it that way and read the release before pulling.
-- `docker compose up -d --force-recreate` is required after an **image rebuild**, otherwise a stale container keeps the old image layer.
+- **Compose interpolates `$VAR` inside `environment:` values**, not just in ports and volumes: a `$HOME` written in a long system-prompt string silently became the host's `/root` and shipped into the container. Escape as `$$HOME` or write `~/…`; check the rendered value with `docker inspect <c> -f '{{range .Config.Env}}{{println .}}{{end}}'` after any edit of a prompt/env block.
+- A plain `up -d` **is** idempotent and silent when nothing changed, and recreates the container when the service definition changed — that is the normal way to roll a template edit out to every project reusing it. `--force-recreate` is only for a rebuilt image or daemon-level settings; putting it in a scheduled loop restarts every container on every tick and cuts live sessions.
 - Container-level settings compose can see (healthcheck, `logging:`, restart policy) are applied by a plain `up -d` — compose reports `Recreated`. **Daemon-level** settings (`/etc/docker/daemon.json`: log rotation, `live-restore`) are invisible to compose, so every existing container keeps its old config until it is explicitly recreated: check with `docker inspect <c> --format '{{json .HostConfig.LogConfig.Config}}'` (`{}` = no rotation) and use `--force-recreate` to fix.
 - `docker restart` does not increment `RestartCount` (only policy-driven restarts do) — a `restarts=0` container may still have been restarted by hand. It also blocks for the container's stop timeout (~10 s by default) before returning.
 - Any `set -a; . .env` poisons the calling shell for later compose work (`COMPOSE_FILE`, passwords); test-only `AUTORECOVER_*` overrides persist the same way. Run such exports in a subshell, or `unset` them before the next unrelated command.
