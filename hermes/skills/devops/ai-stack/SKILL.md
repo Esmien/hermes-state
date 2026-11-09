@@ -47,7 +47,7 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host. Owner: user `ai_
 |---|---|---|
 | litellm | ghcr.io/berriai/litellm:**v1.106.6** (pinned; `main-latest` is a rolling dev tag — why pinning, and how to bump: `references/updates.md`) | LLM gateway/proxy |
 | litellm-redis | redis:7-alpine, `--requirepass` from `${LITELLM_REDIS_PASSWORD}`, `--maxmemory 256mb --maxmemory-policy noeviction`, no published port | LiteLLM state store (auth cache, rate-limit/token counters, router cooldowns) |
-| open-webui | esmien/webui:local (built locally from `ai/webui-branding/`, derived from OWUI 0.13.2) | chat UI, rebranded «Esmien AI» |
+| open-webui | esmien/webui:local (built locally from `ai/webui-branding/`, derived from OWUI 0.13.3) | chat UI, rebranded «Esmien AI» |
 | searxng | searxng/searxng:latest | web search |
 | open-terminal | ghcr.io/open-webui/open-terminal:latest | web terminal |
 | open-terminal-sandbox | esmien/open-terminal-arduino:local (built from `ai/arduino-sandbox/`) | не-root песочница для пользователей WebUI: shell, файлы, arduino-cli — `references/sandbox-terminal.md` |
