@@ -61,6 +61,12 @@ The sandbox has full egress (`github`/`pypi`/`downloads.arduino.cc` all 200) and
 
 Policy the owner set for this: three tiers — (1) userspace installs are the model's job, so the system prompt must carry the `pip --user` / `npm --prefix` / `dpkg-deb -x` recipes, otherwise the model flails on `apt` and reports failure; (2) changes to the shared toolchain core are admin-only, never a model's decision; (3) a request queue into the core is deferred until users actually ask for system packages.
 
+### Where the recipes live: the terminal's own system prompt
+
+Do not put install rules into each model's system prompt — the owner rejected that outright («я же не буду каждой модели прописывать руками»). open-terminal serves its own: `OPEN_TERMINAL_SYSTEM_PROMPT` is returned by `GET /system` as `{"prompt": "…"}` with `{{os}}` `{{kernel}}` `{{arch}}` `{{hostname}}` `{{shell}}` `{{python_version}}` `{{home}}` expanded; `OPEN_TERMINAL_INFO` feeds `GET /info`, and `ENABLE_SYSTEM_PROMPT` (on by default) gates the route. Open WebUI fetches it — `backend/open_webui/utils/tools.py` → `get_terminal_system_prompt`, injected from `utils/middleware.py` — so one env var per container reaches **every** chat using that terminal, whichever model is selected. Verify with `curl -H "Authorization: Bearer <key>" http://<ip>:8000/system | head -c 300`.
+
+What belongs in that text, at this stack's limits: the working directory is the only writable place; not root, so `sudo`/`apt`/`systemctl`/bare `pip3 install` are dead ends — stop and say so rather than improvise; the working install recipes; the 2 GB workspace cap with the warning that old files are deleted automatically; `/opt/toolchain` is read-only. A read-only `AGENTS.md` is only for coding agents launched *inside* the terminal — it is never the channel that reaches an OWUI model.
+
 **LRU eviction must never touch installed tools.** The 2 GB per-user cap counts everything, but eviction skips `.local`, `venv` and `bin`: dropping a pip package because the files are old breaks a working setup. If those directories alone exceed the cap, alert the owner and let him decide.
 
 ### Probing the image without touching the live sandbox
@@ -141,7 +147,7 @@ Deployed shape: a template compose + `state.json` (0600, never in git) + a host 
 - **Disk: LRU cap of 2 GB per user**, accounting excludes the shared toolchain, eviction by `mtime` (`relatime` makes atime useless), TG warning at 1.8 GB and a report of what was removed. Never wipe silently.
 - **Shared toolchain is a read-only bind mount**, not `cp -al` into each workspace: one host directory with packages/binaries/cores mounted at `/opt/toolchain` plus `PATH`/`PYTHONPATH`. Hardlinks only where a writable copy is unavoidable (`ARDUINO_DIRECTORIES_DATA`). Owner's "service container as the system core" idea survives in this form; copies drift in version, a mount cannot.
 - **Keep that mount out of the user's home.** `FILE_BROWSER_ROOT=home` makes the file browser list whatever sits in the home directory, so a toolchain mounted there shows a `system` folder to every user — the owner's rule is that a user sees exactly one directory, his own. Mounting at `/opt/toolchain` also hides the junk left inside the core: the core container gets no grants, so its `/workspace` stays an archive nobody browses.
-- **The existing sandbox becomes the core as it is; Игорь gets a new empty container.** The retro-cleanup was dropped — nothing is deleted and nothing is recompiled for the toolchains, and to him it still looks like a cleanup with the functionality preserved. His old sketches stay inside the core volume, unreachable without a grant.
+- **The existing sandbox becomes the core as it is; Игорь gets a new empty container.** Nothing is recompiled for the toolchains, but his old work is **deleted, not archived** — owner's rule: «мусор Игоря НЕ СОХРАНЯЕМ, УДАЛЯЕМ», and «в ядре не должно быть никаких пользовательских файлов, это же ядро, только бинари». After the purge the core volume holds only `.arduino15` (6.3 GB: `arduino:avr` 259 MB, `esp32:esp32` 6.0 GB, `builtin` 17 MB), `Arduino/libraries` (~49 MB) and the empty `inbox`/`uploads` mount points; everything else (`*.ino`, `bench*`, `bell_*` builds, `.tmp`, logs, drafts, `~/.cache`) is gone. To him it still looks like a cleanup with the functionality preserved.
 - **Idle cost of staying always-on** is ~30 MiB per container, so the aggregate is trivial; the real risk is disk (a user filling `/workspace`) and the VM's shared memory ceiling, not the number of containers.
 
 ### Verified probe for multi-user mode (throwaway container, never the live sandbox)
@@ -160,6 +166,37 @@ curl -s -H 'Authorization: Bearer probe' -H 'X-User-Id: aaaa1111' http://$IP:800
 - `/execute` returns only an id; read the output from `/root/.local/state/open-terminal/logs/processes/*.jsonl` inside the container and match the newest file — the process-list endpoint is unreliable for retrieving output.
 - `sudo: unable to send audit message: Operation not permitted` in the output is benign noise under `no-new-privileges`, not a failure.
 - Arduino under multi-user mode: `/usr/local/bin/arduino-cli` works for a provisioned user, but `/home/user/.arduino15` is `0700 user:user` → `Permission denied`, and the compose `ARDUINO_DIRECTORIES_DATA=/workspace/.arduino15` is not writable by them. Needs a `/etc/skel` toolchain plus a per-user data dir, and a per-user `TMPDIR` (`/tmp` is `noexec`, arduino-cli cannot build there) — i.e. real image work, not one env var.
+
+### Per-user container template — verified end to end
+
+One compose file per user, rendered from `${SB_SLUG}` / `${SB_KEY}` / `${SB_DIR}` (plus `SB_MEM`, `SB_MEMSWAP`, `SB_CPUS`), project `sb-<slug>`, container `ot-u-<slug>`; an optional `-f override-arduino.yml` adds `ARDUINO_DIRECTORIES_DATA=/workspace/.arduino15` and `ARDUINO_DIRECTORIES_USER=/workspace/Arduino` for the one user who needs the cores.
+
+```yaml
+user: "1000:1000"; command: ["run", "--cwd", "/workspace"]
+mem_limit: 1536m; memswap_limit: 2g; cpus: "1.0"; pids_limit: 256
+cap_drop: ALL; cap_add: [SETGID]; no-new-privileges; read_only: true
+tmpfs: /tmp:size=256m,mode=1777
+volumes: ["${SB_DIR}:/workspace"]
+environment:
+  HOME: /workspace        # pip --user → /workspace/.local, i.e. inside the user's own quota
+  TMPDIR: /workspace/.tmp # /tmp is noexec; arduino-cli's PyInstaller bootloader needs exec
+  PATH: /workspace/.local/bin:/workspace/bin:/opt/toolchain/bin:/usr/local/bin:/usr/bin:/bin
+  OPEN_TERMINAL_SYSTEM_PROMPT: | …recipes for the model…
+networks: [stack-net]      # external: true
+```
+
+Probe after `up -d` + `healthy` — reach the container by IP, the host cannot resolve `stack-net` names:
+
+- `/files/cwd` → `{"cwd":"/workspace","home":"/workspace","root":{"path":"/workspace","label":"Home"}}`. The file browser's root **is the cwd**, which is why nothing outside `/workspace` is browsable and a toolchain mounted at `/opt/toolchain` never appears as a folder.
+- `/execute` with `id; grep CapEff /proc/self/status; touch /etc/x; ls /var/run/docker.sock` → uid 1000, `CapEff: 0000000000000000` (children run with an empty permitted set even though `cap_add: SETGID` is required for boot), `Read-only file system`, no socket.
+- `pip3 install --user requests` → imports (`2.34.2`); on the arduino overlay `arduino-cli core list` shows `arduino:avr 1.8.8` + `esp32:esp32 3.3.12` and `compile --fqbn arduino:avr:uno` prints `Sketch uses 444 bytes (1%)`.
+
+Pitfalls specific to this shape:
+
+- **Hardlinks cannot cross mount points inside a container.** `cp -al /opt/toolchain/arduino/. /workspace/.arduino15/` fails per file with `Invalid cross-device link` even though both paths are on `/dev/sda1` — two bind mounts are two devices to the kernel. Do it **on the host**, between the volume's `_data` directory and the user's bind directory (`cp -al /var/lib/docker/volumes/<vol>/_data/.arduino15 <userdir>/`): no mount boundary, and 6.3 GB of cores is not duplicated.
+- **Anything hardlinked into a workspace inflates `du` without inflating disk.** That user reports 6.3 GB in his directory while `df` does not move. Quota/LRU accounting must exclude `.arduino15` and `Arduino` in addition to `.local`, `venv`, `bin`, or the cleaner deletes the toolchain and frees nothing.
+- **`docker compose down` needs the same `${SB_*}` variables as `up`.** Without them interpolation gives `invalid spec: :/workspace: empty section between colons` and the project is never torn down — pass the identical env (or a per-project env file) to every compose call.
+- **With `HOME=/workspace`, open-terminal writes its process logs to `<userdir>/.local/state/open-terminal/logs/processes/*.jsonl`.** Read them from the host bind directory; the `/root/.local/...` path used by the production sandbox does not exist here.
 
 Also: the sandbox sits on `stack-net` like every other service, so a shell inside it can reach `litellm:4000`, `open-webui:8080`, `postgres:5432`. Nothing is reachable without credentials, but if that matters, give the sandbox its own network and attach only `open-webui` to both (recreate `open-webui` to change its networks).
 

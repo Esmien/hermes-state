@@ -50,7 +50,7 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host. Owner: user `ai_
 | open-webui | esmien/webui:local (built locally from `ai/webui-branding/`, derived from OWUI 0.13.3) | chat UI, rebranded «Esmien AI» |
 | searxng | searxng/searxng:latest | web search |
 | open-terminal | ghcr.io/open-webui/open-terminal:latest | web terminal |
-| open-terminal-sandbox | esmien/open-terminal-arduino:local (built from `ai/arduino-sandbox/`) | не-root песочница для пользователей WebUI: shell, файлы, arduino-cli — `references/sandbox-terminal.md` |
+| open-terminal-sandbox | esmien/open-terminal-arduino:local (built from `ai/arduino-sandbox/`) | не-root песочница для пользователей WebUI: shell, файлы, arduino-cli. По решению владельца превращается в **ядро с тулчейном** (грантов нет), а каждый пользователь получает свой контейнер — `references/sandbox-terminal.md` |
 
 > `cptr` (`ghcr.io/open-webui/computer`) was removed on the owner's instruction — container, image, data dir, compose block, `deploy.sh`, nginx vhost + cert, boot list. Nothing should reintroduce it → [references/operations.md](references/operations.md).
 > **open-terminal memory** (heap ratchets, 2g cap, nightly restart): `references/disk-and-memory.md`.
@@ -143,7 +143,7 @@ A question like «подходит ли эта модель под задачу�
 - `references/owui-admin-auth.md` — **Open WebUI admin auth** (`UI_PASSWORD` is LiteLLM's, not WebUI's).
 - `references/owui-data-purge.md` — **Удаление чатов/файлов Open WebUI** по дате или юзеру (`chat` / `chat_message` / `chat_file`).
 - `references/owui-task-models.md` — **Фоновые задачи Open WebUI** (заголовки чатов, теги, follow-up; `task.*`).
-- `references/sandbox-terminal.md` — **Песочница `open-terminal-sandbox`** (не-root, arduino-cli, access_grants, `meta.terminalId`); промпт — `templates/mcu-assistant-system-prompt.md`.
+- `references/sandbox-terminal.md` — **Песочница и разделение по пользователям**: общая `open-terminal-sandbox`, режим `OPEN_TERMINAL_MULTI_USER` и почему владелец его запретил, шаблон контейнера на пользователя (лимиты, `HOME=/workspace`, `OPEN_TERMINAL_SYSTEM_PROMPT`), hardlink-ловушка EXDEV, установка пакетов без root, access_grants, `meta.terminalId`; промпт MCU — `templates/mcu-assistant-system-prompt.md`.
 - `references/model-route-benchmark.md` — **Model / route A/B benchmarking**; `scripts/model-route-bench.py`.
 - `scripts/probe-owui-terminal.py` — **end-to-end terminal probe** (login → flags → real `run_command` → `/execute` evidence). Run after any WebUI update.
 - `scripts/lyria-enricher-router-pipe.py` — **живой OWUI-Pipe `enricher`** (decider → poem/idea → Argon → JSON). Держать синхронно с функцией в OWUI.
