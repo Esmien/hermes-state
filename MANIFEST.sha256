@@ -68,7 +68,7 @@ f7b5bb43e8ca9ad5a5181677d0ea74656f6ed4e15b1d431ec877c6017f3a2611  ./hermes/skill
 1ea50fe11e32a4dc16e2f99de0ba87a29006f05b6449611445fb600fae664887  ./hermes/skills/career/job-application-review/references/resume-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-21fba03d2358f9b32e416a6598af5b607a7d7b0e11fccdc3e81f16cce1e28d47  ./hermes/skills/devops/ai-stack/SKILL.md
+3785cedc9bed557fc789592b86ec0ef53bd997d45c8b43013d9252722cb02a6e  ./hermes/skills/devops/ai-stack/SKILL.md
 35f011180b4ddc06606d1bf45df577e34baf6cb7a0aeff203c055d46eed7afbe  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
 d4d2d38f0c3fe3ff53ff7de02ca914cd07b05c1f8700813a0c3fa242b323ed89  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
@@ -88,10 +88,11 @@ d32b911740806c58a28870e0ea40448998a6e8745de130a375e717205d4755d1  ./hermes/skill
 4ce8573213cc4a570e6b62122d24d4c8df5cf7727eb2389f09150bcd7ea4f944  ./hermes/skills/devops/ai-stack/references/operations.md
 23681fed79a731f0e5ac3dbf907087700aedc29fa84c1b54872f7694682b3e76  ./hermes/skills/devops/ai-stack/references/owui-admin-auth.md
 a75500218b095f51dc380fb92091c16c5004bdf3915da193cd0ec7358d70de6f  ./hermes/skills/devops/ai-stack/references/owui-data-purge.md
+8ecb43cda5faf0f3f98a7accc0cdaac7f458be116cf2c8c034ec1c536c162cbe  ./hermes/skills/devops/ai-stack/references/owui-internals.md
 5c33219e84e4b7f5d04b079bf8e1d45595cabf3bfa59c234c28801061dc84864  ./hermes/skills/devops/ai-stack/references/owui-task-models.md
 8a69bfb96ab3f785ae029f371d7492a5862c46c4f4ec66e53d9546c385fc1977  ./hermes/skills/devops/ai-stack/references/pitfalls.md
 7e6a9417891e69766d9816809ec46c8eea9273a50306f296c975f7ddc4b652c1  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
-9f83517fa99d735e8109374bfb623726671088c5313aac51a131bfe9932d18d2  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
+263aad398139bc88ade2be78b8157b96003a9d7d89807323f5a38297ede05291  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
 255f0977a8801e5f17f9a6a7c3b0c207a5a5cd7f72a1b6032a6ed790b31e3f33  ./hermes/skills/devops/ai-stack/references/searxng.md
 23e8a449e6f4133e8f331862152a5ada1e7d65c4a0f67cf25d39d467db12521e  ./hermes/skills/devops/ai-stack/references/signup-approval.md
 9ed6dd0699cbc69da36a60ee6b1174f0230def598d6610d01257d7f66b8116c2  ./hermes/skills/devops/ai-stack/references/ui-latency.md
