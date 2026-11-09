@@ -4,6 +4,28 @@ Owner wants the tunnel up without any app window open and without a GNOME VPN pr
 GNOME's «Добавить VPN» dialog speaks only OpenVPN/PPTP/WireGuard, our entry is VLESS over
 WS+TLS, so the OS dialog is a dead end. Run a daemon instead.
 
+## Package: `esmien-vpn` (deb) — single source of truth
+
+The whole desktop CLI now lives in `/root/esmien-vpn-cli` (git repo, not in `vps-infra`):
+`bin/vpn` (dispatcher), `libexec/{vpn-sub-edit,vpn-sub-update,merge_profile.py}`,
+`systemd/*`, completions, `packaging/` + `packaging/build.sh`, `install.sh`/`uninstall.sh`,
+`tests/sample-profile.yaml`. Build: `VERSION=1.0.0 packaging/build.sh` (no `make` on the VPS;
+`make deb` exists for the desktop) → `dist/esmien-vpn_<v>_all.deb` (`Architecture: all`, engine
+not vendored).
+
+- Install on the laptop: `sudo apt install ./esmien-vpn_1.0.0_all.deb`; first run
+  `sudo vpn setup '<url>'` = engine download + link + units + `vpn on`.
+- Uninstall: `apt remove` (keeps `/etc/mihomo`, `/opt/mihomo`) or `apt purge` (removes both).
+  `prerm` stops+disables `mihomo.service` and the timer so no TUN/routes are left behind.
+- Paths differ from the hand-made install: `/usr/bin/vpn`, `/usr/lib/esmien-vpn/*`,
+  `/usr/share/doc/esmien-vpn/README.md`; git-clone install goes to `/usr/local` via `install.sh`.
+- `mihomo-update.service` calls `/usr/bin/env vpn update` (not an absolute libexec path) so one
+  unit works for both layouts.
+- Verified in a debian:bookworm container: install → `vpn engine install` (real download) →
+  `vpn update` against a local http profile → `mihomo -t` passes → purge leaves nothing.
+- Do not install this deb on the VPS itself: it is a desktop client, the entry host keeps
+  `vpn-router`/`vpn-cfg`.
+
 ## Toggle: `sudo vpn on|off|status` (`/usr/local/bin/vpn`)
 
 The owner asked for exactly this shape — `on` (Estonia up) and `off` (tunnel down, FlClash free to
