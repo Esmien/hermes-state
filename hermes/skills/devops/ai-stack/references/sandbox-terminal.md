@@ -32,6 +32,8 @@ journalctl -u sandbox-provisioner.service -n 30 --no-pager
 - **Добавить системный пакет всем** — только через пересборку образа; внутрь контейнера root не даётся.
 
 Грабли этой схемы:
+- **Выбор терминала — только клиентский.** В 0.13.x `terminal_id` не пишется в БД (у чатов такого поля нет); фронт берёт его из `localStorage.selectedTerminalId` и шлёт в каждом запросе. Серверной настройки «терминал по умолчанию» нет. Решение у нас: `webui-branding/terminal-autoselect.js` (вставляется в `index.html` в Dockerfile) — если выбора нет и у пользователя ровно одна песочница, ставит её id и один раз перезагружает страницу. Проверять в браузере: засеять `localStorage.token` (токен можно выпустить внутри контейнера через `create_token({'id': uid})`), очистить storage, открыть `/` — должен появиться `selectedTerminalId` = его connection id.
+- Проверка «терминал включён» без логина/LLM: `localStorage.selectedTerminalId` совпадает с `conn_id` из `state.json` — этого достаточно, дальше фронт сам кладёт его в `terminal_id`.
 - `sync_assets.py` для `/usr/local/bin` и `/etc/systemd/system` работает по манифесту: новый файл сам не появится в репо — его надо один раз положить в `assets/host/{bin,systemd}`.
 - `TMPDIR` из compose в окружение команд `/execute` не доходит (`echo $TMPDIR` пусто), но `HOME=/workspace` доходит; `/tmp` в контейнере — tmpfs с `noexec`.
 - `POST /execute` с `curl` работает, а сборка запроса в `urllib` без явного `method='POST'` может отдать 405 — проверять curl'ом, прежде чем искать баг в API.
