@@ -54,6 +54,7 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host. Owner: user `ai_
 
 > `cptr` (`ghcr.io/open-webui/computer`) was removed on the owner's instruction — container, image, data dir, compose block, `deploy.sh`, nginx vhost + cert, boot list. Nothing should reintroduce it → [references/operations.md](references/operations.md).
 > **open-terminal memory** (heap ratchets, 2g cap, nightly restart): `references/disk-and-memory.md`.
+> **beszel** (`mon.esmien.ru:8090`) is a SEPARATE compose — live at `/home/ai_service/beszel` (hub + agent, `network_mode: host`, own `.env` with `TOKEN`/`KEY` that never enters git); the tracked copy of its compose lives in `ai/beszel/`. Not covered by `deploy.sh`.
 
 - **PostgreSQL 17 + pgvector runs on the HOST** (apt, pgdg repo) — not in compose.
 - **Nginx** = TLS terminator (replaced caddy); **Certbot** issues/renews certs.
