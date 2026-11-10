@@ -235,7 +235,7 @@ c64a7ee60a16608e0b86f08c73f947c28d48b9168e1d33c4eb21f898c57cb515  ./hermes/tasks
 9a8a4f9270a64de4ca700bb4fe574eeb100a1283facb50dc828d318d6551729c  ./host/ai-stack/backup-databases.sh
 d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md
 846efb23aba0d86ee3b1086edc19cb47f2cb07426875cfeaaca852f62c8a811f  ./host/ai-stack/runbook.md
-39a81139e5d21571564dbe8b9badb218d1893924908f60f00499b0222045e2d5  ./host/backups/tg-registry.json
+a4a22d3417e663a7fdadb9da45dcec9cfe28a064bf0270297d9d67295bffbe86  ./host/backups/tg-registry.json
 3d999ff1ff6aaca44eea08c3683eca79b59a573ae5dc8bf9dba668e38a3e6d5f  ./host/bin/docker-detector-liveness.sh
 bb24baca67f479c8fb1ce9eb41fd9b3c4d1ba41f2bd03a2dda9d809074275eac  ./host/bin/docker-incident-agent.sh
 9be678d50f64ee72144f42b07a78643cd40de466e849cba04d27f5a823d6fab6  ./host/bin/docker-incident-detector.py
