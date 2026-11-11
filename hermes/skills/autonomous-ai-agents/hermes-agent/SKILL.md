@@ -106,6 +106,7 @@ Profiles use `~/.hermes/profiles/<name>/` with the same layout. When a profile i
 | Memory is full, an add was rejected, «память задыхается» — dedupe, migrate detail into skills, raise the budget last | `references/memory-curation.md` |
 | How skills are chosen/loaded, why a skill never fires, catalog vs disk count | `references/skills-loading.md` |
 | Hard gates on dangerous actions: `pre_tool_call` hooks, fail-closed, state that survives `/new` | `references/agent-guardrails.md` |
+| Approval cards losing the command / «approval expired while I was away» — no-timer and keep-body patches on THIS host | `references/local-approval-tuning.md` |
 | Restricting ONE gateway user (guest/colleague) to a subset of tools or commands — «он в аллоулите, но только ssh»; also load it whenever a hook must know WHO is asking, because the hook payload carries no platform user id | `references/per-user-access-control.md` + `templates/ssh-only-gate.py` |
 | AGENTS.md / .hermes.md / CLAUDE.md project rules | `references/project-context-files.md` |
 | Secret redaction, PII, approval modes, "reset permissions" | `references/security-privacy.md` |

@@ -26,7 +26,7 @@ ee5084f2d7ec196488bef2c74248fb3d8328d1b2e3277ddda3f0de9da6fc7131  ./hermes/skill
 e35d4d165daadfd066661df59a202a4159c5df41b77642884d3656830054d6bc  ./hermes/skills/apple/findmy/SKILL.md
 bc68b1648e301409bc25b1084ec26766213ca9f3c1b2fd3d3d6ebe3dbde9e967  ./hermes/skills/apple/imessage/SKILL.md
 7f2427c7112d71235d92f68ba68392a4fed3d28a7636f522deb2748cb44fe7fc  ./hermes/skills/autonomous-ai-agents/DESCRIPTION.md
-bcf109500227c62297bce38643404966ecc20c9b4a85d61cb72949432531a0ba  ./hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md
+c6fb4cb192a88e24077282e493274416ca4b989fc03b3697b479ac46128b1bf8  ./hermes/skills/autonomous-ai-agents/hermes-agent/SKILL.md
 cd0b6f0d36322f4a26dd1572bb1e3fa8b5153f1253c1b1d2e21f9475a3d6de88  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/agent-guardrails.md
 70099ca64774cc7e70a33330d180f862cf19a02c0f936dc4c50d51c6d0b73556  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/background-systems.md
 a15c6838f9ac1e35b0e113a66738b3ce27bb6500d31218797467a2f8691341b5  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/cli-reference.md
@@ -36,6 +36,7 @@ a15c6838f9ac1e35b0e113a66738b3ce27bb6500d31218797467a2f8691341b5  ./hermes/skill
 2bd78982684a2612f27756b3e2f7eb744d17f72e523e5586d2b388f6d7db1037  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/desktop-plugins.md
 ee6ca1a172ecb61554248d25e97155c38c8dd18d45ee6bdd7f02f5c88bd69f54  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/error-message-diagnosis.md
 1f1a3db7bf2af80600d1ed2220f205fe7f79a7bdc1ba7df967c5405c19a28ac2  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/external-coding-agents.md
+ae53083081d449938aa12ef0ea95c54e5c03c8ecc59841214e06c3804c419cf5  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/local-approval-tuning.md
 03bde0b1f1d5abb3b58af962f274608797d27e786ad37290804e1503b2c822ac  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/memory-curation.md
 2f7d11ebe963a83a4e9478c7e7b7d02c1a02e08916eac1d6cd757ba1211d7a2c  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/model-fallback-diagnosis.md
 ded08718d2eb141262a31b323f8e66eeb40f35e074e1f0e70abb76860891ec92  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/native-mcp.md
