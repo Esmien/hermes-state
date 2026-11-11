@@ -2469,6 +2469,7 @@ onboarding:
     busy_input_prompt: true
 approvals:
   destructive_slash_confirm: false
+  timeout: 31536000
 platforms:
   telegram:
     enabled: true
