@@ -52,25 +52,52 @@ An assistant message also carries `model`, `output` (the reasoning blocks), `usa
 
 ## The decision: did the model have hands?
 
+**`m.get('tool_calls')` is not where they live, and its absence proves nothing.** In chats stored by current Open WebUI the calls are items of `message.output[]` with `type: "function_call"`, each paired with a `function_call_output` that carries the real `command`, `exit_code` and `output` (plus `log_path` for background runs):
+
+```python
+for m in order:
+    calls = [o['name'] for o in (m.get('output') or []) if o.get('type') == 'function_call']
+    if calls:
+        print(m.get('role'), calls)
+```
+
+Count them over the whole row before saying anything about hands:
+
 ```bash
-# 1. tool calls are on the message object
-#    (in the parse loop above)  m.get('tool_calls')  -> list, usually empty
-# 2. what could have been bound at all
+grep -o '"type":"function_call"' one_chat.json | wc -l
+grep -o '"name":"[a-z_]*"' one_chat.json | sort | uniq -c | sort -rn | head
+```
+
+Names that occur in practice: `run_command`, `get_process_status`, `write_file`, `read_file`, `execute_code`, `view_knowledge_file`, `grep_knowledge_files`, `list_knowledge`, `query_knowledge_files`, `ask_user`, `display_file`.
+
+**Never print a message's `output` truncated** while deciding this: the reasoning block comes first and the calls sit after it, so `json.dumps(...)[:400]` looks exactly like «инструментов не было» and yields a confident wrong verdict. Same for a `.get('content')`-only pass — assistant content is just the narrative.
+
+Only a **zero** count supports «рук не было». Then confirm what could have been bound at all:
+
+```bash
 sudo -u postgres psql -d webui_db -Atc "select name,type,is_active from function order by updated_at desc limit 15;"
 sudo -u postgres psql -d webui_db -Atc "select id,name from tool order by updated_at desc limit 10;"
-# 3. the interpreter is a container flag, not a DB row
 docker inspect open-webui --format '{{range .Config.Env}}{{println .}}{{end}}' | grep -iE 'interpreter|code_exec|jupyter|mcp'
 ```
 
-Empty tool calls + no pipe/tool + no interpreter env = the model had **only** the model and whatever RAG collection was attached. That is the whole diagnosis.
+Last check, when the narrative claims files were written: look for them where they should be, rather than inferring from the text —
+
+```bash
+docker exec <sandbox-container> ls -la /home/user/workspace/<project>
+```
+
+A missing path means the session ran ephemeral and the work did not survive, which is a different finding from «модель соврала» and is worth telling the owner on its own.
 
 ## Interpreting the answer — three different defects
 
-1. **Fabricated verification** (the one that produces «он галлюцинирует»): narrative verbs «проверил», «прогнал 55 кейсов», «все файлы записаны», «поставил pydantic 2.13.5» — with no tool call behind them. It is not an error in the code, it is a report about actions that never ran. Name it exactly that, and check for the tell-tale contradiction (same chat: «пакетов нет и ставить нельзя» → «установил»).
+1. **Fabricated verification** — only when the row contains **no** `function_call` at all, while the narrative says «проверил», «прогнал 55 кейсов», «все файлы записаны», «поставил pydantic 2.13.5». It is not an error in the code, it is a report about actions that never ran; the tell-tale is a self-contradiction in the same chat («пакетов нет и ставить нельзя» → «установил»). Count first: one existing call for the same subject already destroys this diagnosis.
 2. **Real logic error**: extra normalisation, duplicate validation, code that violates the ticket's own wording. The model often admits it when challenged — that is normal review work, not hallucination.
-3. **Unverified assumption about the environment** — the cheapest to fix with one probe command, and the reason a terminal matters more than a better model.
+3. **Unverified assumption about the environment** — stated as fact («pydantic тут нет») and then disproved by the model's own next command, or never checked. Cheapest to fix with one probe, and the reason a terminal matters more than a better model.
 
-Verdict shape for the owner: «модель не врёт про код — она врёт про проверку, потому что проверять ей нечем». Then: the fix is not a different model but one tool.
+Verdict shape depends on the count, and the two shapes are not interchangeable:
+
+- zero calls → «модель не врёт про код — она врёт про проверку, потому что проверять ей нечем», и лечится это инструментом, а не моделью;
+- calls present → жалоба не про галлюцинации, а про качество ревью: назвать конкретные ошибки, отметить, что обе исправлены после замечаний, и не защищать модель по памяти.
 
 ## Giving the model hands — what that costs
 
