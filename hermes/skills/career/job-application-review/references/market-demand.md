@@ -70,6 +70,13 @@ When he asks «а не податься ли в X», answer with counts **and** 
 
 **Trainee programmes are a cost, not a job.** «Месяц интенсива + стажировка 3–4 месяца 5/2, потом от 70 000 ₽ до вычета» for a DevOps «ученик» is a hiring-funnel business model; for someone with a live production contour it is a step backwards. Quote the net monthly, the months, and the fact that he already does the syllabus.
 
+Same rule for an **агентство трудоустройства / аутстафф**, which is what «переобучение на ИИ-инженера» usually turns out to be:
+
+- открытых направлений на их сайте обычно **одно**, остальные «набор приостановлен» — считай блок вакансий, а не список в письме;
+- модель **ISA / % от зарплаты после трудоустройства** без названного процента — это не «бесплатно», это отложенный платёж; в ответе называй вилку (джуновские 50–70k РФ fullstack) и что процент не раскрыт;
+- если их фильтр — «код пишут ИИ-агенты, разработчик — архитектор и ревьюер», человек с прод-контуром уже проходит его без курса; назови единственное, что реально добавится;
+- порядок величин для сравнения направлений (name-search, РФ): **1С ≈ 1 200**, AI/AI-engineer ≈ 105–110. Называть цифру и тут же говорить, что решение всё равно про стек, а не про размер рынка.
+
 ## «Это долго и сложно?» — time-to-competence
 
 At 1–2 h/day, to *working* level (not mastery):
