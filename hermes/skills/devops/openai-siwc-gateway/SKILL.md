@@ -91,11 +91,22 @@ Revert: `POST /model/unblock {"model_id": ...}`.
 - **Order, not fallbacks, expresses «subscription first».** Inside one group set the SIWC leg
   `litellm_params.order = 1` and the other provider `order = 2`: the router serves order 1 and
   only moves on when that deployment errors or 429s. A `fallbacks` entry is for crossing
-  *groups*, not for ranking legs of the same group.
+  *groups*, not for ranking legs of the same group. **Every leg of a mixed group needs an explicit
+  `order`**: a leg left at `None` is dropped from selection the moment any sibling declares one
+  (see the `order` pitfall below), so «grey `order: 1` / bridge without order» silently means
+  «grey only» — and `/model/info` still shows the bridge unblocked and healthy.
 - **A group leg must be usable by the clients that will hit it.** An OpenCode-backed leg needs
   `x-opencode-session`; if it has to serve non-OpenCode clients, inject it in
   `litellm_params.extra_headers` when creating/updating that deployment — otherwise every call
   lands on `400 MissingSessionID`.
+- **Prove which leg served from `LiteLLM_SpendLogs`, not from the log body.**
+  `docker logs litellm | grep provider=` names the provider, never the deployment, and a group can
+  hold two legs of the same provider. One query per group settles it:
+  `sudo -u postgres psql -d litellm_db -Atc "select coalesce(\"api_base\",'-'), model, count(*),
+  round(sum(spend)::numeric,4) from \"LiteLLM_SpendLogs\" where \"startTime\" > now() - interval
+  '24 hours' and model like '%<slug>%' group by 1,2 order by 3 desc"` — one row per leg, with the
+  upstream URL and the money. A leg missing from that result served nothing, whatever
+  `/model/info` claims about it.
 - **Timeout-driven fallback across providers** (e.g. free relay → paid/OpenCode leg): set
   `litellm_params.timeout` on the primary deployments, then add
   `router_settings.fallbacks: [{group: [target_group]}]` to
@@ -149,9 +160,14 @@ For model inventory and cleanup, see `ai-stack` → `references/model-provenance
   `litellm_params`; then re-read `/model/info` and assert `blocked` **per deployment id**.
   After a rename the flag can end up on the wrong row, which silently leaves the grey
   route live and looks like a gateway bug.
-- `order` in `litellm_params` does not give strict priority under `simple-shuffle` — for a
-  real "primary → fallback" chain put the secondary in its own model group and declare it
-  in `router_settings.fallbacks`.
+- **A leg without `order` stops existing once any sibling has one.** `get_order_filtered_deployments`
+  (`litellm/utils.py`, called from the router's `async_get_healthy_deployments`) keeps only the
+  deployments at the *lowest* `order` in the group and **drops every leg whose `order` is `None`**.
+  Symptom: 100 % of a group's traffic lands on the backend you did not want, the other leg answers
+  fine when called directly, and nothing in `/model/info` looks wrong. Read the orders per
+  deployment id before diagnosing — `order` inside one group is a real priority ladder, it is only
+  weaker than a separate fallback group when you need a *different provider* on the second rung.
+  Fix by giving every leg a number (bridge `1`, grey `2`) or by blocking the leg you do not want.
 - `ext_agent_host_id` must be a hyphenated **UUIDv4** with `urn:uuid:` prefix; a hex
   machine-id gives `invalid_authorize_request` / `param: ext_agent_host_id`.
 - Host-ID and client-id must persist; restarting or re-signing-in must not mint a new host.

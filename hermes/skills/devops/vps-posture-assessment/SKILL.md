@@ -80,6 +80,12 @@ Companion skills: `ai-stack` (what is inside the AI stack, and the backup verifi
   **Judge the watchdog by its target, not by its verdict:** when it reports «сервер недоступен снаружи», read the
   URLs inside the workflow and `getent hosts` each one before touching the host — the check spent months probing
   retired `esmien.qd.je` names that no longer resolve, so it cried «down» while every service answered 200.
+- **Name only the components the inventory actually printed.** A summary is read as fact, so a
+  familiar-sounding service filled in from general knowledge becomes a lie in the owner's head:
+  an overview once called the ingress «Traefik» on a host where `systemctl` lists `nginx.service`
+  and no Traefik exists anywhere. Every daemon, proxy and database named in the answer must trace
+  back to a line of this session's `systemctl` / `docker ps` / `ss` output; ingress on this host is
+  **nginx (system package, never a container)**.
 - **Quote swap in use, not `free`'s «available».** `free -h` shows a comfortable 4.5 GiB available because page cache counts as reclaimable, while the swap file holds ~1.9 GB of 4 — the swap figure is the honest statement of the memory margin and the number that belongs in a document. Name it as a thin margin, not as an outage to fix.
 - **`docker system df`: read the `RECLAIMABLE` column, not TOTAL.** 13.89 GB of build cache with 43 MB
   reclaimable is not «17 GB можно освободить без потерь» — pruning costs a full rebuild of `esmien/webui`

@@ -79,7 +79,7 @@ dc14bc0c6422327a0aecf02277be289b131fdb80a0fa650071ff49b3d95eb90c  ./hermes/skill
 4ca891acafa249bc7f4cab7c375b4f569cb7f48eae57651fe7edfd4e6133c703  ./hermes/skills/devops/ai-stack/references/enricher-system.md
 c59c1d19122edc2b769aa8370db797bc17edf118e9b0be10fdbbaf6d8667cc8e  ./hermes/skills/devops/ai-stack/references/kb-sync.md
 0a5837b8d283d7edfcfe6b28754c5a2c893f2f60a508d059c9b2552c87f56314  ./hermes/skills/devops/ai-stack/references/litellm-admin-auth.md
-9a1a175fcd3b1de461f0ee712728317784269ec5c84f28d4ff82ff00aa461919  ./hermes/skills/devops/ai-stack/references/litellm-model-db.md
+0e24fb650e2f92a9b4e2012a099b49e3601a22a81d31a07ecafdd01be7005acb  ./hermes/skills/devops/ai-stack/references/litellm-model-db.md
 41f4f7689a758d15c420cc8eebebb24df540146fba04ac2aad0a825c8e816e28  ./hermes/skills/devops/ai-stack/references/media-pipeline.md
 5490b3699d7ee7cf47a8633189687ae78ea8d9bc2be86e55509a4b1c979623ca  ./hermes/skills/devops/ai-stack/references/memory-troubleshooting.md
 d32b911740806c58a28870e0ea40448998a6e8745de130a375e717205d4755d1  ./hermes/skills/devops/ai-stack/references/model-provenance.md
@@ -137,7 +137,7 @@ f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skill
 9d1851b42d0020e65831a250ae71f4e88bc0076a8eae3191b7b472df70c48d97  ./hermes/skills/devops/llm-route-bench/scripts/authenticity_probe.py
 8448c5899b2ffab423b675e9ff1c24f808f95fc736d3d010d72fcb8d3007e9c6  ./hermes/skills/devops/llm-route-bench/scripts/code_bench.py
 a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skills/devops/llm-route-bench/scripts/code_bench_hard.py
-dee0fd894905b57c13964d4c149f54f83074bafed236a48658c4d95547a8c2cf  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
+796003d2816e407d2bd7ea1590fcb3ce4925a9edc0cc45401b892cad85b4b50a  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 ca25472b50ad83024fb7bcf7338aad4dacb16a24391d54e694f0f9ee85b37b32  ./hermes/skills/devops/ru-access-to-foreign-cloud/SKILL.md
 9863e40dd9c9afc73287285af5bd3aebf53410d153f77bd53859b23721d892a1  ./hermes/skills/devops/ru-access-to-foreign-cloud/references/oracle-cloud.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
@@ -197,7 +197,7 @@ fe6241ba003a9ed5822b33b762b1a506e5a31dfc0e59f25419f87e41934346a0  ./hermes/skill
 d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skills/devops/vps-network-exposure/scripts/audit-exposure.sh
 6089d1d7d5f1cc59b77d4147ea1b2b404175cec3888f095d4bc6e049f2f8391d  ./hermes/skills/devops/vps-network-exposure/scripts/faketls-probe.py
 5e780432952150f90883eff45349e648ab6e3417334b171b7d4215fd1f798ff3  ./hermes/skills/devops/vps-network-exposure/templates/vpn-subscription-generator.py
-7c4566f0441746e676b54f81265d1544a28228eac45e589a648a5813fb0d5c7a  ./hermes/skills/devops/vps-posture-assessment/SKILL.md
+aa74880e9efb1f80b2b71f1c7d472d89b2c0723c4dd887403a069d9fbc8d8c0a  ./hermes/skills/devops/vps-posture-assessment/SKILL.md
 83bb952c9532373b508e3f534c4c7d75189eb6b628abeb91eab74ae8d0e4d83f  ./hermes/skills/devops/vps-posture-assessment/references/prompt-injection-defense.md
 d1a75067b4341cc720e209bb7494010cd07d291b625f9924e6240fdf9823e2af  ./hermes/skills/devops/vps-posture-assessment/references/recovery-rto.md
 ee4da44acd0fa13e9866411ecb0a8bcdbf1f810dd3971d07506d8738ecaf6856  ./hermes/skills/devops/webui-ios-icons/SKILL.md

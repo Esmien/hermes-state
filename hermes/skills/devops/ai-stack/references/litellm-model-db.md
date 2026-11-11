@@ -93,6 +93,33 @@ OpenCode-нога `order=5` как следующий приоритет. **Эт
 `429 Free models are for active keys`. На синтетике из 9 задач платный аргон Токанатора
 показал тот же результат, что легитимный маршрут (9/9), — признаков подмены слабой моделью нет.
 
+## Цены деплойментов: как аудитить и что считается «проставлено»
+
+Цена живёт **на деплойменте**, а не на имени группы: в одной группе две ноги с разными
+провайдерами, и `$0` в отчёте обычно означает «у этой ноги цены нет», а не «модель бесплатная».
+
+- Ставятся только в `litellm_params` (`input_cost_per_token`, `output_cost_per_token`,
+  `cache_read_input_token_cost`); то же в `model_info` принимается с 200 и молча теряется —
+  подробности в `references/chatgpt-subscription.md`.
+- Аудит — обход `/model/info`, а не список имён: для каждого деплоймента печатать
+  `model_name | model_info.id | litellm_params.model | api_base | order | blocked | in | out`.
+  Голое имя группы скрывает, что цены есть у одной ноги и нет у соседней.
+- `blocked` — **отдельная колонка** `LiteLLM_ProxyModelTable.blocked` (`boolean NOT NULL default
+  false`), в `model_info->>'blocked'` её нет (там пусто у всех строк). SQL-проверка:
+  `select model_name, model_info->>'id', blocked from "LiteLLM_ProxyModelTable" order by 1;`
+- Референс цены — каталог OpenRouter: `https://openrouter.ai/api/v1/models/<vendor>/<slug>/endpoints`
+  отдаёт `model_id`, `context_length` и `pricing` по каждому провайдеру. Три правила чтения:
+  головная цена в UI — не то же, что тариф конкретного провайдера за нашими ногами; при prompt
+  выше порога (у GPT-6/6.1 — 272k, у Claude Haiku 5.5 — 100k) тариф удваивается; у картинок,
+  TTS, музыки и reranker единица — изображение/песня/вызов, токенной цены там просто нет, и
+  подставлять вместо неё «цену за токен» нельзя.
+- **Чего нет в каталоге OpenRouter — тому цену не назначаем** (например `gpt-reserve`): slug
+  отдаёт 404, значит цифру взять неоткуда, и любая догадка потом живёт в отчётах как факт.
+- Лог `Billable request priced at $0 and logged as such (model_group=… provider=…) pricing entry
+  '<uuid>' declares non-zero rates` — это про **деплоймент с этим uuid**: у соседней ноги той же
+  группы суммы нормальные. Судить «цены не применились» по одной строке нельзя, нужно сверить
+  сумму по `api_base`/`model` в `LiteLLM_SpendLogs`.
+
 ## Что считать нормой после восстановления дампа
 
 - `/model/info` отдаёт меньше записей, чем есть групп в БД (часть алиасов висит на мёртвых
