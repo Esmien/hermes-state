@@ -143,7 +143,7 @@ ca25472b50ad83024fb7bcf7338aad4dacb16a24391d54e694f0f9ee85b37b32  ./hermes/skill
 9863e40dd9c9afc73287285af5bd3aebf53410d153f77bd53859b23721d892a1  ./hermes/skills/devops/ru-access-to-foreign-cloud/references/oracle-cloud.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
-91801cb3e8edfe5883f961cf02f14481d2b29e8be030ee95b97506fd364229da  ./hermes/skills/devops/shell-and-terminal-ux/SKILL.md
+bd492812ca6826885dd392d6d7105700d80f72c15ac6d5e13147e70f9be0734d  ./hermes/skills/devops/shell-and-terminal-ux/SKILL.md
 4e9f74a0c726e108168c48fd06a6fc009023a6ff4912e9ddbb094ac594b33459  ./hermes/skills/devops/shell-and-terminal-ux/templates/starship.toml
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 a11cea480af1ecd7fb72bb1210d03d7ee0b71ee57e82a0b4e587da117ce8e444  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
