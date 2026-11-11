@@ -86,6 +86,7 @@ vpn.esmien.ru:8443 (VPN entry)                    | vpn.esmien.qd.je:8443
 - **UI from a foreign machine = SSH tunnel only** (`-L 8080:127.0.0.1:8080 -L 4000:127.0.0.1:4000`) → [references/operations.md](references/operations.md).
 - **Docker events miss "Up+healthy, traffic dead"**: `litellm-watchdog.py` + `litellm-watchdog.{service,timer}` (60 s, alerts via Bot API) covers it → [references/backups-notifications.md](references/backups-notifications.md).
 - **Misquoted facts** (aliases vs unique models, `edge-tts` orphan, «Failure» wall = scanners, empty `bot_db`) → [references/pitfalls.md](references/pitfalls.md).
+- **Tool calls in an Open WebUI chat live in `message.output[]` as `{type:"function_call"}`**, not in `tool_calls` (that field is absent). Reading only `content`/`tool_calls` makes an agent-heavy session look like a plain chat with fabricated verification — grep the stored chat JSON for `"function_call"` and count names (`run_command`, `write_file`, `execute_code`, `view_knowledge_file`) before concluding a model had no hands. `chat` is a `json` column in `webui_db` (postgres on the host, not in docker); `jsonb_typeof(chat->…)` fails on it, cast instead (`(chat::jsonb)->'messages'`).
 
 ## Deploy
 
