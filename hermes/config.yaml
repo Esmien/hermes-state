@@ -2518,4 +2518,6 @@ hooks:
 command_allowlist:
   - script execution via -e/-c flag
   - script execution via heredoc
+  - stop/restart system service
   - sudo with combined-flag privilege escalation
+  - sudo with privilege flag (stdin/askpass/shell/list)
