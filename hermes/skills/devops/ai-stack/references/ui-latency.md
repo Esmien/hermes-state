@@ -59,15 +59,23 @@ pat = re.compile(r'"GET (\S+) HTTP[^"]*" (\d{3}) (\d+) rt=([\d.]+)')
 - Обработчик (`routers/models.py`, `get_model_profile_image`) ставит только `ETag`, **без
   `Cache-Control`**, поэтому браузер перепроверяет все картинки на каждый заход.
 
-Лечение — кэш в браузере, а не воркеры:
+Лечение — кэш в браузере, а не воркеры, и с недавнего времени аватарки отдаёт nginx из
+статического кэша (`/var/cache/owui-avatars`, `owui-avatar-sync.py` +
+`owui-avatar-sync.timer` раз в 15 мин, `try_files` + `@owui_model_avatar` как фолбэк):
+это и снимает нагрузку с воркера, и убирает гонку авторизации — SPA на холодном
+старте запрашивает иконки раньше, чем восстановлена сессия, получает `401`,
+подменяет картинку дефолтным логотипом и **не повторяет попытку** (жалоба «куда
+аватарки моделей делись» — ровно это; файлы в базе целы, сервер отдаёт 200).
+Один id = один файл `<id>.<webp|png|jpg|gif>`; `$arg_id` валидируется регуляркой
+(без `..`), потому что путь для `try_files` собирается из query.
 
 ```nginx
 # в server с listen 127.0.0.1:9443 (НЕ в порт-80 редиректе!), перед location /api/
 location = /api/v1/models/model/profile/image {
-    proxy_pass http://127.0.0.1:8080;
-    proxy_set_header Host $host;
-    proxy_http_version 1.1;
-    proxy_set_header Connection "";
+    if ($arg_id ~ "\.\.") { return 404; }
+    if ($arg_id !~ "^[A-Za-z0-9][A-Za-z0-9._:/-]{0,120}$") { return 404; }
+    root /var/cache/owui-avatars;
+    try_files /$arg_id.webp /$arg_id.png /$arg_id.jpg /$arg_id.gif @owui_model_avatar;
     add_header Cache-Control "private, max-age=3600" always;
 }
 ```
@@ -76,8 +84,10 @@ location = /api/v1/models/model/profile/image {
 Если вставить локацию перед первым `location / {`, она попадёт в редирект-сервер: `nginx -t`
 пройдёт, reload пройдёт, а заголовка в ответе не будет — проверять надо именно `https`-запрос.
 Признак правильной вставки — `grep -n 'profile/image'` показывает строку внутри блока с
-`listen 127.0.0.1:9443`. Проверка без токена: 401-ответ должен нести `cache-control`
-(для этого и нужен `always`).
+`listen 127.0.0.1:9443`. **Проверка после reload: запрос без куки обязан вернуть
+`200 image/webp|png`** (статика, авторизация на этом пути не нужна). Если без куки
+приходит `401` или `302` — работает старый проксирующий блок, то есть локация
+попала не в тот `server` или `try_files` не нашёл файлов в кэше.
 
 ## 5. Второй воркер WebUI: что даст и почему пока нет
 

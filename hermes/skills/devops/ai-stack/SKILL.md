@@ -132,7 +132,7 @@ A question like «подходит ли эта модель под задачу�
 - `references/ui-latency.md` — **«Медленно грузится»: латентность UI/API** (per-URI `rt`, два штатных виновника, кэш nginx, профиль длинного чата).
 - `references/model-provenance.md` — **Model provenance / cleanup in Open WebUI** (ghost models, dead presets, **model avatars/icons**).
 - `references/media-pipeline.md` — **Media pipeline (images / TTS through LiteLLM)**.
-- `references/enricher-system.md` — **System-промпт модели `enricher`** (актуальный). Read before touching it.
+- `references/enricher-system.md` — **System-промпт обогатителя** (канон — `src/domains/enricher/prompt.md` в репо бота, здесь копия для чтения). Read before touching it.
 - `references/enricher-system-legacy.md` — **Старый system-промпт `enricher`** (откат на claude-haiku-5.5).
 - `references/music-bot-lyria.md` — **Music bot (lyria)**. Read when the separate lyria deployment (its own Postgres/Redis/RabbitMQ).
 - `references/chatgpt-subscription.md` — **ChatGPT/Codex subscription as a LiteLLM route** (`chatgpt/*` models in WebUI).

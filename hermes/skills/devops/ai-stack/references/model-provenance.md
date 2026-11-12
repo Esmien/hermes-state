@@ -96,7 +96,17 @@ sudo -u postgres psql -d webui_db -Atc "select id, is_active, length(coalesce((m
 
 Probe with the admin API key instead of a signin: `OWUI_ADMIN_API_KEY` sits next to `OWUI_ADMIN_PASSWORD` in `/root/.config/owui-signup-approver/env` (print keys only, never values). A `200` there plus a valid decoded image (`file`/`ffprobe` says webp/png 250×250) closes the server half.
 
-Row classes decide which ids the client asks for: curated presets (short id like `gpt-6-luna`, `architect`) carry the avatar; the ~60 connection rows (`chat.*`, `aider.*`, `hermes.*`, `other.*`, named `(Chat) …`) have **no** `profile_image_url` at all. A client view that resolves avatars against a connection id therefore paints the default logo for every model — the fix is either a client reload or copying the twin preset's `profile_image_url` onto those rows (data-only, reversible), not hunting for lost files.
+Row classes decide which ids the client asks for: curated presets (short id like `gpt-6-luna`, `architect`) carry the avatar; the ~60 connection rows (`chat.*`, `aider.*`, `hermes.*`, `other.*`, named `(Chat) …`) have **no** `profile_image_url` at all. A client view that resolves avatars against a connection id therefore paints the default logo for every model — the fix is a client reload or the static cache below, not hunting for lost files.
+
+**Never mass-copy a preset's `profile_image_url` onto the connection rows** — the owner refused exactly that: «второй сломает мою логику сортировки». His model list/sort is hand-curated; touching the connection rows changes what the picker shows. Report the row split as diagnosis, do not "fix" it there.
+
+### Standing fix: nginx serves avatars from a static cache
+
+Avatars are mirrored to `/var/cache/owui-avatars/<id>.<webp|png|jpg|gif>` by `/usr/local/bin/owui-avatar-sync.py` (master: `vps-infra/assets/host/bin/owui-avatar-sync.py`, symlinked from `ai-stack/ai/webui-avatars/sync-avatars.py`), refreshed by `owui-avatar-sync.timer` every 15 min; DB stays the source of truth, the script only adds/updates files and never deletes. nginx (`ai.esmien.ru.conf`, in the `listen 127.0.0.1:9443` server) answers `location = /api/v1/models/model/profile/image` with `root /var/cache/owui-avatars; try_files /$arg_id.webp … @owui_model_avatar;` — **no auth on that path**, which is what kills the cold-start `401` poisoning; a missing file falls through to the WebUI proxy exactly as before.
+
+- `$arg_id` is validated with `if ($arg_id ~ "\.\.") { return 404; }` plus a `^[A-Za-z0-9][A-Za-z0-9._:/-]{0,120}$` allowlist — `try_files` builds a filesystem path out of the query, so an unguarded `?id=` is path traversal. Verify after a reload: real id → `200 image/webp` **without any cookie**, `id=../../etc/passwd` → `404`, id without an avatar → the old `302` to `/static/favicon.png`.
+- Changing an avatar: it appears in the cache within the timer period, or immediately with `sudo /usr/local/bin/owui-avatar-sync.py` (idempotent — prints `written/unchanged/skipped/orphaned`).
+- Accepted trade-off (say it out loud when relevant): the icons are now readable without authentication by anyone who knows a model id — they are brand logos, not user data.
 
 **Cold-start 401 poisons the sidebar.** `<img>` fires before the SPA restores the session: the log shows the whole batch `401` and, seconds later, the same ids `200`. The UI swaps a failed avatar for the default logo and never re-requests, so all icons look gone until a full app reload. Read the per-id statuses from nginx before touching the DB:
 
