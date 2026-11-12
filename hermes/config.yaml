@@ -2516,6 +2516,7 @@ hooks:
       timeout: 10
       fail_closed: true
 command_allowlist:
+  - delete in root path
   - script execution via -e/-c flag
   - script execution via heredoc
   - stop/restart system service
