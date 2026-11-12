@@ -26,5 +26,5 @@ status: todo
 file: tasks/docs/vpn-service-rewrite.md
 
 ## #6 Файловая память WebUI: PROFILE.md в воркспейсах юзеров, инъекция через Filter
-status: todo
+status: in_progress
 file: tasks/docs/owui-file-memory.md
