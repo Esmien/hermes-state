@@ -10,6 +10,8 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 9e21be702a5c9c853afca040a01db25b37fa8b2f51e31c6cfe05ab3020db26e0  ./hermes/docs/vpn-runbook.md
 510781153fd8c7eabbfc319e2dd76aafa2158b9cf67cb45cfac2c28f2c630fb9  ./hermes/memories/MEMORY.md
 62ec8c3f548a39240384bfc7c1067ed3cef4f368c4b04602544620528b0d1e85  ./hermes/memories/USER.md
+2a9ea9f557ebcea079797dc1936912eb255d454874ddea7eace192e2334d21f4  ./hermes/plugins/codex-persona/__init__.py
+6b1e38576b251dafc5e1503579b71be80d752d54a60f6ae6742a1da2769c567b  ./hermes/plugins/codex-persona/plugin.yaml
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
 e192a0881a87b24d55161cdc1ee075291f19592316ed88d5a770773ace175718  ./hermes/plugins/muse-persona/persona.md
 b900857a741b20fdc37399ed8eb71191eccec8b0013ed0f2c37a8827342e8fd8  ./hermes/plugins/muse-persona/plugin.yaml

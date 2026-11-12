@@ -1,0 +1,5 @@
+name: codex-persona
+version: "1.0.0"
+description: "Attach a dedicated system prompt to every model of the Codex/ChatGPT subscription route (provider openai-codex, i.e. sol/terra/luna) without touching the global agent.system_prompt. Prompt text lives in persona.md next to this plugin; missing/empty file = the plugin is inert."
+author: "VPS Admin"
+provides_hooks: []
