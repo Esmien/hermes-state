@@ -82,6 +82,13 @@ Built-in aliases (catalog-resolved against the active provider): `sonnet`,
 `deepseek`, `grok`, `llama`, `qwen`, `minimax`, `nemotron`, `kimi`, `glm`,
 `step`, `mimo`, `trinity`.
 
+**An alias never changes the provider.** `-m codex` on a host whose active route
+is a local gateway (or any other provider) sends the literal model id `codex` to
+that base_url, gets `HTTP 400 Model not found`, and the turn SILENTLY falls back
+to the default model — the printed answer looks fine and proves nothing. Reaching
+Codex OAuth means picking the `openai-codex` provider (`hermes model`, or a user
+alias with `provider: openai-codex`), not naming the alias.
+
 ### Adding a provider key + alias (verified workflow)
 
 1. **Key → `$HERMES_HOME/.env`**, under the provider's standard env var name from
@@ -122,6 +129,38 @@ explicit `/inference/go/v1` base_url passes through untouched.
 Sanity-check the wire (the provider decides the protocol, not the docs):
 `POST {base}/chat/completions` → `400 ModelProtocolUnsupported` for muse-spark,
 while `POST {base}/responses` answers 200.
+
+### OpenAI Codex OAuth — "did we connect it already?" (verification recipe)
+
+Answer from state, cheapest check first — never from a config comment or from
+`-m codex` answering "OK":
+
+1. **`hermes auth list`** — Hermes' own credentials/pools. A Codex CLI login
+   borrowed through `auth.adopt_external_logins` (default `true`) does **not**
+   appear here, and `auth.json` showing `"active_provider": null` means the
+   same: absent = no login of Hermes' own, not necessarily "no Codex at all".
+2. **Usage history** — zero rows with `billing_provider='openai-codex'` in
+   `session_model_usage` = the provider was never actually exercised on this
+   host, whatever the config says. `sqlite3` CLI is absent on some hosts; query
+   from Python instead:
+   `sqlite3.connect('file:$HERMES_HOME/state.db?mode=ro', uri=True)` then
+   `select billing_provider, model, count(*) from session_model_usage group by 1,2`.
+3. **`~/.codex/auth.json`** — the CLI's own login (`auth_mode: chatgpt`,
+   `tokens.access_token`). Decode the JWT `exp` BEFORE any probe: while the
+   access token is still valid no refresh fires, so the probe cannot burn the
+   single-use refresh token and log the CLI out. Print only `exp` — never token
+   values.
+4. **`hermes auth list` containing `openai-codex`** is the only real "connected".
+
+Two wiring paths, and say which is which when reporting:
+
+- **Borrow** — nothing to do: with `adopt_external_logins: true` Hermes uses
+  `~/.codex/auth.json` once the provider is selected. One login for two programs
+  and single-use refresh tokens → Hermes and the Codex CLI can log each other
+  out.
+- **Own login** — `hermes auth add openai-codex` (device code; separate tokens,
+  CLI untouched). `--browser` / `auth.codex_login_flow: browser` only when the
+  org disables the device-code grant.
 
 ### "Add model X the same way Y is set up" — identify the layer first
 
