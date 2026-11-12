@@ -151,6 +151,20 @@ For model inventory and cleanup, see `ai-stack` → `references/model-provenance
   aggregated JSON to a caller that expects SSE. LiteLLM reports it as
   `APIConnectionError: openai closed the responses stream before any terminal event` — 100%
   reproducible on `/v1/responses`, invisible on `/v1/chat/completions`.
+- **Мост теряет всё, кроме текста.** `convert_messages()` в `gateway.py` склеивает
+  content списком строк (`'\n'.join(p.get('text','') …)`) и выбрасывает `image_url`/`input_image`
+  без ошибки. LiteLLM при этом отдаёт `supports_vision: true` (модель ведь зрячая), поэтому
+  клиент не получает ни `400`, ни предупреждения: модель просто отвечает «изображение не
+  прикреплено». Любая группа, чья живая нога — этот мост (и серая `chatgpt/` тоже), слепая
+  к картинкам; `image-generator`/vision-модели на такой группе не работают.
+- **Проверка «дошла ли картинка» — по `prompt_tokens`, не по ответу модели.** Один и тот же
+  текстовый payload даёт одинаковое число токенов с картинкой и без, если её срезали:
+  текстовый запрос `openai/<slug>` = N, тот же запрос с `image_url` = N (признак потери), а через
+  зрячую ногу (`service.openrouter/<slug>`) = N + сотни токенов и правильное описание.
+  Второй свидетель — `api_base` в `LiteLLM_SpendLogs`: `http://host.docker.internal:4010/v1`
+  значит запрос ушёл в мост. Лечение: увести клиента на группу с реально зрячей ногой
+  (или добавить проброс `input_image` в мост — только после проверки, что backend принимает
+  картинки), а не чинить OWUI.
 - **Always synthesise a terminal event.** If the upstream stream ends without
   `response.completed|incomplete|failed`, emit a synthetic `response.completed` yourself;
   otherwise the proxy turns a merely truncated answer into a hard error.

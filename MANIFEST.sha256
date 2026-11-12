@@ -69,7 +69,7 @@ ffc3d455a8097e27856ca875bd66f8e7e0fc9a89bf99805972c7a9fd9f61f11e  ./hermes/skill
 1ea50fe11e32a4dc16e2f99de0ba87a29006f05b6449611445fb600fae664887  ./hermes/skills/career/job-application-review/references/resume-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-99f676fe61613157d999cf1afebbccce483f16237d7a515c078a6c15d664f017  ./hermes/skills/devops/ai-stack/SKILL.md
+193dbca1c6e5927a0d5ed827bb79054e46c2ea2f9c0c0aa88e52183d8e73746d  ./hermes/skills/devops/ai-stack/SKILL.md
 35f011180b4ddc06606d1bf45df577e34baf6cb7a0aeff203c055d46eed7afbe  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
 d4d2d38f0c3fe3ff53ff7de02ca914cd07b05c1f8700813a0c3fa242b323ed89  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
@@ -81,7 +81,7 @@ dc14bc0c6422327a0aecf02277be289b131fdb80a0fa650071ff49b3d95eb90c  ./hermes/skill
 c59c1d19122edc2b769aa8370db797bc17edf118e9b0be10fdbbaf6d8667cc8e  ./hermes/skills/devops/ai-stack/references/kb-sync.md
 0a5837b8d283d7edfcfe6b28754c5a2c893f2f60a508d059c9b2552c87f56314  ./hermes/skills/devops/ai-stack/references/litellm-admin-auth.md
 4e9acc70cf979960a2423eddb28d29ff9d60a3b22515dbb9b08213aa5b380e40  ./hermes/skills/devops/ai-stack/references/litellm-model-db.md
-41f4f7689a758d15c420cc8eebebb24df540146fba04ac2aad0a825c8e816e28  ./hermes/skills/devops/ai-stack/references/media-pipeline.md
+49b9059ff8e50d6a650f3c3ae228dea6ac3a7fea82a7df45b16baa69c2867052  ./hermes/skills/devops/ai-stack/references/media-pipeline.md
 5490b3699d7ee7cf47a8633189687ae78ea8d9bc2be86e55509a4b1c979623ca  ./hermes/skills/devops/ai-stack/references/memory-troubleshooting.md
 ac748903dd3fab6673926b5bfab429273e7e8b370d0347fae27ab62f2a27cf2a  ./hermes/skills/devops/ai-stack/references/model-provenance.md
 4ac7aac6b3e15b22a09ef8fb8e8b89e91c814835c7a9455f90a086ac9c4f10d7  ./hermes/skills/devops/ai-stack/references/model-route-benchmark.md
@@ -140,7 +140,7 @@ f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skill
 a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skills/devops/llm-route-bench/scripts/code_bench_hard.py
 d0318bee8625a133365c1c251d116b090ee791a463fa9a925bde2dff16d7b7ed  ./hermes/skills/devops/lyria-music-bot/SKILL.md
 dfb7b3e56857f88530a34d972a369d597305ee5a9ac3e669b5a529fa504c65f0  ./hermes/skills/devops/lyria-music-bot/references/suno-provider.md
-796003d2816e407d2bd7ea1590fcb3ce4925a9edc0cc45401b892cad85b4b50a  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
+bb4896606774be2eb9bdada5079ddc46d7a6e24826d98792e724544942e41a1e  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 ca25472b50ad83024fb7bcf7338aad4dacb16a24391d54e694f0f9ee85b37b32  ./hermes/skills/devops/ru-access-to-foreign-cloud/SKILL.md
 9863e40dd9c9afc73287285af5bd3aebf53410d153f77bd53859b23721d892a1  ./hermes/skills/devops/ru-access-to-foreign-cloud/references/oracle-cloud.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
