@@ -86,6 +86,21 @@ Russian, terse, no command replay, no secrets. «Ложная тревога о�
 
 ## Pitfalls
 
+- **When the alert detail *is* a psql error, the ratio is still real.** `aggregate functions are
+  not allowed in GROUP BY` comes from the watchdog's own enrichment query
+  (`/usr/local/bin/litellm-watchdog.py`, `breakdown` ~line 184: it concatenates `count(*)` inside
+  the SELECT and then `group by 1`). The 15-minute count/ratio is computed by a different, working
+  query — so do not dismiss the alarm as noise, re-run the breakdown by hand.
+- **`/model/update` / `/model/delete` + `/model/new` traffic in the gateway log means a route
+  migration is in flight.** Bridge legs created without `api_key` produce
+  `OpenAIError: The api_key client option must be set`, which the router turns into
+  `RouterRateLimitError: No deployments available … cooldown_list=[]` → `429` to clients, and the
+  spend log shows `model_group` = the affected group with `model_id` of a deployment that no
+  longer exists in `LiteLLM_ProxyModelTable`. That is a config-side artefact of the migration, not
+  a gateway outage — confirm with the ids and with `LiteLLM_SpendLogs.api_base`
+  (`host.docker.internal:4010` = SIWC bridge), then re-verify with a real call.
+- **`/model/info` masks `api_key`** — `MISSING` there proves nothing; read `LiteLLM_ProxyModelTable`
+  or just call the model.
 - **Do not trust the alert text's percentage alone** — it is a ratio, and with 10-15 calls in a window a couple of control-endpoint rows read as 90%. Always add the breakdown query before concluding.
 - **`status<>'success'` is not "the model failed".** Check `coalesce(model,'')<>''` — empty model means the request never reached a provider.
 - **`agent.log` is buffered** — the nested `hermes chat` writes on exit; poll the systemd unit, not the file size.

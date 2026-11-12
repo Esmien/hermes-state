@@ -130,7 +130,7 @@ c0ecb8227f1460b4674c82762ab1df0deb77e55ad6d09da3bc6db8924fddbbf6  ./hermes/skill
 3c44c0cf146ec8c5aff9552355488c98e4d986eca11c9d645cb6fd379129fe06  ./hermes/skills/devops/docker-compose-traps/SKILL.md
 5e43eb5b9f5a36a6d40919147b0a29418977460522f5fe6960c84a0d535b862a  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
-8ce572465e42f636a46a8c247ceba1fb09e4fec2d90aaa2dbb2c6c73c3a9de54  ./hermes/skills/devops/litellm-fallout-triage/SKILL.md
+fa533136e7a7e0f356aeb1ab1fe9cfabd6700b7f19de1498233f2322b14ac5b4  ./hermes/skills/devops/litellm-fallout-triage/SKILL.md
 81970c54e32ced498a1b55b0e6b6798c473deabcfc86f878a86ebd5d6884fb4a  ./hermes/skills/devops/llm-route-bench/SKILL.md
 2af389e91336a6a8769124ec2d237935d72155963d1549d63eef9def98953691  ./hermes/skills/devops/llm-route-bench/references/access-pricing.md
 fc01a40988b33a5871a1f67133fc005952f93758b924dae5ad11d5d7e2131589  ./hermes/skills/devops/llm-route-bench/references/code-gen-bench.md
