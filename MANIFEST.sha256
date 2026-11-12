@@ -138,6 +138,7 @@ f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skill
 9d1851b42d0020e65831a250ae71f4e88bc0076a8eae3191b7b472df70c48d97  ./hermes/skills/devops/llm-route-bench/scripts/authenticity_probe.py
 8448c5899b2ffab423b675e9ff1c24f808f95fc736d3d010d72fcb8d3007e9c6  ./hermes/skills/devops/llm-route-bench/scripts/code_bench.py
 a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skills/devops/llm-route-bench/scripts/code_bench_hard.py
+11a9382be216d5b4dad3ee02110561706ce5b4a3c523ba51d98b4a06467ccb99  ./hermes/skills/devops/lyria-music-bot/SKILL.md
 796003d2816e407d2bd7ea1590fcb3ce4925a9edc0cc45401b892cad85b4b50a  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 ca25472b50ad83024fb7bcf7338aad4dacb16a24391d54e694f0f9ee85b37b32  ./hermes/skills/devops/ru-access-to-foreign-cloud/SKILL.md
 9863e40dd9c9afc73287285af5bd3aebf53410d153f77bd53859b23721d892a1  ./hermes/skills/devops/ru-access-to-foreign-cloud/references/oracle-cloud.md
