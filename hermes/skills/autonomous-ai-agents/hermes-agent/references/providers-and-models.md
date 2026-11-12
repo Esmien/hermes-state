@@ -162,6 +162,37 @@ Two wiring paths, and say which is which when reporting:
   CLI untouched). `--browser` / `auth.codex_login_flow: browser` only when the
   org disables the device-code grant.
 
+#### Running the device-code flow (works headless)
+
+`hermes auth add openai-codex` prints a URL + code and then blocks on the browser
+step, so run it as `terminal(background=true, pty=true)` and poll; a foreground
+call just sits until timeout. Say what the owner must DO in the same message as
+the URL and code ("open …/codex/device, enter CODE, ~15 min to live"), then hand
+over and stop polling: each blocking `wait` burns a turn window while he is
+doing his part, and "почему так долго" is answered by "процесс ждёт твой шаг в
+браузере". Nothing is saved until the process exits — `Waiting for sign-in...`
+means no credential yet; look for `Added openai-codex OAuth credential #1` and
+confirm with `hermes auth list`. If the code expired, re-run and issue a new one.
+
+#### After login: model ids are per-plan, and `-m` never picks a provider
+
+- Probe one-shot with an explicit provider:
+  `hermes chat -q "Reply with exactly: OK" -m <model-id> --provider openai-codex`.
+  `-m openai-codex/<model>` is not a route: the string goes verbatim to the
+  ACTIVE provider (`400 Model not found` from a local gateway) and the turn falls
+  back silently.
+- Never trust a model id from a config comment or the built-in `codex` alias: a
+  ChatGPT-plan account answers `400 The 'gpt-5.3-codex' model is not supported
+  when using Codex with a ChatGPT account`. Read the real list from the CLI cache
+  `~/.codex/models_cache*.json` → `models[].slug` (observed: gpt-6.1-sol,
+  gpt-6-astra, gpt-6.1-terra, gpt-6-sol, gpt-6-luna, gpt-5.6-sol/terra/luna).
+- Success = the session's `session_model_usage` row for the primary is
+  `openai-codex` / `https://chatgpt.com/backend-api/codex`. A fallback row ALONE
+  means the switch did not happen; `grep <session_id> logs/agent.log |
+  grep -iE "error|Fallback activated"` separates a bad model id from a bad login.
+- A working OAuth login does not make `-m codex` work: offer the owner a user
+  alias carrying `provider: openai-codex` for the id his plan actually serves.
+
 ### "Add model X the same way Y is set up" — identify the layer first
 
 Y may run as a direct provider alias, through a local gateway (Open WebUI /

@@ -2,7 +2,7 @@
 §
 Правило владельца: recovery-репо (vps-infra, hermes-state) обязаны всегда совпадать с живым хостом — любое изменение на хосте сразу переносится в репо.
 §
-Дорогие LLM-маршруты (opus/gpt-6/sonnet) не трогать и не вызывать без явного указания; DeepSeek-flash — дефолт для тестов. Квота Sol 15–160 сообщ/5ч ОБЩАЯ для Codex CLI, OpenCode и Hermes-провайдера openai-codex — не жечь впустую.
+Дорогие LLM-маршруты (opus/gpt-6/sonnet) — только по явному указанию; DeepSeek-flash — дефолт тестов. Квота Sol 15–160/5ч ОБЩАЯ для Codex CLI, OpenCode и Hermes (свой OAuth openai-codex с 12.11, модели gpt-6.1-sol, gpt-5.6-*; gpt-5.3-codex аккаунту недоступен).
 §
 Hermes ходит через Open WebUI-гейтвей (custom, http://127.0.0.1:8080/api/v1); model.aliases.* переключают сессию, дефолтный маршрут не меняют.
 §
