@@ -72,6 +72,23 @@ API facts that cost time to discover:
   reports `0 tool(s), 0 hook(s)` for a section-only plugin — that is not a
   failure, it simply does not count sections.
 
+## Group scope: bind by provider, not by model name
+
+When the ask is «промпт для группы моделей» — a subscription route rather than one id —
+filter on `session_info["provider"]`, not on the model prefix: every model of that route
+gets the section and no name list has to be maintained. Live example on this host:
+`$HERMES_HOME/plugins/codex-persona/` matches `openai-codex`/`codex` (Hermes aliases
+`sol`/`terra`/`luna`), with `CODEX_PERSONA_MODELS` as an optional extra model-substring list.
+Provider values are the configured provider ids: `openai-codex` for a direct Codex OAuth
+alias, `custom` for anything through the Open WebUI gateway — so a `custom` filter would hit
+*every* OWUI-routed model, and is never the way to scope a single group.
+
+Verify group scope with two runs: `hermes chat -q 'ок' -m sol --oneshot -Q`, then assert
+`sessions.billing_provider` = `openai-codex` and the persisted prompt contains
+`## Plugin Context: <section-id>`; run a second one-shot on the default alias and assert the
+marker is absent. On the 8080 route that prompt also has no VPS_ADMIN text — the OWUI preset
+prepends it upstream, it is not part of Hermes' stored prompt.
+
 ## Verify which prompt the model actually got
 
 Do not infer it from the reply. The prompt is persisted per session and joined

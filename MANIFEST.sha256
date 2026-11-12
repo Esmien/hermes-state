@@ -3,7 +3,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 03b3093643b9cdb20aa43444f1c0e41e71dbae9a63294c372c2d860eb886e73f  ./hermes/SOUL.md
 683646459f25cdbbebebf48b674e0be4d96218b4032f7ab129bf0497bcf3f613  ./hermes/agent-hooks/ssh-only-gate.py
 8de8aafe34757fdff3e165704d4803a5a054618d11243cad6401fd4cc5483159  ./hermes/bin/read-untrusted
-8444f68453e4b8938cb44ba1b3f888ecfe2380b81679dc3fc6435d0c4038cff9  ./hermes/config.yaml
+c43a7f53dcc4dae32db8e9fad489060c0f574371347e5aa96333d4315c5789ac  ./hermes/config.yaml
 48e0043586e4d8824f57d5d5f09172b185b376e1bc9753770e0321dc11fb47fa  ./hermes/cron/jobs.json
 6624bae8326a2b7845ffeb7b1f88c78d6724d3e49c6317697054717bd4472c19  ./hermes/docs/proposals/sandbox-per-user.md
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
@@ -11,6 +11,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 510781153fd8c7eabbfc319e2dd76aafa2158b9cf67cb45cfac2c28f2c630fb9  ./hermes/memories/MEMORY.md
 62ec8c3f548a39240384bfc7c1067ed3cef4f368c4b04602544620528b0d1e85  ./hermes/memories/USER.md
 2a9ea9f557ebcea079797dc1936912eb255d454874ddea7eace192e2334d21f4  ./hermes/plugins/codex-persona/__init__.py
+f17eb4853ee327b86bcf6660d6a3970748a79443bfc3d44b894467289c4b6dfd  ./hermes/plugins/codex-persona/persona.md
 6b1e38576b251dafc5e1503579b71be80d752d54a60f6ae6742a1da2769c567b  ./hermes/plugins/codex-persona/plugin.yaml
 a3ff97054d49e0b050c9e2478b9c01678e45e54f0f93b4d4e6eb560ee59509b8  ./hermes/plugins/muse-persona/__init__.py
 e192a0881a87b24d55161cdc1ee075291f19592316ed88d5a770773ace175718  ./hermes/plugins/muse-persona/persona.md
@@ -42,7 +43,7 @@ ae53083081d449938aa12ef0ea95c54e5c03c8ecc59841214e06c3804c419cf5  ./hermes/skill
 03bde0b1f1d5abb3b58af962f274608797d27e786ad37290804e1503b2c822ac  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/memory-curation.md
 2f7d11ebe963a83a4e9478c7e7b7d02c1a02e08916eac1d6cd757ba1211d7a2c  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/model-fallback-diagnosis.md
 ded08718d2eb141262a31b323f8e66eeb40f35e074e1f0e70abb76860891ec92  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/native-mcp.md
-9b41c3a92743c10295ad22038f446b0af30d750a7960bc97ba8524794f4cae64  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/per-model-system-prompts.md
+52e4d8b03190896c598e18470dbf0e4107426f6c5752e2c8db5da573779fb17f  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/per-model-system-prompts.md
 8e476ed9f4b36de9ccd1ecf950a8b42d29ca09816017b0600215dd776f650a8d  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/per-user-access-control.md
 2254eabf40c360efb54e4df482f3b84820b54a15e6954c4a7e9e7fee4eb90f77  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/petdex.md
 4890617a80d8c70fc388a49201d5a718049a64c0ddd5fac3f35754641f063b99  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/portal-auth-for-third-party-apps.md
@@ -71,7 +72,7 @@ ffc3d455a8097e27856ca875bd66f8e7e0fc9a89bf99805972c7a9fd9f61f11e  ./hermes/skill
 1ea50fe11e32a4dc16e2f99de0ba87a29006f05b6449611445fb600fae664887  ./hermes/skills/career/job-application-review/references/resume-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-a6c65a48ccd1f903a71ef6d72dfeeef314011aeaedaed276f2a6030940db7061  ./hermes/skills/devops/ai-stack/SKILL.md
+0224346cf37aee4ab78d489eacc65a1b95c0928520950d3d92021ab5cc0a025b  ./hermes/skills/devops/ai-stack/SKILL.md
 35f011180b4ddc06606d1bf45df577e34baf6cb7a0aeff203c055d46eed7afbe  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
 d4d2d38f0c3fe3ff53ff7de02ca914cd07b05c1f8700813a0c3fa242b323ed89  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md

@@ -70,6 +70,7 @@ plugins:
 # Model Configuration
 # =============================================================================
   enabled:
+    - codex-persona
     - muse-persona
   disabled: []
 model:
