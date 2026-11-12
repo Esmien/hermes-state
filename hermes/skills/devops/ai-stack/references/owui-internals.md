@@ -8,6 +8,7 @@
 |---|---|
 | настройки инстанса (в т.ч. `terminal_server.connections`, `tool_server.connections`, `ui.*`, `task.*`) | таблица `config`, ключ → JSON в `value` |
 | workspace-инструменты (Python-тулзы, «Image Ref Generator» и пр.) | таблица `tool`: `content` (исходник) + отдельная колонка `valves` (значения полей формы) |
+| pipe-функции (модели-пайпы, напр. `enricher`) | таблица `function`: `content` (код) + `valves` (JSON с моделью/URL/ключами); в таблице `model` такая модель есть, но с **пустым `base_model_id`** и без `params->>'system'` |
 | чаты | таблица `chat`, поле `chat` — JSON (id, title, models, messages, history, files, tags) |
 | файлы/вложения | таблица `file` + диск `/app/backend/data/uploads` (в контейнере) |
 | состояние сессии/выбора в UI | **не в БД** — `localStorage` браузера |
@@ -27,6 +28,25 @@ select length(content), content like '%<маркер версии>%' from tool w
 ```
 
 Секреты (ключи в `valves`, токены в конфигах) в чат не выводить — только имена ключей и наличие.
+
+## Pipe-функция = модель без базовой модели
+
+Модель с пустым `base_model_id` и пустым `params->>'system'` — это не «сломанный пресет», а pipe: поведение (и промпт) лежит в `function.content`, параметры — в `function.valves`. Смотреть так:
+
+```sql
+select id, type, is_active, length(content) from function order by length(content) desc;
+select coalesce(valves::text,'<null>') from function where id='<pipe_id>';
+```
+
+`valves` содержат ключи провайдеров — печатать только имена полей и значения, не являющиеся секретами (модель, URL, лимиты, таймаут).
+
+**Правка valves — только через API, не SQL-ом:** `GET /api/v1/functions/id/<id>/valves` читает, `POST /api/v1/functions/id/<id>/valves/update` пишет (POST на `/valves` без `/update` отвечает `405`). API перезагружает значения в памяти процесса; правка строки в БД без рестарта контейнера не подхватится. Тело шлём целиком тем же объектом, что вернул GET (иначе теряются остальные поля).
+
+**Аутентификация для этих ручек:** bearer = API-ключ админа из таблицы `api_key` (`select key from api_key where user_id='<admin uuid>';`) — он там в открытом виде. Самодельный JWT, подписанный `WEBUI_SECRET_KEY`, OWUI 0.13.3 отвергает (`401 Invalid token`): не тратить время на минт токена.
+
+**Восстановление удалённой строки `model`:** бэкап — `select to_jsonb(m) from model m where id='<id>'`. При вставке обратно `params` и `meta` приезжают **строками**, и если закастить их в `jsonb` как есть, внутрь ляжет JSON-строка: `params->>'system'` вернёт пусто, а модель будет выглядеть «без промпта». Перед вставкой `json.loads` → `json.dumps` → `::jsonb`.
+
+**psql на хосте:** `su - postgres -c "psql -d webui_db -Atc \"select (params::jsonb)->>'system' …\""` ломается на вложенных кавычках и скобках. Писать SQL в `/tmp/q.sql` и звать `psql -f /tmp/q.sql` — тот же приём уже используется для длинных UPDATE.
 
 ## Минифицированный фронт не grep'ать широко
 

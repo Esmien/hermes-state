@@ -80,6 +80,7 @@ vpn.esmien.ru:8443 (VPN entry)                    | vpn.esmien.qd.je:8443
 
 ## Cross-cutting rules and the expensive traps
 
+- **Сломался внешний вызов (сервис вернул `None`/500/timeout) — сначала найти, кто владеет конфигом, и починить ТОЛЬКО мёртвый указатель** (URL, имя модели, ключ). Промпты/политики живут у владельца фичи (pipe-функция в OWUI, модель в LiteLLM), а не в вызывающем коде: перенос промпта в бота «чтобы починить» владелец откатывает и считает поломкой архитектуры. Порядок: найти по стеку, кто отдаёт это поведение (`search_files` по коду/конфигам, затем `function`/`model` в `webui_db`) → проверить живость указателя → заменить указатель → сквозной тест.
 - **Never put `/dev/null` as a destination** in a symlink/`install`/`ln -sfn` one-liner while cleaning up: it silently unlinks the device node host-wide (every service writing to `null` fails). Restore is `rm -f /dev/null && mknod -m 666 /dev/null c 1 3`; verify with `ls -l /dev/null` → `crw-rw-rw- 1 root root 1, 3`.
 - **Git is the record:** `sudo -u ai_service env HOME=/home/ai_service git -C /home/ai_service/ai-stack …` (**no remote** — branch `master` is local-only, so nothing gets pushed and `git commit -a` sweeps unrelated working-tree edits into your commit: stage files by name); `ai/.env`, `backups/`, `backup-deploy/`, `*.bak*`, logs ignored on purpose; `ai/.env.example` holds the key names with `CHANGE_ME`. `runbook.md` is tracked and owner-facing — update it when a recovery procedure changes.
 - **DB restore applies `backups/postgres/<db>_*.dump` — but the dumps are `.dump.enc`**, so an unchanged mask silently finds nothing and the deploy continues on an empty database.
@@ -132,7 +133,7 @@ A question like «подходит ли эта модель под задачу�
 - `references/ui-latency.md` — **«Медленно грузится»: латентность UI/API** (per-URI `rt`, два штатных виновника, кэш nginx, профиль длинного чата).
 - `references/model-provenance.md` — **Model provenance / cleanup in Open WebUI** (ghost models, dead presets, **model avatars/icons**).
 - `references/media-pipeline.md` — **Media pipeline (images / TTS through LiteLLM)**.
-- `references/enricher-system.md` — **System-промпт обогатителя** (канон — `src/domains/enricher/prompt.md` в репо бота, здесь копия для чтения). Read before touching it.
+- `references/enricher-system.md` — **System-промпт обогатителя** (канон — pipe-функция `enricher` в Open WebUI; здесь копия для сверки, в боте промпта быть не должно). Read before touching it.
 - `references/enricher-system-legacy.md` — **Старый system-промпт `enricher`** (откат на claude-haiku-5.5).
 - `references/music-bot-lyria.md` — **Music bot (lyria)**. Read when the separate lyria deployment (its own Postgres/Redis/RabbitMQ).
 - `references/chatgpt-subscription.md` — **ChatGPT/Codex subscription as a LiteLLM route** (`chatgpt/*` models in WebUI).
