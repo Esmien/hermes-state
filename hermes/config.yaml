@@ -2198,6 +2198,7 @@ display:
   language: ru
   runtime_footer:
     enabled: true
+  show_reasoning: true
 telemetry:
   shared_metrics:
     enabled: false
