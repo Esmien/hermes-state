@@ -3,7 +3,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 03b3093643b9cdb20aa43444f1c0e41e71dbae9a63294c372c2d860eb886e73f  ./hermes/SOUL.md
 683646459f25cdbbebebf48b674e0be4d96218b4032f7ab129bf0497bcf3f613  ./hermes/agent-hooks/ssh-only-gate.py
 8de8aafe34757fdff3e165704d4803a5a054618d11243cad6401fd4cc5483159  ./hermes/bin/read-untrusted
-c43a7f53dcc4dae32db8e9fad489060c0f574371347e5aa96333d4315c5789ac  ./hermes/config.yaml
+3ea94e96132b1ea7b1f5b81233b553bcbd23ce61fc7a46a5b6dc7c43d963540e  ./hermes/config.yaml
 48e0043586e4d8824f57d5d5f09172b185b376e1bc9753770e0321dc11fb47fa  ./hermes/cron/jobs.json
 6624bae8326a2b7845ffeb7b1f88c78d6724d3e49c6317697054717bd4472c19  ./hermes/docs/proposals/sandbox-per-user.md
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
@@ -72,7 +72,7 @@ ffc3d455a8097e27856ca875bd66f8e7e0fc9a89bf99805972c7a9fd9f61f11e  ./hermes/skill
 1ea50fe11e32a4dc16e2f99de0ba87a29006f05b6449611445fb600fae664887  ./hermes/skills/career/job-application-review/references/resume-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-0224346cf37aee4ab78d489eacc65a1b95c0928520950d3d92021ab5cc0a025b  ./hermes/skills/devops/ai-stack/SKILL.md
+2dd2c94d260f57d43d548a47a9ac7f8266656fc8e928fdc26d8dad2b419823f6  ./hermes/skills/devops/ai-stack/SKILL.md
 35f011180b4ddc06606d1bf45df577e34baf6cb7a0aeff203c055d46eed7afbe  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
 d4d2d38f0c3fe3ff53ff7de02ca914cd07b05c1f8700813a0c3fa242b323ed89  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
@@ -84,7 +84,7 @@ dc14bc0c6422327a0aecf02277be289b131fdb80a0fa650071ff49b3d95eb90c  ./hermes/skill
 c59c1d19122edc2b769aa8370db797bc17edf118e9b0be10fdbbaf6d8667cc8e  ./hermes/skills/devops/ai-stack/references/kb-sync.md
 0a5837b8d283d7edfcfe6b28754c5a2c893f2f60a508d059c9b2552c87f56314  ./hermes/skills/devops/ai-stack/references/litellm-admin-auth.md
 4e9acc70cf979960a2423eddb28d29ff9d60a3b22515dbb9b08213aa5b380e40  ./hermes/skills/devops/ai-stack/references/litellm-model-db.md
-9a781e25cce5909fe9c1217d6b1d87f2fbc83358e7f08dfd672f1d441951464d  ./hermes/skills/devops/ai-stack/references/media-pipeline.md
+0a212f2ae32d2d3bcdeb43bbd421074cb4ee1e95308b586025e90224d9553987  ./hermes/skills/devops/ai-stack/references/media-pipeline.md
 5490b3699d7ee7cf47a8633189687ae78ea8d9bc2be86e55509a4b1c979623ca  ./hermes/skills/devops/ai-stack/references/memory-troubleshooting.md
 ac748903dd3fab6673926b5bfab429273e7e8b370d0347fae27ab62f2a27cf2a  ./hermes/skills/devops/ai-stack/references/model-provenance.md
 4ac7aac6b3e15b22a09ef8fb8e8b89e91c814835c7a9455f90a086ac9c4f10d7  ./hermes/skills/devops/ai-stack/references/model-route-benchmark.md
@@ -143,7 +143,7 @@ f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skill
 a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skills/devops/llm-route-bench/scripts/code_bench_hard.py
 d0318bee8625a133365c1c251d116b090ee791a463fa9a925bde2dff16d7b7ed  ./hermes/skills/devops/lyria-music-bot/SKILL.md
 dfb7b3e56857f88530a34d972a369d597305ee5a9ac3e669b5a529fa504c65f0  ./hermes/skills/devops/lyria-music-bot/references/suno-provider.md
-bb4896606774be2eb9bdada5079ddc46d7a6e24826d98792e724544942e41a1e  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
+56b9357259c64abe929407cc8ba76bead2a9ff115422e9b13e0b064f7cc86a7c  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 ca25472b50ad83024fb7bcf7338aad4dacb16a24391d54e694f0f9ee85b37b32  ./hermes/skills/devops/ru-access-to-foreign-cloud/SKILL.md
 9863e40dd9c9afc73287285af5bd3aebf53410d153f77bd53859b23721d892a1  ./hermes/skills/devops/ru-access-to-foreign-cloud/references/oracle-cloud.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md

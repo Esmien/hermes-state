@@ -134,6 +134,25 @@ For model inventory and cleanup, see `ai-stack` → `references/model-provenance
 - Проверка, что YAML реально применился: `/router/settings` отдаёт `fields[]`, и в нём
   `fallbacks` — а не значение верхнего уровня (верхний уровень `null` ничего не значит).
 
+## Media on the bridge
+
+- **The bridge carries images now, and that matters for route order.** `convert_messages` builds
+  `input_text` + `input_image` parts for user messages (`image_url` may be a dict or a string, data
+  URL or `/api/v1/files/...`). Before this patch it joined `p.get('text')` and silently dropped every
+  image, so the white route was blind while the grey one was not — and a blind primary looks like
+  "the model forgot how to see pictures".
+- **White primary, grey fallback**: per group set the bridge deployment `order=1` and the `chatgpt/`
+  one `order=2`. Every leg needs an explicit order — a leg left at `None` disappears the moment a
+  sibling declares one.
+- **`/model/update` bookkeeping does not always reach the router.** The DB and `/model/info` show the
+  new order, yet calls die with `429 No deployments available ... cooldown_list=[]` (a blocked grey
+  sibling + an in-memory leg still at `order=None`). Reliable fix: `/model/delete` the leg and
+  `/model/new` it again; a bridge leg needs `api_key` (any string) or the upstream client complains
+  `AuthenticationError: The api_key client option must be set`.
+- **Restarting the unit is enough for code changes** — but check both binds afterwards
+  (`172.17.0.1:4010` and `127.0.0.1:4010`), and probe with a real PNG: `prompt_tokens` ~670 means the
+  image arrived, 13–19 means it was dropped again.
+
 ## Pitfalls
 
 - **После перезагрузки хоста проверять оба bind, а не `systemctl is-active`.** Юнит стартует
