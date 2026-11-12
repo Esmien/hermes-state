@@ -29,6 +29,12 @@ select length(content), content like '%<маркер версии>%' from tool w
 
 Секреты (ключи в `valves`, токены в конфигах) в чат не выводить — только имена ключей и наличие.
 
+## Персональный системный промпт и миграция
+
+При инвентаризации промптов проверяй `user.settings::jsonb -> 'ui' ->> 'system'`, выводя только агрегаты по роли и длину, не тексты. Например: `select role, count(*), min(length(settings::jsonb->'ui'->>'system')), max(length(settings::jsonb->'ui'->>'system')) from "user" where coalesce(settings::jsonb->'ui'->>'system','') <> '' group by role;`. JSON null не является объектом: перед `jsonb_object_keys` проверяй `jsonb_typeof(...)='object'`.
+
+При переносе в файлы сопоставляй `user.id` с `state.json` и проверяй принадлежность каталога, а не email; admin и pending могут не иметь песочницы. Сначала проверь полный перенос каждого промпта без обрезания и перезаписи существующего профиля, затем согласованно отключай пользовательские промпты и только после проверки очищай исходные значения. Не затрагивай админские промпты моделей в `model.params` и проверяй итоговый порядок системных инструкций на реальном запросе. `chat.system_prompt` — разрешение интерфейса/сохранения настроек; не считай его доказанной блокировкой system-сообщений через API. Источник: https://docs.openwebui.com/features/authentication-access/rbac/permissions
+
 ## Pipe-функция = модель без базовой модели
 
 Модель с пустым `base_model_id` и пустым `params->>'system'` — это не «сломанный пресет», а pipe: поведение (и промпт) лежит в `function.content`, параметры — в `function.valves`. Смотреть так:
