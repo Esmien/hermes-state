@@ -1,6 +1,6 @@
 # Model provenance and cleanup in Open WebUI
 
-> Loaded from the `ai-stack` skill. Read this when ghost models, dead/disabled presets, model ids that 400 or vanish.
+> Loaded from the `ai-stack` skill. Read this when ghost models, dead/disabled presets, model ids that 400 or vanish, or a model icon/avatar looks wrong.
 
 ## Model provenance in Open WebUI (ghost models)
 
@@ -78,6 +78,34 @@ Order of operations:
 
 When the user says «удали мёртвые», delete only the ones that fail the probe — a disabled-but-working model is a config choice, not garbage. Report counts (dead removed / alive kept), the backup path, and the surviving disabled entries.
 
+## Model avatars (иконки моделей)
+
+«Куда делись аватарки моделей?» — almost never a lost image. Where they live and what each answer means:
+
+- The image is `webui_db.model.meta.profile_image_url` — a `data:image/webp|png;base64,…` URL (a few KB; uploads can be ~150 KB PNG). Inspect with a **cast** — `meta` is `json`, so `jsonb_typeof(meta->…)` fails:
+
+```bash
+sudo -u postgres psql -d webui_db -Atc "select id, is_active, length(coalesce((meta::jsonb)->>'profile_image_url','')) from model order by id;"
+```
+
+- **`/api/models` strips `profile_image_url` from every row on purpose** ("images are served via /model/profile/image") — an empty `meta` there proves nothing and is not a regression.
+- Images are served by `GET /api/v1/models/model/profile/image?id=<id>` (the sidebar calls it with `&lang=`). Verdict per status:
+  - `200` + image bytes → storage and serving fine, look at the client;
+  - `302` (empty body) → **fallback to `/static/favicon.png`**, i.e. that id has no image, no read grant, or does not exist;
+  - `401` → the request arrived without a session.
+
+Probe with the admin API key instead of a signin: `OWUI_ADMIN_API_KEY` sits next to `OWUI_ADMIN_PASSWORD` in `/root/.config/owui-signup-approver/env` (print keys only, never values). A `200` there plus a valid decoded image (`file`/`ffprobe` says webp/png 250×250) closes the server half.
+
+Row classes decide which ids the client asks for: curated presets (short id like `gpt-6-luna`, `architect`) carry the avatar; the ~60 connection rows (`chat.*`, `aider.*`, `hermes.*`, `other.*`, named `(Chat) …`) have **no** `profile_image_url` at all. A client view that resolves avatars against a connection id therefore paints the default logo for every model — the fix is either a client reload or copying the twin preset's `profile_image_url` onto those rows (data-only, reversible), not hunting for lost files.
+
+**Cold-start 401 poisons the sidebar.** `<img>` fires before the SPA restores the session: the log shows the whole batch `401` and, seconds later, the same ids `200`. The UI swaps a failed avatar for the default logo and never re-requests, so all icons look gone until a full app reload. Read the per-id statuses from nginx before touching the DB:
+
+```bash
+grep -h 'models/model/profile/image' /var/log/nginx/access.log* | sed -E 's/.*id=([^&"]+).*" ([0-9]{3}) .*/\2 \1/' | sort | uniq -c | sort -rn | head -20
+```
+
+Do not try to prove rendering with the Lightpanda browser: it gives you the `src` you need (confirm the sidebar asks for preset ids, not connection ids) while `naturalWidth` stays 0 because no image is decoded — verify pixels by fetching the endpoint instead. `model.updated_at` is a **bigint epoch**, so `to_timestamp(updated_at)::date`, never `updated_at::date`.
+
 ## When to read this file (annotated index entry, moved from SKILL.md)
 
-- `references/model-provenance.md` — **Model provenance and cleanup in Open WebUI**. Read when ghost models, dead/disabled presets, model ids that 400 or vanish.
+- `references/model-provenance.md` — **Model provenance and cleanup in Open WebUI**. Read when ghost models, dead/disabled presets, model ids that 400 or vanish, or a model avatar/icon is missing.
