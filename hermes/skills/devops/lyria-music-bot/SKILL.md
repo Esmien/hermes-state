@@ -21,7 +21,8 @@ metadata:
 - **Энричер НЕ в боте.** Промпт и логика обогащения живут в Open WebUI как **pipe-функция** `enricher` (таблица `function`, ~14.7 KB, `is_active=t`); модель OWUI `enricher` — это её pipe-модель. Рядом неактивный `lyria_enricher` (2-stage) — не трогать.
   - Валивы пайпа: `API_BASE_URL=http://litellm:4000/v1`, `API_KEY` (ключ LiteLLM с алиасом `Other`), `MODEL_POET`/`MODEL_PRODUCER`, `MAX_TOKENS=1200`, `TIMEOUT=110`. Меняются через `POST /api/v1/functions/id/enricher/valves/update` (обычный POST на `/valves` даёт 405).
   - Бот ходит в OWUI: `ENRICH_URL=https://ai.esmien.ru/api/v1/chat/completions`, `ENRICH_MODEL=enricher`, `ENRICH_TOKEN` = API-ключ OWUI (таблица `api_key`, plaintext).
-- **Генерация идёт МИМО LiteLLM**: `src/domains/generation/service.py::generate_song_real` напрямую в `https://openrouter.ai/api/v1/chat/completions` с `OPENROUTER_API_KEY` и `MODEL_ID` (SSE, base64-дельты, `modalities: [text, audio]`). Единственная точка замены провайдера — `generate_song_real`; её вызывает только `run_generation`.
+- **Генерация идёт МИМО LiteLLM**: `src/domains/generation/service.py::generate_song_real` напрямую в `https://openrouter.ai/api/v1/chat/completions` с `OPENROUTER_API_KEY` и `MODEL_ID` (SSE, base64-дельты, `modalities: [text, audio]`). Точка выбора провайдера — `run_generation`: `GENERATION_PROVIDER=lyria|suno`, фолбэк на Lyria при быстрых отказах Suno. `run_generation` возвращает **`list[bytes]`** (Suno отдаёт 2 варианта), а не один трек.
+- Детали провайдера Suno, политика ретраев/таймаутов, чек-лист перед коммитом и рецепт живой проверки — `references/suno-provider.md`.
 
 ## Деплой: главная ловушка compose
 
@@ -45,6 +46,12 @@ metadata:
 `sunoapi.org` — **реальный Suno**, но неофициальный прокси: треки открываются на `suno.com/song/<id>` под пул-аккаунтом, `model_name: chirp-hawk`, всегда 2 клипа на генерацию. Оператор — MIRA MUSE LLC, общий бэкенд с kie.ai/api.box; сканеры (ScamAdviser 16/100 и др.) плохие, партнёрства с Suno нет. Риск: забанят пул — сервис умрёт.
 
 API: `POST https://api.sunoapi.org/api/v1/generate` (HTTP **200**, `data.taskId`; обязательны `customMode`, `instrumental`, `model`, `callBackUrl` — заглушка `https://example.com/callback` работает) → поллинг `GET /api/v1/generate/record-info?taskId=…` (`PENDING → TEXT_SUCCESS → SUCCESS`, ~40 с) → `data.response.sunoData[].audio_url` (их CDN `tempfile.aiquickdraw.com`, `audiostream.api.box`; скачивать сразу). Маппинг: стиль = genre+mood+instrumentation+tempo+vocal (≤1000 симв.), лирика как есть, `model=V6`, отмена у них невозможна — кредит списывается.
+
+Три правила, которые нельзя нарушать в этом провайдере:
+
+1. **Таймаут ≠ фолбэк.** После `SUNO_TASK_TIMEOUT_SECONDS` задача уже оплачена — запуск Lyria сверху это двойное списание. Таймаут отдельным исключением, без фолбэка.
+2. **Бриф обогатителя протянут во ВСЕ точки запуска генерации** (`handle_title`, `handle_title_leave_as_is`, `retry_generation`). Потеря `brief` на любой кнопке = `customMode: false` и песня не по нашему тексту.
+3. **`song_structure` в Suno не передаётся** — он не принимает прозу про аранжировку, только теги секций в лирике. Это ограничение провайдера, а не долг кода.
 
 ## Прочее
 
