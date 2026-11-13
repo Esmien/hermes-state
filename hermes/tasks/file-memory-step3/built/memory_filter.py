@@ -175,7 +175,7 @@ import json
 import urllib.request
 from pydantic import BaseModel, Field
 import types
-memory = types.SimpleNamespace(**{k: globals()[k] for k in ("FILES", "_open_dir", "_read", "_records", "_load_state", "_save_state")})
+memory = types.SimpleNamespace(**{k: globals()[k] for k in ("FILES", "_uid", "_open_dir", "_read", "_records", "_load_state", "_save_state")})
 
 BEGIN = '\n\n<!-- owui-memory-38b88eaf-begin -->'
 END = '<!-- owui-memory-38b88eaf-end -->'
@@ -188,6 +188,7 @@ class Filter:
         decision_model: str = 'perplexity/pplx-decider-v1.2'
         decision_key: str = Field(default='', json_schema_extra={'type': 'password'})
         timeout: int = 15
+        tool_id: str = 'file_memory_pilot_tool'
 
     def __init__(self):
         self.valves = self.Valves()
@@ -210,6 +211,28 @@ class Filter:
         if not isinstance(answers,dict) or not isinstance(answers.get('misplaced',{}).get('noul'),(float,int)):
             raise ValueError('Invalid decision response')
         return answers
+
+    async def _delete_first_ten(self, request, user, name):
+        if request is None or name not in ('MEMORY', 'PROFILE'):
+            raise ValueError('No verified tool context')
+        from open_webui.models.users import Users
+        from open_webui.utils.tools import get_tools
+        user_obj = await Users.get_user_by_id(memory._uid(user))
+        if user_obj is None:
+            raise ValueError('User unavailable')
+        loaded = await get_tools(request, [self.valves.tool_id], user_obj, {'__user__': user})
+        tool = loaded['memory']['callable']
+        listing = await tool(action='list', file=name)
+        entries = listing.get('entries') if isinstance(listing, dict) and listing.get('ok') is True else None
+        if not isinstance(entries, list) or not all(isinstance(x, str) for x in entries):
+            raise ValueError('Could not read records')
+        if len(entries) < 10:
+            return 'too_few'
+        selected = [{'number': index + 1, 'text': text} for index, text in enumerate(entries[:10])]
+        result = await tool(action='delete', file=name, selected=selected)
+        if not isinstance(result, dict) or result.get('ok') is not True or result.get('entries') != entries[10:]:
+            raise ValueError('Deletion not verified')
+        return 'deleted'
 
     @staticmethod
     def _messages(body):
@@ -260,7 +283,11 @@ class Filter:
                         if stage == 'offer':
                             additions.append(f'Память {name} переполнена. Выберите текстом записи для удаления:\n{listing}\nРекомендуется удалить {len(records) // 4} записей.')
                         else:
+                            if item.get('auto_deleted') is True:
+                                warning = f'Автоматически удалены первые 10 записей из {name} после повторного игнорирования предупреждения.'
                             additions.append(f'Текущие записи {name}:\n{listing}\nОставляем или есть правки?')
+                    elif stage == 'blocked':
+                        additions.append(f'Автоматическая обработка памяти {name} остановлена. Результат удаления не подтверждён; проверьте записи перед продолжением.')
                     elif stage == 'refused':
                         additions.append(f'Напоминание: память {name} заполнена. Для новых записей нужно освободить место; без вашего выбора ничего не удаляю.')
                     elif stage == 'completed':
@@ -319,7 +346,7 @@ class Filter:
                 os.close(dfd)
         return body
 
-    async def inlet(self, body: dict, __user__: dict = None, __metadata__: dict = None) -> dict:
+    async def inlet(self, body: dict, __user__: dict = None, __metadata__: dict = None, __request__ = None) -> dict:
         meta=__metadata__ if isinstance(__metadata__,dict) else {}
         if meta.get('task') or meta.get('internal') is True or (isinstance(body.get('metadata'),dict) and body['metadata'].get('task')):
             return body
@@ -361,14 +388,30 @@ class Filter:
                             state['overflow'][pending]={'stage':'warning'}; memory._save_state(dfd,state)
                             instructions.append('Начни ответ точным предупреждением: '+FULL_WARNING)
                         elif stage=='warning' and FULL_WARNING in previous and intent=='ignore':
-                            state['overflow'][pending]={'stage':'delete_pending'}; memory._save_state(dfd,state)
-                            instructions.append('Пользователь повторно проигнорировал явное предупреждение. Перечитай '+pending+' через Tool, затем удали ровно первые 10 записей через Tool; если записей меньше 10, не удаляй и уточни.')
+                            state['overflow'][pending]={'stage':'blocked'}; memory._save_state(dfd,state)
+                            try:
+                                outcome = await self._delete_first_ten(__request__, __user__, pending)
+                            except Exception:
+                                outcome = 'failed'
+                            if outcome == 'deleted':
+                                state = memory._load_state(dfd)
+                                state['overflow'][pending] = {'stage': 'confirm', 'auto_deleted': True}
+                                memory._save_state(dfd, state)
+                                files[pending] = memory._read(dfd, memory.FILES[pending])
+                                instructions.append('После повторного игнорирования Tool уже удалил первые 10 записей. Не удаляй больше ничего. Сообщи об удалении, покажи оставшиеся записи и попроси подтверждение.')
+                            else:
+                                state = memory._load_state(dfd)
+                                state['overflow'][pending] = {'stage': 'blocked'}
+                                memory._save_state(dfd, state)
+                                instructions.append('Автоматическая обработка остановлена. Не выполняй удаление и не утверждай, что оно произошло. Уточни у пользователя.')
                         elif stage=='warning' and FULL_WARNING not in previous:
                             instructions.append('Начни ответ точным предупреждением: '+FULL_WARNING)
                         elif stage=='confirm':
                             instructions.append('Покажи текущие записи и спроси: «Оставляем или есть правки?»')
+                        elif stage=='blocked':
+                            instructions.append('Автоматическая обработка остановлена. Ничего не удаляй автоматически; попроси пользователя проверить записи.')
                         elif stage=='delete_pending':
-                            instructions.append('Перечитай '+pending+' через Tool и удали первые 10 только если их не меньше 10, затем покажи записи и попроси подтверждение.')
+                            instructions.append('Старый незавершённый сценарий; ничего не удаляй автоматически. Попроси пользователя проверить записи.')
                         else:
                             if stage=='refused': instructions.append('Пользователь ранее отказался от удаления. Ничего не удаляй без явного выбора.')
                             instructions.append('Память '+pending+' переполнена: покажи все записи пронумерованным списком, предложи выбрать записи для удаления и порекомендуй удалить 25% с округлением вниз.')
