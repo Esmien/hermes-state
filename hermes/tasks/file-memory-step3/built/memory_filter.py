@@ -272,10 +272,10 @@ class Filter:
                             if item.get('list_offered') is True:
                                 additions.append(f'Напоминание: память {name} переполнена. Скажите, если хотите увидеть список записей и выбрать, что удалить; без вашего выбора ничего не удаляется.')
                             else:
-                                additions.append(f'Память {name} переполнена. Выберите текстом записи для удаления:\n{listing}\nРекомендуется удалить {len(records) // 4} записей.')
+                                additions.append(f'Память {name} переполнена. Выберите текстом записи для удаления:\n{listing}\n\nРекомендуется удалить {len(records) // 4} записей.')
                                 offered.append(name)
                         else:
-                            additions.append(f'Текущие записи {name}:\n{listing}\nОставляем или есть правки?')
+                            additions.append(f'Текущие записи {name}:\n{listing}\n\nОставляем или есть правки?')
                     elif stage == 'blocked':
                         additions.append(f'Автоматическая обработка памяти {name} остановлена. Результат удаления не подтверждён; проверьте записи перед продолжением.')
                     elif stage == 'refused':
