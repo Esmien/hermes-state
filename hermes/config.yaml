@@ -2516,6 +2516,7 @@ hooks:
       timeout: 10
       fail_closed: true
 command_allowlist:
+  - command parser limit or malformed executable payload
   - delete in root path
   - script execution via -e/-c flag
   - script execution via heredoc
