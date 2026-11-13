@@ -72,7 +72,7 @@ ffc3d455a8097e27856ca875bd66f8e7e0fc9a89bf99805972c7a9fd9f61f11e  ./hermes/skill
 1ea50fe11e32a4dc16e2f99de0ba87a29006f05b6449611445fb600fae664887  ./hermes/skills/career/job-application-review/references/resume-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-46ba844e88cc3760ae3589536329e1259d851613ccf9e86bd544cc9e5eb1a329  ./hermes/skills/devops/ai-stack/SKILL.md
+798c07041b2cb36362bc9a87600297669a79dadf0fdb9f14f56859356e9d4735  ./hermes/skills/devops/ai-stack/SKILL.md
 35f011180b4ddc06606d1bf45df577e34baf6cb7a0aeff203c055d46eed7afbe  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
 d4d2d38f0c3fe3ff53ff7de02ca914cd07b05c1f8700813a0c3fa242b323ed89  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
@@ -237,7 +237,7 @@ d45a136df942a16e1503be0b03d4215f1682d16f6703abea1eb4dc6e5fea5e71  ./hermes/skill
 6c924f789f78e902652861f36a687bab935b9aba2d43e494048491a1ce899d93  ./hermes/tasks/docs/media-mcp-plan.md
 cd44df6a854f67449408571c60d009081a33bdf73e66322e9254c9a491984e00  ./hermes/tasks/docs/modules-plan.md
 0262c8b098d9d1cd6932c26d0c97a11b34ab174c1c7618eff5aadc3ad069d8b5  ./hermes/tasks/docs/multiagent-tiers.md
-0ac79caf18ea84ce128002f49178b2c77d31e8f10a9879811be4854b3a89bbe7  ./hermes/tasks/docs/owui-file-memory.md
+abe1f2b3e9c938fa67b458dfd1807eb65354304c6f988ebd7deb2e3bbef7bb30  ./hermes/tasks/docs/owui-file-memory.md
 c64a7ee60a16608e0b86f08c73f947c28d48b9168e1d33c4eb21f898c57cb515  ./hermes/tasks/docs/vpn-service-rewrite.md
 2ee26f3d7fc2d8856a743e3a0975d178f853b8c228c2cc7d641ce3544ce1f1b4  ./hermes/tasks/docs/web-search-plan.md
 565b594347dc4f66b778d6bac5a2393911b41f587af2eaf6447ac491286b583a  ./hermes/tasks/file-memory-step3/build_plugins.py
