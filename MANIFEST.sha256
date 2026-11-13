@@ -83,7 +83,7 @@ dc14bc0c6422327a0aecf02277be289b131fdb80a0fa650071ff49b3d95eb90c  ./hermes/skill
 7adba28f3522efea5364d09c390e280fc10d9f513b3fcc698b411487c4277e44  ./hermes/skills/devops/ai-stack/references/enricher-system.md
 c59c1d19122edc2b769aa8370db797bc17edf118e9b0be10fdbbaf6d8667cc8e  ./hermes/skills/devops/ai-stack/references/kb-sync.md
 0a5837b8d283d7edfcfe6b28754c5a2c893f2f60a508d059c9b2552c87f56314  ./hermes/skills/devops/ai-stack/references/litellm-admin-auth.md
-4e9acc70cf979960a2423eddb28d29ff9d60a3b22515dbb9b08213aa5b380e40  ./hermes/skills/devops/ai-stack/references/litellm-model-db.md
+b9d81b097e6739325912c378b222951a68f48444dc0a4b8667c6f2c76790eb51  ./hermes/skills/devops/ai-stack/references/litellm-model-db.md
 0a212f2ae32d2d3bcdeb43bbd421074cb4ee1e95308b586025e90224d9553987  ./hermes/skills/devops/ai-stack/references/media-pipeline.md
 5490b3699d7ee7cf47a8633189687ae78ea8d9bc2be86e55509a4b1c979623ca  ./hermes/skills/devops/ai-stack/references/memory-troubleshooting.md
 ac748903dd3fab6673926b5bfab429273e7e8b370d0347fae27ab62f2a27cf2a  ./hermes/skills/devops/ai-stack/references/model-provenance.md
@@ -93,7 +93,7 @@ ac748903dd3fab6673926b5bfab429273e7e8b370d0347fae27ab62f2a27cf2a  ./hermes/skill
 23681fed79a731f0e5ac3dbf907087700aedc29fa84c1b54872f7694682b3e76  ./hermes/skills/devops/ai-stack/references/owui-admin-auth.md
 3e3de999564ce2910af13cc065e73fd827b7dd7b0996f9b3d7e19d46424c5e9b  ./hermes/skills/devops/ai-stack/references/owui-chat-forensics.md
 a75500218b095f51dc380fb92091c16c5004bdf3915da193cd0ec7358d70de6f  ./hermes/skills/devops/ai-stack/references/owui-data-purge.md
-1caad25d9ea34b7395219e7535ab3924475c1ba5b0dbc8b94f8cef6cbdf67f0f  ./hermes/skills/devops/ai-stack/references/owui-internals.md
+dfc971f288c60bf969ce05c355e37ee7598b889f2f4f32cb39d9ed9a56f79f6d  ./hermes/skills/devops/ai-stack/references/owui-internals.md
 5c33219e84e4b7f5d04b079bf8e1d45595cabf3bfa59c234c28801061dc84864  ./hermes/skills/devops/ai-stack/references/owui-task-models.md
 8a69bfb96ab3f785ae029f371d7492a5862c46c4f4ec66e53d9546c385fc1977  ./hermes/skills/devops/ai-stack/references/pitfalls.md
 7e6a9417891e69766d9816809ec46c8eea9273a50306f296c975f7ddc4b652c1  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
@@ -240,8 +240,8 @@ cd44df6a854f67449408571c60d009081a33bdf73e66322e9254c9a491984e00  ./hermes/tasks
 4439c2743bb5e3b450d125697ecb9e7fa6771bfa6d9b377aa6c86a3a7607875f  ./hermes/tasks/docs/owui-file-memory.md
 c64a7ee60a16608e0b86f08c73f947c28d48b9168e1d33c4eb21f898c57cb515  ./hermes/tasks/docs/vpn-service-rewrite.md
 2ee26f3d7fc2d8856a743e3a0975d178f853b8c228c2cc7d641ce3544ce1f1b4  ./hermes/tasks/docs/web-search-plan.md
-0a22adbfa84043ac9e077bc5849b3335b841e7128cc039553d03e8842c73f1ce  ./hermes/tasks/file-memory-step3/memory_tool.py
-6f3a5bd568312461ca89fd56fc9fbe09a650208b3f49f809881e16c29eca03b0  ./hermes/tasks/file-memory-step3/test_memory_tool.py
+f0a0a85b8ba9f2f408bd83fdd7698ff4d0d3806782a9d87bbf93d5e6cfd156f4  ./hermes/tasks/file-memory-step3/memory_tool.py
+7e1f62df9a8dff773f650e2e82a7dc476de4ba9b4fa5203779f7d85aa2507e80  ./hermes/tasks/file-memory-step3/test_memory_tool.py
 9a8a4f9270a64de4ca700bb4fe574eeb100a1283facb50dc828d318d6551729c  ./host/ai-stack/backup-databases.sh
 d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md
 846efb23aba0d86ee3b1086edc19cb47f2cb07426875cfeaaca852f62c8a811f  ./host/ai-stack/runbook.md

@@ -85,6 +85,18 @@ def _store(dfd, name, text):
         except FileNotFoundError:
             pass
 
+def _load_state(dfd):
+    try:
+        state = json.loads(_read(dfd, '.memory-state.json'))
+    except FileNotFoundError:
+        return {'version': 1, 'overflow': {}}
+    if not isinstance(state, dict) or state.get('version') != 1 or not isinstance(state.get('overflow'), dict):
+        raise MemoryErrorSafe('Некорректное состояние памяти')
+    return state
+
+def _save_state(dfd, state):
+    _store(dfd, '.memory-state.json', json.dumps(state, ensure_ascii=False, sort_keys=True))
+
 def _check_entry(name, value):
     if not isinstance(value, str) or not value.strip() or value != value.strip() or '\n\n' in value or '\r' in value:
         raise MemoryErrorSafe('Нужна одна непустая запись без пустых строк')
@@ -96,8 +108,6 @@ def operate(user, action, name, value='', selected=None):
         raise MemoryErrorSafe('Неизвестный файл')
     if action not in ('list', 'append', 'delete', 'replace'):
         raise MemoryErrorSafe('Неизвестная операция')
-    if name == 'AGENTS':
-        raise MemoryErrorSafe('Редактирование AGENTS пока не поддерживается')
     dfd = _open_dir(user)
     try:
         text = _read(dfd, FILES[name])
@@ -133,9 +143,17 @@ def operate(user, action, name, value='', selected=None):
                         end += 1
                     new_body = new_body[:m.start()] + new_body[end:]
             new = prefix + new_body
-        if len(new) > LIMIT:
+        if name != 'AGENTS' and len(new) > LIMIT:
+            state = _load_state(dfd)
+            state['overflow'].setdefault(name, {'stage': 'offer'})
+            _save_state(dfd, state)
             return {'ok': False, 'reason': 'memory_full', 'entries': entries, 'suggested_remove': len(entries) // 4, 'characters': len(text), 'limit': LIMIT}
         _store(dfd, FILES[name], new)
+        if action in ('delete', 'replace'):
+            state = _load_state(dfd)
+            if name in state['overflow']:
+                state['overflow'][name] = {'stage': 'confirm'}
+                _save_state(dfd, state)
         return {'ok': True, 'entries': [m.group() for m in _records(new, name)[2]], 'characters': len(new), 'limit': LIMIT}
     finally:
         os.close(dfd)

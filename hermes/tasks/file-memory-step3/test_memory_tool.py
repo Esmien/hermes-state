@@ -57,8 +57,9 @@ class MemoryTests(unittest.TestCase):
         self.assertTrue(p.read_text().startswith(original))
         self.assertEqual(m.operate(self.user,'list','PROFILE')['entries'], ['First line\nsecond line','Another entry','Third'])
     def test_no_bulk_agents_write_or_bad_shape(self):
-        for f in ('../PROFILE', '/etc/passwd', 'AGENTS'):
+        for f in ('../PROFILE', '/etc/passwd'):
             with self.assertRaises(m.MemoryErrorSafe): m.operate(self.user,'append',f,'bad')
+        self.assertTrue(m.operate(self.user,'append','AGENTS','a'*6000)['ok'])
         with self.assertRaises(m.MemoryErrorSafe): m.operate(self.user,'append','MEMORY','a\n\nb')
 
 if __name__ == '__main__': unittest.main()
