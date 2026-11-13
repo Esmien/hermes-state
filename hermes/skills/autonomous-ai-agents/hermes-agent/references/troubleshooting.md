@@ -79,12 +79,18 @@ hermes config set auxiliary.vision.model <model_name>
 ### Aux task 401 with the *provider's own* error (stale credential)
 `vision_analyze` (or compression) returns something like `401 Your session has expired or the token is invalid` while the main model keeps answering normally. That is not a Hermes bug and not an outage: the aux task routed to that OpenAI-compatible provider, and the key Hermes holds for it is dead — most often because the other side re-issued its key and invalidated the old one.
 
-1. Split the two failures before touching anything: main-model calls working + aux calls 401 = credential on the aux provider, not config.
+1. Split the two failures before touching anything: a working main model does not prove auxiliary credentials or routing. Inspect the task-specific provider, model and actual endpoint in compression/auxiliary logs; a wrong endpoint can produce 404 before a separate auth failure in fallback.
 2. Prove it in one request: `GET <base_url>/models` with `Bearer <key from .env>` — 401 confirms a stale key, 200 with a model count confirms the key.
 3. Write the current key into `~/.hermes/.env` **and into every other consumer of that same credential** — the same key routinely lives in a service's own env file, and fixing only one leaves the other broken.
 4. Restart the gateway: Hermes reads `.env` at process start and keeps it in memory, so the edit alone changes nothing mid-session. This is an owner action — `systemctl restart hermes-gateway` — the agent cannot restart its own gateway.
 
 Prevention: an integration that exposes a "create key" endpoint often *regenerates* rather than returns the existing key. Read the current key from the service's own store (DB/UI) instead of minting a new one, and when you must mint, propagate it to all consumers in the same pass.
+
+### Compression route with a switched main provider
+
+Inspect `hermes config get auxiliary.compression` and the actual route in `agent.log` for the current session. If a generic `custom` auxiliary inherits the current main model's endpoint, bind compression to the intended named custom provider instead: `hermes config set auxiliary.compression.provider 'Open WebUI'`; preserve the existing dedicated compression model. A named entry resolves its own base URL and credential, so a Codex main session does not send the compressor to Codex by accident. Verify with a real auxiliary `call_llm(task='compression', main_runtime=<switched-main-runtime>, route_info=...)` on synthetic input: inspect both route and actual returned model, and distinguish this probe from a successful end-to-end `/compact`. Check current logs and provider configuration before applying this fix to another setup.
+
+When the saved key is current but a long-lived CLI still has an older exported value, restart the process with that variable removed from its inherited environment, then resume the session; for the WebUI gateway key use `env -u HERMES_CUSTOM_127_0_0_1_8080_API_KEY hermes --continue`. Verify `/compact` after restart rather than treating a standalone auxiliary probe as proof the conversation was compressed.
 
 ### Reading a screenshot when vision is unavailable
 Text-first fallback that actually works on phone photos of a monitor: install `tesseract-ocr` + `tesseract-ocr-rus` and Pillow in a throwaway venv, then upscale 3–4x, grayscale and boost contrast (~2x) before OCR with `--psm 6`.
