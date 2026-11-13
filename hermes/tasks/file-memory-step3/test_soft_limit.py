@@ -21,6 +21,15 @@ class SoftLimitTests(MemoryTests):
   asyncio.run(x.inlet({'messages':[{'role':'user','content':'Привет'}]},self.user,{})); fd=m._open_dir(self.user)
   try:self.assertEqual(m._load_state(fd)['overflow']['MEMORY']['stage'],'offer')
   finally:os.close(fd)
+ def test_state_failure_reports_success_and_recovers_from_file(self):
+  self.fill()
+  with patch.object(m,'_save_state',side_effect=OSError('synthetic')):
+   r=m.operate(self.user,'append','MEMORY','y'*260)
+  self.assertTrue(r['ok']); self.assertTrue(r['state_warning']); self.assertTrue(r['overflow']); self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'][-1],'y'*260)
+  x=f.Filter(); x._call_decider=lambda *a:{'misplaced':{'noul':0}}
+  asyncio.run(x.inlet({'messages':[{'role':'user','content':'Привет'}]},self.user,{})); fd=m._open_dir(self.user)
+  try:self.assertEqual(m._load_state(fd)['overflow']['MEMORY']['stage'],'offer')
+  finally:os.close(fd)
  def test_profile_without_limit(self):
   result=m.operate(self.user,'append','PROFILE','q'*20000); self.assertTrue(result['ok']); self.assertIsNone(result['limit']); self.assertFalse(result['overflow'])
  def test_exact_limit_blocks_new_and_sets_pending(self):

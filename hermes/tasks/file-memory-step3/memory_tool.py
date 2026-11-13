@@ -114,7 +114,7 @@ def operate(user, action, name, value='', selected=None):
         prefix, body, spans = _records(text, name)
         entries = [m.group() for m in spans]
         if action == 'list':
-            return {'ok': True, 'entries': entries, 'characters': len(text), 'limit': LIMIT}
+            return {'ok': True, 'entries': entries, 'characters': len(text), 'limit': LIMIT if name == 'MEMORY' else None}
         if action in ('append', 'replace'):
             _check_entry(name, value)
         if action == 'append':
@@ -149,16 +149,20 @@ def operate(user, action, name, value='', selected=None):
             state['overflow'].setdefault(name, {'stage': 'offer'})
             _save_state(dfd, state)
             return {'ok': False, 'reason': 'memory_full', 'entries': entries, 'suggested_remove': len(entries) // 4, 'characters': len(text), 'limit': LIMIT}
+        state = _load_state(dfd) if limited else None
         _store(dfd, FILES[name], new)
+        state_error = False
         if limited:
-            state = _load_state(dfd)
-            if len(new) > LIMIT:
-                state['overflow']['MEMORY'] = {'stage': 'offer'}
-                _save_state(dfd, state)
-            elif action in ('delete', 'replace') and name in state['overflow']:
-                state['overflow'][name] = {'stage': 'confirm'}
-                _save_state(dfd, state)
-        return {'ok': True, 'entries': [m.group() for m in _records(new, name)[2]], 'characters': len(new), 'limit': LIMIT if limited else None, 'overflow': limited and len(new) > LIMIT}
+            try:
+                if len(new) > LIMIT:
+                    state['overflow']['MEMORY'] = {'stage': 'offer'}
+                    _save_state(dfd, state)
+                elif action in ('delete', 'replace') and name in state['overflow']:
+                    state['overflow'][name] = {'stage': 'confirm'}
+                    _save_state(dfd, state)
+            except (OSError, ValueError, MemoryErrorSafe):
+                state_error = True
+        return {'ok': True, 'entries': [m.group() for m in _records(new, name)[2]], 'characters': len(new), 'limit': LIMIT if limited else None, 'overflow': limited and len(new) > LIMIT, 'state_warning': state_error}
     finally:
         os.close(dfd)
 

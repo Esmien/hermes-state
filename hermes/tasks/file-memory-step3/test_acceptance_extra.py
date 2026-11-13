@@ -5,7 +5,7 @@ class MoreTests(MemoryTests):
  def test_exact_5000_and_next_character(self):
   p=self.agents/'PROFILE.md'; prefix='# PROFILE\n\n'; value='я'*(5000-len(prefix)-1)
   r=m.operate(self.user,'append','PROFILE',value); self.assertTrue(r['ok']); self.assertEqual(len(p.read_text()),5000)
-  before=p.read_text(); r=m.operate(self.user,'append','PROFILE','x'); self.assertEqual(r['reason'],'memory_full'); self.assertEqual(p.read_text(),before)
+  before=p.read_text(); r=m.operate(self.user,'append','PROFILE','x'); self.assertTrue(r['ok']); self.assertTrue(p.read_text().startswith(before))
  def test_corrupted_file_should_warn(self):
   (self.agents/'MEMORY.md').write_text('CORRUPTED FILE WITHOUT REQUIRED HEADER')
   fl=f.Filter(); fl._call_decider=lambda *args:{'misplaced':{'noul':0.01}}

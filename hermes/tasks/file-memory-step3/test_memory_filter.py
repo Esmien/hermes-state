@@ -38,14 +38,12 @@ class FilterTests(MemoryTests):
         b=self.run_filter(self.body(),user={'id':'not-a-uuid'})
         text=b['messages'][0]['content']; self.assertIn(f.WARNING,text); self.assertNotIn('[PROFILE]',text)
     def test_overflow_ignored_twice_and_missing_warning(self):
+        m.operate(self.user,'append','MEMORY','synthetic')
         self.set_stage('offer'); self.answers['intent']['choice']='ignore'
-        b=self.run_filter(self.body()); self.assertEqual(self.get_stage(),'warning'); self.assertIn(f.FULL_WARNING,b['messages'][0]['content'])
-        self.answers['notice_seen']['noul']=0.01
-        b=self.run_filter(self.body()); self.assertEqual(self.get_stage(),'warning'); self.assertIn(f.FULL_WARNING,b['messages'][0]['content'])
-        self.answers['notice_seen']['noul']=1.0
-        state=json.loads((self.agents/'.memory-state.json').read_text()); state['overflow']['MEMORY']['guarded']=True; (self.agents/'.memory-state.json').write_text(json.dumps(state))
-        b=self.run_filter(self.body(prev=f.FULL_WARNING)); self.assertEqual(self.get_stage(),'blocked'); self.assertIn('не выполняй удаление',b['messages'][0]['content'].lower())
-        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'],[])
+        before=m.operate(self.user,'list','MEMORY')['entries']
+        for _ in range(3):
+            b=self.run_filter(self.body()); self.assertEqual(self.get_stage(),'offer'); self.assertIn('переполнена',b['messages'][0]['content'].lower())
+        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'],before)
     def test_refusal_never_deletes(self):
         self.set_stage('warning'); self.answers['intent']['choice']='refuse'
         b=self.run_filter(self.body()); self.assertEqual(self.get_stage(),'refused'); self.assertIn('ничего не удаляй',b['messages'][0]['content'].lower())
@@ -70,9 +68,10 @@ class FilterTests(MemoryTests):
         asyncio.run(self.filter.outlet(body,{'id':'invalid'},{}))
         self.assertTrue(body['messages'][0]['content'].startswith(f.WARNING))
     def test_real_overflow_records_state(self):
-        result=m.operate(self.user,'append','PROFILE','x'*5000)
-        self.assertEqual(result['reason'],'memory_full')
+        (self.agents/'MEMORY.md').write_text('# MEMORY\n\n' + ('x'*240+'\n\n')*20)
+        result=m.operate(self.user,'append','MEMORY','y'*260)
+        self.assertTrue(result['ok']); self.assertTrue(result['overflow'])
         state=json.loads((self.agents/'.memory-state.json').read_text())
-        self.assertEqual(state['overflow']['PROFILE']['stage'],'offer')
+        self.assertEqual(state['overflow']['MEMORY']['stage'],'offer')
 
 if __name__=='__main__': unittest.main()
