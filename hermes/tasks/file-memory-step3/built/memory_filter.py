@@ -175,7 +175,7 @@ import json
 import urllib.request
 from pydantic import BaseModel, Field
 import types
-memory = types.SimpleNamespace(**{k: globals()[k] for k in ("FILES", "_open_dir", "_read", "_load_state", "_save_state")})
+memory = types.SimpleNamespace(**{k: globals()[k] for k in ("FILES", "_open_dir", "_read", "_records", "_load_state", "_save_state")})
 
 BEGIN = '\n\n<!-- owui-memory-38b88eaf-begin -->'
 END = '<!-- owui-memory-38b88eaf-end -->'
@@ -244,24 +244,53 @@ class Filter:
         try:
             dfd = memory._open_dir(__user__)
             try:
-                for filename in memory.FILES.values():
-                    memory._read(dfd, filename)
+                files = {key: memory._read(dfd, filename) for key, filename in memory.FILES.items()}
+                entries = {key: [span.group() for span in memory._records(text, key)[2]] for key, text in files.items()}
                 state = memory._load_state(dfd)
                 warning = FULL_WARNING if any(v.get('stage') == 'warning' for v in state['overflow'].values() if isinstance(v, dict)) else ''
+                additions = []
+                completed = []
+                for name, item in state['overflow'].items():
+                    if name not in ('MEMORY', 'PROFILE') or not isinstance(item, dict):
+                        raise ValueError('Invalid overflow state')
+                    stage = item.get('stage')
+                    if stage in ('offer', 'confirm'):
+                        records = entries[name]
+                        listing = '\n'.join(f'{index}. {value}' for index, value in enumerate(records, 1)) or '(записей нет)'
+                        if stage == 'offer':
+                            additions.append(f'Память {name} переполнена. Выберите текстом записи для удаления:\n{listing}\nРекомендуется удалить {len(records) // 4} записей.')
+                        else:
+                            additions.append(f'Текущие записи {name}:\n{listing}\nОставляем или есть правки?')
+                    elif stage == 'refused':
+                        additions.append(f'Напоминание: память {name} заполнена. Для новых записей нужно освободить место; без вашего выбора ничего не удаляю.')
+                    elif stage == 'completed':
+                        additions.append('Сохранено, можем продолжить разговор')
+                        completed.append(name)
+                    elif stage not in ('warning', 'delete_pending'):
+                        raise ValueError('Invalid overflow stage')
             finally:
                 import os
                 os.close(dfd)
         except Exception:
             warning = WARNING
-        if not warning:
+            additions = []
+            completed = []
+        if not warning and not additions:
             return body
         messages = self._messages(body)
         message = next((x for x in reversed(messages) if x.get('role') == 'assistant'), None)
         if not message:
             return body
+        def decorate(content):
+            if warning and not content.startswith(warning):
+                content = warning + '\n\n' + content
+            for addition in additions:
+                if addition not in content:
+                    content += '\n\n' + addition
+            return content
         content = message.get('content')
-        if isinstance(content, str) and not content.startswith(warning):
-            message['content'] = warning + '\n\n' + content
+        if isinstance(content, str):
+            message['content'] = decorate(content)
         output = message.get('output')
         if isinstance(output, list):
             for item in output:
@@ -272,9 +301,22 @@ class Filter:
                     continue
                 for part in parts:
                     if isinstance(part, dict) and part.get('type') == 'output_text' and isinstance(part.get('text'), str):
-                        if not part['text'].startswith(warning):
-                            part['text'] = warning + '\n\n' + part['text']
-                        return body
+                        part['text'] = decorate(part['text'])
+                        break
+                else:
+                    continue
+                break
+        if completed:
+            dfd = memory._open_dir(__user__)
+            try:
+                latest = memory._load_state(dfd)
+                for name in completed:
+                    if latest['overflow'].get(name, {}).get('stage') == 'completed':
+                        del latest['overflow'][name]
+                memory._save_state(dfd, latest)
+            finally:
+                import os
+                os.close(dfd)
         return body
 
     async def inlet(self, body: dict, __user__: dict = None, __metadata__: dict = None) -> dict:
@@ -290,6 +332,8 @@ class Filter:
             dfd=memory._open_dir(__user__)
             try:
                 files={k:memory._read(dfd,v) for k,v in memory.FILES.items()}
+                for key, text in files.items():
+                    memory._records(text, key)
                 if any(BEGIN in v or END in v for v in files.values()): raise ValueError('Memory delimiter collision')
                 state=memory._load_state(dfd)
                 pending=next(iter(state['overflow']),None)
@@ -308,7 +352,7 @@ class Filter:
                         intent=answers.get('intent',{}).get('choice','unclear')
                         notice=answers.get('notice_seen',{}).get('noul',0)
                         if stage=='confirm' and intent=='confirm' and notice>=0.8:
-                            del state['overflow'][pending]; memory._save_state(dfd,state)
+                            state['overflow'][pending] = {'stage': 'completed'}; memory._save_state(dfd,state)
                             instructions.append('Пользователь подтвердил правки: ответь «Сохранено, можем продолжить разговор».')
                         elif intent=='refuse':
                             state['overflow'][pending]={'stage':'refused'}; memory._save_state(dfd,state)
