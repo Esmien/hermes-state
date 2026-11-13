@@ -237,7 +237,7 @@ d45a136df942a16e1503be0b03d4215f1682d16f6703abea1eb4dc6e5fea5e71  ./hermes/skill
 6c924f789f78e902652861f36a687bab935b9aba2d43e494048491a1ce899d93  ./hermes/tasks/docs/media-mcp-plan.md
 cd44df6a854f67449408571c60d009081a33bdf73e66322e9254c9a491984e00  ./hermes/tasks/docs/modules-plan.md
 0262c8b098d9d1cd6932c26d0c97a11b34ab174c1c7618eff5aadc3ad069d8b5  ./hermes/tasks/docs/multiagent-tiers.md
-befab0e31d51f526494ab7569e991ebbac7513c99908fc13837393f7de002a5d  ./hermes/tasks/docs/owui-file-memory.md
+b7457e0d1458e0955d11d6efdfc62d04116d9db96d26b58ab815f09a90b55eaf  ./hermes/tasks/docs/owui-file-memory.md
 c64a7ee60a16608e0b86f08c73f947c28d48b9168e1d33c4eb21f898c57cb515  ./hermes/tasks/docs/vpn-service-rewrite.md
 2ee26f3d7fc2d8856a743e3a0975d178f853b8c228c2cc7d641ce3544ce1f1b4  ./hermes/tasks/docs/web-search-plan.md
 80360118207690da5e5fb6b785f78f8504755b22006250219e37b643121b6c05  ./hermes/tasks/file-memory-step3/build_plugins.py
@@ -245,6 +245,7 @@ c83e097085b5da9816b0acfb88af9950a38bcfdca89905ba72125a7ffb1f1286  ./hermes/tasks
 bf2aaf555f8d597979b237f39ec8121ec8f4a05215615159f6f47d3081fbc566  ./hermes/tasks/file-memory-step3/built/memory_tool.py
 e0f6e56d5c70de952f6075b3e97b75ac870014097c87f647895431acc933f4a8  ./hermes/tasks/file-memory-step3/memory_filter.py
 bf2aaf555f8d597979b237f39ec8121ec8f4a05215615159f6f47d3081fbc566  ./hermes/tasks/file-memory-step3/memory_tool.py
+8d509ea53d4830e0b94aecb5d9a62ea4b293ca0ab309ca01561354fa250d9ad5  ./hermes/tasks/file-memory-step3/test_acceptance_extra.py
 609ed648ba48cd709fe774188bf77a5147dcf2ca16df995de4bf0da14d195439  ./hermes/tasks/file-memory-step3/test_memory_filter.py
 7e1f62df9a8dff773f650e2e82a7dc476de4ba9b4fa5203779f7d85aa2507e80  ./hermes/tasks/file-memory-step3/test_memory_tool.py
 9a8a4f9270a64de4ca700bb4fe574eeb100a1283facb50dc828d318d6551729c  ./host/ai-stack/backup-databases.sh
