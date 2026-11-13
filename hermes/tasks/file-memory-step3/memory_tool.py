@@ -160,8 +160,10 @@ def operate(user, action, name, value='', selected=None):
 
 class Tools:
     def memory(self, action: str, file: str, value: str = '', selected: list[dict] | None = None, __user__: dict = None) -> dict:
-        """Read or update personal memory. action: list, append, delete, replace. file: MEMORY or PROFILE. For delete/replace pass selected as [{"number": 1, "text": "exact current text"}]."""
+        """Read or update personal memory. action: list, append, delete, replace. file: AGENTS, MEMORY or PROFILE. For delete/replace pass selected as [{"number": 1, "text": "exact current text"}]."""
         try:
             return operate(__user__, action, file, value, selected)
-        except (MemoryErrorSafe, OSError, ValueError, UnicodeError, json.JSONDecodeError):
+        except MemoryErrorSafe as exc:
+            return {'ok': False, 'reason': str(exc)}
+        except (OSError, ValueError, UnicodeError, json.JSONDecodeError):
             return {'ok': False, 'reason': 'operation_failed'}
