@@ -174,63 +174,7 @@
       "attach_to_session": true,
       "run_claim": null,
       "fire_claim": null
-    },
-    {
-      "id": "c86176480440",
-      "name": "owui-0130-rollout-check",
-      "prompt": "Проверка перед раскаткой Open WebUI 0.13.0 (Владислав решил 03.11.2026 подождать 3 дня).\n\nЧто сделать:\n1. Узнать последнюю версию: curl -sS -H 'Accept: application/vnd.github+json' 'https://api.github.com/repos/open-webui/open-webui/releases?per_page=5' и посмотреть tag_name/published_at.\n2. Если вышла 0.13.x с патчем (0.13.1+): прочитать её changelog, проверить, нет ли откатов/регрессий, упоминаний брендинга/статики.\n3. Проверить открытые баги по 0.13.0: GitHub issues с метками bug/p0/p1 за последние 7 дней (api.github.com/repos/open-webui/open-webui/issues?state=open&sort=created&direction=desc&per_page=20), отфильтровать по '0.13'.\n4. Проверить, что наши три якоря брендинга на месте в образе-кандидате: docker run --rm --entrypoint sh <image> -c 'grep -n \"Open WebUI)\" /app/backend/open_webui/env.py; grep -oE \"href=\\\"/static/(favicon|apple-touch)[^\\\"]*\\\"\" /app/build/index.html; grep -n \"static/logo\" /app/backend/open_webui/main.py' — и что строка лендинга '>Open WebUI</div>' всё ещё в бандле (её патчит наш Dockerfile).\n5. Коротко доложить владельцу по-русски: какая версия вышла, были ли фиксы проблем 0.13.0, совместим ли брендинг, вердикт «катим / ждём ещё». Ничего не обновлять без явного «Да» от владельца.\n\nКонтекст: текущая боевая версия — 0.12.5 (закреплена по digest в /home/ai_service/ai-stack/ai/webui-branding/Dockerfile). Тестовая сборка 0.13.0 уже лежит как esmien/webui:0.13.0-test2 и проверена — брендинг живой, лендинг перекрашен в ESMIEN AI. Апгрейд содержит миграции БД: перед раскаткой обязателен свежий бэкап (cd /home/ai_service/ai-stack/ai && sudo -u ai_service ./backup-databases.sh).",
-      "skills": [],
-      "skill": null,
-      "model": null,
-      "provider": null,
-      "base_url": null,
-      "script": null,
-      "no_agent": false,
-      "monitor_script": null,
-      "monitor_url": null,
-      "monitor_state": null,
-      "context_from": null,
-      "schedule": {
-        "kind": "once",
-        "run_at": "2026-11-06T07:00:00+00:00",
-        "display": "once at 2026-11-06 07:00"
-      },
-      "schedule_display": "once at 2026-11-06 07:00",
-      "repeat": {
-        "times": 1,
-        "completed": 1
-      },
-      "enabled": false,
-      "state": "completed",
-      "paused_at": null,
-      "paused_reason": null,
-      "created_at": "2026-11-03T13:35:48.248055+00:00",
-      "next_run_at": null,
-      "last_run_at": "2026-11-06T07:06:01.695945+00:00",
-      "last_status": "ok",
-      "last_error": null,
-      "last_delivery_error": null,
-      "last_delivery_unverified": null,
-      "last_failure": null,
-      "failure_streak": 0,
-      "deliver": "origin",
-      "origin": {
-        "platform": "telegram",
-        "chat_id": "214062001",
-        "chat_name": "Владислав",
-        "thread_id": null,
-        "user_id": "214062001",
-        "scope_id": null
-      },
-      "enabled_toolsets": [
-        "terminal",
-        "web"
-      ],
-      "workdir": null,
-      "attach_to_session": true,
-      "run_claim": null,
-      "fire_claim": null
     }
   ],
-  "updated_at": "2026-11-13T03:16:28.781007+00:00"
+  "updated_at": "2026-11-13T07:06:38.920494+00:00"
 }
