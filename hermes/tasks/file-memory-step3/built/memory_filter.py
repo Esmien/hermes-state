@@ -237,6 +237,46 @@ class Filter:
         system['content'] += BEGIN+'\n'+block+'\n'+END
         return body
 
+    async def outlet(self, body: dict, __user__: dict = None, __metadata__: dict = None) -> dict:
+        meta = __metadata__ if isinstance(__metadata__, dict) else {}
+        if meta.get('task') or meta.get('internal') is True:
+            return body
+        try:
+            dfd = memory._open_dir(__user__)
+            try:
+                for filename in memory.FILES.values():
+                    memory._read(dfd, filename)
+                state = memory._load_state(dfd)
+                warning = FULL_WARNING if any(v.get('stage') == 'warning' for v in state['overflow'].values() if isinstance(v, dict)) else ''
+            finally:
+                import os
+                os.close(dfd)
+        except Exception:
+            warning = WARNING
+        if not warning:
+            return body
+        messages = self._messages(body)
+        message = next((x for x in reversed(messages) if x.get('role') == 'assistant'), None)
+        if not message:
+            return body
+        content = message.get('content')
+        if isinstance(content, str) and not content.startswith(warning):
+            message['content'] = warning + '\n\n' + content
+        output = message.get('output')
+        if isinstance(output, list):
+            for item in output:
+                if not isinstance(item, dict) or item.get('type') != 'message':
+                    continue
+                parts = item.get('content')
+                if not isinstance(parts, list):
+                    continue
+                for part in parts:
+                    if isinstance(part, dict) and part.get('type') == 'output_text' and isinstance(part.get('text'), str):
+                        if not part['text'].startswith(warning):
+                            part['text'] = warning + '\n\n' + part['text']
+                        return body
+        return body
+
     async def inlet(self, body: dict, __user__: dict = None, __metadata__: dict = None) -> dict:
         meta=__metadata__ if isinstance(__metadata__,dict) else {}
         if meta.get('task') or meta.get('internal') is True or (isinstance(body.get('metadata'),dict) and body['metadata'].get('task')):

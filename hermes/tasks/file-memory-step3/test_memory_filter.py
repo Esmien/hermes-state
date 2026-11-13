@@ -56,6 +56,18 @@ class FilterTests(MemoryTests):
     def test_markers_collisions_rejected(self):
         (self.agents/'MEMORY.md').write_text('# MEMORY\n\n'+f.BEGIN)
         b=self.run_filter(self.body()); self.assertIn(f.WARNING,b['messages'][0]['content'])
+    def test_outlet_adds_warning_to_content_and_structured_output_once(self):
+        self.set_stage('warning')
+        message={'role':'assistant','content':'Ответ', 'output':[{'type':'message','content':[{'type':'output_text','text':'Ответ'}]}]}
+        body={'messages':[message]}
+        asyncio.run(self.filter.outlet(body,self.user,{}))
+        asyncio.run(self.filter.outlet(body,self.user,{}))
+        self.assertEqual(message['content'].count(f.FULL_WARNING),1)
+        self.assertEqual(message['output'][0]['content'][0]['text'].count(f.FULL_WARNING),1)
+    def test_outlet_missing_user_warning(self):
+        body={'messages':[{'role':'assistant','content':'Ответ'}]}
+        asyncio.run(self.filter.outlet(body,{'id':'invalid'},{}))
+        self.assertTrue(body['messages'][0]['content'].startswith(f.WARNING))
     def test_real_overflow_records_state(self):
         result=m.operate(self.user,'append','PROFILE','x'*5000)
         self.assertEqual(result['reason'],'memory_full')
