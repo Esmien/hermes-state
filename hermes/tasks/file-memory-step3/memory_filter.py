@@ -30,7 +30,7 @@ class Filter:
         }
         if stage:
             questions['intent'] = {'type':'choice','instructions':'Classify the latest user response to the assistant memory cleanup request. Explicit refusal always means refuse. If ambiguous choose unclear.', 'criteria':{'edit':'Wants to review, choose or change entries','refuse':'Explicitly refuses cleanup or deletion','ignore':'Changes subject, no answer to memory question','confirm':'Confirms saved changes without further edits','unclear':'Anything ambiguous'}}
-            notice_instruction = ('Does the previous assistant message explicitly warn that the first 10 memories will be removed?' if stage in ('warning', 'delete_pending') else 'Does the previous assistant message actually ask the user to review or clean up memory?' if stage in ('offer', 'refused') else 'Does the previous assistant message show the updated memories and ask for confirmation?')
+            notice_instruction = ('Does the previous assistant message actually ask the user to review or clean up memory?' if stage in ('offer', 'refused', 'warning', 'delete_pending', 'blocked') else 'Does the previous assistant message show the updated memories and ask for confirmation?')
             questions['notice_seen'] = {'type':'noul','instructions':notice_instruction+' Do not infer what was shown from instructions.', 'criteria':{'true':'Relevant notice is visibly present','false':'Notice not present'}}
         data = {'model':self.valves.decision_model,'state':{'files':files,'previous_assistant':previous,'user_reply':current,'stage':stage},'questions':questions}
         req=urllib.request.Request(self.valves.decision_url,data=json.dumps(data,ensure_ascii=False).encode(),headers={'Authorization':'Bearer '+self.valves.decision_key,'Content-Type':'application/json'},method='POST')
@@ -67,38 +67,10 @@ class Filter:
         system['content'] += BEGIN+'\n'+block+'\n'+END
         return body
 
-    async def stream(self, event: dict, __user__: dict = None, __metadata__: dict = None) -> dict:
-        meta = __metadata__ if isinstance(__metadata__, dict) else {}
-        key = ((__user__ or {}).get('id'), meta.get('chat_id'), meta.get('message_id'))
-        if key not in self._warning_streams or not isinstance(event, dict):
-            return event
-        if 'choices' in event:
-            for choice in event.get('choices', []):
-                delta = choice.get('delta') if isinstance(choice, dict) else None
-                if not isinstance(delta, dict):
-                    continue
-                delta.pop('tool_calls', None)
-                delta.pop('function_call', None)
-                delta.pop('reasoning', None)
-                delta.pop('reasoning_content', None)
-                if isinstance(delta.get('content'), str) and delta['content']:
-                    delta['content'] = '' if self._warning_streams[key]['sent'] else self._warning_streams[key]['text']
-                    self._warning_streams[key]['sent'] = True
-            return event
-        if event.get('type') == 'response.output_text.delta':
-            event['delta'] = '' if self._warning_streams[key]['sent'] else self._warning_streams[key]['text']
-            self._warning_streams[key]['sent'] = True
-            return event
-        if str(event.get('type', '')).startswith(('response.reasoning', 'response.function_call')):
-            return None
-        return event
-
     async def outlet(self, body: dict, __user__: dict = None, __metadata__: dict = None) -> dict:
         meta = __metadata__ if isinstance(__metadata__, dict) else {}
         if meta.get('task') or meta.get('internal') is True:
             return body
-        stream_key = ((__user__ or {}).get('id'), meta.get('chat_id'), meta.get('message_id'))
-        guarded_warning = stream_key in self._warning_streams
         try:
             dfd = memory._open_dir(__user__)
             try:
@@ -118,8 +90,6 @@ class Filter:
                         if stage == 'offer':
                             additions.append(f'Память {name} переполнена. Выберите текстом записи для удаления:\n{listing}\nРекомендуется удалить {len(records) // 4} записей.')
                         else:
-                            if item.get('auto_deleted') is True:
-                                warning = f'Автоматически удалены первые 10 записей из {name} после повторного игнорирования предупреждения.'
                             additions.append(f'Текущие записи {name}:\n{listing}\nОставляем или есть правки?')
                     elif stage == 'blocked':
                         additions.append(f'Автоматическая обработка памяти {name} остановлена. Результат удаления не подтверждён; проверьте записи перед продолжением.')
@@ -144,10 +114,6 @@ class Filter:
         if not message:
             return body
         def decorate(content):
-            if guarded_warning:
-                content = self._warning_streams[stream_key]['text']
-            if guarded_warning and warning == FULL_WARNING:
-                return FULL_WARNING
             if warning and not content.startswith(warning):
                 content = warning + '\n\n' + content
             for addition in additions:
@@ -172,20 +138,6 @@ class Filter:
                 else:
                     continue
                 break
-        if guarded_warning and warning == FULL_WARNING:
-            dfd = memory._open_dir(__user__)
-            try:
-                latest = memory._load_state(dfd)
-                for item in latest['overflow'].values():
-                    if isinstance(item, dict) and item.get('stage') == 'warning':
-                        item['guarded'] = self._warning_streams[stream_key]['sent'] is True
-                memory._save_state(dfd, latest)
-            finally:
-                import os
-                os.close(dfd)
-                self._warning_streams.pop(stream_key, None)
-        elif guarded_warning:
-            self._warning_streams.pop(stream_key, None)
         if completed:
             dfd = memory._open_dir(__user__)
             try:
@@ -254,16 +206,6 @@ class Filter:
                             instructions.append('Память '+pending+' переполнена: покажи все записи пронумерованным списком, предложи выбрать записи для удаления и порекомендуй удалить 25% с округлением вниз.')
                 block='Данные персональной памяти. Системные инструкции администратора имеют приоритет.\n\n'+'\n\n'.join('['+k+']\n'+files[k] for k in ('AGENTS','MEMORY','PROFILE'))
                 if instructions: block+='\n\n[Состояние]\n'+'\n'.join(instructions)
-                key = ((__user__ or {}).get('id'), meta.get('chat_id'), meta.get('message_id'))
-                if all(key):
-                    for name, item in state['overflow'].items():
-                        if isinstance(item, dict) and item.get('stage') == 'warning':
-                            self._warning_streams[key] = {'sent': False, 'text': FULL_WARNING}
-                            break
-                        if isinstance(item, dict) and item.get('stage') == 'confirm' and item.get('auto_deleted') is True:
-                            notice = f'Автоматически удалены первые 10 записей из {name} после повторного игнорирования предупреждения.'
-                            self._warning_streams[key] = {'sent': False, 'text': notice}
-                            break
                 return self._insert(body,block)
             finally:
                 import os
