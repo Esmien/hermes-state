@@ -143,18 +143,22 @@ def operate(user, action, name, value='', selected=None):
                         end += 1
                     new_body = new_body[:m.start()] + new_body[end:]
             new = prefix + new_body
-        if name != 'AGENTS' and len(new) > LIMIT:
+        limited = name == 'MEMORY'
+        if limited and len(text) >= LIMIT and len(new) > len(text):
             state = _load_state(dfd)
             state['overflow'].setdefault(name, {'stage': 'offer'})
             _save_state(dfd, state)
             return {'ok': False, 'reason': 'memory_full', 'entries': entries, 'suggested_remove': len(entries) // 4, 'characters': len(text), 'limit': LIMIT}
         _store(dfd, FILES[name], new)
-        if action in ('delete', 'replace'):
+        if limited:
             state = _load_state(dfd)
-            if name in state['overflow']:
+            if len(new) > LIMIT:
+                state['overflow']['MEMORY'] = {'stage': 'offer'}
+                _save_state(dfd, state)
+            elif action in ('delete', 'replace') and name in state['overflow']:
                 state['overflow'][name] = {'stage': 'confirm'}
                 _save_state(dfd, state)
-        return {'ok': True, 'entries': [m.group() for m in _records(new, name)[2]], 'characters': len(new), 'limit': LIMIT}
+        return {'ok': True, 'entries': [m.group() for m in _records(new, name)[2]], 'characters': len(new), 'limit': LIMIT if limited else None, 'overflow': limited and len(new) > LIMIT}
     finally:
         os.close(dfd)
 

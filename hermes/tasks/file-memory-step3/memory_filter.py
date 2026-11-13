@@ -8,7 +8,7 @@ import memory_tool as memory
 BEGIN = '\n\n<!-- owui-memory-38b88eaf-begin -->'
 END = '<!-- owui-memory-38b88eaf-end -->'
 WARNING = '🔴 ВНИМАНИЕ: персональная память сейчас недоступна; отвечаю без неё.'
-FULL_WARNING = '🔴 ВНИМАНИЕ! Вы точно хотите пропустить редактирование воспоминаний? Если вы откажетесь от правок, первые 10 записей будут удалены!'
+FULL_WARNING = '🔴 ВНИМАНИЕ: память MEMORY переполнена. Выберите записи для удаления; без вашего выбора ничего не удаляется.'
 
 class Filter:
     class Valves(BaseModel):
@@ -40,28 +40,6 @@ class Filter:
         if not isinstance(answers,dict) or not isinstance(answers.get('misplaced',{}).get('noul'),(float,int)):
             raise ValueError('Invalid decision response')
         return answers
-
-    async def _delete_first_ten(self, request, user, name):
-        if request is None or name not in ('MEMORY', 'PROFILE'):
-            raise ValueError('No verified tool context')
-        from open_webui.models.users import Users
-        from open_webui.utils.tools import get_tools
-        user_obj = await Users.get_user_by_id(memory._uid(user))
-        if user_obj is None:
-            raise ValueError('User unavailable')
-        loaded = await get_tools(request, [self.valves.tool_id], user_obj, {'__user__': user})
-        tool = loaded['memory']['callable']
-        listing = await tool(action='list', file=name)
-        entries = listing.get('entries') if isinstance(listing, dict) and listing.get('ok') is True else None
-        if not isinstance(entries, list) or not all(isinstance(x, str) for x in entries):
-            raise ValueError('Could not read records')
-        if len(entries) < 10:
-            return 'too_few'
-        selected = [{'number': index + 1, 'text': text} for index, text in enumerate(entries[:10])]
-        result = await tool(action='delete', file=name, selected=selected)
-        if not isinstance(result, dict) or result.get('ok') is not True or result.get('entries') != entries[10:]:
-            raise ValueError('Deletion not verified')
-        return 'deleted'
 
     @staticmethod
     def _messages(body):
@@ -238,6 +216,9 @@ class Filter:
                     memory._records(text, key)
                 if any(BEGIN in v or END in v for v in files.values()): raise ValueError('Memory delimiter collision')
                 state=memory._load_state(dfd)
+                if len(files['MEMORY']) > 5000 and 'MEMORY' not in state['overflow']:
+                    state['overflow']['MEMORY']={'stage':'offer'}
+                    memory._save_state(dfd,state)
                 pending=next(iter(state['overflow']),None)
                 stage=state['overflow'].get(pending,{}).get('stage') if pending else None
                 try:
@@ -259,28 +240,9 @@ class Filter:
                         elif intent=='refuse':
                             state['overflow'][pending]={'stage':'refused'}; memory._save_state(dfd,state)
                             instructions.append('Пользователь отказался от удаления: ничего не удаляй. Напоминай о необходимости освободить место.')
-                        elif stage=='offer' and intent=='ignore' and notice>=0.8:
-                            state['overflow'][pending]={'stage':'warning'}; memory._save_state(dfd,state)
-                            instructions.append('Начни ответ точным предупреждением: '+FULL_WARNING)
-                        elif stage=='warning' and FULL_WARNING in previous and intent=='ignore' and state['overflow'][pending].get('guarded') is True:
-                            state['overflow'][pending]={'stage':'blocked'}; memory._save_state(dfd,state)
-                            try:
-                                outcome = await self._delete_first_ten(__request__, __user__, pending)
-                            except Exception:
-                                outcome = 'failed'
-                            if outcome == 'deleted':
-                                state = memory._load_state(dfd)
-                                state['overflow'][pending] = {'stage': 'confirm', 'auto_deleted': True}
-                                memory._save_state(dfd, state)
-                                files[pending] = memory._read(dfd, memory.FILES[pending])
-                                instructions.append('После повторного игнорирования Tool уже удалил первые 10 записей. Не удаляй больше ничего. Сообщи об удалении, покажи оставшиеся записи и попроси подтверждение.')
-                            else:
-                                state = memory._load_state(dfd)
-                                state['overflow'][pending] = {'stage': 'blocked'}
-                                memory._save_state(dfd, state)
-                                instructions.append('Автоматическая обработка остановлена. Не выполняй удаление и не утверждай, что оно произошло. Уточни у пользователя.')
-                        elif stage=='warning' and FULL_WARNING not in previous:
-                            instructions.append('Начни ответ точным предупреждением: '+FULL_WARNING)
+                        elif stage in ('warning', 'delete_pending', 'blocked'):
+                            state['overflow'][pending]={'stage':'offer'}; memory._save_state(dfd,state)
+                            instructions.append('Напомни о переполнении памяти. Не удаляй записи без явного выбора пользователя.')
                         elif stage=='confirm':
                             instructions.append('Покажи текущие записи и спроси: «Оставляем или есть правки?»')
                         elif stage=='blocked':

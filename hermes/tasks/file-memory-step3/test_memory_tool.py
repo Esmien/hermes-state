@@ -33,8 +33,8 @@ class MemoryTests(unittest.TestCase):
         self.assertTrue(m.operate(self.user,'append','PROFILE','ю'*1000)['ok'])
         before = (self.agents / 'PROFILE.md').read_text()
         result = m.operate(self.user,'append','PROFILE','z'*4000)
-        self.assertEqual(result['reason'], 'memory_full')
-        self.assertEqual(before, (self.agents / 'PROFILE.md').read_text())
+        self.assertTrue(result['ok'])
+        self.assertTrue((self.agents / 'PROFILE.md').read_text().startswith(before))
     def test_delete_exact_and_replace(self):
         for v in ('alpha', 'beta', 'gamma'): m.operate(self.user,'append','MEMORY',v)
         with self.assertRaises(m.MemoryErrorSafe): m.operate(self.user,'delete','MEMORY',selected=[{'number':2,'text':'wrong'}])
