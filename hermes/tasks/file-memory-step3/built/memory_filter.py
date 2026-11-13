@@ -192,6 +192,7 @@ class Filter:
 
     def __init__(self):
         self.valves = self.Valves()
+        self._warning_streams = {}
 
     def _call_decider(self, files, previous, current, stage):
         if not self.valves.decision_key:
@@ -260,10 +261,38 @@ class Filter:
         system['content'] += BEGIN+'\n'+block+'\n'+END
         return body
 
+    async def stream(self, event: dict, __user__: dict = None, __metadata__: dict = None) -> dict:
+        meta = __metadata__ if isinstance(__metadata__, dict) else {}
+        key = ((__user__ or {}).get('id'), meta.get('chat_id'), meta.get('message_id'))
+        if key not in self._warning_streams or not isinstance(event, dict):
+            return event
+        if 'choices' in event:
+            for choice in event.get('choices', []):
+                delta = choice.get('delta') if isinstance(choice, dict) else None
+                if not isinstance(delta, dict):
+                    continue
+                delta.pop('tool_calls', None)
+                delta.pop('function_call', None)
+                delta.pop('reasoning', None)
+                delta.pop('reasoning_content', None)
+                if isinstance(delta.get('content'), str) and delta['content']:
+                    delta['content'] = '' if self._warning_streams[key]['sent'] else self._warning_streams[key]['text']
+                    self._warning_streams[key]['sent'] = True
+            return event
+        if event.get('type') == 'response.output_text.delta':
+            event['delta'] = '' if self._warning_streams[key]['sent'] else self._warning_streams[key]['text']
+            self._warning_streams[key]['sent'] = True
+            return event
+        if str(event.get('type', '')).startswith(('response.reasoning', 'response.function_call')):
+            return None
+        return event
+
     async def outlet(self, body: dict, __user__: dict = None, __metadata__: dict = None) -> dict:
         meta = __metadata__ if isinstance(__metadata__, dict) else {}
         if meta.get('task') or meta.get('internal') is True:
             return body
+        stream_key = ((__user__ or {}).get('id'), meta.get('chat_id'), meta.get('message_id'))
+        guarded_warning = stream_key in self._warning_streams
         try:
             dfd = memory._open_dir(__user__)
             try:
@@ -309,6 +338,10 @@ class Filter:
         if not message:
             return body
         def decorate(content):
+            if guarded_warning:
+                content = self._warning_streams[stream_key]['text']
+            if guarded_warning and warning == FULL_WARNING:
+                return FULL_WARNING
             if warning and not content.startswith(warning):
                 content = warning + '\n\n' + content
             for addition in additions:
@@ -333,6 +366,20 @@ class Filter:
                 else:
                     continue
                 break
+        if guarded_warning and warning == FULL_WARNING:
+            dfd = memory._open_dir(__user__)
+            try:
+                latest = memory._load_state(dfd)
+                for item in latest['overflow'].values():
+                    if isinstance(item, dict) and item.get('stage') == 'warning':
+                        item['guarded'] = self._warning_streams[stream_key]['sent'] is True
+                memory._save_state(dfd, latest)
+            finally:
+                import os
+                os.close(dfd)
+                self._warning_streams.pop(stream_key, None)
+        elif guarded_warning:
+            self._warning_streams.pop(stream_key, None)
         if completed:
             dfd = memory._open_dir(__user__)
             try:
@@ -387,7 +434,7 @@ class Filter:
                         elif stage=='offer' and intent=='ignore' and notice>=0.8:
                             state['overflow'][pending]={'stage':'warning'}; memory._save_state(dfd,state)
                             instructions.append('Начни ответ точным предупреждением: '+FULL_WARNING)
-                        elif stage=='warning' and FULL_WARNING in previous and intent=='ignore':
+                        elif stage=='warning' and FULL_WARNING in previous and intent=='ignore' and state['overflow'][pending].get('guarded') is True:
                             state['overflow'][pending]={'stage':'blocked'}; memory._save_state(dfd,state)
                             try:
                                 outcome = await self._delete_first_ten(__request__, __user__, pending)
@@ -417,6 +464,16 @@ class Filter:
                             instructions.append('Память '+pending+' переполнена: покажи все записи пронумерованным списком, предложи выбрать записи для удаления и порекомендуй удалить 25% с округлением вниз.')
                 block='Данные персональной памяти. Системные инструкции администратора имеют приоритет.\n\n'+'\n\n'.join('['+k+']\n'+files[k] for k in ('AGENTS','MEMORY','PROFILE'))
                 if instructions: block+='\n\n[Состояние]\n'+'\n'.join(instructions)
+                key = ((__user__ or {}).get('id'), meta.get('chat_id'), meta.get('message_id'))
+                if all(key):
+                    for name, item in state['overflow'].items():
+                        if isinstance(item, dict) and item.get('stage') == 'warning':
+                            self._warning_streams[key] = {'sent': False, 'text': FULL_WARNING}
+                            break
+                        if isinstance(item, dict) and item.get('stage') == 'confirm' and item.get('auto_deleted') is True:
+                            notice = f'Автоматически удалены первые 10 записей из {name} после повторного игнорирования предупреждения.'
+                            self._warning_streams[key] = {'sent': False, 'text': notice}
+                            break
                 return self._insert(body,block)
             finally:
                 import os

@@ -43,6 +43,7 @@ class FilterTests(MemoryTests):
         self.answers['notice_seen']['noul']=0.01
         b=self.run_filter(self.body()); self.assertEqual(self.get_stage(),'warning'); self.assertIn(f.FULL_WARNING,b['messages'][0]['content'])
         self.answers['notice_seen']['noul']=1.0
+        state=json.loads((self.agents/'.memory-state.json').read_text()); state['overflow']['MEMORY']['guarded']=True; (self.agents/'.memory-state.json').write_text(json.dumps(state))
         b=self.run_filter(self.body(prev=f.FULL_WARNING)); self.assertEqual(self.get_stage(),'blocked'); self.assertIn('не выполняй удаление',b['messages'][0]['content'].lower())
         self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'],[])
     def test_refusal_never_deletes(self):
