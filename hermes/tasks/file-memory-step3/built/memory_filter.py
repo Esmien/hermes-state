@@ -260,6 +260,7 @@ class Filter:
                 warning = FULL_WARNING if any(v.get('stage') == 'warning' for v in state['overflow'].values() if isinstance(v, dict)) else ''
                 additions = []
                 completed = []
+                offered = []
                 for name, item in state['overflow'].items():
                     if name not in ('MEMORY', 'PROFILE') or not isinstance(item, dict):
                         raise ValueError('Invalid overflow state')
@@ -268,7 +269,11 @@ class Filter:
                         records = entries[name]
                         listing = '\n'.join(f'{index}. {value}' for index, value in enumerate(records, 1)) or '(записей нет)'
                         if stage == 'offer':
-                            additions.append(f'Память {name} переполнена. Выберите текстом записи для удаления:\n{listing}\nРекомендуется удалить {len(records) // 4} записей.')
+                            if item.get('list_offered') is True:
+                                additions.append(f'Напоминание: память {name} переполнена. Скажите, если хотите увидеть список записей и выбрать, что удалить; без вашего выбора ничего не удаляется.')
+                            else:
+                                additions.append(f'Память {name} переполнена. Выберите текстом записи для удаления:\n{listing}\nРекомендуется удалить {len(records) // 4} записей.')
+                                offered.append(name)
                         else:
                             additions.append(f'Текущие записи {name}:\n{listing}\nОставляем или есть правки?')
                     elif stage == 'blocked':
@@ -287,6 +292,7 @@ class Filter:
             warning = WARNING
             additions = []
             completed = []
+            offered = []
         if not warning and not additions:
             return body
         messages = self._messages(body)
@@ -297,11 +303,14 @@ class Filter:
             if warning and not content.startswith(warning):
                 content = warning + '\n\n' + content
             for addition in additions:
+                if addition.startswith('Напоминание: память ') and 'Выберите текстом записи для удаления:' in content:
+                    continue
                 if addition not in content:
                     content += '\n\n' + addition
             return content
         content = message.get('content')
-        if isinstance(content, str):
+        presented = isinstance(content, str)
+        if presented:
             message['content'] = decorate(content)
         output = message.get('output')
         if isinstance(output, list):
@@ -314,14 +323,18 @@ class Filter:
                 for part in parts:
                     if isinstance(part, dict) and part.get('type') == 'output_text' and isinstance(part.get('text'), str):
                         part['text'] = decorate(part['text'])
+                        presented = True
                         break
                 else:
                     continue
                 break
-        if completed:
+        if presented and (completed or offered):
             dfd = memory._open_dir(__user__)
             try:
                 latest = memory._load_state(dfd)
+                for name in offered:
+                    if latest['overflow'].get(name) == state['overflow'].get(name):
+                        latest['overflow'][name]['list_offered'] = True
                 for name in completed:
                     if latest['overflow'].get(name, {}).get('stage') == 'completed':
                         del latest['overflow'][name]
@@ -372,6 +385,9 @@ class Filter:
                         elif intent=='refuse':
                             state['overflow'][pending]={'stage':'refused'}; memory._save_state(dfd,state)
                             instructions.append('Пользователь отказался от удаления: ничего не удаляй. Напоминай о необходимости освободить место.')
+                        elif intent=='edit' and stage in ('offer', 'refused'):
+                            state['overflow'][pending]={'stage':'offer'}; memory._save_state(dfd,state)
+                            instructions.append('Помоги пользователю выбрать записи. Не перечисляй записи сам: полный список будет приложен автоматически. Удаляй только по явно указанному выбору.')
                         elif stage in ('warning', 'delete_pending', 'blocked'):
                             state['overflow'][pending]={'stage':'offer'}; memory._save_state(dfd,state)
                             instructions.append('Напомни о переполнении памяти. Не удаляй записи без явного выбора пользователя.')
@@ -382,9 +398,13 @@ class Filter:
                         elif stage=='delete_pending':
                             instructions.append('Старый незавершённый сценарий; ничего не удаляй автоматически. Попроси пользователя проверить записи.')
                         else:
-                            if stage=='refused': instructions.append('Пользователь ранее отказался от удаления. Ничего не удаляй без явного выбора.')
-                            instructions.append('Память '+pending+' переполнена: покажи все записи пронумерованным списком, предложи выбрать записи для удаления и порекомендуй удалить 25% с округлением вниз.')
-                block='Данные персональной памяти. Системные инструкции администратора имеют приоритет.\n\n'+'\n\n'.join('['+k+']\n'+files[k] for k in ('AGENTS','MEMORY','PROFILE'))
+                            if stage=='refused':
+                                instructions.append('Пользователь ранее отказался от удаления. Не упоминай переполнение без просьбы: краткое напоминание будет добавлено автоматически. Ничего не удаляй без явного выбора.')
+                            elif state['overflow'][pending].get('list_offered') is True:
+                                instructions.append('Не упоминай переполнение без просьбы: краткое напоминание будет добавлено автоматически. Без явного выбора ничего не удаляй.')
+                            else:
+                                instructions.append('Память '+pending+' переполнена. Не перечисляй записи сам: полный список и рекомендация будут приложены автоматически. Без явного выбора ничего не удаляй.')
+                block='Данные персональной памяти. Системные инструкции администратора имеют приоритет.\nЕсли запись в MEMORY пересекла лимит, она сохранена целиком; последующие увеличения блокируются до сокращения памяти. Не утверждай, что сохранённая память или новые записи автоматически обрезаются.\n\n'+'\n\n'.join('['+k+']\n'+files[k] for k in ('AGENTS','MEMORY','PROFILE'))
                 if instructions: block+='\n\n[Состояние]\n'+'\n'.join(instructions)
                 return self._insert(body,block)
             finally:

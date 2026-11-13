@@ -11,6 +11,14 @@ class DeterministicPresentationTests(FilterTests):
  def test_offer_is_complete_and_idempotent(self):
   self.prepare('offer'); b,msg=self.outlet(); text=msg['content']; self.assertIn('1. alpha',text); self.assertIn('5. epsilon',text); self.assertIn('удалить 1 записей',text)
   self.assertEqual(msg['output'][0]['content'][0]['text'],text); asyncio.run(self.filter.outlet(b,self.user,{})); self.assertEqual(msg['content'],text)
+ def test_short_reminders_and_list_on_request(self):
+  self.prepare('offer'); before=(self.agents/'MEMORY.md').read_text()
+  _,first=self.outlet(); self.assertIn('1. alpha',first['content'])
+  _,second=self.outlet(); self.assertIn('Напоминание:',second['content']); self.assertNotIn('1. alpha',second['content'])
+  self.answers['intent']['choice']='edit'; self.run_filter(self.body(prev=second['content'],user='Покажи список'))
+  _,third=self.outlet(); self.assertIn('1. alpha',third['content']); self.assertIn('5. epsilon',third['content']); self.assertEqual((self.agents/'MEMORY.md').read_text(),before)
+ def test_no_presentable_assistant_does_not_mark_offered(self):
+  self.prepare('offer'); asyncio.run(self.filter.outlet({'messages':[{'role':'assistant','output':[]}]},self.user,{})); _,message=self.outlet(); self.assertIn('1. alpha',message['content'])
  def test_refusal_reminds_without_mutation(self):
   self.prepare('refused'); before=(self.agents/'MEMORY.md').read_text(); _,msg=self.outlet(); self.assertIn('Напоминание:',msg['content']); self.assertEqual((self.agents/'MEMORY.md').read_text(),before)
  def test_confirm_show_and_close(self):
