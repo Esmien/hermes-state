@@ -21,6 +21,17 @@ class FilterTests(MemoryTests):
         (self.agents/'.memory-state.json').write_text(json.dumps({'version':1,'overflow':{'MEMORY':{'stage':stage}}}))
     def get_stage(self):
         return json.loads((self.agents/'.memory-state.json').read_text())['overflow']['MEMORY']['stage']
+    def test_global_scope_and_tool_injection(self):
+        u={**self.user, 'role':'user'}
+        b=self.body(); b['tool_ids']=['existing_tool']; out=self.run_filter(b,user=u)
+        self.assertEqual(out['tool_ids'],['existing_tool',self.filter.valves.tool_id])
+        self.assertEqual(self.run_filter(out,user=u)['tool_ids'],['existing_tool',self.filter.valves.tool_id])
+        explicit=self.body(); explicit['tools']=[]; self.assertNotIn('tool_ids',self.run_filter(explicit,user=u))
+        bad=self.body(); self.assertNotIn('tool_ids',self.run_filter(bad,user={'role':'user','id':'bad'}))
+        admin={**self.user,'role':'admin'}; b=self.body(); original=copy.deepcopy(b)
+        self.assertEqual(self.run_filter(b,user=admin),original)
+        response={'messages':[{'role':'assistant','content':'ok'}]}; old=copy.deepcopy(response)
+        self.assertEqual(asyncio.run(self.filter.outlet(response,admin,{})),old)
     def test_stable_single_block_admin_intact(self):
         b=self.run_filter(self.body()); first=b['messages'][0]['content']
         self.assertEqual(first.count(f.BEGIN),1)
