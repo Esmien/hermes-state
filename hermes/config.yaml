@@ -2492,7 +2492,7 @@ auxiliary:
     reasoning_effort: ''
     provider: custom
   compression:
-    provider: custom
+    provider: Open WebUI
     model: compacter
 fallback_providers:
   - provider: custom
