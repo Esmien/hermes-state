@@ -51,11 +51,21 @@ For open-webui `read_file` the top ~140 lines — newest-first, one section per 
 - **Behavior changes ride along with backports, and the release notes bury them.** A "client subscription forwarding" backport makes a caller-supplied provider login take precedence over the saved gateway account on shared-subscription providers, and adds passthrough routes. Name the affected leg and the condition ("only for clients that bring their own login"), then say plainly that master-key traffic is unchanged.
 - **Diff `litellm/proxy/health_endpoints/_health_endpoints.py` between the tags.** Our watchdog probes `/health/liveliness` and `/health/readiness`; a change there is a monitoring risk, not a feature bullet. Identical file ⇒ the watchdog keeps working.
 
-**LiteLLM has no prisma migration files — so «no migrations in the diff» is NOT a risk signal here, unlike Open WebUI.** `git/trees/<tag>?recursive=1` filtered on `prisma/migrations` returns **zero** `.sql` paths on both the running and the newest tag: LiteLLM reconciles the schema against `schema.prisma` at startup (the Rust/ClickHouse migrations under `litellm-rust/` are a different product). Consequences to state in the review:
+**LiteLLM DOES ship SQL migrations — but under `litellm-proxy-extras/`, not `prisma/migrations`.** The old probe (`git/trees/<tag>?recursive=1` filtered on `prisma/migrations`) returns **zero** paths and produces the false conclusion «no migrations, nothing to inspect». The real files are `litellm-proxy-extras/litellm_proxy_extras/migrations/<ts>_<name>/migration.sql` (~225 of them by 1.108.8), applied by the proxy at boot (docker log: `Applying migration …`, ending with `All migrations have been successfully applied.`). Correct preflight:
 
-- a schema change can land silently on the first boot after the bump, with no file to inspect beforehand;
-- the rollback path is therefore **a database dump, not an image tag** — take a fresh `litellm_db` dump before the bump and say the restore step out loud;
-- `LiteLLM_Config`/general_settings rows survive a downgrade, so a bad release can be reverted by tag alone *only if* the schema did not move.
+```python
+def migs(tag):  # set-diff the two tags
+    tr = json.load(urlopen(f"https://api.github.com/repos/BerriAI/litellm/git/trees/{tag}?recursive=1"))
+    return {t["path"] for t in tr["tree"] if t["type"] == "blob" and t["path"].endswith("migration.sql")}
+added = sorted(migs(new) - migs(old))   # the migrations that WILL run on first boot
+```
+
+Then fetch each added file and grep it for `DROP TABLE|DROP COLUMN|DELETE FROM|ALTER COLUMN`: empty means the schema move is additive and a downgrade is safe. State in the review:
+
+- how many migrations will run and what they add (1.106.6 → 1.108.8 was 7 migrations, all new tables/indexes, zero destructive statements);
+- additive ⇒ the rollback path may be **the previous image tag**, and extra tables just sit there;
+- still take a fresh `litellm_db` dump before the bump — that is the only path back if an applied migration is not reversible;
+- `LiteLLM_Config`/general_settings rows survive a downgrade regardless.
 
 **You can still prove the schema did not move: diff `litellm/proxy/schema.prisma` between the two tags.** Identical file ⇒ nothing to reconcile on boot ⇒ rollback by image tag alone is safe and the pre-bump dump is belt-and-braces. Say which of the two rollback paths applies instead of always writing «откат — только дампом»:
 
