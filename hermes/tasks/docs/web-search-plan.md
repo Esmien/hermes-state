@@ -105,3 +105,21 @@ GET  /health                                  ->  {"ok": true, "searxng": "up|do
 - Эскалацию делать через отдельный инстанс Hermes или через MCP-сервер `lightpanda mcp`
   в самом шиме (без агента вовсе)?
 - Сколько страниц открывать по умолчанию: 5 (быстро) против 8–10 (качество, +латентность).
+
+## Сделано 14.11.2026: headless-браузер для WebUI
+
+Промежуточный шаг до `search-shim`: у WebUI появился собственный браузер, поэтому страницы
+из поиска и по прямой ссылке рендерятся с JS.
+
+- Контейнер `playwright` (`mcr.microsoft.com/playwright:v1.60.0-noble`, `npx playwright@1.60.0
+  run-server --port 3000`, `ipc: host`, в `stack-net`, портов наружу нет). Версия образа равна
+  версии пакета `playwright` в образе WebUI (1.60.0) — при обновлении WebUI синхронизировать.
+- Конфиг OWUI: `web.loader.engine=playwright`, `web.loader.playwright_ws_url=ws://playwright:3000`,
+  `web.search.bypass_web_loader=false`. Поиск остаётся SearXNG.
+- Проверка рендера: `POST /api/v1/retrieval/process/url` на `quotes.toscrape.com/js/` вернул
+  10 цитат (1501 знак) — контент есть только после исполнения JS.
+- Тул `web_browser` (`/app` Tool, публичный) с методом `browse_page(url, wait_for_selector, max_chars)`:
+  подключается к серверу по WS, берёт `innerText` из `article`/`main`, отдаёт заголовок + описание +
+  текст, обрезает по `max_chars`. Привязан к 26 моделям группы `chat.*` через `params.tool_ids`.
+- Бэкапы: `docker-compose-before-playwright.yml`, `models-chat-params-before-tool.json` (0600).
+- Откат: убрать `tool_ids`, вернуть `web.loader.engine=''`, `docker compose rm -sf playwright`.
