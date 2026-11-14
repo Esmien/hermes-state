@@ -37,6 +37,8 @@ class FilterTests(MemoryTests):
         self.assertEqual(first.count(f.BEGIN),1)
         self.assertEqual(first.count(f.END),1)
         self.assertTrue(first.startswith('ADMIN'))
+        self.assertIn('260 символов — потолок, а не цель', first)
+        self.assertIn('без потери значимых фактов', first)
         self.assertLess(first.index('[AGENTS]'),first.index('[MEMORY]'))
         self.assertLess(first.index('[MEMORY]'),first.index('[PROFILE]'))
         second=self.run_filter(b)['messages'][0]['content']
