@@ -137,3 +137,43 @@ class AutoFileTests(FilterTests):
         self.classify({long_rule:'MEMORY'})
         self.run_filter(self.body())
         self.assertIn(long_rule,m.operate(self.user,'list','PROFILE')['entries'])
+
+class ConflictTests(FilterTests):
+    """Противоречие между файлами: вопрос пользователю и удаление по ответу."""
+    def seed(self):
+        self.conflicts=[];self.kept=[]
+        self.answers={'misplaced':{'noul':0.0}}
+        self.filter._classify=lambda items: {}
+        self.filter._find_conflicts=lambda pairs: {p['id'] for p in pairs}
+        self.filter._ask_keep=lambda a,b,r: self.kept.pop(0) if self.kept else 'unclear'
+        m.operate(self.user,'append','MEMORY','Живёт в Ванино.')
+        m.operate(self.user,'append','PROFILE','Живёт в Краснодаре.')
+    def run_outlet(self,body):
+        return asyncio.run(self.filter.outlet(body,self.user,{}))
+    def test_question_then_resolution(self):
+        self.seed()
+        self.run_filter(self.body(user='привет'))
+        state=json.loads((self.agents/'.memory-state.json').read_text())
+        self.assertEqual(len(state['conflicts']),1)
+        self.assertEqual(state['conflicts'][0]['a_file'],'MEMORY')
+        reply={'messages':[{'role':'system','content':'ADMIN'},{'role':'assistant','content':'Ок'},{'role':'user','content':'привет'}]}
+        out=self.run_outlet(reply)
+        text=out['messages'][1]['content']
+        self.assertIn('Две записи противоречат друг другу',text)
+        self.assertIn('оставить 1',text)
+        state=json.loads((self.agents/'.memory-state.json').read_text())
+        self.assertEqual(state['conflicts'][0]['stage'],'shown')
+        self.kept=['second']
+        self.run_filter(self.body(user='оставить 2'))
+        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'],[])
+        self.assertEqual(m.operate(self.user,'list','PROFILE')['entries'],['Живёт в Краснодаре.'])
+        state=json.loads((self.agents/'.memory-state.json').read_text())
+        self.assertEqual(state['conflicts'],[])
+        self.assertEqual(state['conflict_resolved']['to'],'PROFILE')
+    def test_no_delete_without_choice(self):
+        self.seed()
+        self.run_filter(self.body(user='привет'))
+        self.kept=['unclear']
+        self.run_filter(self.body(user='не знаю'))
+        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'],['Живёт в Ванино.'])
+        self.assertEqual(len(json.loads((self.agents/'.memory-state.json').read_text())['conflicts']),1)
