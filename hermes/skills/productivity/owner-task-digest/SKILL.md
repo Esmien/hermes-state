@@ -59,6 +59,10 @@ Silent board edits are the failure mode: the owner asked for **every** change to
 
 Ответ `{"action": "unchanged"}` у `refresh` — не сбой: watcher успел обновить карточку первым и сравнил с уже сохранённым состоянием. Проверять надо содержимое `/var/lib/hermes-task-board/state.json` (есть ли новый `#id`/путь), а не код возврата.
 
+**Сетевой сбой — повторить, а не объявлять поломку.** `refresh` может упасть с `urllib.error.URLError: Connection reset by peer`, пока api.telegram.org жив: один повтор проходит, и второй ответ часто сразу `unchanged`. Владельцу докладывать по состоянию в `state.json` (статус конкретной задачи), а не по коду возврата скрипта.
+
+Правка доски в `~/.hermes/tasks` требует снапшота в тот же ход (см. ниже): без него репо расходится с хостом.
+
 **Правка доски и новые планы не попадают в снапшот сами.** `hermes-state-watch` следит за `skills/`, `memories/`, `plugins/`, `hooks/`, `scripts/`, `config.yaml`, `SOUL.md` — каталога `$HERMES_HOME/tasks` в списке нет, в репо он приезжает только прогоном `/usr/local/bin/hermes-state-backup.sh` (или ночным `hermes-state-backup.timer`). Правило владельца «репо = живой хост» значит: после нового дока в `tasks/docs/` и записи в доску сразу прогнать бэкап (он же коммит + push) и подтвердить доставку строкой `✓ pushed <sha>`.
 
 ## Checks
