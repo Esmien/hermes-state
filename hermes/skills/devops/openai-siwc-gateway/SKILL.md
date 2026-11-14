@@ -57,11 +57,14 @@ replacement. The documented path is SIWC for open-source / locally hosted apps.
   **не HTTP-кодом, а событием `response.failed` внутри 200-потока** — поэтому маппинг только на
   уровне статуса ничего не меняет (проверено: после него ровно тот же `BadRequestError` в чате).
   Лечение — в мосте, две точки: `relay_error()` для не-200 (400/403 с «usage limit» → `429`
-  `rate_limit_error`) и **чтение стартового потока ДО отправки 200** (`handle_responses` и `handle_chat`): ошибка идёт
- **не первым событием, а сразу после preamble** (`response.created` / `response.in_progress`),
- поэтому peek по одному событию не ловит её — пропускай preamble до первого содержательного
- события (лимит ~8) и только тогда отдавай 200; если раньше встретился `response.failed`/`error` —
- 429. Подтверждение факта в реальном отказе: строка `responses failed before stream:` в
+  `rate_limit_error`) и **чтение стартового потока ДО отправки 200** (`handle_responses` и `handle_chat`): отказ идёт
+ **не первым событием**, а в любой момент до первого вывода — реальные последовательности на этом
+ хосте: `created → in_progress → output_item.added → failed`, `created → in_progress → metadata →
+ failed` и `created → in_progress → metadata → error`. Список «тихих» типов бесполезен (состав
+ меняется), поэтому правило простое: **копить всё, пока не встретится `*.delta` / `output_item.done` /
+ `completed` / `incomplete`** (лимит ~200 событий), и только тогда отдавать 200; встретили
+ `response.failed`/`error` — 429. Стриминг сохраняется, тормозятся только pre-text события.
+ Проверка в реальном отказе: строка `responses failed before stream: <type> <msg>` в
  `/root/siwc/gateway.log` (юнит пишет stdout/stderr туда, а не в journald — `journalctl -u
  siwc-gateway` пуст и это норма). `aggregate()` тоже должен
   ставить `status='failed'` для `response.failed`, иначе sync-ветка отдаёт пустой 200. Тест логики —
@@ -151,7 +154,6 @@ For model inventory and cleanup, see `ai-stack` → `references/model-provenance
   `fallbacks` — а не значение верхнего уровня (верхний уровень `null` ничего не значит).
 
 ## Учебный прогон квоты (сквозной, без ожидания реального отказа)
-
 Квота не читается и не воспроизводится по заказу, поэтому отладка fallback-цепочки идёт инъекцией
 того же события: второй экземпляр моста с `SIWC_FAKE_QUOTA=1` и своим портом
 (`SIWC_PORT=4022 SIWC_BIND=172.17.0.1,127.0.0.1 python3 /root/siwc/gateway.py`) отдаёт ровно
@@ -167,6 +169,15 @@ POST `/api/chat/completions`, модель `gpt-61-terra`) — запускат�
 фейковой ноги (`responses failed before stream`) и ответ от `order=2` (OpenRouter) — в
 спенд-логах `model_id` ноги OpenRouter, ни одной `failure`-строки у группы. После снятия подмены
 order-1 снова отдаёт мост. Учесть: пока идёт прогон, рабочая нога фактически подменена.
+
+**Chromium-сессия владельца без пароля:** cookie `token` серверу достаточно (API отдаёт 200), но SPA
+сразу редиректит на `/auth` — она читает `localStorage.token`. Порядок: зайти на `/auth`, положить
+JWT в `localStorage.token`, только потом открывать `/?model=<id>`. JWT — `{id, session_stamp, typ:
+'session', mfa_verified: true, iat, exp}`, `session_stamp` берётся из таблицы `auth` в `webui_db`.
+Ввод в чат — реальный ввод с клавиатуры: поле `#chat-input` это `contenteditable`, установка
+`value` не работает; нужно `Input.dispatchMouseEvent` по центру + `Input.insertText` +
+`Input.dispatchKeyEvent` Enter. Готовый драйвер — `assets/host/siwc/owui-chromium-e2e.py`
+(venv с `websocket-client`, Chromium с `--remote-debugging-port`, `/json/new` только методом PUT).
 
 ## Media on the bridge
 
