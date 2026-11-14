@@ -65,8 +65,8 @@
 ## Backups & notifications
 
 - **`Requires=` in a timer's `[Unit]` makes the timer START its service — including at every boot.** Both backup timers originally carried `Requires=postgres-backup.service` / `Requires=postgres-backup-notify.service`; because `timers.target` starts the timers at boot, systemd pulled the services in too, so every reboot produced a full pg_dump pair (~150 MB, ~13 s CPU) plus a Telegram digest. `Persistent=true` was NOT the cause (stamps were current). Activation is already handled by the implicit `Unit=` (`foo.timer` → `foo.service`); the `Requires=` lines were removed. Symptom to recognise: `journalctl -b | grep postgres-backup` shows `Started postgres-backup.timer` immediately followed by `Starting postgres-backup.service` seconds after boot. Verify a fix with `systemctl show <timer> -p Requires` (must not list the service) and by restarting the timer — the service must stay `inactive`.
-- `postgres-backup.timer` (02:30 UTC / 05:30 MSK) runs `ai/backup-databases.sh`: pg_dump of `webui_db` + `litellm_db`, then keeps only the newest `RETENTION_COUNT` (default 3) dumps **per database** and deletes the rest — count-based, not date-based, so several backups made on the same day still collapse to the last 3. DB names are derived from the dump filenames; ordering is by mtime.
-- `postgres-backup-notify.timer` (03:00 UTC / 06:00 MSK) runs `notifications/monitor.py backup`: sends the newest dump of each DB to the **file bot** (`FILE_BOT_TOKEN`, `@esmien_ai_backups_bot`) and a digest to the **message bot** (`BOT_TOKEN`, `@esmien_vps_notificator_bot`). Dumps are split adaptively: `split_part_count(size) = ceil(size / TG_DOC_LIMIT)` with `TG_DOC_LIMIT = 18 MiB` — **the limit is the download one, not the upload one.** `sendDocument` takes 50 MB, but `getFile` returns at most 20 MB, so a 45 MiB part sits in the chat and can never be pulled back for a restore (measured: `webui_db` 113 MB → 7×16.2 MiB, `litellm_db` 28.5 MB → 2×14.3 MiB). The join command names all parts and is phrased via `plural_ru(count, ...)` so the wording is right for 3+ parts.
+- `postgres-backup.timer` (00:00 UTC / 03:00 MSK) runs `ai/backup-databases.sh`: pg_dump of `webui_db` + `litellm_db`, then keeps only the newest `RETENTION_COUNT` (default 3) dumps **per database** and deletes the rest — count-based, not date-based, so several backups made on the same day still collapse to the last 3. DB names are derived from the dump filenames; ordering is by mtime.
+- `postgres-backup-notify.timer` (00:30 UTC / 03:30 MSK) runs `notifications/monitor.py backup`: sends the newest dump of each DB to the **file bot** (`FILE_BOT_TOKEN`, `@esmien_ai_backups_bot`) and a digest to the **message bot** (`BOT_TOKEN`, `@esmien_vps_notificator_bot`). Dumps are split adaptively: `split_part_count(size) = ceil(size / TG_DOC_LIMIT)` with `TG_DOC_LIMIT = 18 MiB` — **the limit is the download one, not the upload one.** `sendDocument` takes 50 MB, but `getFile` returns at most 20 MB, so a 45 MiB part sits in the chat and can never be pulled back for a restore (measured: `webui_db` 113 MB → 7×16.2 MiB, `litellm_db` 28.5 MB → 2×14.3 MiB). The join command names all parts and is phrased via `plural_ru(count, ...)` so the wording is right for 3+ parts.
 - **A bot cannot read its own chat history — the only handle for restore is `file_id`.** Every part's `file_id`/`message_id` is written to `<BACKUP_DIR>/.tg-registry.json` (newest 3 sets per DB) by `record_backup_registry`, and that file is shipped to the private `hermes-state` repo as `host/backups/tg-registry.json`, from where `install.py --from-bot` downloads the parts and checks `sha256`. Losing the registry does not lose the files but breaks the automatic path: the fallback is the owner forwarding the parts to the bot and `getUpdates` picking them up. Uploaded files of the pre-18-MiB era are unrecoverable regardless.
 - Notifications live in **`/home/ai_service/notifications/`** (sibling of `ai-stack`, NOT inside it): `monitor.py`, `README.md`, `.env` (mode 640 root:ai_service). `.env` holds `BOT_TOKEN`, `FILE_BOT_TOKEN`, `BOT_OWNER=214062001`, `BACKUP_DIR`, `BACKUP_PATTERN=*.dump`, `DISK/INODE_WARN|CRIT_PERCENT`, `MAX_BACKUP_AGE_HOURS`, `MONITOR_*_STATE_FILE`. Never print it.
 - **The upload digest must say what the recipient is looking at.** Nine part-files in the chat mean nothing to the owner without a mapping, and «в отчёте их нет» is the predictable complaint. `build_backup_digest` therefore ends with a «В файл-боте (реестр file_id)» block fed from `.tg-registry.json` via `registry_sent_parts()`: per DB — part count, average part size, delivery state, and the first 12 hex of the dump's `sha256`. Keep that block in sync with whatever the splitter actually sends; a digest that lists only dump names is an upload receipt that hides the transport.
@@ -119,6 +119,29 @@ Two hard rules from this stack:
 ## Scripts / index entry (moved from SKILL.md)
 
 - `scripts/check-notification-bots.py` — **Telegram notification health** (each bot token via `getMe`, usernames only; plus the `file_id` restore registry with part sizes and age). Run first when the owner says a message never arrived.
+
+## Окно бэкапов: всё в 00:00 UTC
+
+С 14.11.2026 ежедневные и недельные бэкапы сведены в одно окно. Реальные OnCalendar живут в drop-in
+`/etc/systemd/system/<timer>.timer.d/override.conf`; в `vps-infra/assets/host/systemd/` они копируются
+в подкаталоги `<timer>.timer.d/` — правка одного базового юнита `systemctl show` не изменит.
+
+- 00:00 — `postgres-backup`, `hermes-state-backup`, `ai-memory-backup`;
+- 00:30 — `postgres-backup-notify` (зависит от дампа, поэтому позже);
+- вс 00:15/00:25/00:35 — `webui-data-backup`, `secrets-offsite-backup`, `hermes-history-backup`.
+
+**`ai-memory-backup`** (`/usr/local/bin/ai-memory-backup.sh` + `ai-memory-backup.{service,timer}`) — единственный
+бэкап файловой памяти: раз в сутки собирает только `.agents` всех пользователей из
+`/home/ai_service/sandbox/users` в staging, `rsync --delete` в `/var/lib/ai-memory-repo/repo/users/<slug>/`,
+коммитит и пушит в приватный `Esmien/users_ai_memory`. Нет репозитория — скрипт создаёт его сам через GitHub API
+(`GITHUB_KEY` из `ai-stack/ai/.env`, в `.git/config` не попадает). TG-отчёт (тема Backups,
+`telegram:-1004410657647:10`) — после успешного пуша: аккаунты, число изменённых файлов, короткий sha;
+«изменений нет» тоже сообщается, сбой пуша идёт отдельным сообщением.
+
+**`searxng-quality-check.py` — тревога только при полном отказе.** Проверки не менялись (google cse ≥5,
+общий ≥10 и ≥2 движка, раз в 30 минут), но в TG уходит только «контейнер не running или ноль результатов
+по всем запросам» после `SQ_FAILS` подряд; деградация пишется как `DEGRADED` в `/var/log/searxng-quality.log`
+и в Telegram не идёт. Сообщение о восстановлении — только если до этого была тревога.
 
 ## When to read this file (annotated index entry, moved from SKILL.md)
 

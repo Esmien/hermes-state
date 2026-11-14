@@ -354,3 +354,18 @@ AGENTS.md (шаблон provisioner, раздел «Сохранение по с
 Проверка на живых моделях через API: «отпуск в феврале, Карелия» → и `gpt-6.1-terra`, и
 `deepseek-v4.1-flash` первым делом вызывают `memory(list, MEMORY)`; «привет, как настроение» → обычный
 ответ без вызова инструмента. То есть инициатива появилась, а болтовня в память не льётся.
+
+## Бэкап файловой памяти в git (14.11.2026)
+
+Запоздавший пункт плана закрыт: `.agents` теперь версионируются.
+
+- `/usr/local/bin/ai-memory-backup.sh` + `ai-memory-backup.{service,timer}`, ежедневно 00:00 UTC.
+- Источник — только каталоги `.agents` из `/home/ai_service/sandbox/users`; копия в
+  `/var/lib/ai-memory-repo/repo/users/<slug>/`, коммит и пуш в приватный `Esmien/users_ai_memory`.
+- Репозиторий создаётся скриптом сам (GitHub API, токен `GITHUB_KEY` из `ai-stack/ai/.env`).
+- Отчёт в TG (тема Backups) после успешного пуша: аккаунты, изменённые файлы, короткий sha; при отсутствии
+  изменений — «изменений нет», при сбое пуша — отдельное сообщение.
+- Остальные бэкапы переведены в то же окно: postgres и hermes-state в 00:00, postgres-notify в 00:30,
+  недельные (webui-data, secrets-offsite, hermes-history) — вс 00:15/00:25/00:35. Реальные OnCalendar — в
+  drop-in `/etc/systemd/system/<timer>.timer.d/override.conf`, копии в `vps-infra/assets/host/systemd/<timer>.timer.d/`.
+- Первый прогон: 13 аккаунтов, 42 файла, коммит `2197c5a`; удалённый репозиторий проверен через API.

@@ -73,7 +73,7 @@ ffc3d455a8097e27856ca875bd66f8e7e0fc9a89bf99805972c7a9fd9f61f11e  ./hermes/skill
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
 45036951d33fa041669ae0028310e0fc1afc48b4e208846cfcd28eb7c01ad7e6  ./hermes/skills/devops/ai-stack/SKILL.md
-35f011180b4ddc06606d1bf45df577e34baf6cb7a0aeff203c055d46eed7afbe  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
+9463df662fecb2f81a3baaf2defe08b886782f1774a8d39703cc87469988e836  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
 d4d2d38f0c3fe3ff53ff7de02ca914cd07b05c1f8700813a0c3fa242b323ed89  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
 45d3b61b57f8c5e4e1d02b2c426584b8c19b45723437abf07064de943549c69b  ./hermes/skills/devops/ai-stack/references/cloudflare-proxy.md
@@ -238,7 +238,7 @@ d45a136df942a16e1503be0b03d4215f1682d16f6703abea1eb4dc6e5fea5e71  ./hermes/skill
 6c924f789f78e902652861f36a687bab935b9aba2d43e494048491a1ce899d93  ./hermes/tasks/docs/media-mcp-plan.md
 cd44df6a854f67449408571c60d009081a33bdf73e66322e9254c9a491984e00  ./hermes/tasks/docs/modules-plan.md
 0262c8b098d9d1cd6932c26d0c97a11b34ab174c1c7618eff5aadc3ad069d8b5  ./hermes/tasks/docs/multiagent-tiers.md
-a236a37931a425af229ae90df7376232454b27b8f91041bdf32b4113f9c165ea  ./hermes/tasks/docs/owui-file-memory.md
+b1231dd098ed167b54613c91a292729f39fcfd06a66a38341eec6a8c2b621a6a  ./hermes/tasks/docs/owui-file-memory.md
 c64a7ee60a16608e0b86f08c73f947c28d48b9168e1d33c4eb21f898c57cb515  ./hermes/tasks/docs/vpn-service-rewrite.md
 385820f09df4d9df4431624060b62210b39e69eaaa5a4f96a327cf981c13361d  ./hermes/tasks/docs/web-search-plan.md
 d9556e10757839d8be3f920dfd5df84f6ded00964a989207901eaf7138555e04  ./hermes/tasks/file-memory-step3/build_plugins.py
@@ -272,7 +272,7 @@ a415801fd548d9e48e216c2c1271616083986caf7a4feba4eeb6cf1cde450f43  ./host/bin/her
 249ff939ae185cf37c91ef7bdcc926518767213c964e952180be17ab4bfb7377  ./host/bin/litellm-spend-retention.sh
 956f0f2f8ae83828267575d4ac6c653e804b4bcce80e75b64b06caf792997aa3  ./host/bin/litellm-watchdog.py
 764bc62ccd10c7a4b51e32012de64fdbe4d329904b2440d7b89019b50d9db979  ./host/bin/owui-signup-approver.py
-9bab0d5f058d8ba6fa6ecfe52872aba6e870b4d8462fae791141b4bf623b417f  ./host/bin/searxng-quality-check.py
+1dca5d32c47197b2f671f06d3f45f8ea6c3e756417fd27413e9e4fd509bb299c  ./host/bin/searxng-quality-check.py
 dddd1e9d4ddd41e3e3122f6f9bef6266953fc26a5650ec4c800b30c69fc6cb7a  ./host/bin/secrets-offsite-backup.py
 42d76cebc17fefeb9e49a7b007e11aa7a538a359ffdbdcf08585a8c069c8dab6  ./host/bin/tor-rotate.sh
 20ff03e6cf44682eb7cad75deee62e4dc66fe8d981a3ee1d06d3800fab714e04  ./host/bin/webui-compact-images.sh
