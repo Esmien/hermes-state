@@ -101,7 +101,7 @@ ac748903dd3fab6673926b5bfab429273e7e8b370d0347fae27ab62f2a27cf2a  ./hermes/skill
 255f0977a8801e5f17f9a6a7c3b0c207a5a5cd7f72a1b6032a6ed790b31e3f33  ./hermes/skills/devops/ai-stack/references/searxng.md
 23e8a449e6f4133e8f331862152a5ada1e7d65c4a0f67cf25d39d467db12521e  ./hermes/skills/devops/ai-stack/references/signup-approval.md
 593822ca298eabae09dedabc28e4d3239a127a9301a803ad1f32eda49ea5661b  ./hermes/skills/devops/ai-stack/references/ui-latency.md
-5e67845d291082859b336ebf1e95049316a04abc1efe168dba34034e76c6a4eb  ./hermes/skills/devops/ai-stack/references/updates.md
+515133167afa5d2b2e41c1817e097de79cfaf7fcbad699d73dc4882734d3502a  ./hermes/skills/devops/ai-stack/references/updates.md
 70a66d4b7c86b48fa464a48a0b5646efda8eb8a02c861ed2c3864d9a62a2ccb5  ./hermes/skills/devops/ai-stack/references/upstream-release-review.md
 1b4234ba77f004dac807f264abb6e96b34eb82514f38455ccfeafda3c4fc56a2  ./hermes/skills/devops/ai-stack/references/web-search-architecture.md
 80ffd361b1c5f46f0006193a623ec4ff84c62eff2b4f2195adb5cc13a10e0a82  ./hermes/skills/devops/ai-stack/scripts/audit-dead-models.py
