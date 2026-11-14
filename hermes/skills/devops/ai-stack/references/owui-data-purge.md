@@ -20,6 +20,11 @@ from chat c join \"user\" u on u.id=c.user_id group by 1 order by 2 desc;"
 `chat.created_at` / `updated_at` are **epoch seconds (bigint)**, not timestamps. Resolve the
 owner's `user.id` by email — never hardcode the UUID.
 
+Display them in MSK by converting the bigint first and applying the zone to the timestamp:
+`to_char(to_timestamp(c.updated_at) at time zone 'Europe/Moscow','MM-DD HH24:MI')`. The
+reverse form `to_timestamp(c.updated_at at time zone 'UTC')` fails with
+`function pg_catalog.timezone(unknown, bigint) does not exist`.
+
 ## 2. Map what a chat actually owns
 
 A chat row is NOT the whole chat:
@@ -29,7 +34,12 @@ A chat row is NOT the whole chat:
 | `chat` | title, owner, timestamps, whole `chat` JSON |
 | `chat_message` | per-message rows (newer OWUI) — orphans if you delete only `chat` |
 | `chat_file` | chat → `file.id` links |
-| `chatidtag`, `feedback`, `shared_chat` | possible extras; check before deleting |
+| `chat_view_state` | per-user view state (exists on 0.13.x, gets rows for every chat opened) |
+| `chatidtag`, `shared_chat`, `automation_run` | tags / public links / scheduled runs — usually 0 rows, still delete |
+| `feedback` | no `chat_id` column here; check before assuming it |
+
+Do not trust an old list — enumerate instead:
+`select table_name, column_name from information_schema.columns where table_schema='public' and column_name in ('chat_id','chatid');`
 
 `file` is referenced with **`ON DELETE CASCADE`** from `chat_file`, `knowledge_file` and
 `channel_file`: deleting a `file` row silently removes the knowledge-base link too. So
@@ -55,14 +65,44 @@ BEGIN;
 CREATE TEMP TABLE doomed AS SELECT id FROM chat
  WHERE user_id='<uuid>' AND updated_at < $CUT;
 SELECT count(*) FROM doomed;
-DELETE FROM chat_message WHERE chat_id IN (SELECT id FROM doomed);
-DELETE FROM chat_file    WHERE chat_id IN (SELECT id FROM doomed);
-DELETE FROM chat         WHERE id IN (SELECT id FROM doomed);
+DELETE FROM chat_message    WHERE chat_id IN (SELECT id FROM doomed);
+DELETE FROM chat_file       WHERE chat_id IN (SELECT id FROM doomed);
+DELETE FROM chatidtag       WHERE chat_id IN (SELECT id FROM doomed);
+DELETE FROM chat_view_state WHERE chat_id IN (SELECT id FROM doomed);
+DELETE FROM shared_chat     WHERE chat_id IN (SELECT id FROM doomed);
+DELETE FROM automation_run  WHERE chat_id IN (SELECT id FROM doomed);
+DELETE FROM chat            WHERE id IN (SELECT id FROM doomed);
 COMMIT;
 SQL
 ```
 
-No restart needed — OWUI reads chats from the DB per request.
+No restart needed — OWUI reads chats from the DB per request. After the transaction, prove
+zero orphans before reporting: `select count(*) from chat_message m left join chat c on
+c.id=m.chat_id where c.id is null;` (same for `chat_file`).
+
+## 4b. Purge by title («убери тестовые чаты / пинги»)
+
+When the ask is not a date cutoff but «все тестовые», classify first and delete by title
+family in the SAME transaction shape:
+
+```sql
+select c.title, count(*),
+       min(to_char(to_timestamp(c.updated_at) at time zone 'Europe/Moscow','MM-DD HH24:MI')) first,
+       max(to_char(to_timestamp(c.updated_at) at time zone 'Europe/Moscow','MM-DD HH24:MI')) last
+from chat c where c.user_id='<uuid>' group by 1 order by 2 desc;
+```
+
+- Test runs leave families, not singletons: one repeated title (`Synthetic overflow test` ×17),
+  ping-looking titles (`Проверка связи`, `запрос связи`, `Ping-сообщение`), and memory-check
+  titles (`Назови маркер памяти`, `Запрос о памяти`, `Запрос знаний обо мне`).
+- Leftover test ACCOUNTS (pilot users, `test@…`) hold the bulk of the junk; offer them as a
+  scope choice in the same confirmation. Their chats are invisible in the owner's sidebar,
+  which is why he does not mention them.
+- Short real-looking Q&A sitting inside the test window (`три отличия TCP UDP`, 2 messages) is
+  genuinely ambiguous: list those as a second question in the same confirm call instead of
+  guessing. The owner's answer has been «тоже удалить» — he does not want half a run left.
+- Cross-check by `(chat::jsonb)->'models'` and message counts before deciding: 2-message chats
+  on a test-only model id are tests, 20–30-message chats on a normal preset are real.
 
 ## 5. Files: recover the mapping from the dump, then delete
 
@@ -95,6 +135,11 @@ there are models/TTS cache, unrelated to chats; `generated_images` is separate t
 
 Cleanup: `dropdb purge_ref`, remove `/tmp/pr.dump` and the intermediate id lists.
 
+Attachments that belonged only to the purged chats stay behind as unreferenced `file` rows
+plus their bytes in `uploads`. Recovering their ids needs the dump (step 5) — so either do
+step 5 in the same pass or report them by name and size and ask. Never delete them silently:
+file deletion is the irreversible half of the job.
+
 ## 6. Report
 
 Numbers, not narration: deleted chats / message rows / file links / files + MB, uploads dir
@@ -111,6 +156,11 @@ that restored rows will point at files that no longer exist.
   `pg_restore` into a scratch DB; delete the copy afterwards.
 - Deleting only `chat` leaves `chat_message` orphans that still bloat `webui_db`; always
   clear the child tables.
+- **`VACUUM` cannot run inside a transaction block**, and `psql -c "vacuum a; vacuum b;"`
+  wraps the statements in one — run one `psql -c "vacuum analyze <table>;"` per table. Plain
+  `vacuum analyze` after a purge only refreshes stats and drops dead tuples for reuse: the
+  reported `pg_database_size` does NOT shrink, so do not promise freed disk. `VACUUM FULL`
+  would shrink it but locks the tables — the owner's live chats are in them.
 - Family members' chats sit in the same `chat` table — a date-only request is ambiguous about
   them, so make the owner pick the scope in the confirmation.
 

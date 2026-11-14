@@ -165,7 +165,7 @@ A question like «подходит ли эта модель под задачу�
 - `references/operations.md` — **Operations drills** (recreating a container after a config edit, routine checks).
 - `references/repo-hygiene.md` — **Git hygiene for `ai-stack`** (what must never be committed, commit shape).
 - `references/owui-admin-auth.md` — **Open WebUI admin auth** (`UI_PASSWORD` is LiteLLM's, not WebUI's).
-- `references/owui-data-purge.md` — **Удаление чатов/файлов Open WebUI** по дате или юзеру (`chat` / `chat_message` / `chat_file`).
+- `references/owui-data-purge.md` — **Удаление чатов/файлов Open WebUI** по дате, юзеру или титулу («убери тестовые чаты/пинги»): полный набор дочерних таблиц (`chat_message`, `chat_file`, `chat_view_state`, `chatidtag`, `shared_chat`, `automation_run`), MSK-конвертация bigint-таймстампов, восстановление маппинга файлов из дампа, `VACUUM` после чистки. Read before any «снеси/почисти диалоги».
 - `references/owui-task-models.md` — **Фоновые задачи Open WebUI** (заголовки чатов, теги, follow-up; `task.*`).
 - `references/owui-chat-forensics.md` — **Разбор чужого чата в `webui_db`**: что модель реально могла делать (инструменты/интерпретатор/коллекция), как отличить ошибку от выдуманной проверки, чем грозит привязка `open-terminal` к модели. Read before answering «модель галлюцинирует».
 - `references/owui-internals.md` — **Внутренности Open WebUI**: где живёт состояние (`config`, `tool.content`/`valves`, `chat`), почему нель­зя выбирать значения целиком (base64 в `ui.default_interface_settings`), как безопасно править workspace-тул в БД, почему выбор терминала — клиентский. Read before any DB edit or bundle grep.
