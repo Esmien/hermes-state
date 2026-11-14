@@ -73,3 +73,10 @@ class StructuredFormatTests(MemoryTests):
         self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'], ['Первая запись.','Вторая запись.','Третья запись.'])
         m.operate(self.user,'delete','MEMORY',selected=[{'number':1,'text':'Первая запись.'}])
         self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'], ['Вторая запись.','Третья запись.'])
+
+class BulletFormatTests(MemoryTests):
+    def test_bullets_are_separate_records(self):
+        (self.agents/'PROFILE.md').write_text('# PROFILE\n\n## Основная информация\n\n- Имя: Влад\n- Город: Краснодар\n\n## Телефон\n\n- iPhone 15 Pro Max\n')
+        self.assertEqual(m.operate(self.user,'list','PROFILE')['entries'], ['- Имя: Влад','- Город: Краснодар','- iPhone 15 Pro Max'])
+        m.operate(self.user,'delete','PROFILE',selected=[{'number':2,'text':'- Город: Краснодар'}])
+        self.assertEqual(m.operate(self.user,'list','PROFILE')['entries'], ['- Имя: Влад','- iPhone 15 Pro Max'])
