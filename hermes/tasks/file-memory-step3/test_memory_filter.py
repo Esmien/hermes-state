@@ -92,34 +92,48 @@ if __name__=='__main__': unittest.main()
 
 class AutoFileTests(FilterTests):
     """Записи не по адресу переносит фильтр: новая запись плюс удаление старой."""
+    def classify(self, mapping):
+        calls={}
+        def fake(items):
+            calls['items']=[x['text'] for x in items]
+            return {x['id']: mapping[x['text']] for x in items if x['text'] in mapping}
+        self.filter._classify=fake
+        return calls
     def test_move_memory_to_profile(self):
-        m.operate(self.user,'append','MEMORY','У неё две кошки, Крис и Вася.')
+        text='У неё две кошки, Крис и Вася.'
+        m.operate(self.user,'append','MEMORY',text)
         m.operate(self.user,'append','PROFILE','Живёт в Ванино.')
-        files={k:m._read(m._open_dir(self.user),v) for k,v in m.FILES.items()}
-        answers={'misplaced':{'noul':0.9},
-                 'place_MEMORY_1':{'type':'choice','choice':'PROFILE','confidence':0.95},
-                 'place_PROFILE_1':{'type':'choice','choice':'PROFILE','confidence':0.99}}
-        out=self.run_filter(self.body(), answers=answers)
-        entries_m=m.operate(self.user,'list','MEMORY')['entries']
-        entries_p=m.operate(self.user,'list','PROFILE')['entries']
-        self.assertNotIn('У неё две кошки, Крис и Вася.', entries_m)
-        self.assertEqual(entries_p[-1],'У неё две кошки, Крис и Вася.')
-        self.assertIn('фильтр памяти', out['messages'][0]['content'])
+        calls=self.classify({text:'PROFILE'})
+        out=self.run_filter(self.body())
+        self.assertIn(text,calls['items'])
+        self.assertNotIn(text,m.operate(self.user,'list','MEMORY')['entries'])
+        self.assertEqual(m.operate(self.user,'list','PROFILE')['entries'][-1],text)
+        self.assertIn('фильтр памяти',out['messages'][0]['content'])
         state=json.loads((self.agents/'.memory-state.json').read_text())
-        self.assertEqual(state['moves'][-1],{'from':'MEMORY','to':'PROFILE','chars':len('У неё две кошки, Крис и Вася.')})
-    def test_no_move_on_low_confidence_or_same_file(self):
-        m.operate(self.user,'append','MEMORY','Заметка про проект.')
-        answers={'misplaced':{'noul':0.9},
-                 'place_MEMORY_1':{'type':'choice','choice':'AGENTS','confidence':0.4}}
-        self.run_filter(self.body(), answers=answers)
-        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'], ['Заметка про проект.'])
-        self.assertEqual(m.operate(self.user,'list','AGENTS')['entries'], [])
+        self.assertEqual(state['moves'][-1],{'from':'MEMORY','to':'PROFILE','chars':len(text)})
+        self.assertTrue(state['checked'])
+        self.run_filter(self.body()); self.run_filter(self.body())
+        self.assertEqual(len(json.loads((self.agents/'.memory-state.json').read_text())['moves']),1)
+    def test_no_move_without_sure_target(self):
+        text='Заметка про проект.'
+        m.operate(self.user,'append','MEMORY',text)
+        self.classify({})
+        self.run_filter(self.body())
+        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'],[text])
+        state=json.loads((self.agents/'.memory-state.json').read_text())
+        self.assertTrue(state['checked'])
+        self.assertNotIn('moves',state)
+    def test_agents_is_never_auto_target(self):
+        text='Правило: отвечать кратко.'
+        m.operate(self.user,'append','MEMORY',text)
+        self.classify({text:'AGENTS'})
+        self.run_filter(self.body())
+        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'],[text])
+        self.assertEqual(m.operate(self.user,'list','AGENTS')['entries'],[])
     def test_move_into_memory_respects_limit(self):
         long_rule='Правило: '+'я'*280
-        m.operate(self.user,'append','AGENTS',long_rule)
+        m.operate(self.user,'append','PROFILE',long_rule)
         m.operate(self.user,'append','MEMORY','x'*250)
-        answers={'misplaced':{'noul':0.9},
-                 'place_AGENTS_1':{'type':'choice','choice':'MEMORY','confidence':0.99},
-                 'place_AGENTS_2':{'type':'choice','choice':'MEMORY','confidence':0.99}}
-        self.run_filter(self.body(), answers=answers)
-        self.assertEqual(m.operate(self.user,'list','AGENTS')['entries'], [long_rule])
+        self.classify({long_rule:'MEMORY'})
+        self.run_filter(self.body())
+        self.assertIn(long_rule,m.operate(self.user,'list','PROFILE')['entries'])

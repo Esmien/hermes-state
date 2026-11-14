@@ -11,7 +11,7 @@ if flt.count(needle) != 1:
 # Open WebUI stores plugins independently in its database; embed a private copy
 # of the shared logic in the Filter rather than depending on a container path.
 shared=tool.replace('"""Open WebUI file memory tool. Staged for isolated tests; not deployed."""','',1)
-namespace='import types\nmemory = types.SimpleNamespace(**{k: globals()[k] for k in ("FILES", "_uid", "_open_dir", "_read", "_records", "_load_state", "_save_state")})'
+namespace='import types\nmemory = types.SimpleNamespace(**{k: globals()[k] for k in ("FILES", "LIMIT", "_uid", "_open_dir", "_read", "_records", "_load_state", "_save_state", "_store", "operate")})'
 combined=shared+'\n\n'+flt.replace(needle,namespace,1)
 ast.parse(combined)
 # The caller chooses where generated outputs live; never touch live plugins.
