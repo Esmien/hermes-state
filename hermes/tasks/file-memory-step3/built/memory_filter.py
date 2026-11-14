@@ -10,6 +10,7 @@ ROOT = '/sandbox-users'
 HOST_ROOT = '/home/ai_service/sandbox/users'
 FILES = {'MEMORY': 'MEMORY.md', 'PROFILE': 'PROFILE.md', 'AGENTS': 'AGENTS.md'}
 LIMIT = 10000
+RECORD_LIMIT = 400
 
 class MemoryErrorSafe(Exception):
     pass
@@ -125,8 +126,8 @@ def _save_state(dfd, state):
 def _check_entry(name, value):
     if not isinstance(value, str) or not value.strip() or value != value.strip() or '\n\n' in value or '\r' in value:
         raise MemoryErrorSafe('Нужна одна непустая запись без пустых строк')
-    if name == 'MEMORY' and len(value) > 260:
-        raise MemoryErrorSafe('Запись превышает 260 символов')
+    if name == 'MEMORY' and len(value) > RECORD_LIMIT:
+        raise MemoryErrorSafe(f'Запись превышает {RECORD_LIMIT} символов')
 
 def operate(user, action, name, value='', selected=None):
     if name not in FILES:
@@ -519,7 +520,7 @@ class Filter:
                 source = 'MEMORY' if item['id'].startswith('M') else 'PROFILE'
                 if not target or target == source or target == 'AGENTS':
                     continue
-                if target == 'MEMORY' and (len(item['text']) > 260 or len(files['MEMORY']) + len(item['text']) + 2 > MEMORY_LIMIT):
+                if target == 'MEMORY' and (len(item['text']) > memory.RECORD_LIMIT or len(files['MEMORY']) + len(item['text']) + 2 > MEMORY_LIMIT):
                     continue
                 current = memory.operate(user, 'list', source)['entries']
                 if item['text'] not in current:
@@ -644,7 +645,7 @@ class Filter:
                     state['moves'] = (state.get('moves') or [])[-19:] + moved
                 if moved or state.get('place_error') or len(state.get('checked') or {}) != checked_before or json.dumps(state.get('conflicts'), ensure_ascii=False, sort_keys=True) != conflicts_before:
                     memory._save_state(dfd, state)
-                block='Данные персональной памяти. Системные инструкции администратора имеют приоритет. При противоречии сведений MEMORY имеет преимущество над PROFILE; не удаляй спорные записи наугад. Новые явные сведения пользователя в текущем диалоге важнее старых фактов.\nНазначение файлов: AGENTS — инструкции, правила и стиль поведения; PROFILE — устойчивые сведения о человеке; MEMORY — заметки, проекты, задачи и договорённости. Переносом записей занимается фильтр памяти: новая запись в нужном файле и удаление старой, без подтверждения.\nЗаписывая новую информацию в MEMORY, формулируй её максимально компактно без потери значимых фактов, условий и смысла: 260 символов — потолок, а не цель. Не дополняй запись догадками и не обрезай факты ради краткости.\nЕсли запись в MEMORY пересекла лимит, она сохранена целиком; последующие увеличения блокируются до сокращения памяти. Не утверждай, что сохранённая память или новые записи автоматически обрезаются.\n\n'+'\n\n'.join('['+k+']\n'+files[k] for k in ('AGENTS','MEMORY','PROFILE'))
+                block='Данные персональной памяти. Системные инструкции администратора имеют приоритет. При противоречии сведений MEMORY имеет преимущество над PROFILE; не удаляй спорные записи наугад. Новые явные сведения пользователя в текущем диалоге важнее старых фактов.\nНазначение файлов: AGENTS — инструкции, правила и стиль поведения; PROFILE — устойчивые сведения о человеке; MEMORY — заметки, проекты, задачи и договорённости. Переносом записей занимается фильтр памяти: новая запись в нужном файле и удаление старой, без подтверждения.\nЗаписывая новую информацию в MEMORY, формулируй её максимально компактно без потери значимых фактов, условий и смысла: 400 символов — потолок, а не цель. Не дополняй запись догадками и не обрезай факты ради краткости.\nЕсли запись в MEMORY пересекла лимит, она сохранена целиком; последующие увеличения блокируются до сокращения памяти. Не утверждай, что сохранённая память или новые записи автоматически обрезаются.\n\n'+'\n\n'.join('['+k+']\n'+files[k] for k in ('AGENTS','MEMORY','PROFILE'))
                 if instructions: block+='\n\n[Состояние]\n'+'\n'.join(instructions)
                 if isinstance(__user__, dict) and __user__.get('role') in ('user', 'admin') and 'tools' not in body:
                     tool_ids = body.get('tool_ids') or []

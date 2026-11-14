@@ -28,8 +28,8 @@ class MemoryTests(unittest.TestCase):
     def tearDown(self):
         self.tmp.cleanup()
     def test_append_limit_and_profile(self):
-        self.assertTrue(m.operate(self.user,'append','MEMORY','x'*260)['ok'])
-        with self.assertRaises(m.MemoryErrorSafe): m.operate(self.user,'append','MEMORY','x'*261)
+        self.assertTrue(m.operate(self.user,'append','MEMORY','x'*m.RECORD_LIMIT)['ok'])
+        with self.assertRaises(m.MemoryErrorSafe): m.operate(self.user,'append','MEMORY','x'*(m.RECORD_LIMIT+1))
         self.assertTrue(m.operate(self.user,'append','PROFILE','ю'*1000)['ok'])
         before = (self.agents / 'PROFILE.md').read_text()
         result = m.operate(self.user,'append','PROFILE','z'*4000)

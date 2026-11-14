@@ -38,7 +38,7 @@ class FilterTests(MemoryTests):
         self.assertEqual(first.count(f.BEGIN),1)
         self.assertEqual(first.count(f.END),1)
         self.assertTrue(first.startswith('ADMIN'))
-        self.assertIn('260 символов — потолок, а не цель', first)
+        self.assertIn('400 символов — потолок, а не цель', first)
         self.assertIn('без потери значимых фактов', first)
         self.assertLess(first.index('[AGENTS]'),first.index('[MEMORY]'))
         self.assertLess(first.index('[MEMORY]'),first.index('[PROFILE]'))
@@ -83,7 +83,7 @@ class FilterTests(MemoryTests):
         self.assertTrue(body['messages'][0]['content'].startswith(f.WARNING))
     def test_real_overflow_records_state(self):
         (self.agents/'MEMORY.md').write_text('# MEMORY\n\n' + ('x'*(m.LIMIT//20-10)+'\n\n')*20)
-        result=m.operate(self.user,'append','MEMORY','y'*260)
+        result=m.operate(self.user,'append','MEMORY','y'*m.RECORD_LIMIT)
         self.assertTrue(result['ok']); self.assertTrue(result['overflow'])
         state=json.loads((self.agents/'.memory-state.json').read_text())
         self.assertEqual(state['overflow']['MEMORY']['stage'],'offer')
@@ -131,7 +131,7 @@ class AutoFileTests(FilterTests):
         self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'],[text])
         self.assertEqual(m.operate(self.user,'list','AGENTS')['entries'],[])
     def test_move_into_memory_respects_limit(self):
-        long_rule='Правило: '+'я'*280
+        long_rule='Правило: '+'я'*m.RECORD_LIMIT
         m.operate(self.user,'append','PROFILE',long_rule)
         m.operate(self.user,'append','MEMORY','x'*250)
         self.classify({long_rule:'MEMORY'})
