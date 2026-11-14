@@ -329,3 +329,13 @@ PROFILE админа был свален в один блок с `*   ` и пу�
   подставляет память; ход с запросом списка вернул вызов `memory(action=list)` — Tool подхватился по новому id.
 - Скрипты деплоя в `/root/.hermes/cache/scratch/file-memory-step3/` переведены на новые id.
 - Исторические записи в этом файле сохраняют старые имена — это лог, не актуальные ссылки.
+
+## Удаление пилотных остатков (14.11.2026)
+
+- Модель `file-memory-pilot-model` («File Memory Pilot») и её 3 гранта удалены; чатов на ней не было.
+- Песочницы `file-memory-pilot-1-2026` и `file-memory-pilot-2-2026` удалены из
+  `/home/ai_service/sandbox/users/`, их записи вычищены из `/home/ai_service/sandbox-users/state.json`
+  (осталось 13 пользователей). Сами аккаунты в `webui_db` уже отсутствовали — оставались только каталоги.
+- Бэкап перед удалением: `/var/backups/file-memory-step2/pilot-removal/` (model.json, grants.json,
+  state-before.json, sandboxes.tar.gz; 0600).
+- Учётка `test@test.com` не тронута: это обычный тестовый пользователь, не пилот.
