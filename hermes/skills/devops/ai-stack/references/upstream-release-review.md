@@ -37,11 +37,35 @@ For open-webui `read_file` the top ~140 lines — newest-first, one section per 
 
 **Check the patch release on OUR line before proposing a minor bump.** LiteLLM ships almost daily: a `vX.Y.Z+1` on the version we run is often 3 bullets («Lens/Helm chart», one provider route) and therefore «не обновляемся, нам это ничего не даёт» — say that explicitly, it answers the owner's real question. Only a minor bump (hundreds of bullets) needs the filtering treatment below.
 
+### Patch lines ship in parallel — the fix we need may land on OUR line
+
+`releases?per_page=N` is ordered by **publish time, not version**, and BerriAI maintains several stable lines at once. A `v1.106.10` can sit at the top of the list above `v1.108.8` and `v1.109.1` — it is not "the new release" and it is not older than the 1.108/1.109 tags below it. So:
+
+1. Read the newest tag **on the line we run** (compose pin) and every patch between it and ours; four bodies of two bullets are cheaper and more accurate than one minor sweep.
+2. Grep those bodies for `security(` — a patch line exists to carry backports, and a security backport is the one thing that makes a bump worth doing even when every feature bullet is irrelevant to us.
+3. Then decide: security backport on our line ⇒ recommend the patch bump; nothing security-related and irrelevant bullets ⇒ say «не обновляемся» instead of jumping to the newest minor.
+
+**Prove a security backport's blast radius from the source plus our config surface, never from the PR prose.** Pull the PR's file list (`/pulls/<N>/files`), diff the touched file between our tag and the target tag, and extract the *exact* param/field names it now rejects; then check each name against what we actually deploy. A 401-on-unknown-field fix is harmless here when no deployment and no client sends those fields — say which names you checked and where.
+
+- **Ciphertext makes SQL absence worthless.** In 1.106.x the values in `LiteLLM_ProxyModelTable.litellm_params` are stored **encrypted** (base64 blobs even for `model` and `api_base`), so `litellm_params::text ilike '%azure%'` or `~ 'os\.environ/'` returns 0 no matter what is deployed. A zero count there is not evidence; get provider/credential facts from the admin UI, `/model/info`, or a real call. Details — `references/litellm-model-db.md`.
+- **Behavior changes ride along with backports, and the release notes bury them.** A "client subscription forwarding" backport makes a caller-supplied provider login take precedence over the saved gateway account on shared-subscription providers, and adds passthrough routes. Name the affected leg and the condition ("only for clients that bring their own login"), then say plainly that master-key traffic is unchanged.
+- **Diff `litellm/proxy/health_endpoints/_health_endpoints.py` between the tags.** Our watchdog probes `/health/liveliness` and `/health/readiness`; a change there is a monitoring risk, not a feature bullet. Identical file ⇒ the watchdog keeps working.
+
 **LiteLLM has no prisma migration files — so «no migrations in the diff» is NOT a risk signal here, unlike Open WebUI.** `git/trees/<tag>?recursive=1` filtered on `prisma/migrations` returns **zero** `.sql` paths on both the running and the newest tag: LiteLLM reconciles the schema against `schema.prisma` at startup (the Rust/ClickHouse migrations under `litellm-rust/` are a different product). Consequences to state in the review:
 
 - a schema change can land silently on the first boot after the bump, with no file to inspect beforehand;
 - the rollback path is therefore **a database dump, not an image tag** — take a fresh `litellm_db` dump before the bump and say the restore step out loud;
 - `LiteLLM_Config`/general_settings rows survive a downgrade, so a bad release can be reverted by tag alone *only if* the schema did not move.
+
+**You can still prove the schema did not move: diff `litellm/proxy/schema.prisma` between the two tags.** Identical file ⇒ nothing to reconcile on boot ⇒ rollback by image tag alone is safe and the pre-bump dump is belt-and-braces. Say which of the two rollback paths applies instead of always writing «откат — только дампом»:
+
+```python
+o=get("https://raw.githubusercontent.com/BerriAI/litellm/v<old>/litellm/proxy/schema.prisma")
+n=get("https://raw.githubusercontent.com/BerriAI/litellm/v<new>/litellm/proxy/schema.prisma")
+print(list(difflib.unified_diff(o.splitlines(),n.splitlines(),'old','new',lineterm='',n=0))[:40])
+```
+
+Also diff the provider transformation we depend on in the same pass (`litellm/llms/openrouter/chat/transformation.py`) — unchanged there means the standing `drop_params: true` workaround is still required after the bump (see the workaround checklist below).
 
 **Fetch raw text with `curl`, not `web_extract`.** `web_extract` here is backed by SearXNG, a search-only backend, and returns "cannot extract URL content" for any URL. Use `curl` (or set `web.extract_backend` to firecrawl/tavily/keenable/exa/parallel if you want `web_extract`).
 

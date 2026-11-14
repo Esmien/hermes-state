@@ -99,8 +99,10 @@ Russian, terse, no command replay, no secrets. «Ложная тревога о�
   longer exists in `LiteLLM_ProxyModelTable`. That is a config-side artefact of the migration, not
   a gateway outage — confirm with the ids and with `LiteLLM_SpendLogs.api_base`
   (`host.docker.internal:4010` = SIWC bridge), then re-verify with a real call.
-- **`/model/info` masks `api_key`** — `MISSING` there proves nothing; read `LiteLLM_ProxyModelTable`
-  or just call the model.
+- **`/model/info` masks `api_key`** — `MISSING` there proves nothing. `LiteLLM_ProxyModelTable`
+  does not answer it either: `litellm_params` is stored encrypted (`model`, `api_base`, credential
+  name come back as base64), so a text match there proves only the absence of plaintext. Read the
+  decrypted params through `/model/info` for a named group, or just call the model.
 - **Do not trust the alert text's percentage alone** — it is a ratio, and with 10-15 calls in a window a couple of control-endpoint rows read as 90%. Always add the breakdown query before concluding.
 - **`status<>'success'` is not "the model failed".** Check `coalesce(model,'')<>''` — empty model means the request never reached a provider.
 - **`agent.log` is buffered** — the nested `hermes chat` writes on exit; poll the systemd unit, not the file size.
