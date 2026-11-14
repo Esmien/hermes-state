@@ -147,7 +147,7 @@ Drills, from cheap to conclusive — `references/push-outage-drill.md`:
   Сам реестр пишет `monitor.py` при отправке дампа в бота, а снапшот подхватывает его только следующим
   прогоном — после `systemctl start postgres-backup-notify.service` нужен ещё один снапшот, иначе
   свежий дамп есть в боте, но `install.py --from-bot` на новой машине его не увидит.
-- **Do not re-enable `hermes-state-backup.timer`.** The owner replaced the schedule with change-triggered snapshots on 2026-10-24; a timer means duplicate commits and a second source of truth. The unit stays on disk only as a manual fallback.
+- **`hermes-state-backup.timer` is enabled on purpose (owner's decision, 2026-11-14).** Change-triggered snapshots (watcher) stay the main path, but the daily 02:30 UTC timer is kept as a belt-and-braces run; it is the same script under the same `flock`, and it no-ops (`no changes since last snapshot`) when the tree is untouched, so it does not create duplicate commits or a second source of truth. Do not disable it as "leftover" — that is how it was misread once.
 - `Conflicts=` pointing at the unit itself is dropped by systemd with a warning (`Dependency Conflicts=… is dropped`) — do not “guard” a singleton service that way.
 - `write_file` refuses paths under `/etc`; stage the unit in `/root/.hermes/cache/scratch/` and
   `install -m 644` it into place, then `systemctl daemon-reload`.

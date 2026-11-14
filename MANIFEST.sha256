@@ -73,7 +73,7 @@ ffc3d455a8097e27856ca875bd66f8e7e0fc9a89bf99805972c7a9fd9f61f11e  ./hermes/skill
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
 ea5a7cc02ec8aa3d1696f43c168dedefd4f2d6c6460607e5e87ac43f4912e19c  ./hermes/skills/devops/ai-stack/SKILL.md
-b2f5d8a9ecf41485aa97849140f61b4768793adb19da50d3e7a4579a8665e881  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
+04dab2bd8669682006714830808733859a04e69aeab59733f745073350df8983  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
 d4d2d38f0c3fe3ff53ff7de02ca914cd07b05c1f8700813a0c3fa242b323ed89  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
 45d3b61b57f8c5e4e1d02b2c426584b8c19b45723437abf07064de943549c69b  ./hermes/skills/devops/ai-stack/references/cloudflare-proxy.md
@@ -130,7 +130,7 @@ da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skill
 c0ecb8227f1460b4674c82762ab1df0deb77e55ad6d09da3bc6db8924fddbbf6  ./hermes/skills/devops/credential-login-verification/scripts/probe-litellm-admin-view.py
 3af99e224dc91eff3c6f4906d0d145dbcd96229f4dcd9355fca5acce1ee62e02  ./hermes/skills/devops/credential-login-verification/scripts/reset-litellm-admin-password.py
 3c44c0cf146ec8c5aff9552355488c98e4d986eca11c9d645cb6fd379129fe06  ./hermes/skills/devops/docker-compose-traps/SKILL.md
-dec079e046e90766586845315237350690714c61bfe3ed4af9cbeb8e48409d9b  ./hermes/skills/devops/hermes-state-backup/SKILL.md
+a223c712bda9db0f991543d01db394a809e6a98336198fa0cbf9dbbe729b1df3  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
 95cfaed0ab99a7851e7417043e2a4571d0a13a06b6202378af02551b7c2abf82  ./hermes/skills/devops/litellm-fallout-triage/SKILL.md
 81970c54e32ced498a1b55b0e6b6798c473deabcfc86f878a86ebd5d6884fb4a  ./hermes/skills/devops/llm-route-bench/SKILL.md
@@ -292,7 +292,7 @@ dddd1e9d4ddd41e3e3122f6f9bef6266953fc26a5650ec4c800b30c69fc6cb7a  ./host/bin/sec
 20ff03e6cf44682eb7cad75deee62e4dc66fe8d981a3ee1d06d3800fab714e04  ./host/bin/webui-compact-images.sh
 d48070a0b5da6e9bba3bf6315495f7f62502f60e7e7b74d64b6009f8468a239c  ./host/bin/webui-data-backup.py
 59374c165d09e7083f1a48601eba88d3681e0a53a63755564d9f42fcb32d6566  ./host/bin/webui-data-restore.py
-da383d7fc645cf8719954dd901e04d2fb00a75959a97fbbff50264d8ab73376a  ./host/bin/webui-generated-images-retention.sh
+04cd4ab914f2a6eba7bf5e75368509a05b1719be2f9bcd34e8d610459d2d99ca  ./host/bin/webui-generated-images-retention.sh
 5ad5ebcc8417f031dd5e5ef405acadbbc7686ec862f53c884dd99ab2c86940d4  ./host/etc/docker-autorecover.conf
 3268655956b4a866cc3d8d571719b1ae2f9dd0b1f5ac44ec569b95f2a8891456  ./host/etc/hermes-boot-expected-containers.txt
 5cadb4bc141906a11c1b75c70527a928f7bee24d64400ead1c4046b32b1a2898  ./host/etc/logrotate.d-hermes-state-backup
