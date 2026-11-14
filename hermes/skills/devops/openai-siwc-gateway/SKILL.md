@@ -57,8 +57,13 @@ replacement. The documented path is SIWC for open-source / locally hosted apps.
   **не HTTP-кодом, а событием `response.failed` внутри 200-потока** — поэтому маппинг только на
   уровне статуса ничего не меняет (проверено: после него ровно тот же `BadRequestError` в чате).
   Лечение — в мосте, две точки: `relay_error()` для не-200 (400/403 с «usage limit» → `429`
-  `rate_limit_error`) и **чтение первого SSE-события ДО отправки 200** (`handle_responses` и
-  `handle_chat`): если оно `response.failed`/`error`, отвечаем 429, а не 200. `aggregate()` тоже должен
+  `rate_limit_error`) и **чтение стартового потока ДО отправки 200** (`handle_responses` и `handle_chat`): ошибка идёт
+ **не первым событием, а сразу после preamble** (`response.created` / `response.in_progress`),
+ поэтому peek по одному событию не ловит её — пропускай preamble до первого содержательного
+ события (лимит ~8) и только тогда отдавай 200; если раньше встретился `response.failed`/`error` —
+ 429. Подтверждение факта в реальном отказе: строка `responses failed before stream:` в
+ `/root/siwc/gateway.log` (юнит пишет stdout/stderr туда, а не в journald — `journalctl -u
+ siwc-gateway` пуст и это норма). `aggregate()` тоже должен
   ставить `status='failed'` для `response.failed`, иначе sync-ветка отдаёт пустой 200. Тест логики —
   `assets/host/siwc/test_gateway_quota.py` (8 кейсов, monkeypatch `upstream`), сквозная проверка —
   стаб с 429 на `order=1` + OpenRouter на `order=2`: отвечает `order=2`, и в стриме, и без; Если у группы живая только плановая нога (серая `chatgpt/` заблокирована),
