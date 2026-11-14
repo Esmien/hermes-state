@@ -66,7 +66,7 @@ def _records(text, name):
     if not text.startswith(prefix):
         raise MemoryErrorSafe('Неизвестный формат файла памяти')
     body = text[len(prefix):]
-    spans = list(re.finditer(r'[^\n]+(?:\n(?!\n)[^\n]+)*', body))
+    spans = [span for span in re.finditer(r'[^\n]+(?:\n(?!\n)[^\n]+)*', body) if not span.group().startswith('## ')]
     return prefix, body, spans
 
 def _store(dfd, name, text):

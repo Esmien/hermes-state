@@ -150,6 +150,24 @@ For model inventory and cleanup, see `ai-stack` → `references/model-provenance
 - Проверка, что YAML реально применился: `/router/settings` отдаёт `fields[]`, и в нём
   `fallbacks` — а не значение верхнего уровня (верхний уровень `null` ничего не значит).
 
+## Учебный прогон квоты (сквозной, без ожидания реального отказа)
+
+Квота не читается и не воспроизводится по заказу, поэтому отладка fallback-цепочки идёт инъекцией
+того же события: второй экземпляр моста с `SIWC_FAKE_QUOTA=1` и своим портом
+(`SIWC_PORT=4022 SIWC_BIND=172.17.0.1,127.0.0.1 python3 /root/siwc/gateway.py`) отдаёт ровно
+реальную последовательность `response.created → in_progress → output_item.added → response.failed`,
+но как HTTP 429. Дальше — временная подмена `api_base` у порядковой ноги на
+`http://host.docker.internal:4022/v1` через `PATCH /model/<id>/update` (полный `litellm_params`),
+**прогон через WebUI от лица владельца** и немедленный возврат `api_base` на 4010. Драйвер WebUI:
+`assets/host/siwc/owui-e2e-quota.py` (JWT с `session_stamp` из таблицы `auth` + `mfa_verified`,
+POST `/api/chat/completions`, модель `gpt-61-terra`) — запускать внутри контейнера
+`open-webui`, JSON с uid/stamp/model подавать на stdin.
+
+Что доказано этим прогоном: 3 хода в реальном чате, каждый дал **два** отвергнутых вызова
+фейковой ноги (`responses failed before stream`) и ответ от `order=2` (OpenRouter) — в
+спенд-логах `model_id` ноги OpenRouter, ни одной `failure`-строки у группы. После снятия подмены
+order-1 снова отдаёт мост. Учесть: пока идёт прогон, рабочая нога фактически подменена.
+
 ## Media on the bridge
 
 - **The bridge carries images now, and that matters for route order.** `convert_messages` builds
