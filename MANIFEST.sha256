@@ -3,7 +3,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 03b3093643b9cdb20aa43444f1c0e41e71dbae9a63294c372c2d860eb886e73f  ./hermes/SOUL.md
 683646459f25cdbbebebf48b674e0be4d96218b4032f7ab129bf0497bcf3f613  ./hermes/agent-hooks/ssh-only-gate.py
 8de8aafe34757fdff3e165704d4803a5a054618d11243cad6401fd4cc5483159  ./hermes/bin/read-untrusted
-f01832890d9bf1fbb8240148c023fb3504e0d1f27d5cb8752c0ceaf0d7fb7b05  ./hermes/config.yaml
+b8f3d883e57b90cac1a59e20d3109e9fdff88f48212497f341f5f5e350c64755  ./hermes/config.yaml
 f6dcb4e1c9e507903aa68874048194131d640b9749748b77213c6dcc031b036e  ./hermes/cron/jobs.json
 6624bae8326a2b7845ffeb7b1f88c78d6724d3e49c6317697054717bd4472c19  ./hermes/docs/proposals/sandbox-per-user.md
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
@@ -72,7 +72,7 @@ ffc3d455a8097e27856ca875bd66f8e7e0fc9a89bf99805972c7a9fd9f61f11e  ./hermes/skill
 1ea50fe11e32a4dc16e2f99de0ba87a29006f05b6449611445fb600fae664887  ./hermes/skills/career/job-application-review/references/resume-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-d95a5235589799457a0292e99383a1235b8fa57b17d06bfba720dea11de010e5  ./hermes/skills/devops/ai-stack/SKILL.md
+29848e5db546ef40da4776f2a4f13449df264778e9064011ae2ba716a1a902ac  ./hermes/skills/devops/ai-stack/SKILL.md
 e7a84f7fe4142f5e69cccca59260b052e3fb9a8452aab7546acbda2d2286cc5e  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
 d4d2d38f0c3fe3ff53ff7de02ca914cd07b05c1f8700813a0c3fa242b323ed89  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md

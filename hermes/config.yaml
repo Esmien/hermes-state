@@ -2202,7 +2202,7 @@ display:
   show_reasoning: true
   pet:
     enabled: true
-    scale: 0.5
+    scale: 0.4
 telemetry:
   shared_metrics:
     enabled: false
