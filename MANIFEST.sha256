@@ -234,7 +234,7 @@ a75d9e73565cc0114299768de742f1b5719a50ea5b75f56413a8e0594839ee59  ./hermes/skill
 2469ca9a70c519907857820756986a1024117edced8378b491937300751710fd  ./hermes/skills/web/blocked-page-recovery/SKILL.md
 d45a136df942a16e1503be0b03d4215f1682d16f6703abea1eb4dc6e5fea5e71  ./hermes/skills/web/blocked-page-recovery/scripts/html_to_text.py
 22b996996ae2bf252b31cfd2636231f08936729a381dce7ba8bfa4afb8ffe8c6  ./hermes/skills/web/blocked-page-recovery/scripts/recover_page.py
-9db61daa74834e68e95f2e7eeaa5efc0aac2730e7079d79f4a30c90e4ba7ebd5  ./hermes/tasks/backlog.md
+f4267914e003c0f2ebf69c3dc3df816c10ed9fd1ba1a92c4212a7764ed5ca0e8  ./hermes/tasks/backlog.md
 6c924f789f78e902652861f36a687bab935b9aba2d43e494048491a1ce899d93  ./hermes/tasks/docs/media-mcp-plan.md
 cd44df6a854f67449408571c60d009081a33bdf73e66322e9254c9a491984e00  ./hermes/tasks/docs/modules-plan.md
 0262c8b098d9d1cd6932c26d0c97a11b34ab174c1c7618eff5aadc3ad069d8b5  ./hermes/tasks/docs/multiagent-tiers.md
