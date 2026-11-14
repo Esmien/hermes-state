@@ -150,7 +150,7 @@ A question like «подходит ли эта модель под задачу�
 - `references/coupling-hermes.md` — **Hermes ↔ AI stack coupling** (Hermes config, LiteLLM groups/fallback, emergency route).
 - `references/pitfalls.md` — **Pitfalls (AI stack)**. Read when something behaves in a way the docs do not explain.
 - `references/disk-and-memory.md` — **Memory, disk headroom, DB growth** (disk full, RAM climb, open-terminal heap floor).
-- `references/backups-notifications.md` — **Backups, restore, timers, Telegram notifications**.
+- `references/backups-notifications.md` — **Backups, restore, timers, Telegram notifications**; пер-юзерные файлы песочниц (`sandbox/users/<slug>/generated_images`) и полный список их читателей — бэкап, ретеншен, restore, квота.
 - `references/litellm-model-db.md` — **Модели/группы в `litellm_db`**. Read when a model flaps, a group returns 400 from one deployment, or a DB edit (extra_headers, aliases) has to be applied and verified.
 - `references/litellm-admin-auth.md` — **LiteLLM: ownership в `litellm_db`** (ключи/spend/мемберства, «Created By = Unknown», вес и кэш админки). Auth-путь — в skill `credential-login-verification`.
 - `references/ui-latency.md` — **«Медленно грузится»: латентность UI/API** (per-URI `rt`, два штатных виновника, кэш nginx, профиль длинного чата).
