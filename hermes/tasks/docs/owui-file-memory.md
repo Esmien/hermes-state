@@ -179,7 +179,7 @@ Decision-модель `perplexity/pplx-decider-v1.2` через OpenRouter Decis
 
 ### Что в WebUI отключено, а что осталось осознанно
 
-Отключено: встроенная память (`memories.enable`, `memories.system_context.enable`, `memories.background_review.enable` — все `false`), редактирование пользовательского системного промпта (`chat.system_prompt=false`) и сами сохранённые пользовательские промпты (в БД 0 значений, твой перенесён в AGENTS.md).
+Отключено: право `chat.system_prompt` на всех уровнях — по умолчанию `false` и в группах «Семья» и «Ограничения» (в «Ограничениях» стояло `true`, то есть участники могли снова писать промпты; бэкап групп `groups-before-system-prompt-off.json`). Фронтенд скрывает поле, когда право `false`. Встроенная память (`memories.enable`, `memories.system_context.enable`, `memories.background_review.enable` — все `false`), редактирование пользовательского системного промпта (`chat.system_prompt=false`) и сами сохранённые пользовательские промпты (в БД 0 значений, твой перенесён в AGENTS.md).
 
 Осознанно оставлено: системные промпты на уровне моделей (`model.params.system`, 20 из 80). Решение владельца от 14.11.2026 — это установки администратора, они необходимы; не предлагать их чистить и не трогать без прямого указания. Тонкие заглушки вида «Ты модель - GPT-6 Luna» и персоны Architect/Coder/Reviewer/Sound/Image/MicroControllers тоже остаются.
 
