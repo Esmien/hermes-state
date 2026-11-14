@@ -5,7 +5,7 @@ from pathlib import Path
 import unittest
 import memory_filter as f
 import memory_tool as m
-from test_memory_tool import MemoryTests
+from test_memory_tool import MemoryTests, B, HEAD
 
 class FilterTests(MemoryTests):
     def setUp(self):
@@ -52,7 +52,7 @@ class FilterTests(MemoryTests):
         b=self.run_filter(self.body(),user={'id':'not-a-uuid'})
         text=b['messages'][0]['content']; self.assertIn(f.WARNING,text); self.assertNotIn('[PROFILE]',text)
     def test_overflow_ignored_twice_and_missing_warning(self):
-        m.operate(self.user,'append','MEMORY','synthetic')
+        m.operate(self.user,'append','MEMORY',B('synthetic'))
         self.set_stage('offer'); self.answers['intent']['choice']='ignore'
         before=m.operate(self.user,'list','MEMORY')['entries']
         for _ in range(3):
@@ -83,7 +83,7 @@ class FilterTests(MemoryTests):
         self.assertTrue(body['messages'][0]['content'].startswith(f.WARNING))
     def test_real_overflow_records_state(self):
         (self.agents/'MEMORY.md').write_text('# MEMORY\n\n' + ('x'*(m.LIMIT//20-10)+'\n\n')*20)
-        result=m.operate(self.user,'append','MEMORY','y'*m.RECORD_LIMIT)
+        result=m.operate(self.user,'append','MEMORY',HEAD+'y'*(m.RECORD_LIMIT-len(HEAD)))
         self.assertTrue(result['ok']); self.assertTrue(result['overflow'])
         state=json.loads((self.agents/'.memory-state.json').read_text())
         self.assertEqual(state['overflow']['MEMORY']['stage'],'offer')
@@ -100,9 +100,9 @@ class AutoFileTests(FilterTests):
         self.filter._classify=fake
         return calls
     def test_move_memory_to_profile(self):
-        text='У неё две кошки, Крис и Вася.'
+        text=B('У неё две кошки, Крис и Вася.')
         m.operate(self.user,'append','MEMORY',text)
-        m.operate(self.user,'append','PROFILE','Живёт в Ванино.')
+        m.operate(self.user,'append','PROFILE',B('Живёт в Ванино.'))
         calls=self.classify({text:'PROFILE'})
         out=self.run_filter(self.body())
         self.assertIn(text,calls['items'])
@@ -115,7 +115,7 @@ class AutoFileTests(FilterTests):
         self.run_filter(self.body()); self.run_filter(self.body())
         self.assertEqual(len(json.loads((self.agents/'.memory-state.json').read_text())['moves']),1)
     def test_no_move_without_sure_target(self):
-        text='Заметка про проект.'
+        text=B('Заметка про проект.')
         m.operate(self.user,'append','MEMORY',text)
         self.classify({})
         self.run_filter(self.body())
@@ -124,16 +124,16 @@ class AutoFileTests(FilterTests):
         self.assertTrue(state['checked'])
         self.assertNotIn('moves',state)
     def test_agents_is_never_auto_target(self):
-        text='Правило: отвечать кратко.'
+        text=B('Правило: отвечать кратко.')
         m.operate(self.user,'append','MEMORY',text)
         self.classify({text:'AGENTS'})
         self.run_filter(self.body())
         self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'],[text])
         self.assertEqual(m.operate(self.user,'list','AGENTS')['entries'],[])
     def test_move_into_memory_respects_limit(self):
-        long_rule='Правило: '+'я'*m.RECORD_LIMIT
+        long_rule='- **Правило:** '+'я'*m.RECORD_LIMIT
         m.operate(self.user,'append','PROFILE',long_rule)
-        m.operate(self.user,'append','MEMORY','x'*250)
+        m.operate(self.user,'append','MEMORY',B('x'*250))
         self.classify({long_rule:'MEMORY'})
         self.run_filter(self.body())
         self.assertIn(long_rule,m.operate(self.user,'list','PROFILE')['entries'])
@@ -146,8 +146,8 @@ class ConflictTests(FilterTests):
         self.filter._classify=lambda items: {}
         self.filter._find_conflicts=lambda pairs: {p['id'] for p in pairs}
         self.filter._ask_keep=lambda a,b,r: self.kept.pop(0) if self.kept else 'unclear'
-        m.operate(self.user,'append','MEMORY','Живёт в Ванино.')
-        m.operate(self.user,'append','PROFILE','Живёт в Краснодаре.')
+        m.operate(self.user,'append','MEMORY',B('Живёт в Ванино.'))
+        m.operate(self.user,'append','PROFILE',B('Живёт в Краснодаре.'))
     def run_outlet(self,body):
         return asyncio.run(self.filter.outlet(body,self.user,{}))
     def test_question_then_resolution(self):
@@ -166,7 +166,7 @@ class ConflictTests(FilterTests):
         self.kept=['second']
         self.run_filter(self.body(user='оставить 2'))
         self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'],[])
-        self.assertEqual(m.operate(self.user,'list','PROFILE')['entries'],['Живёт в Краснодаре.'])
+        self.assertEqual(m.operate(self.user,'list','PROFILE')['entries'],[B('Живёт в Краснодаре.')])
         state=json.loads((self.agents/'.memory-state.json').read_text())
         self.assertEqual(state['conflicts'],[])
         self.assertEqual(state['conflict_resolved']['to'],'PROFILE')
@@ -175,5 +175,5 @@ class ConflictTests(FilterTests):
         self.run_filter(self.body(user='привет'))
         self.kept=['unclear']
         self.run_filter(self.body(user='не знаю'))
-        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'],['Живёт в Ванино.'])
+        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'],[B('Живёт в Ванино.')])
         self.assertEqual(len(json.loads((self.agents/'.memory-state.json').read_text())['conflicts']),1)

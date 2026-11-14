@@ -1,11 +1,11 @@
 import asyncio, json, unittest
 import memory_filter as f, memory_tool as m
-from test_memory_tool import MemoryTests
+from test_memory_tool import MemoryTests, B, HEAD
 class MoreTests(MemoryTests):
  def test_exact_5000_and_next_character(self):
-  p=self.agents/'PROFILE.md'; prefix='# PROFILE\n\n'; value='я'*(5000-len(prefix)-1)
+  p=self.agents/'PROFILE.md'; prefix='# PROFILE\n\n'; value=HEAD+'я'*(5000-len(prefix)-1-len(HEAD))
   r=m.operate(self.user,'append','PROFILE',value); self.assertTrue(r['ok']); self.assertEqual(len(p.read_text()),5000)
-  before=p.read_text(); r=m.operate(self.user,'append','PROFILE','x'); self.assertTrue(r['ok']); self.assertTrue(p.read_text().startswith(before))
+  before=p.read_text(); r=m.operate(self.user,'append','PROFILE',B('x')); self.assertTrue(r['ok']); self.assertTrue(p.read_text().startswith(before))
  def test_corrupted_file_should_warn(self):
   (self.agents/'MEMORY.md').write_text('CORRUPTED FILE WITHOUT REQUIRED HEADER')
   fl=f.Filter(); fl._call_decider=lambda *args:{'misplaced':{'noul':0.01}}

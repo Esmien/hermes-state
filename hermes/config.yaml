@@ -2200,6 +2200,9 @@ display:
   runtime_footer:
     enabled: true
   show_reasoning: true
+  pet:
+    enabled: true
+    scale: 0.5
 telemetry:
   shared_metrics:
     enabled: false
