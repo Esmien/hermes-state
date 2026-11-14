@@ -73,7 +73,7 @@ ffc3d455a8097e27856ca875bd66f8e7e0fc9a89bf99805972c7a9fd9f61f11e  ./hermes/skill
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
 ea5a7cc02ec8aa3d1696f43c168dedefd4f2d6c6460607e5e87ac43f4912e19c  ./hermes/skills/devops/ai-stack/SKILL.md
-04dab2bd8669682006714830808733859a04e69aeab59733f745073350df8983  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
+a3610b2023d29bc221162fa294af846524c74affd7eebaac7771fef671549f19  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
 d4d2d38f0c3fe3ff53ff7de02ca914cd07b05c1f8700813a0c3fa242b323ed89  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
 45d3b61b57f8c5e4e1d02b2c426584b8c19b45723437abf07064de943549c69b  ./hermes/skills/devops/ai-stack/references/cloudflare-proxy.md
@@ -292,7 +292,7 @@ dddd1e9d4ddd41e3e3122f6f9bef6266953fc26a5650ec4c800b30c69fc6cb7a  ./host/bin/sec
 20ff03e6cf44682eb7cad75deee62e4dc66fe8d981a3ee1d06d3800fab714e04  ./host/bin/webui-compact-images.sh
 d48070a0b5da6e9bba3bf6315495f7f62502f60e7e7b74d64b6009f8468a239c  ./host/bin/webui-data-backup.py
 59374c165d09e7083f1a48601eba88d3681e0a53a63755564d9f42fcb32d6566  ./host/bin/webui-data-restore.py
-04cd4ab914f2a6eba7bf5e75368509a05b1719be2f9bcd34e8d610459d2d99ca  ./host/bin/webui-generated-images-retention.sh
+95deb616c8423efe10f2ae5dcd7c356e85c367e3a3a187bb6eb1b2cf69c29096  ./host/bin/webui-generated-images-retention.sh
 5ad5ebcc8417f031dd5e5ef405acadbbc7686ec862f53c884dd99ab2c86940d4  ./host/etc/docker-autorecover.conf
 3268655956b4a866cc3d8d571719b1ae2f9dd0b1f5ac44ec569b95f2a8891456  ./host/etc/hermes-boot-expected-containers.txt
 5cadb4bc141906a11c1b75c70527a928f7bee24d64400ead1c4046b32b1a2898  ./host/etc/logrotate.d-hermes-state-backup
