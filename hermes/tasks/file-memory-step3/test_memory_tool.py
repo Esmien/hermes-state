@@ -39,8 +39,9 @@ class MemoryTests(unittest.TestCase):
         for v in ('alpha', 'beta', 'gamma'): m.operate(self.user,'append','MEMORY',v)
         with self.assertRaises(m.MemoryErrorSafe): m.operate(self.user,'delete','MEMORY',selected=[{'number':2,'text':'wrong'}])
         m.operate(self.user,'replace','MEMORY','new', [{'number':2,'text':'beta'}])
-        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'], ['alpha','new','gamma'])
-        m.operate(self.user,'delete','MEMORY',selected=[{'number':1,'text':'alpha'},{'number':3,'text':'gamma'}])
+        # Правка — новая запись и удаление старой, а не правка текста на месте.
+        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'], ['alpha','gamma','new'])
+        m.operate(self.user,'delete','MEMORY',selected=[{'number':1,'text':'alpha'},{'number':2,'text':'gamma'}])
         self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'], ['new'])
     def test_user_and_path_rejection(self):
         self.assertRaises(m.MemoryErrorSafe,m.operate,{'id':str(uuid.uuid4())},'list','MEMORY')
@@ -63,3 +64,12 @@ class MemoryTests(unittest.TestCase):
         with self.assertRaises(m.MemoryErrorSafe): m.operate(self.user,'append','MEMORY','a\n\nb')
 
 if __name__ == '__main__': unittest.main()
+
+class StructuredFormatTests(MemoryTests):
+    def test_sections_are_not_entries(self):
+        (self.agents/'MEMORY.md').write_text('# MEMORY\n\n## Проект\n\nПервая запись.\n\n## Заметки\n\nВторая запись.\n')
+        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'], ['Первая запись.','Вторая запись.'])
+        m.operate(self.user,'append','MEMORY','Третья запись.')
+        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'], ['Первая запись.','Вторая запись.','Третья запись.'])
+        m.operate(self.user,'delete','MEMORY',selected=[{'number':1,'text':'Первая запись.'}])
+        self.assertEqual(m.operate(self.user,'list','MEMORY')['entries'], ['Вторая запись.','Третья запись.'])
