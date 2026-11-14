@@ -53,10 +53,15 @@ replacement. The documented path is SIWC for open-source / locally hosted apps.
   отказ это или цикл ретраев. **400 от моста убивает всю цепочку: `order` не сработает, fallback-группа
   тоже.** `litellm.should_retry()` ретраит только 408/409/429/5xx, а `should_retry_this_error()` для
   прочих 4xx сразу делает `raise` — поэтому `order=2`/`fallbacks` молча не работают, и текст ошибки
-  приходит в чат, хотя нога формально здорова и в cooldown не уходит. Лечение — в самом мосте:
-  `relay_error()` превращает 400/403 с текстом «usage limit»/«subscription sharing» в `429`
-  (`type: rate_limit_error`), после чего роутер тем же запросом уходит на следующую ногу. Проверено:
-  стаб с 429 на `order=1` + реальный OpenRouter на `order=2` → ответ сразу с `order=2`, 3/3 вызова; Если у группы живая только плановая нога (серая `chatgpt/` заблокирована),
+  приходит в чат, хотя нога формально здорова и в cooldown не уходит. Сама ошибка при стриме приходит
+  **не HTTP-кодом, а событием `response.failed` внутри 200-потока** — поэтому маппинг только на
+  уровне статуса ничего не меняет (проверено: после него ровно тот же `BadRequestError` в чате).
+  Лечение — в мосте, две точки: `relay_error()` для не-200 (400/403 с «usage limit» → `429`
+  `rate_limit_error`) и **чтение первого SSE-события ДО отправки 200** (`handle_responses` и
+  `handle_chat`): если оно `response.failed`/`error`, отвечаем 429, а не 200. `aggregate()` тоже должен
+  ставить `status='failed'` для `response.failed`, иначе sync-ветка отдаёт пустой 200. Тест логики —
+  `assets/host/siwc/test_gateway_quota.py` (8 кейсов, monkeypatch `upstream`), сквозная проверка —
+  стаб с 429 на `order=1` + OpenRouter на `order=2`: отвечает `order=2`, и в стриме, и без; Если у группы живая только плановая нога (серая `chatgpt/` заблокирована),
   ошибка идёт прямо в чат — для таких групп держать отдельную fallback-группу на не-плановом провайдере.
 
 ## Building the bridge (stdlib only)

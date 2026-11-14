@@ -72,7 +72,7 @@ ffc3d455a8097e27856ca875bd66f8e7e0fc9a89bf99805972c7a9fd9f61f11e  ./hermes/skill
 1ea50fe11e32a4dc16e2f99de0ba87a29006f05b6449611445fb600fae664887  ./hermes/skills/career/job-application-review/references/resume-review.md
 9a33c260575f6f824c2ec997eafbb0bfbe992b9c2cf3916e66153bdc7045d1eb  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-f094783425129d3ac97fb6a6a1933ef8f652d0f48ac2870b746ece7034c05fc9  ./hermes/skills/devops/ai-stack/SKILL.md
+f829d8086c6e24580a136e6baaf4a0ea966343d5677168824d5a495d09010a2c  ./hermes/skills/devops/ai-stack/SKILL.md
 35f011180b4ddc06606d1bf45df577e34baf6cb7a0aeff203c055d46eed7afbe  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
 d4d2d38f0c3fe3ff53ff7de02ca914cd07b05c1f8700813a0c3fa242b323ed89  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
@@ -93,7 +93,7 @@ ac748903dd3fab6673926b5bfab429273e7e8b370d0347fae27ab62f2a27cf2a  ./hermes/skill
 23681fed79a731f0e5ac3dbf907087700aedc29fa84c1b54872f7694682b3e76  ./hermes/skills/devops/ai-stack/references/owui-admin-auth.md
 3e3de999564ce2910af13cc065e73fd827b7dd7b0996f9b3d7e19d46424c5e9b  ./hermes/skills/devops/ai-stack/references/owui-chat-forensics.md
 a75500218b095f51dc380fb92091c16c5004bdf3915da193cd0ec7358d70de6f  ./hermes/skills/devops/ai-stack/references/owui-data-purge.md
-f650de338e5e0f4011db616629afe7fcdcbb85bbde18de2632f07774651074dc  ./hermes/skills/devops/ai-stack/references/owui-internals.md
+d9359357e9472c954b11816afb5e70e853ba6a5c7efa10601f512e88d9ad0cc6  ./hermes/skills/devops/ai-stack/references/owui-internals.md
 5c33219e84e4b7f5d04b079bf8e1d45595cabf3bfa59c234c28801061dc84864  ./hermes/skills/devops/ai-stack/references/owui-task-models.md
 8a69bfb96ab3f785ae029f371d7492a5862c46c4f4ec66e53d9546c385fc1977  ./hermes/skills/devops/ai-stack/references/pitfalls.md
 7e6a9417891e69766d9816809ec46c8eea9273a50306f296c975f7ddc4b652c1  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
@@ -143,7 +143,7 @@ f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skill
 a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skills/devops/llm-route-bench/scripts/code_bench_hard.py
 d0318bee8625a133365c1c251d116b090ee791a463fa9a925bde2dff16d7b7ed  ./hermes/skills/devops/lyria-music-bot/SKILL.md
 dfb7b3e56857f88530a34d972a369d597305ee5a9ac3e669b5a529fa504c65f0  ./hermes/skills/devops/lyria-music-bot/references/suno-provider.md
-1019aff2b65a46f2f07ec207cb7b31adedd51b795a162e80af84e64382baa02b  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
+9f43ff22f18227c6b84b521d7d21c0dd6eeaccc1009b9e73adc12bcd00dae220  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 ca25472b50ad83024fb7bcf7338aad4dacb16a24391d54e694f0f9ee85b37b32  ./hermes/skills/devops/ru-access-to-foreign-cloud/SKILL.md
 9863e40dd9c9afc73287285af5bd3aebf53410d153f77bd53859b23721d892a1  ./hermes/skills/devops/ru-access-to-foreign-cloud/references/oracle-cloud.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
@@ -245,7 +245,7 @@ c6c6f55b31c7c1b591d8fb3f7f18eb940f36f105bfb18f930dbf5f9832bb3fc0  ./hermes/tasks
 437d5c05922e66009b6f6671cccb8be6d3a95e141db9909a6f379f90ff0bd713  ./hermes/tasks/file-memory-step3/built/memory_tool.py
 72aad258a17aaba4bf2c8faab678061266fed8a652d9af3dca7c3744f74427b5  ./hermes/tasks/file-memory-step3/memory_filter.py
 437d5c05922e66009b6f6671cccb8be6d3a95e141db9909a6f379f90ff0bd713  ./hermes/tasks/file-memory-step3/memory_tool.py
-2c5c1d8aa17d6692337235e99fd97d524d9c1ea7221908f6116cfa30c4228d44  ./hermes/tasks/file-memory-step3/provisioner-staged.py
+17ab4efec8d71f53265791caa1eaddb877aa410def04f77bb5d39975dd14429b  ./hermes/tasks/file-memory-step3/provisioner-staged.py
 90af4fcc68279728ac3a4f27319379736629481cdf47f2f0c2bb02f8f650a5af  ./hermes/tasks/file-memory-step3/test_acceptance_extra.py
 0773fa2d996bf9ad08bf0d57f5102976013e84e81e357377689291a4e58d9910  ./hermes/tasks/file-memory-step3/test_auto_cleanup.py
 4c5a002554e2d3b0ed59036abbaa4ba1fcfbd2dd2aa349c3bb39c62c2b4bb28c  ./hermes/tasks/file-memory-step3/test_built_filter.py

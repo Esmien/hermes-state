@@ -166,12 +166,36 @@ MEMORY.md содержит важный контекст бесед и прое�
 AGENTS_TEMPLATE = AGENTS_BLOCK_BEGIN + "\n" + AGENTS_BODY + AGENTS_BLOCK_END + "\n"
 
 
+LEGACY_AGENTS_TEXT = """# AGENTS
+
+Системные правила и инструкции администратора модели имеют высший приоритет.
+MEMORY.md содержит важный контекст бесед и проектов; PROFILE.md — сведения о пользователе.
+Сохраняйте и удаляйте воспоминания только через инструмент памяти, если он доступен.
+Перед переносом сведений между файлами спросите пользователя. Не удаляйте данные ради уборки.
+Новые сообщения пользователя имеют приоритет над устаревшими фактами."""
+
+
+def _norm_lines(text: str) -> str:
+    return " ".join(text.split())
+
+
+def _managed_only(text: str) -> bool:
+    """Текст состоит только из строк управляемых шаблонов (старых или текущего)."""
+    known = {_norm_lines(line) for line in (LEGACY_AGENTS_TEXT + "\n" + AGENTS_BODY).splitlines() if line.strip()}
+    return all(_norm_lines(line) in known for line in text.splitlines() if line.strip())
+
+
 def merge_agents_block(existing: str) -> str:
     """Заменить управляемый блок, сохранив собственный текст пользователя."""
     begin = existing.find(AGENTS_BLOCK_BEGIN)
     end = existing.find(AGENTS_BLOCK_END)
     if begin != -1 and end > begin:
-        return existing[:begin] + AGENTS_TEMPLATE.rstrip("\n") + existing[end + len(AGENTS_BLOCK_END):]
+        prefix = existing[:begin]
+        tail = existing[end + len(AGENTS_BLOCK_END):]
+        # Старый управляемый текст, оставшийся перед блоком, не должен жить рядом с новым.
+        if not prefix.strip() or _managed_only(prefix):
+            prefix = ""
+        return prefix + AGENTS_TEMPLATE.rstrip("\n") + tail
     if 'Системные правила и инструкции администратора модели имеют высший приоритет.' in existing:
         # Прежний управляемый текст без маркеров: целиком заменяется новым блоком.
         return AGENTS_TEMPLATE
