@@ -258,7 +258,7 @@ abf23eb2ad6ea0b05063c8ff2ea0651bfdd586d6f376a3eb704167ebd146ff9f  ./hermes/tasks
 4cfb8f27f7c6941c4f7bc730724eba78bee8c3101a31d53139886efc42eb95e9  ./hermes/tasks/file-memory-step3/built/memory_tool.py
 8e8f0f1213b30fd1256b815fea88ae5a51dc0f56309c3905c125ceb1bc49fc00  ./hermes/tasks/file-memory-step3/memory_filter.py
 4cfb8f27f7c6941c4f7bc730724eba78bee8c3101a31d53139886efc42eb95e9  ./hermes/tasks/file-memory-step3/memory_tool.py
-17ab4efec8d71f53265791caa1eaddb877aa410def04f77bb5d39975dd14429b  ./hermes/tasks/file-memory-step3/provisioner-staged.py
+112f856ee838eeb656a9391df1a31160d9d13790ee032ccf11c79d883e70e1ca  ./hermes/tasks/file-memory-step3/provisioner-staged.py
 f531340cfeeba3cdb2ba50ffe00fa51b57b50c29a51dfdcbe4c40110a7cd48cb  ./hermes/tasks/file-memory-step3/test_acceptance_extra.py
 f1ad6e7f645d3244de33691e62393843f57070642bcce35e0ca525e0e8273b19  ./hermes/tasks/file-memory-step3/test_auto_cleanup.py
 4c5a002554e2d3b0ed59036abbaa4ba1fcfbd2dd2aa349c3bb39c62c2b4bb28c  ./hermes/tasks/file-memory-step3/test_built_filter.py
