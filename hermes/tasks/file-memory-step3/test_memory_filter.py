@@ -82,7 +82,7 @@ class FilterTests(MemoryTests):
         asyncio.run(self.filter.outlet(body,{'id':'invalid'},{}))
         self.assertTrue(body['messages'][0]['content'].startswith(f.WARNING))
     def test_real_overflow_records_state(self):
-        (self.agents/'MEMORY.md').write_text('# MEMORY\n\n' + ('x'*240+'\n\n')*20)
+        (self.agents/'MEMORY.md').write_text('# MEMORY\n\n' + ('x'*(m.LIMIT//20-10)+'\n\n')*20)
         result=m.operate(self.user,'append','MEMORY','y'*260)
         self.assertTrue(result['ok']); self.assertTrue(result['overflow'])
         state=json.loads((self.agents/'.memory-state.json').read_text())

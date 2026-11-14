@@ -6,7 +6,7 @@ import memory_filter as f
 
 class SoftLimitTests(MemoryTests):
  def fill(self):
-  (self.agents/'MEMORY.md').write_text('# MEMORY\n\n'+('x'*240+'\n\n')*20)
+  (self.agents/'MEMORY.md').write_text('# MEMORY\n\n'+('x'*(m.LIMIT//20-10)+'\n\n')*20)
  def test_crossing_blocks_next_and_no_auto_removal(self):
   self.fill(); r=m.operate(self.user,'append','MEMORY','y'*260); self.assertTrue(r['ok']); self.assertTrue(r['overflow']); initial=m.operate(self.user,'list','MEMORY')['entries']; self.assertEqual(m.operate(self.user,'append','MEMORY','new')['reason'],'memory_full'); self.assertEqual(initial,m.operate(self.user,'list','MEMORY')['entries'])
  def test_partial_delete_while_over_limit(self):
@@ -33,7 +33,7 @@ class SoftLimitTests(MemoryTests):
  def test_profile_without_limit(self):
   result=m.operate(self.user,'append','PROFILE','q'*20000); self.assertTrue(result['ok']); self.assertIsNone(result['limit']); self.assertFalse(result['overflow'])
  def test_exact_limit_blocks_new_and_sets_pending(self):
-  (self.agents/'MEMORY.md').write_text('# MEMORY\n\n'+'x'*(5000-len('# MEMORY\n\n'))); r=m.operate(self.user,'append','MEMORY','q'); self.assertFalse(r['ok']); fd=m._open_dir(self.user)
+  (self.agents/'MEMORY.md').write_text('# MEMORY\n\n'+'x'*(m.LIMIT-len('# MEMORY\n\n'))); r=m.operate(self.user,'append','MEMORY','q'); self.assertFalse(r['ok']); fd=m._open_dir(self.user)
   try:self.assertEqual(m._load_state(fd)['overflow']['MEMORY']['stage'],'offer')
   finally:os.close(fd)
 if __name__=='__main__':unittest.main()
