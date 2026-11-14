@@ -172,6 +172,7 @@ HOST_BIN=(
     fw-guard-postgres.sh
     hermes-history-backup.py
     secrets-offsite-backup.py
+    ai-memory-backup.sh
 )
 for f in "${HOST_BIN[@]}"; do
     [[ -f "/usr/local/bin/$f" ]] && install -m 700 -D "/usr/local/bin/$f" "$REPO_DIR/host/bin/$f"
@@ -189,9 +190,17 @@ HOST_UNITS=(
     webui-data-backup.service webui-data-backup.timer
     hermes-history-backup.service hermes-history-backup.timer
     secrets-offsite-backup.service secrets-offsite-backup.timer
+    ai-memory-backup.service ai-memory-backup.timer
 )
 for f in "${HOST_UNITS[@]}"; do
     [[ -f "/etc/systemd/system/$f" ]] && install -m 644 -D "/etc/systemd/system/$f" "$REPO_DIR/host/systemd/$f"
+done
+
+# drop-in'ы: фактическое расписание таймеров живёт здесь, а не в базовом unit
+for d in /etc/systemd/system/*.timer.d; do
+    [[ -d "$d" ]] || continue
+    [[ -f "$d/override.conf" ]] || continue
+    install -m 644 -D "$d/override.conf" "$REPO_DIR/host/systemd/$(basename "$d")/override.conf"
 done
 
 HOST_ETC=(docker-autorecover.conf hermes-boot-expected-containers.txt)
