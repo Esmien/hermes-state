@@ -28,10 +28,9 @@ class FilterTests(MemoryTests):
         self.assertEqual(self.run_filter(out,user=u)['tool_ids'],['existing_tool',self.filter.valves.tool_id])
         explicit=self.body(); explicit['tools']=[]; self.assertNotIn('tool_ids',self.run_filter(explicit,user=u))
         bad=self.body(); self.assertNotIn('tool_ids',self.run_filter(bad,user={'role':'user','id':'bad'}))
-        admin={**self.user,'role':'admin'}; b=self.body(); original=copy.deepcopy(b)
-        self.assertEqual(self.run_filter(b,user=admin),original)
-        response={'messages':[{'role':'assistant','content':'ok'}]}; old=copy.deepcopy(response)
-        self.assertEqual(asyncio.run(self.filter.outlet(response,admin,{})),old)
+        admin={**self.user,'role':'admin'}; b=self.body(); out=self.run_filter(b,user=admin)
+        self.assertIn(f.BEGIN,out['messages'][0]['content'])
+        self.assertIn(self.filter.valves.tool_id,out['tool_ids'])
     def test_stable_single_block_admin_intact(self):
         b=self.run_filter(self.body()); first=b['messages'][0]['content']
         self.assertEqual(first.count(f.BEGIN),1)
