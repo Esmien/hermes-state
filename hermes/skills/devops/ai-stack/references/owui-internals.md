@@ -183,6 +183,30 @@ docker exec open-webui sh -c "grep -rho '.\{160\}selectedTerminalId.\{200\}' /ap
 
 Родная ручка (env/конфиг/флаг) → замер → и только по слову владельца дериватив `webui-branding/Dockerfile`. Патч бандла или upstream-Python переживает обновление базового образа только если применён в сборке и **валит сборку** при несовпадении строки — иначе тихо ломает UI после бампа. Цена и формулировка для владельца — в SKILL.md «Answering the owner».
 
+**«Глянь патч на X» без вложения — патч уже на хосте, скриншот не нужен.** Речь почти всегда о нашей же работе (часто из прерванной сессии): сначала `git status` в `/home/ai_service/ai-stack` — untracked `webui-branding/patch_*.py` плюс `M .../Dockerfile` и есть предмет ревью, — потом код в живом контейнере. Просить у владельца файл/скрин = возвращать ему его же работу.
+
+**Логику на Python править патч-скриптом, а не `sed`.** `patch_<тема>.py` с `replace_once` (ровно одно совпадение, иначе `SystemExit`) и `py_compile` каждого изменённого файла после записи; в Dockerfile `COPY patch_x.py /tmp/patch_x.py` + `RUN python /tmp/patch_x.py && rm /tmp/patch_x.py`. Fail-closed сохраняется, но кривой отступ или забытый импорт падают на сборке, а не в рантайме у пользователя. Скрипт патча — часть коммита: untracked `patch_*.py` рядом с правкой Dockerfile означает, что чистая сборка умрёт на `COPY`.
+
+**Ревью = «смотрел ровно то, что запущено».** Свежий образ сам в контейнер не приезжает — без `--force-recreate` живёт старый слой, а новый тег в `docker images` выглядит как «патч выкачен». Сверять побайтово:
+
+```bash
+docker run --rm --entrypoint md5sum esmien/webui:local \
+  /app/backend/open_webui/tools/builtin.py /app/backend/open_webui/models/chats.py
+docker exec open-webui md5sum /app/backend/open_webui/tools/builtin.py /app/backend/open_webui/models/chats.py
+docker inspect open-webui --format '{{.Created}}'; docker images esmien/webui --format '{{.Tag}} {{.CreatedAt}}'
+```
+
+**Каждое имя из вставленного блока должно существовать в скоупе целевой функции** — читать функцию целиком (`docker exec <c> sed -n '<start>,<end>p'`), а не только место вставки: `__chat_id__`, `count`, `start_timestamp` приходят аргументами, а `chat_search_terms` может быть не импортирован. И **тип поля перед арифметикой**: `ChatTitleIdResponse.updated_at: int` переживает `-c.updated_at`, `datetime` дал бы `TypeError` внутри `try/except` тулзы, то есть `{'error': …}` вместо результатов — снаружи это выглядит как «поиск просто ничего не находит».
+
+**Функциональная проба — в контейнере, на живой БД, только чтение.** Локальный скрипт копируется внутрь и запускается от `/app/backend`:
+
+```bash
+docker cp /root/.hermes/cache/scratch/probe.py open-webui:/tmp/probe.py
+docker exec -e PYTHONPATH=/app/backend -w /app/backend open-webui python /tmp/probe.py
+```
+
+Без `PYTHONPATH` из `/tmp` `import open_webui` падает `ModuleNotFoundError`. Успех пробы — не «код скомпилировался», а ожидаемое поведение до и после: например, стрикт-запрос с лишним словом даёт 0, а фолбэк возвращает целевой чат (разбор поиска — `owui-chat-search.md`).
+
 Инжект в `index.html` — единственный способ добавить своё поведение на фронте без правки минифицированных чанков: `COPY <script>.js /app/build/static/` + `sed` в тег перед `</head>` с `grep -q` в том же `RUN`. Статика из `/app/build/static` при старте копируется в `/app/backend/open_webui/static`, поэтому проверять надо оба пути и `curl /static/<file>.js` снаружи.
 
 **Скрипт на загрузке страницы ≠ «после входа»:** вход в SPA не перезагружает документ, токен появляется в `localStorage` уже внутри приложения. Всё, что зависит от токена (свой fetch, выбор терминала, персональные запросы), должно опрашивать его появление; иначе у нового пользователя код не сработает ни разу, а в тесте с заранее засеянным токеном — сработает, и разница будет невидима. Симптом на скриншоте владельца: в `localStorage` нет флага скрипта вовсе.
