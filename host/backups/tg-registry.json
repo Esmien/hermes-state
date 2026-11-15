@@ -1,7 +1,46 @@
 {
-  "updated_at": "2026-11-15T00:32:13Z",
+  "updated_at": "2026-11-15T00:37:49Z",
   "chat_id": "214062001",
   "sets": [
+    {
+      "db": "hermes_history",
+      "dump": "hermes_history_20261115_003734.tar.gz",
+      "size": 63150366,
+      "sha256": "858f54ef9f5ce777552e01b310aca94d20778a9e545d39e5a09bba53ee638e76",
+      "created_at": "2026-11-15T00:37:41Z",
+      "chat_id": "214062001",
+      "complete": true,
+      "parts": [
+        {
+          "name": "hermes_history_20261115_003734.tar.gz.part_00",
+          "size": 15787592,
+          "sha256": "d048e6656e4a07171d884e2c5c4eea174738e27283cbd3c4a09aad1d3015da21",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACBctq-P7WFgje59OEPIIZzb3CHYjPNAACWLIAAqEmyEveTtJj2eNYRT0E",
+          "message_id": 1483
+        },
+        {
+          "name": "hermes_history_20261115_003734.tar.gz.part_01",
+          "size": 15787592,
+          "sha256": "8dd0915f518ee4681f44d05245fa50fd46c1ed24af63031c74fd3456124a0a70",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACBcxq-P7YvLjR_QjMpKrcSqm_YDOnuAACWbIAAqEmyEsinyBTtTdlBD0E",
+          "message_id": 1484
+        },
+        {
+          "name": "hermes_history_20261115_003734.tar.gz.part_02",
+          "size": 15787591,
+          "sha256": "9e6448548dd1d1c514d0c1781442d3fe02d015e43b4b1860a9671a564d9816ac",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACBc1q-P7ajDGD_2xm6vChhpzKfDqTOAACWrIAAqEmyEtm2jW67Ac1fT0E",
+          "message_id": 1485
+        },
+        {
+          "name": "hermes_history_20261115_003734.tar.gz.part_03",
+          "size": 15787591,
+          "sha256": "42d4aac8469ab7134d28288cafc37295f97b877c137de915a08d1203b8f49d44",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACBc5q-P7brffvQhqRbsPglFEU0W2r4wACW7IAAqEmyEv6SuLRMXCkTT0E",
+          "message_id": 1486
+        }
+      ]
+    },
     {
       "db": "secrets_offsite",
       "dump": "secrets_20261115_003210.tar.gz.enc",
