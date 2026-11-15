@@ -1,7 +1,25 @@
 {
-  "updated_at": "2026-11-15T00:30:14Z",
+  "updated_at": "2026-11-15T00:32:13Z",
   "chat_id": "214062001",
   "sets": [
+    {
+      "db": "secrets_offsite",
+      "dump": "secrets_20261115_003210.tar.gz.enc",
+      "size": 12048,
+      "sha256": "40c5b87ab0d2a82558b08023f116906fbbd867035015e0133eec91c007860228",
+      "created_at": "2026-11-15T00:32:11Z",
+      "chat_id": "214062001",
+      "complete": true,
+      "parts": [
+        {
+          "name": "secrets_20261115_003210.tar.gz.enc",
+          "size": 12048,
+          "sha256": "40c5b87ab0d2a82558b08023f116906fbbd867035015e0133eec91c007860228",
+          "file_id": "BQACAgIAAyEGAAMBBuVLbwACBb9q-P2MkRTESMRRr56237XSJIVh2AACUbIAAqEmyEvZafRRl3aADz0E",
+          "message_id": 1471
+        }
+      ]
+    },
     {
       "db": "webui_data",
       "dump": "webui_data_files_20261115_002455.tar.gz",
@@ -782,24 +800,6 @@
           "sha256": "33d745b3bc70e24035cb142a1371799bc0a16b836354f567cdc0933b24172d43",
           "file_id": "BQACAgIAAxkDAAIBl2ro85PLtX9wymG12q_6GLXh-1ClAAIYtQACHZFIS3LF76E0r8fcPQQ",
           "message_id": 407
-        }
-      ]
-    },
-    {
-      "db": "secrets_offsite",
-      "dump": "secrets_20261102_203313.tar.gz.enc",
-      "size": 13152,
-      "sha256": "02d22abdd7287e315b397c585367b6a6c35a232163ebc542bb81d47b13605878",
-      "created_at": "2026-11-02T20:33:14Z",
-      "chat_id": "214062001",
-      "complete": true,
-      "parts": [
-        {
-          "name": "secrets_20261102_203313.tar.gz.enc",
-          "size": 13152,
-          "sha256": "02d22abdd7287e315b397c585367b6a6c35a232163ebc542bb81d47b13605878",
-          "file_id": "BQACAgIAAxkDAAIBk2ro84rrVLAGFvrJt5DfxtrVFrZnAAIVtQACHZFIS9xbiKWEDMWAPQQ",
-          "message_id": 403
         }
       ]
     },
