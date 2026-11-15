@@ -45,26 +45,9 @@ This is not the same class as a chat answer. Chat: short, verdict first, bullets
 
 ## Shape that works for a change plan / proposal
 
-Trigger: «напиши подробно, понятным языком, какой у нас план, что делаем, как делаем, трейдоффы и результат». The subject is a change that does **not** exist yet: every claim is a claim about what will be built, so the document must survive being argued with line by line.
+Trigger: «напиши подробно, понятным языком, какой у нас план, что делаем, как делаем, трейдоффы и результат».
 
-1. **Вердикт** — two or three lines naming the real cause, not the symptom («упираешься не в железо, а в отсутствие квот»).
-2. **Что сейчас** — table of live numbers: what runs, its limits, what it actually costs.
-3. **Что строим** — numbered list of the moving parts, one sentence each.
-4. **Из чего состоит** — table «файл / юнит → что делает». Real paths, so he can check them afterwards.
-5. **Как это работает по шагам** — the lifecycle, not the code: появился пользователь → пишет → удалили → ребут → что видит админ. Each step states what the user sees while it happens.
-6. **Цифры** — before/after table for RAM, CPU, disk, time. Give the arithmetic (11 × 31 MiB), not the sum alone; he checks it.
-7. **Трейдоффы** — table «решение / зачем / чем платим». The cost column is mandatory and never «немного»: a real number or a real consequence.
-8. **Что это не решает** — mandatory section. Shared physical limits, shared disk, shared network, anything the design cannot fix. Without it the document reads as an advert and he discards it.
-9. **Порядок работ** — phases, each with `Проверка:` (a command and its expected output) and the rollback once for the whole plan.
-10. **Открытые решения** — numbered questions, each with a proposed default, so he can answer «1 — да, 2 — 1.5 ГБ» instead of writing prose. Only include a question whose answer changes the implementation.
-11. **Оценка** — hours, split by phase, naming the phase that will eat them.
-
-Rules for this shape:
-
-- **Limits are numbers he chose, never adjectives.** «1.5 ГБ / 1 CPU на контейнер», not «разумные лимиты»; «храним 3 дня», not «недолго».
-- **His conscious choices stay boundaries.** «Одна машина, без кластера» goes into границы, never into «что не решает» as a shortcoming.
-- **Every number in the plan is measured before it is written.** Idle memory, image size, free disk, current caps — read them with a command; a plan built on remembered numbers gets rejected on the first check.
-- **A rejected proposal is rewritten, not re-argued.** When he refuses a mechanism («даёшь всем рут»), replace the mechanism and say in one line what it costs instead of defending the old one.
+Full text → [references/change-plan.md](references/change-plan.md)
 
 ## Audience
 
@@ -92,50 +75,15 @@ Close with the snapshot time in UTC and a line that it does not update itself.
 
 ## Shape that works for a system overview («покажи другу / коллеге»)
 
-Same rules, different skeleton — the subject is the machine, not the owner. Order that read well end to end:
+Trigger: an outsider must understand the contour without reading the server.
 
-1. **Коротко** — one paragraph: what this server is, who it serves, what runs on it.
-2. **Железо и состояние** — CPU/RAM/disk/uptime with the uncomfortable number stated (swap in use, disk at 73 %).
-3. **Что запущено** — by role, not by container name; a role may be one line or five.
-4. **Неочевидная механика** — the part a guest cannot guess: how a personal subscription becomes a normal API,
-   how the tunnel survives DPI, why a service is pinned to one country. This is the section that makes the
-   document worth reading, and the one that must explain the price of the trick, not just the trick.
-5. **Что делает само** — by rhythm (minute / 10 min / 15 min / daily / weekly / boot), never by unit name.
-6. **Данные и бэкапы** — table: what / volume / where / how often / retained; then the sentence that proves
-   restore is exercised, not assumed.
-7. **Восстановление** — measured step costs and a range; name the step that is slowest and why it is access.
-8. **Безопасность** — perimeter first, then the sentence «за периметром» that a perimeter alone would hide.
-9. **Границы** — conscious limits, framed as boundaries (see the standing rule above).
-10. **Оценки по слоям** — table with a reason per score, one score visibly not 10.
-11. **Что осталось** — exactly one action.
-
-Redaction for this audience: no addresses, domains, paths, container names or ports; versions, counts, sizes,
-minutes and score tables stay. Close the chat reply with an offer of the internal version — he may want it for
-himself after seeing the redacted one.
+Full text → [references/system-overview.md](references/system-overview.md)
 
 ## Shape that works for a runbook («понять и собрать руками»)
 
-Trigger: «где посмотреть нашу систему», «хочу разобраться, не собирая по крупицам по серверу», «чтобы сторонний человек поднял у себя», «разворачиваемое одной командой». The subject is how to **rebuild** the thing, so every claim needs a command that proves it.
+Trigger: «где посмотреть нашу систему», «хочу разобраться, не собирая по крупицам по серверу».
 
-1. **Коротко** — что это и что делает, 5–6 строк, с живыми числами (сколько узлов, путей, людей).
-2. **Схема** — ASCII-поток с реальными портами и путями, развилки подписаны («Google → Франция», «.ru → бокс»).
-3. **Решения и их цена** — таблица «решение / зачем / чем платим». Колонка цены обязательна: без неё документ читается как реклама и он его не принимает.
-4. **Компоненты** — таблица «что / где»: путь, юнит, каталог. Соответствие «роль → файл», а не список имён вразнобой.
-5. **Что происходит с одним запросом** — нумерованный путь от клиента до сайта, 6–8 шагов, с именами инбаундов и правил.
-6. **Где кончается «просто»** — ограничения самой архитектуры (что не видно, что зависит от DNS, что не покрыто правилами).
-7. **Сборка с нуля** — пронумерованные шаги, у каждого `Проверка:` с конкретной командой. Шаг без проверки не ставится: он читает это как рецепт и повторит иначе, чем вы.
-8. **Диагностика** — 6–8 команд плюс таблица «симптом → причина → что смотреть».
-9. **Грабли** — те, на которых реально потеряли время, с механизмом, без дат и без «однажды у нас».
-10. **Границы** — что схема не делает; conscious limits как границы, не как список недостатков.
-11. **Если упаковывать в продукт** — порядок шагов; runbook сам становится ТЗ, поэтому его нельзя писать постфактум под готовый код.
-
-Rules specific to this shape:
-
-- **Шаг 0 — что читатель должен принести сам** (железо, домен, чужие подписки, ключи). Без него документ обещает больше, чем система даёт: развёрнутое «одной командой» без релеев работает наполовину, и это надо сказать в самом начале.
-- **Пути и имена файлов — да, значения — нет.** Токены, UUID, приватные ключи, IP чужих узлов заменяются на `<токен>`, `<ip-бокса>`.
-- **Цифры с живой машины в момент написания** (число инбаундов, размер конфига, срок сертификата, кто в каком цвете). Через месяц по копии из памяти он соберёт устаревшее.
-- **Не changelog.** «Мы добавили / я починил» — в чат; в документе описан стек, как он стоит.
-- **Проверять себя по коду, а не по памяти.** Перед сдачей пройти рецепт глазами: каждый шаг должен иметь источник в файле на диске, иначе в runbook попадёт то, чего в системе нет.
+Full text → [references/runbook.md](references/runbook.md)
 
 ## Where the file lives
 

@@ -29,48 +29,9 @@ replacement. The documented path is SIWC for open-source / locally hosted apps.
 
 ## SIWC facts that matter (verified Oct 2026)
 
-- Authorize: `https://auth.openai.com/api/accounts/authorize` with
-  `client_id=dynamic_agent_client`, `agent_name_hint`, `ext_agent_host_id`,
-  `response_type=code`, `redirect_uri=http://127.0.0.1:PORT/auth/callback` (path fixed,
-  port may vary, never `localhost`), `scope=openid profile email offline_access
-  resource.invoke chatgpt.tokens.use.direct`, `resource=https://api.openai.com/v1`,
-  `state`, `nonce`, `code_challenge_method=S256`, `code_challenge`.
-- Callback returns `code,state,client_id` — the issued `client_id` is `oaiapp_…`; it must be
-  saved and reused for later sign-ins. Token exchange: form POST to
-  `https://auth.openai.com/api/accounts/oauth/token`, `grant_type=authorization_code`,
-  no client secret. Refresh uses `grant_type=refresh_token` + `client_id` + `resource`.
-- Inference: only `/v1/responses`, `store:false`, `stream:true`. Function calling works
-  cleanly (verified: `function_call` with correct name and JSON arguments), so a chat→
-  responses bridge does not break tools.
-- Model catalog: `GET /v1/models` returns the account plan models (`visibility == list`).
-- No rate-limit headers come back; quota is invisible, same subscription allowance.
-- **`The ChatGPT user has reached their Subscription Sharing usage limit` — это квота аккаунта, не баг моста.**
-  Текст приходит от OpenAI (в LiteLLM — `BadRequestError`/400 на `/v1/responses`) и означает, что общий
-  allowance подписки выбран для всех клиентов сразу: Codex CLI, OpenCode и этот мост делят один пул.
-  Остаток нигде не читается (ни заголовков, ни `/usage`: `hermes usage` отвечает «нет данных»), поэтому
-  вариантов два — ждать сброса окна или увести клиента на маршрут без подписки. Диагностика по факту:
-  `docker logs litellm | grep -i "Subscription Sharing"` даёт время и модель, `grep -c` — единичный
-  отказ это или цикл ретраев. **400 от моста убивает всю цепочку: `order` не сработает, fallback-группа
-  тоже.** `litellm.should_retry()` ретраит только 408/409/429/5xx, а `should_retry_this_error()` для
-  прочих 4xx сразу делает `raise` — поэтому `order=2`/`fallbacks` молча не работают, и текст ошибки
-  приходит в чат, хотя нога формально здорова и в cooldown не уходит. Сама ошибка при стриме приходит
-  **не HTTP-кодом, а событием `response.failed` внутри 200-потока** — поэтому маппинг только на
-  уровне статуса ничего не меняет (проверено: после него ровно тот же `BadRequestError` в чате).
-  Лечение — в мосте, две точки: `relay_error()` для не-200 (400/403 с «usage limit» → `429`
-  `rate_limit_error`) и **чтение стартового потока ДО отправки 200** (`handle_responses` и `handle_chat`): отказ идёт
- **не первым событием**, а в любой момент до первого вывода — реальные последовательности на этом
- хосте: `created → in_progress → output_item.added → failed`, `created → in_progress → metadata →
- failed` и `created → in_progress → metadata → error`. Список «тихих» типов бесполезен (состав
- меняется), поэтому правило простое: **копить всё, пока не встретится `*.delta` / `output_item.done` /
- `completed` / `incomplete`** (лимит ~200 событий), и только тогда отдавать 200; встретили
- `response.failed`/`error` — 429. Стриминг сохраняется, тормозятся только pre-text события.
- Проверка в реальном отказе: строка `responses failed before stream: <type> <msg>` в
- `/root/siwc/gateway.log` (юнит пишет stdout/stderr туда, а не в journald — `journalctl -u
- siwc-gateway` пуст и это норма). `aggregate()` тоже должен
-  ставить `status='failed'` для `response.failed`, иначе sync-ветка отдаёт пустой 200. Тест логики —
-  `assets/host/siwc/test_gateway_quota.py` (8 кейсов, monkeypatch `upstream`), сквозная проверка —
-  стаб с 429 на `order=1` + OpenRouter на `order=2`: отвечает `order=2`, и в стриме, и без; Если у группы живая только плановая нога (серая `chatgpt/` заблокирована),
-  ошибка идёт прямо в чат — для таких групп держать отдельную fallback-группу на не-плановом провайдере.
+Endpoint URLs, client id and model ids read from the live auth flow — the bridge must match them exactly.
+
+Full text → [references/siwc-facts.md](references/siwc-facts.md)
 
 ## Building the bridge (stdlib only)
 
@@ -154,30 +115,10 @@ For model inventory and cleanup, see `ai-stack` → `references/model-provenance
   `fallbacks` — а не значение верхнего уровня (верхний уровень `null` ничего не значит).
 
 ## Учебный прогон квоты (сквозной, без ожидания реального отказа)
-Квота не читается и не воспроизводится по заказу, поэтому отладка fallback-цепочки идёт инъекцией
-того же события: второй экземпляр моста с `SIWC_FAKE_QUOTA=1` и своим портом
-(`SIWC_PORT=4022 SIWC_BIND=172.17.0.1,127.0.0.1 python3 /root/siwc/gateway.py`) отдаёт ровно
-реальную последовательность `response.created → in_progress → output_item.added → response.failed`,
-но как HTTP 429. Дальше — временная подмена `api_base` у порядковой ноги на
-`http://host.docker.internal:4022/v1` через `PATCH /model/<id>/update` (полный `litellm_params`),
-**прогон через WebUI от лица владельца** и немедленный возврат `api_base` на 4010. Драйвер WebUI:
-`assets/host/siwc/owui-e2e-quota.py` (JWT с `session_stamp` из таблицы `auth` + `mfa_verified`,
-POST `/api/chat/completions`, модель `gpt-61-terra`) — запускать внутри контейнера
-`open-webui`, JSON с uid/stamp/model подавать на stdin.
 
-Что доказано этим прогоном: 3 хода в реальном чате, каждый дал **два** отвергнутых вызова
-фейковой ноги (`responses failed before stream`) и ответ от `order=2` (OpenRouter) — в
-спенд-логах `model_id` ноги OpenRouter, ни одной `failure`-строки у группы. После снятия подмены
-order-1 снова отдаёт мост. Учесть: пока идёт прогон, рабочая нога фактически подменена.
+Quota cannot be summoned on demand, so the fallback chain is debugged by injecting the same event: a second bridge instance with `SIWC_FAKE_QUOTA=1` on its own port.
 
-**Chromium-сессия владельца без пароля:** cookie `token` серверу достаточно (API отдаёт 200), но SPA
-сразу редиректит на `/auth` — она читает `localStorage.token`. Порядок: зайти на `/auth`, положить
-JWT в `localStorage.token`, только потом открывать `/?model=<id>`. JWT — `{id, session_stamp, typ:
-'session', mfa_verified: true, iat, exp}`, `session_stamp` берётся из таблицы `auth` в `webui_db`.
-Ввод в чат — реальный ввод с клавиатуры: поле `#chat-input` это `contenteditable`, установка
-`value` не работает; нужно `Input.dispatchMouseEvent` по центру + `Input.insertText` +
-`Input.dispatchKeyEvent` Enter. Готовый драйвер — `assets/host/siwc/owui-chromium-e2e.py`
-(venv с `websocket-client`, Chromium с `--remote-debugging-port`, `/json/new` только методом PUT).
+Full text → [references/quota-drill.md](references/quota-drill.md)
 
 ## Media on the bridge
 
@@ -200,67 +141,6 @@ JWT в `localStorage.token`, только потом открывать `/?model
 
 ## Pitfalls
 
-- **После перезагрузки хоста проверять оба bind, а не `systemctl is-active`.** Юнит стартует
-  раньше, чем docker поднимает `docker0`, `bind(172.17.0.1:4010)` падает с `EADDRNOTAVAIL`,
-  поток умирает молча — юнит остаётся `active`, `127.0.0.1:4010` отвечает, а LiteLLM получает
-  `Cannot connect to host host.docker.internal:4010` / `Connect call failed ('172.17.0.1', 4010)`.
-  Симптом со стороны клиента: модель группы падает с `InternalServerError`, а у групп без
-  `router_settings.fallbacks` — сразу ошибка в чат. Лечение: `After=/Wants=docker.service`
-  в юните **и** повтор bind в `serve()` (сеть может отстать и от этого). Проверка после
-  любого reboot: `ss -ltnp | grep 4010` должен показать **две** строки (`172.17.0.1` и `127.0.0.1`).
-  Копии юнита и `gateway.py` лежат в `vps-infra/assets/host/{systemd,siwc}/` (`auth.json` — нет).
+First one after any host reboot: check **both** binds, not `systemctl is-active`.
 
-- **`stream` must be read before you force it.** Setting `body['stream'] = True` and then
-  deciding "client wanted a stream?" always answers False, so the gateway returns an
-  aggregated JSON to a caller that expects SSE. LiteLLM reports it as
-  `APIConnectionError: openai closed the responses stream before any terminal event` — 100%
-  reproducible on `/v1/responses`, invisible on `/v1/chat/completions`.
-- **Мост теряет всё, кроме текста.** `convert_messages()` в `gateway.py` склеивает
-  content списком строк (`'\n'.join(p.get('text','') …)`) и выбрасывает `image_url`/`input_image`
-  без ошибки. LiteLLM при этом отдаёт `supports_vision: true` (модель ведь зрячая), поэтому
-  клиент не получает ни `400`, ни предупреждения: модель просто отвечает «изображение не
-  прикреплено». Любая группа, чья живая нога — этот мост (и серая `chatgpt/` тоже), слепая
-  к картинкам; `image-generator`/vision-модели на такой группе не работают.
-- **Проверка «дошла ли картинка» — по `prompt_tokens`, не по ответу модели.** Один и тот же
-  текстовый payload даёт одинаковое число токенов с картинкой и без, если её срезали:
-  текстовый запрос `openai/<slug>` = N, тот же запрос с `image_url` = N (признак потери), а через
-  зрячую ногу (`service.openrouter/<slug>`) = N + сотни токенов и правильное описание.
-  Второй свидетель — `api_base` в `LiteLLM_SpendLogs`: `http://host.docker.internal:4010/v1`
-  значит запрос ушёл в мост. Лечение: увести клиента на группу с реально зрячей ногой
-  (или добавить проброс `input_image` в мост — только после проверки, что backend принимает
-  картинки), а не чинить OWUI.
-- **Always synthesise a terminal event.** If the upstream stream ends without
-  `response.completed|incomplete|failed`, emit a synthetic `response.completed` yourself;
-  otherwise the proxy turns a merely truncated answer into a hard error.
-- **Upstream rejects `max_output_tokens < 16`**; clamp every `max_tokens`/
-  `max_completion_tokens` to `max(16, int(value))`.
-- **`/model/update` bookkeeping is treacherous.** Pass `model_info.id` and the full
-  `litellm_params`; then re-read `/model/info` and assert `blocked` **per deployment id**.
-  After a rename the flag can end up on the wrong row, which silently leaves the grey
-  route live and looks like a gateway bug.
-- **A leg without `order` stops existing once any sibling has one.** `get_order_filtered_deployments`
-  (`litellm/utils.py`, called from the router's `async_get_healthy_deployments`) keeps only the
-  deployments at the *lowest* `order` in the group and **drops every leg whose `order` is `None`**.
-  Symptom: 100 % of a group's traffic lands on the backend you did not want, the other leg answers
-  fine when called directly, and nothing in `/model/info` looks wrong. Read the orders per
-  deployment id before diagnosing — `order` inside one group is a real priority ladder, it is only
-  weaker than a separate fallback group when you need a *different provider* on the second rung.
-  Fix by giving every leg a number (bridge `1`, grey `2`) or by blocking the leg you do not want.
-- `ext_agent_host_id` must be a hyphenated **UUIDv4** with `urn:uuid:` prefix; a hex
-  machine-id gives `invalid_authorize_request` / `param: ext_agent_host_id`.
-- Host-ID and client-id must persist; restarting or re-signing-in must not mint a new host.
-- Aggregate streamed responses from `response.output_item.done`; `response.completed.output`
-  is **empty** even when the model answered — relying on it yields blank messages.
-- `urllib.request` is easy to forget when only `urllib.parse` is imported; refresh then
-  fails with a bare `AttributeError`.
-- Restarting by `pkill -f <path>` misses a process started as `python3 gateway.py` from its
-  own cwd — check `ss -lntp` before assuming the new build is live; an old instance keeps
-  the port and the new one dies with `Address already in use`.
-- Headless VPS: the loopback callback cannot be reached from the owner's browser. Either
-  `ssh -L PORT:127.0.0.1:PORT` or have them paste the failing redirect URL; the code is
-  single-use and short-lived.
-- Authorize URLs and auth.json carry tokens — never echo them; scratch copies must be wiped.
-- **The upstream stream can close early**: `openai closed the responses stream before any
-  terminal event (response.completed...)`. It surfaces in LiteLLM as
-  `MidStreamFallbackError` and looks like a route failure. Treat it as intermittent upstream
-  behaviour: retry once inside the sidecar before reporting a defect.
+Full text → [references/pitfalls.md](references/pitfalls.md)

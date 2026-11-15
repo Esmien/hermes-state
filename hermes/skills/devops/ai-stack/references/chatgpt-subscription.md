@@ -15,7 +15,8 @@ models through the normal LiteLLM connection — no OWUI-side hack.
 ## Procedure
 
 1. **Version gate first.** `chatgpt/` ships in LiteLLM >= 1.106 (needs the `mcp`
-   package, already inside the image). This stack runs v1.106.6; there is no
+   package, already inside the image). This stack runs v1.108.8 (was 1.106.6 when this was
+   written — the gate is satisfied either way); there is no
    `python` on the container PATH, so probe with its venv interpreter:
    `docker exec litellm /app/.venv/bin/python -c "import litellm.llms.chatgpt; print('ok')"`.
    Missing → bump deliberately per `references/updates.md`, never with a rolling tag.
@@ -27,7 +28,7 @@ models through the normal LiteLLM connection — no OWUI-side hack.
    mkdir -p /root/litellm-chatgpt
    docker run --rm --entrypoint /app/.venv/bin/python \
      -e CHATGPT_TOKEN_DIR=/tokens -v /root/litellm-chatgpt:/tokens \
-     ghcr.io/berriai/litellm:v1.106.6 -c \
+     ghcr.io/berriai/litellm:v1.108.8 -c \
      "from litellm.llms.chatgpt.authenticator import Authenticator; Authenticator().get_access_token(); print('LOGIN_DONE')"
    ```
    The flow is non-interactive: it prints a URL + a code the owner enters in the

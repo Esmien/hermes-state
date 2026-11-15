@@ -62,10 +62,10 @@ failregex = ^<HOST> - - .+ "[^"]+" (401|403|429)
 ignoreregex =
 ```
 
-`/etc/fail2ban/jail.d/nginx-llm.local`:
+`/etc/fail2ban/jail.d/nginx-llm.conf`:
 
 ```ini
-[nginx-llm]
+[nginx-llm-unauth]
 enabled  = true
 port     = http,https
 filter   = nginx-llm-unauth
@@ -79,7 +79,7 @@ bantime  = 6h
 - `backend = polling` обязателен (см. выше), иначе джейл молча читает journal и показывает 0 failed.
 - `ignoreip` берётся из `[DEFAULT]` — docker-сети и loopback не пострадают, но и легитимный
   клиент с протухшим ключом попадёт под бан: 30 отказов за 5 минут он не наберёт, а бот набирает.
-- Проверка: `fail2ban-client status nginx-llm`, затем повторить всплеск с чужого адреса и
+- Проверка: `fail2ban-client status nginx-llm-unauth`, затем повторить всплеск с чужого адреса и
   убедиться, что он в `Banned IP list`; `nginx -t`/reload тут не нужны, nginx не менялся.
 
 ## Rate limiting nginx

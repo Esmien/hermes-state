@@ -1,0 +1,42 @@
+# References (read on demand)
+
+- `references/coupling-hermes.md` — **Hermes ↔ AI stack coupling** (Hermes config, LiteLLM groups/fallback, emergency route).
+- `references/pitfalls.md` — **Pitfalls (AI stack)**. Read when something behaves in a way the docs do not explain.
+- `references/disk-and-memory.md` — **Memory, disk headroom, DB growth** (disk full, RAM climb, open-terminal heap floor).
+- `references/backups-notifications.md` — **Backups, restore, timers, Telegram notifications**; артефакты песочниц в архиве (без пакетов, бинарников и репозиториев), пер-юзерные `generated_images` как обычные данные (LRU + ретеншен) и полный список читателей этих путей — бэкап, ретеншен, restore, квота.
+- `references/litellm-model-db.md` — **Модели/группы в `litellm_db`**. Read when a model flaps, a group returns 400 from one deployment, or a DB edit (extra_headers, aliases) has to be applied and verified.
+- `references/litellm-admin-auth.md` — **LiteLLM: ownership в `litellm_db`** (ключи/spend/мемберства, «Created By = Unknown», вес и кэш админки). Auth-путь — в skill `credential-login-verification`.
+- `references/ui-latency.md` — **«Медленно грузится»: латентность UI/API** (per-URI `rt`, два штатных виновника, кэш nginx, профиль длинного чата).
+- `references/model-provenance.md` — **Model provenance / cleanup in Open WebUI** (ghost models, dead presets, **model avatars/icons**).
+- `references/media-pipeline.md` — **Media pipeline (images / TTS through LiteLLM)**: генерация/правка картинок, TTS-форматы, «модель не видит вложение».
+- `references/enricher-system.md` — **System-промпт обогатителя** (канон — pipe-функция `enricher` в Open WebUI; здесь копия для сверки, в боте промпта быть не должно). Read before touching it.
+- `references/enricher-system-legacy.md` — **Старый system-промпт `enricher`** (откат на claude-haiku-5.5).
+- `references/music-bot-lyria.md` — **Music bot (lyria)**. Read when the separate lyria deployment (its own Postgres/Redis/RabbitMQ).
+- `references/chatgpt-subscription.md` — **ChatGPT/Codex subscription as a LiteLLM route** (`chatgpt/*` models in WebUI).
+- `references/updates.md` — **Updating stack containers** (one container, rolling tags, LiteLLM).
+- `references/branding.md` — **Branding (Esmien AI)** (assets, image/logo, screenshots).
+- `references/signup-approval.md` — **Signup approval, user administration, WebUI auth hardening** (Turnstile, fail2ban, лимиты, MFA, admin keys).
+- `references/searxng.md` — **SearXNG (web search backend)**: junk results, banned engines, image upgrade.
+- `references/cloudflare-proxy.md` — **Cloudflare in front of one of our names** (прокси, WAF, лимиты на всех сразу, ложный down, h3/Alt-Svc).
+- `references/web-search-architecture.md` — **Web search end to end: OWUI `external` contract, shim plan, Hermes's role**. Read when the owner wants search better than SearXNG, or search/answer quality comes up.
+- `references/memory-troubleshooting.md` — **Container memory attribution** («what is eating the RAM»).
+- `references/upstream-release-review.md` — **Reviewing an upstream release**; never update unprompted.
+- `references/kb-sync.md` — **git → база знаний Open WebUI**: `kb-sync.py`, таймер раз в 2 часа, `sync/diff`.
+- `references/operations.md` — **Operations drills** (recreating a container after a config edit, routine checks).
+- `references/repo-hygiene.md` — **Git hygiene for `ai-stack`** (what must never be committed, commit shape).
+- `references/owui-admin-auth.md` — **Open WebUI admin auth** (`UI_PASSWORD` is LiteLLM's, not WebUI's).
+- `references/owui-data-purge.md` — **Удаление чатов/файлов Open WebUI** по дате, юзеру или титулу («убери тестовые чаты/пинги»): полный набор дочерних таблиц (`chat_message`, `chat_file`, `chat_view_state`, `chatidtag`, `shared_chat`, `automation_run`), MSK-конвертация bigint-таймстампов, восстановление маппинга файлов из дампа, `VACUUM` после чистки. Read before any «снеси/почисти диалоги».
+- `references/owui-task-models.md` — **Фоновые задачи Open WebUI** (заголовки чатов, теги, follow-up; `task.*`).
+- `references/owui-chat-forensics.md` — **Разбор чужого чата в `webui_db`**: что модель реально могла делать (инструменты/интерпретатор/коллекция), как отличить ошибку от выдуманной проверки, чем грозит привязка `open-terminal` к модели. Read before answering «модель галлюцинирует».
+- `references/owui-internals.md` — **Внутренности Open WebUI**: где живёт состояние (`config`, `tool.content`/`valves`, `chat`), почему нель­зя выбирать значения целиком (base64 в `ui.default_interface_settings`), как безопасно править workspace-тул в БД, почему выбор терминала — клиентский. Read before any DB edit or bundle grep.
+- `references/sandbox-terminal.md` — **Песочницы на пользователя (действующая схема)**: `template.compose.yml` + `/usr/local/bin/sandbox-provisioner.py` + 60-секундный таймер, лимиты 1.5 ГБ/1 CPU, malloc-тюнинг против арен, квота 2 ГБ с LRU, `HOME=/home/user/workspace` и `OPEN_TERMINAL_FILE_BROWSER_ROOT=/home/user` (юзер видит одну папку `workspace`), установка пакетов без root, access_grants и `meta.terminalId`, автовыбор терминала после SPA-логина (`webui-branding/terminal-autoselect.js`), **отсутствие HTTP-раздачи файлов** (ссылки на файлы не работают, генераторы сохраняют сами), грабли LRU/compose-интерполяции; ниже — история (общая песочница, отвергнутый `OPEN_TERMINAL_MULTI_USER`, EXDEV). Промпт MCU — `templates/mcu-assistant-system-prompt.md`.
+- `references/model-route-benchmark.md` — **Model / route A/B benchmarking**; `scripts/model-route-bench.py`.
+- `scripts/probe-owui-terminal.py` — **end-to-end terminal probe** (login → flags → real `run_command` → `/execute` evidence). Run after any WebUI update.
+- `scripts/audit-memory-files.py` — **аудит `.agents` по всем песочницам** (ровно один managed-блок, шаблонный текст вне блока, размеры MEMORY/PROFILE, владелец и права). Запускать после любой рассылки AGENTS.md и после разбора памяти пользователя; код 1 = дефекты.
+- `scripts/audit-memory-format.py` — **аудит формата записей**: каждая запись — один пункт `- **Ключ:** текст`; парсер берётся из канонического Tool, код 1 = есть не в формате. Запускать после конвертации памяти, правки `_check_entry` и после любого прогона provisioner с изменённым шаблоном.
+- `scripts/lyria-enricher-router-pipe.py` — **живой OWUI-Pipe `enricher`** (decider → poem/idea → Argon → JSON). Держать синхронно с функцией в OWUI.
+- `scripts/lyria-enricher-pipe.py` — **исходник OWUI-Pipe `lyria_enricher`** (songwriter + critic + санитайзер, выключен).
+- `scripts/check-notification-bots.py` — **Telegram notification health** (each token via `getMe`; `file_id` registry). Run first when a message never arrived.
+- `scripts/lyria-e2e.py` — **E2E прогон музыкального бота по всем юзер-стори** («проверь бота / прогони сценарии»).
+- `scripts/` также: `audit-dead-models.py`, `check-env-parity.sh`, `compact-webui-images.py`, `model-route-bench.py`, `probe-approval-guardian.py`, `probe-media-endpoints.py`.
+- `scripts/music-bot-tests.sh` — **тесты music_bot в изоляции** (свои pg/redis/rabbitmq, CI-паритет: ruff + alembic + pytest). Никогда не на хосте.

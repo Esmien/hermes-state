@@ -55,35 +55,15 @@ He is also pushing a **second framing, and it is the stronger one today**: «о�
 
 ## Career-direction verdicts («я девопс или разраб?», «стоит ли учить X?»)
 
-Same advisory work as a vacancy review, with a label instead of a posting read. Verdict in the first line — «разработчик с сильным инфра-уклоном», never «или/или» — then split the evidence in two: **есть, но недоказано** (код без команды, ревью, легаси, нагрузки) и **глубина есть, ширина нет** (инфра на одной ноде, без k8s/IaC/публичного облака). Close with what to do next, ranked.
+Same advisory work with a label instead of a posting: verdict in the first line («разработчик с сильным инфра-уклоном»), never «или/или».
 
-- Judge against the **hiring funnel**, not his self-image: what a screener actually checks. «На DevOps не возьмут» он принимает только когда названа причина (одна нода, нет оркестрации, нет IaC) — называй её.
-- **Never** list his deliberate choices as deficiencies (Prometheus off, no key limits, no fallbacks). If a deliberate choice really blocks a market, phrase it as missing *market* experience with X, not as a hole in his contour.
-- Investment advice gets an **ROI ranking**, cheapest/most-differentiating first, one reason per line. For agent-oriented roles the order is: **evals + tracing** → один публичный агентский кейс с цифрами (тикетов/день, ₽ за прогон, точность) → MCP-сервер над своим стеком → k8s **последним**.
-- Titles are marketing, not professions. «AI-driven разработчик» без одного кейса, выраженного как результат+число, ничего не продаёт — сказать это один раз и перейти к артефакту.
-- **k8s — галочка про доставку, а не дифференциатор.** Когда он оправдан, k3d vs k3s, и проба хоста перед обещанием локального кластера: [references/market-demand.md](references/market-demand.md).
-
-### Калибровка уровня: «я ведь зелёный джун?»
-
-Он периодически сам поднимает тему — «джуны умеют то, что я сделал?», «я только что нашёл узкое место в чужом проекте, серьёзно?». Вердикт всегда **расщеплённый, а не ярлык**: «по объёму и сложности — мидл, по процессу — джун».
-
-- **Ширина** — из его собственных артефактов, а не из похвалы: `/payment-service` (FastAPI, unit-of-work, транзакционный outbox, обязательный `Idempotency-Key` с конфликтом, воркер + брокер, ~5.3k строк, 95 тестов), `/root/deploy/music_bot`, и прод-контур VPS. Цифры называть — они проверяемы.
-- **Процесс** — то, чего в соло-режиме не бывает и что добирается только в команде: ревью над тобой, чужая кодовая база, оценка сроков, дисциплина тестов под дедлайном, документация для незнакомых людей. Это не «мозги» — это среда; так и говорить.
-- **Не поднимать самооценку до сеньора и не утешать.** Сравнение с типичным джуном (CRUD в готовом проекте, инфра — не его, `tcpdump` — мем) даёт больше, чем комплименты.
-- **Найденное узкое место ≠ сделанная работа.** Кредит за мышление (отделил симптом от слоя, сам пришёл к очереди), но цена — доказательство числом: 50 параллельных загрузок, lag event loop и RSS, график до/после, issue/PR. Один такой полный цикл — артефакт для собеседования; три — смена ярлыка.
+Full text → [references/career-direction.md](references/career-direction.md)
 
 ## Agency «переобучение» offers («выбирай: ИИ / 1С / расторжение»)
 
-A message from a «менеджер отдела трудоустройства» that offers **переобучение на другое направление или расторжение** is not a career choice — it is a choice about whether to keep paying an intermediary. Verdict first, then the three checks, then the artefacts. Numbers and direction comparison: `references/market-demand.md`.
+A «менеджер отдела трудоустройства» offering переобучение or расторжение is not a job offer — read it as a funnel, and answer in his interest.
 
-1. **Read the agency's own vacancies page, not the letter.** Open the block behind `#vacancies`: how many directions are actually open, and what is marked «набор приостановлен». The employer named in the letter may not appear on the site at all — say that plainly (it's an аутстафф/трудоустройство funnel, not the product company).
-2. **Price it.** Вилка джуна (fullstack 50–70k РФ) + **ISA «% от зарплаты после трудоустройства»** with no percentage named = an empty figure and a red flag. Add the months and the syllabus he already does. «Обучение бесплатное» — never accept the framing; it is deferred payment.
-3. **Check their «ключевой фильтр» against his contour.** If it reads «код пишут ИИ-агенты, а разработчик — архитектор и ревьюер», he already works that way and the programme adds nothing except whatever is genuinely missing — name that one gap (часто фронт), not the whole course.
-
-- **Do not decide by market size.** Name-search counts (1С ≈ 1 200 vs AI ≈ 110 by title in РФ) show 1С is the bigger market, but for him that direction zeroes the stack. Report the number, then say the choice is about the stack, not the pool.
-- **«Расторжение»**: the only real cost is the line the agency stops confirming. Say it once, without moralising — if such a line sits in the resume, it gets removed rather than left hanging under a tenure check. Freedom from the contract is not freedom from the NDA.
-- When he has already chosen termination and frames it as «руки развязаны, можно честное резюме и открытые репо», **do not argue with the decision** — convert it into artefacts in the same reply: what publishes as-is / publishes after stripping secrets, client names and real data / never publishes. Portfolios built from what the resume was drawn on make the old claims checkable, which is the actual win — say that once and move to the plan.
-- One cheap move worth offering: «тестовое готов сдать сейчас, без программы и без % от ЗП» — costs one message, occasionally lands.
+Full text → [references/agency-offers.md](references/agency-offers.md)
 
 ## Hard rules about experience
 
@@ -117,21 +97,9 @@ His known state (strong retry taxonomy, weak on AMQP delivery semantics, idempot
 
 ## Reviewing a test assignment (take-home)
 
-A ТЗ plus a repo is not a reading exercise: the grading criterion is «работоспособность Docker-окружения», so **clone it and actually run it** before saying anything about quality. Reading alone produces opinions; a run produces facts he can quote to the interviewer.
+Bring it up isolated (own compose project, non-default ports, `touch /var/lib/docker-autorecover/pause`) and grade what the task really tests, not the happy path.
 
-1. Clone into the scratch dir, map files, read only the load-bearing ones (models, outbox/relay, consumer, broker topology, compose, migration, README, pyproject). Never paste code into chat.
-2. Bring the stack up **isolated**: own compose project name, non-default host ports, `.env` written by you and never printed, `touch /var/lib/docker-autorecover/pause` first (снять после) so the incident detector does not treat the test containers as production.
-3. Exercise the contract with curl: create → poll to final status → webhook delivery → idempotent replay → conflicting replay → missing key → missing API key → concurrent same-key burst (one row in DB?) → failing webhook (attempts + DLQ message count).
-4. Run the project's own suite against a real DB in a throwaway container — «113 passed» is a fact, «тесты есть» is not.
-5. Tear down (`compose down -v`), kill the probe servers, unpause.
-
-Full command recipe, the network/`xargs` traps and the reporting shape are in `references/test-assignment-review.md` — read it before the next take-home.
-
-When he comes back with a PR link («проверь»), it is the same class of work, not a new one: rebuild the PR branch, re-run the contract probes on it, and add the check that actually catches regressions — the migration applied as an **upgrade over a populated volume**, not on an empty database. Round-2 recipe and critique lens: `references/test-assignment-review.md` §8.
-
-Deliver: what you ran and what it returned, then strengths, then **ranked holes each phrased as the question an interviewer will ask**, then one-line fixes for the outright bugs, then the verdict («крепко, но…» / «отправлять нельзя»). Finish with an offer to fix the top bug as a PR.
-
-Design questions about his own code («а есть практический, а не косметический смысл в X вместо Y?») get a practical-vs-cosmetic answer, not a survey of trade-offs: [references/repo-review.md](references/repo-review.md).
+Full text → [references/test-assignment-review.md](references/test-assignment-review.md)
 
 ## Resume review checklist
 

@@ -161,3 +161,23 @@ Expect exactly one `200`, the rest `409`, and **one** extra delivery in the rece
 - **Unbounded `DELETE`** in a retention job — batch it (`WHERE id IN (SELECT ... LIMIT n)`), otherwise one long statement locks a growing table.
 - **README examples removed rather than fixed.** The ТЗ asks for examples; a Swagger link is not a replacement, and the original examples being sanitised (`***`, unbalanced quote) is not a reason to ship none.
 - State plainly when a PR closes 4 of 5 findings: the merge verdict should name what was verified live, then the remaining ranked question. Do not re-litigate the first review.
+
+# Reviewing a test assignment (take-home)
+
+## Reviewing a test assignment (take-home)
+
+A ТЗ plus a repo is not a reading exercise: the grading criterion is «работоспособность Docker-окружения», so **clone it and actually run it** before saying anything about quality. Reading alone produces opinions; a run produces facts he can quote to the interviewer.
+
+1. Clone into the scratch dir, map files, read only the load-bearing ones (models, outbox/relay, consumer, broker topology, compose, migration, README, pyproject). Never paste code into chat.
+2. Bring the stack up **isolated**: own compose project name, non-default host ports, `.env` written by you and never printed, `touch /var/lib/docker-autorecover/pause` first (снять после) so the incident detector does not treat the test containers as production.
+3. Exercise the contract with curl: create → poll to final status → webhook delivery → idempotent replay → conflicting replay → missing key → missing API key → concurrent same-key burst (one row in DB?) → failing webhook (attempts + DLQ message count).
+4. Run the project's own suite against a real DB in a throwaway container — «113 passed» is a fact, «тесты есть» is not.
+5. Tear down (`compose down -v`), kill the probe servers, unpause.
+
+Full command recipe, the network/`xargs` traps and the reporting shape are in `references/test-assignment-review.md` — read it before the next take-home.
+
+When he comes back with a PR link («проверь»), it is the same class of work, not a new one: rebuild the PR branch, re-run the contract probes on it, and add the check that actually catches regressions — the migration applied as an **upgrade over a populated volume**, not on an empty database. Round-2 recipe and critique lens: `references/test-assignment-review.md` §8.
+
+Deliver: what you ran and what it returned, then strengths, then **ranked holes each phrased as the question an interviewer will ask**, then one-line fixes for the outright bugs, then the verdict («крепко, но…» / «отправлять нельзя»). Finish with an offer to fix the top bug as a PR.
+
+Design questions about his own code («а есть практический, а не косметический смысл в X вместо Y?») get a practical-vs-cosmetic answer, not a survey of trade-offs: [references/repo-review.md](references/repo-review.md).

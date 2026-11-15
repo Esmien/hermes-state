@@ -87,3 +87,29 @@ tell profiles apart by suffix.
   brings back the public admin surface the owner deliberately removed with 3x-ui.
 - Whitelist-kind bundles stay shared: they carry the provider's own links, so a per-user
   UUID is meaningless there and more tokens only spread the same shared key.
+
+# Per-user keys
+
+## Per-user keys
+
+Per-person access means each person gets their own UUID and own token. There is **no shared key any more**: the legacy global UUID was deleted from every inbound on the owner's order, so every human — the owner included — authenticates with a personal key. `/root/vpn-router/users.py` owns accounts: `add <name>` injects a client into **every** vless inbound (today `/ws` and `/general` only), creates `/var/www/esmien-sub/<token>/{user,title}`, re-renders all bundles and applies. `users.json` (0600, gitignored) is the source of truth; `make_sub.py` picks a token dir's key from its `user` file, so a bundle can no longer carry a key that is not its own.
+
+Roll it out **additively**: no credential swap, no re-import for existing clients. Snapshot `/var/www/esmien-sub/*/*` with `md5sum` first, prove the legacy bundles are byte-identical afterwards, then probe each key through each route. Full procedure, verification matrix, quota/device-limit reality: `references/per-user-keys.md`.
+
+Rule: any script that builds inbounds (`import_sub.py`) must re-apply `users.json` before writing the config — otherwise new paths authenticate only the legacy UUID and a user's subscription lists nodes that refuse his key.
+
+# Per-user keys (pairs: main + LTE)
+
+## Per-user keys (pairs: main + LTE)
+
+`users.json` (0600, gitignored) is the source of truth: `name → {uuid, token, token_lte, title}`. `users.py add <имя>` injects that UUID as a client into **every** vless inbound (`email = "<tag>:<имя>"`), creates two token dirs — main (files `user` + `title`) and LTE (`kind=whitelist`) — then re-renders subs, rewrites the title map, reloads nginx and runs `vpn-cfg apply`. `users.py rm <имя>` drops the clients and **parks** both dirs under `/var/www/esmien-sub/.disabled/<token>.<имя>`; `users.py sync` re-applies users.json after a pool rebuild (`import_sub.py` also calls it).
+
+Rules that make it hold:
+
+- A profile must never carry a UUID that some inbound already holds as another client: `apply_users` skips by id, so that person silently shares the other key and their traffic merges into a foreign stats row. `users.json[<name>]['uuid']` equal to a client id that is not `in-general:<name>` is the diagnosis — replace it with a fresh `uuid4()` and `users.py sync`. That is exactly how the owner once ended up riding the shared legacy key while believing he had his own subscription. Shared-key removal and proof that it is dead: `references/subscription-shapes.md`.
+- `make_sub.py` picks the UUID per token dir: a dir with a `user` file uses that person's key, without one it falls back to `/root/mtproto-faketls/ws-client-uuid`. Adding a per-user key therefore leaves every already-issued bundle byte-identical — verify with `md5sum -c` before/after rather than by eye.
+- `profile-title`/filename come from the dir's `title` file and its `kind`; the `(LTE)` filename is decided by `kind`, not by the title string, or an LTE name would download as `esmien-vpn`. Titles must stay distinct **and differ early**: the LTE bundle is `Esmien VPN LTE (Имя)`, never `Esmien VPN (Имя, LTE)` — clients truncate long profile names, and with LTE at the end both profiles look identical until expanded. `users.py retitle` rewrites the existing `title` files in place when the scheme changes.
+- The LTE bundle carries the provider's raw «глушилки» links, so its *content* is identical for everyone — separate tokens give separate links, not separate credentials. Say that before promising isolation.
+- Rollback of a single person is `users.py rm`; a full rollback of the whole feature is `vpn-cfg rollback` plus deleting the `user`/`title`/`kind` files.
+- Account state is still spread over five places — `users.json`, `config.json`, a `kind` file per token dir, the stats state, and the generated pages — and the two bugs above (a profile built from the full node list, a page outliving its account) are both products of that split. The agreed direction is one admin API over SQLite with the xray config as a rendered artifact: field list, invariants and the secret-storage decision in `references/admin-api.md`.
+- The roster (who has which token, page URL, and the operations cheat-sheet) lives in `/root/vpn-router/users.md` (0600) — deliberately **outside git**: the owner does not want the people list and their tokens pushed, even to the private repo. Code goes to `Esmien/vpn-service`; `users.json`, `users.md`, `pages_index.json` and the generated subscriptions/pages stay on the host.
