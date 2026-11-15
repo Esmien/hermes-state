@@ -139,6 +139,17 @@ for i, ln in enumerate(open(dockerfile).read().splitlines(), 1):
 
 Prefer end-anchored `sed` on stable upstream strings plus a `&& grep -q` guard in the same `RUN`, so a renamed upstream tag fails the build loudly instead of shipping a half-rebranded image.
 
+## Backend code patch ship with the image (chat search)
+
+The image is not only re-branded, it is also **code-patched**: `webui-branding/patch_chat_search.py` runs in the last `RUN` step and rewrites two upstream files — `models/chats.py` (tokenizer `[a-z0-9]+` → `[^\\W_]+`, so Cyrillic queries yield terms at all) and `tools/builtin.py` (`search_chats` gets a per-term OR fallback that fires only when the strict phrase/all-terms pass returns nothing). Both files are compiled right after the edit, and `replace_once` aborts unless the anchor occurs **exactly once**, so an upstream base bump that moves the code fails the build instead of shipping a silently unpatched image.
+
+Consequences to respect:
+
+- On every `OPENWEBUI_BASE` bump the patch anchors must be re-checked against the candidate image, not only the branding seds: `docker run --rm --entrypoint grep <img> -n 'CHAT_SEARCH\|re.findall(r' /app/backend/open_webui/models/chats.py` and the `snippets = await Chats.get_chat_search_snippets` line in `tools/builtin.py`.
+- After any rebuild, verify the block really landed: `docker run --rm --entrypoint sed esmien/webui:local -n '1680,1725p' /app/backend/open_webui/tools/builtin.py` and compare md5 of both patched files inside image vs. the running container.
+- A functional check beats a grep: exec a probe with `PYTHONPATH=/app/backend -w /app/backend`, call `open_webui.tools.builtin.search_chats(query, count=5, __request__=object(), __user__={'id': uid}, __chat_id__='')` with a query that contains one absent word — the fallback must return chats with snippets (~0.3 s for 5 terms when the queries run in `asyncio.gather`).
+- Keep it a text patch with fail-closed anchors; never fork the upstream tree.
+
 ## Rollback
 
 `ai/RESTORE_WEBUI.md`: compose backup `docker-compose.yml.bak.<ts>` restores the stock image, which is pinned by digest in that document; pre-change docker state snapshot in `webui-branding/_state_snapshot/` (`compose.diff.patch`, `branding.sha256`, container/image inspect). Updating the base image = pull `:main`, read the new `RepoDigests`, replace `ARG OPENWEBUI_BASE` in the Dockerfile, rebuild — but never on the live stack without the pre-flight below.
