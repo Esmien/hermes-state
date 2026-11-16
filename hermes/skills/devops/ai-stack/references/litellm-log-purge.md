@@ -27,6 +27,13 @@ their `model_group` is the normal preset. So match **both** columns, otherwise a
 where model ilike 'free%' or model_group ilike 'free%'
 ```
 
+**`free%` is not enough for the aggregates.** SpendLogs stores the upstream name as
+`free-gpt-6-astra`, but the daily tables record it as **`openai/free-gpt-6-astra`** under a
+bare group (`astra`, `gemini_free`, `minimax`) — the leading `openai/` prefix makes a `LIKE
+'free%'` filter miss them, and «astra осталась в логах» is exactly this case. Use
+`model ILIKE '%free%'` (contains) on `LiteLLM_Daily*` tables, then confirm the bare groups
+are empty (`model_group='astra'` → 0).
+
 Count before deleting — `count(*) filter (...)` per condition plus the overlap, and report
 numbers. `status='failure'` overlapped 0 with the free set in practice.
 
