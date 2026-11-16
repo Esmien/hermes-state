@@ -38,6 +38,8 @@ The stack lives at **`/home/ai_service/ai-stack`** on the host. Owner: user `ai_
     backup-databases.sh  pg_dump → encrypt (dump-crypto) helper
   backups/               postgres dumps, nginx/certbot archives
     postgres/<db>_<ts>.dump.enc   AES-256 encrypted, key /etc/backup-crypto.key; retention: newest 3 per DB
+                                  что реально лежит внутри копии, как проверить и как снять внеплановую —
+                                  references/backups-notifications.md § «Что реально лежит в дампе»
   backup-deploy/         previous configs (.old, nginx/, caddy/)
 ```
 
