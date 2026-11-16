@@ -123,7 +123,7 @@ Verbatim from `references/cross-cutting-rules.md` — the full list of rules and
 
 One topic per file, all in `references/`. The annotated index (what each answers, in what order to read them) is → [references/index.md](references/index.md).
 
-- **Routes / models:** `updates.md`, `upstream-release-review.md`, `model-provenance.md`, `model-route-benchmark.md`, `chatgpt-subscription.md`, `litellm-model-db.md`, `litellm-admin-auth.md`
+- **Routes / models:** `updates.md`, `upstream-release-review.md`, `model-provenance.md`, `model-route-benchmark.md`, `chatgpt-subscription.md`, `litellm-model-db.md`, `litellm-admin-auth.md`, `litellm-log-purge.md`
 - **Open WebUI:** `owui-admin-auth.md`, `owui-internals.md`, `owui-chat-search.md`, `owui-chat-forensics.md`, `owui-data-purge.md`, `owui-task-models.md`, `ui-latency.md`, `signup-approval.md`, `branding.md`
 - **Search / media / bots:** `searxng.md`, `web-search-architecture.md`, `media-pipeline.md`, `music-bot-lyria.md`, `enricher-system.md`, `enricher-system-legacy.md`, `sandbox-terminal.md`
 - **Host hygiene:** `operations.md`, `disk-and-memory.md`, `memory-troubleshooting.md`, `repo-hygiene.md`, `coupling-hermes.md`, `backups-notifications.md`, `cloudflare-proxy.md`, `kb-sync.md`, `pitfalls.md`

@@ -6,6 +6,7 @@
 - `references/backups-notifications.md` — **Backups, restore, timers, Telegram notifications**; артефакты песочниц в архиве (без пакетов, бинарников и репозиториев), пер-юзерные `generated_images` как обычные данные (LRU + ретеншен) и полный список читателей этих путей — бэкап, ретеншен, restore, квота.
 - `references/litellm-model-db.md` — **Модели/группы в `litellm_db`**. Read when a model flaps, a group returns 400 from one deployment, or a DB edit (extra_headers, aliases) has to be applied and verified.
 - `references/litellm-admin-auth.md` — **LiteLLM: ownership в `litellm_db`** (ключи/spend/мемберства, «Created By = Unknown», вес и кэш админки). Auth-путь — в skill `credential-login-verification`.
+- `references/litellm-log-purge.md` — **Чистка логов LiteLLM** («вычисти fail-записи / модель X»): где лежат строки (`LiteLLM_SpendLogs.status`, `model` vs `model_group`), почему суточные агрегаты не пересчитываются сами, и что `VACUUM` не освобождает диск.
 - `references/ui-latency.md` — **«Медленно грузится»: латентность UI/API** (per-URI `rt`, два штатных виновника, кэш nginx, профиль длинного чата).
 - `references/model-provenance.md` — **Model provenance / cleanup in Open WebUI** (ghost models, dead presets, **model avatars/icons**).
 - `references/media-pipeline.md` — **Media pipeline (images / TTS through LiteLLM)**: генерация/правка картинок, TTS-форматы, «модель не видит вложение».
