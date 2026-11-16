@@ -77,7 +77,7 @@ ffc3d455a8097e27856ca875bd66f8e7e0fc9a89bf99805972c7a9fd9f61f11e  ./hermes/skill
 6dab18cda7745a3f411c0883ccf3a9113cf6340211bd97ba8f3654ffb05d3aa4  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
 36ff47a912ed69e265cdfaccbd785b3dcc03bd56fb39f4c7d52b831f4fd70b48  ./hermes/skills/devops/ai-stack/SKILL.md
-1b3872da162b81671c54d3d06d38a0e29a8db23fa6d29ff57e8b85811a0fa4b3  ./hermes/skills/devops/ai-stack/references/answering-the-owner.md
+ecc402cd42a6a9ccd745000760037f593830f378f7f5418036d534fc8d8bd43b  ./hermes/skills/devops/ai-stack/references/answering-the-owner.md
 90b8a71678109031496db5cd4045b79e3e8cebda94a515cb9ba558b14efb52d5  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
 2a582b3672f5b0386d65be35292afadaacffe3573583d8fcc726964c35cc8f37  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
@@ -90,7 +90,7 @@ dc14bc0c6422327a0aecf02277be289b131fdb80a0fa650071ff49b3d95eb90c  ./hermes/skill
 00b282c5b4f5ca3ce49b968a3f11e0929866366ed2c7bde42a1dbc79eeded68e  ./hermes/skills/devops/ai-stack/references/index.md
 c59c1d19122edc2b769aa8370db797bc17edf118e9b0be10fdbbaf6d8667cc8e  ./hermes/skills/devops/ai-stack/references/kb-sync.md
 0a5837b8d283d7edfcfe6b28754c5a2c893f2f60a508d059c9b2552c87f56314  ./hermes/skills/devops/ai-stack/references/litellm-admin-auth.md
-3ad2d394a37481611ba114b8491bee32e71497d5c29baefaeb43df1ac705ce26  ./hermes/skills/devops/ai-stack/references/litellm-log-purge.md
+b6facbe055a9326a4cdf1398397eab5f06b3753a6b34fd500c16764fdde87e7c  ./hermes/skills/devops/ai-stack/references/litellm-log-purge.md
 aa91b9feb6519b144daae15eac2731d81bf2bb67e7361d23732c2103307f18b5  ./hermes/skills/devops/ai-stack/references/litellm-model-db.md
 0a212f2ae32d2d3bcdeb43bbd421074cb4ee1e95308b586025e90224d9553987  ./hermes/skills/devops/ai-stack/references/media-pipeline.md
 5490b3699d7ee7cf47a8633189687ae78ea8d9bc2be86e55509a4b1c979623ca  ./hermes/skills/devops/ai-stack/references/memory-troubleshooting.md

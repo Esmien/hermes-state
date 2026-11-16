@@ -89,28 +89,6 @@ where …) t"` → `backups/litellm_tokenator_spendlog_rows_<ts>.json`, `600 roo
 Daily aggregates carry **no** provider/`api_base` column, so Tokenator spend cannot be separated
 there — leave them alone and say so instead of guessing.
 
-## 6. «В выгрузке остался мусор» = `user_id=''` + `model=''`
-
-The owner's usage export (`user_usage_daily_with_models_*.json`) reads `LiteLLM_DailyUserSpend`,
-not SpendLogs. Cleaning SpendLogs does **nothing** to it. The visible junk is rows with
-`user_id=''`, `model=''`, `api_key=<random 64-hex>`, zero tokens, `spend=0`,
-`failed_requests=1`, `total_response_time_ms=0` — requests that failed before user/model
-resolution. In one case 188 750 such rows existed (95 024 of them in a single burst on 2026-11-03)
-while nginx logged only 222 requests that day: it is the proxy's internal aggregation writing
-them, **not** internet noise — their `api_key` values match none of `"LiteLLM_VerificationToken"`.
-They surface in the export as rows with `entity_id:""` and `model:null`.
-
-Fix: back up, then `DELETE … WHERE coalesce(user_id,'')='' AND coalesce(model,'')=''` in both
-`"LiteLLM_DailyUserSpend"` and `"LiteLLM_DailyTeamSpend"` (team table carries the same 188 751
-rows under `team_id=''`). Keep rows that have a real model and only a missing user — those are
-the owner's own curl/probe traffic (~122 rows, ~$0.5) and are real usage. Snapshot via
-`CREATE TABLE _bak AS SELECT …` → `\copy … to program 'gzip -c > …'` → `install -m 600` →
-`DROP TABLE _bak` (55 MB table, 12 MB gz). `VACUUM ANALYZE` leaves both tables at their old
-120 MB size — the space is reusable, not returned; say so.
-
-After the purge the trickle is 1–4 rows/day; if it returns as a burst, look at the proxy's daily
-aggregation instead of deleting again.
-
 ## 6. «Мусор в выгрузке» = unattributed rows, not leftover logs
 
 The UI export («user usage daily with models», `[{date, entity_id, entity_alias, model, spend,
@@ -137,14 +115,48 @@ Cleanup: delete `user_id='' AND model=''` from **both** `"LiteLLM_DailyUserSpend
 `"LiteLLM_DailyTeamSpend"` (they mirror each other, ~same row count) and keep the handful of
 user-less rows that carry a real `model` — those are legitimate direct API/probe calls with real
 spend. Offer «and the user-less ones too» as a separate choice; the owner's export is
-user-oriented, but the money is his.
+user-oriented, but the money is his. Both tables hold ~120 MB of bloat after such a delete, so
+follow with `VACUUM FULL` — see §9.
+
+Snapshot for rollback: `CREATE TABLE _bak AS SELECT * FROM … WHERE …` → `\copy (select * from
+_bak) to program 'gzip -c > /tmp/x.csv.gz'` → `install -m 600 -o root -g root /tmp/x.csv.gz
+/home/ai_service/ai-stack/backups/<name>_<ts>.csv.gz` → `DROP TABLE _bak` (55 MB table ⇒ 12 MB gz).
 
 State of the data after such a pass: 189 456 → ~706 rows in DailyUserSpend, export drops from
 555 to ~516 rows, 39 `model: null` entries disappear. Trickle of 1–4 new rows a day continues and
 is harmless; a new burst means something upstream is hammering with unknown keys — investigate
 `LiteLLM_VerificationToken` lookups rather than deleting again.
 
-## 7. Two habits that keep the transcript readable
+## 7. Dashboard cards are counters, not logs
+
+The Usage header («Total Requests N / ok / failed») reads **`"LiteLLM_DailyGatewayRequests"`**
+(one row per date × category × route), not SpendLogs — so right after a «clean the fails» pass it
+still shows the old failure count and the owner asks why. `"LiteLLM_DailyRequestErrors"` carries
+the few coded ones (`status_code=401` for unknown-key hits).
+
+- Those failures are requests rejected **before** a model resolved (401 unknown key, 400 body,
+  404 route, `/images/generations`, `/rerank`) — they never create a SpendLogs row, so
+  `status='failure'` = 0 together with card ≠ 0 is not a contradiction. Say which table each
+  number comes from instead of re-running the old purge.
+- Failures arrive in bursts on the days routes are benched/audited; correlate a spike day with
+  the vhost log (`zgrep '<dd/Mon/yyyy>' /var/log/nginx/llm.access.log.*.gz`) before blaming
+  scanners.
+- To zero the card: `UPDATE "LiteLLM_DailyGatewayRequests" SET failed_requests=0 WHERE
+  failed_requests>0` (keeps `successful_requests` of mixed rows) + `DELETE FROM
+  "LiteLLM_DailyRequestErrors"`. Deleting whole rows throws away real ok-counts; and state
+  plainly that this erases the real error rate, not garbage.
+
+## 8. `VACUUM FULL`: promise space only after measuring the payload
+
+`VACUUM FULL` on SpendLogs reclaimed nothing (148 → 146 MB) because those bytes are live data:
+`sum(pg_column_size(metadata))` = 99 MB of 146 MB, while `messages`, `response` and
+`proxy_server_request` are ~160 kB combined. Measure per-column `pg_column_size` **before**
+offering a vacuum; when the payload is real, the honest options are retention (~3 MB/day at ~590
+requests/day) or nothing. Bloat tables that really were bloat behave as promised: 120 MB → 600 kB
+each, DB 430 → 170 MB. `VACUUM FULL` takes seconds with `pg_stat_activity` showing no active
+query — check that first, then run it; no maintenance window needed.
+
+## 9. Two habits that keep the transcript readable
 
 - Never run a 4-table `UNION ALL … GROUP BY` overview without `LIMIT`: it printed 264 rows and
   buried the finding. Ask for `count(*) filter (...)` first, then a capped sample.
