@@ -71,7 +71,7 @@ select coalesce(valves::text,'<null>') from function where id='<pipe_id>';
 
 **Правка valves — только через API, не SQL-ом:** `GET /api/v1/functions/id/<id>/valves` читает, `POST /api/v1/functions/id/<id>/valves/update` пишет (POST на `/valves` без `/update` отвечает `405`). API перезагружает значения в памяти процесса; правка строки в БД без рестарта контейнера не подхватится. Тело шлём целиком тем же объектом, что вернул GET (иначе теряются остальные поля).
 
-**Аутентификация для этих ручек:** bearer = API-ключ админа из таблицы `api_key` (`select key from api_key where user_id='<admin uuid>';`) — он там в открытом виде. Не считай произвольно подписанный JWT рабочей сессией: проверяй конкретный токен на `/api/v1/auths/` и сравнивай возвращённый user id, не выводя токен. Для пользовательского UI подходит принятый сервером JWT тестового аккаунта; это не проверка входа по паролю.
+**Аутентификация для этих ручек:** bearer = API-ключ админа из таблицы `api_key` (`select key from api_key where user_id='<admin uuid>';`) — он там в открытом виде. Произвольно подписанный JWT рабочей сессией не считается: `is_valid_token` сверяет claim `session_stamp` с текущим у пользователя, поэтому `create_token({'id': uid})` даёт `401 Invalid token`. Рабочий токен для UI/проб минтить в контейнере от `session_stamp` (`get_auth(uid)`), а не угадывать; проверять конкретный токен на `/api/v1/auths/` и сравнивать возвращённый user id, не выводя токен. Для пользовательского UI подходит принятый сервером JWT тестового аккаунта; это не проверка входа по паролю.
 
 ### Ключ OWUI — прод-секрет, а не тестовый креденшл
 
@@ -210,3 +210,21 @@ docker exec -e PYTHONPATH=/app/backend -w /app/backend open-webui python /tmp/pr
 Инжект в `index.html` — единственный способ добавить своё поведение на фронте без правки минифицированных чанков: `COPY <script>.js /app/build/static/` + `sed` в тег перед `</head>` с `grep -q` в том же `RUN`. Статика из `/app/build/static` при старте копируется в `/app/backend/open_webui/static`, поэтому проверять надо оба пути и `curl /static/<file>.js` снаружи.
 
 **Скрипт на загрузке страницы ≠ «после входа»:** вход в SPA не перезагружает документ, токен появляется в `localStorage` уже внутри приложения. Всё, что зависит от токена (свой fetch, выбор терминала, персональные запросы), должно опрашивать его появление; иначе у нового пользователя код не сработает ни разу, а в тесте с заранее засеянным токеном — сработает, и разница будет невидима. Симптом на скриншоте владельца: в `localStorage` нет флага скрипта вовсе.
+
+## Инструменты «по умолчанию на всех моделях» (workspace Tools, не builtin)
+
+Владелец спрашивает это регулярно («реально ли?»), поэтому ниже — вся цепочка и способ доказать её на живой среде.
+
+**Механика.** Дефолт задаётся настройкой админки `models.default_metadata` (в настройках — Default Model Metadata, ключ `toolIds`), НЕ переменной окружения. Бэкенд `utils/models.py` (~394) при сборке списка моделей мержит этот объект в `info.meta` каждой модели, у которой своего `toolIds` нет (per-model override старше). Новые модели и базовые модели из LiteLLM подхватывают автоматически — править каждую не нужно. Доступ пользователям даёт не настройка, а грант в `access_grant` (`resource_type='tool'`, `principal_id='*'` = все), иначе фронт отфильтрует инструмент своим `$tools`.
+
+**Фронт.** `Chat`-чанк: `selectedToolIds = union(selected models' info.meta.toolIds filter($tools includes id))` — при выборе модели инструмент сам появляется в запросе, руками не включается.
+
+**Как проверить по-настоящему (без скриншотов).**
+1. `GET /api/v1/tools/list` токеном обычного юзера → `web_browser` в списке, `write_access:false`.
+2. `GET /api/models` тем же токеном → `info.meta.toolIds` у всех видимых моделей; считать пустые, а не смотреть одну.
+3. UI: залогиниться чужим (тестовым) юзером через `localStorage.token`, повесить хук `window.fetch` на `/chat/completions`, отправить сообщение и прочитать `tool_ids` из перехваченного тела — это единственное доказательство «включено по умолчанию», потому что бэкенд сам tool_ids не подставляет.
+   - JWT для подмены минтить в контейнере: `create_token({'id': uid, 'session_stamp': (await get_auth(uid)).session_stamp})` — без `session_stamp` `is_valid_token` даёт 401 «Invalid token». Cookie `token` + `localStorage.token`.
+   - Текст в ProseMirror из lightpanda: `fill_input` и `Input.insertText` не доходят, помогает `el.innerText = …` + `dispatchEvent(new InputEvent('input', {bubbles:true}))` — после этого Send становится активной.
+4. Исполнение инструмента в чате видно в БД: `chat.chat->history->messages` → `function_call` (+`function_call_output` со реальным текстом страницы). В `/api/chat/completions` без `chat_id` сервер tool-вызов НЕ исполняет — стрим просто обрывается на `finish_reason: tool_calls`; это не поломка, это стендалон-режим.
+
+**Модели с собственным `toolIds`** (в этом стеке — `test`, `image-generator`) дефолт перекрывают: если такой модели нужен `web_browser`, он добавляется ей в `meta.toolIds` явно. Список перекрывающих моделей читать из БД, а не по памяти: `select id, meta::jsonb->'toolIds' from model where meta::jsonb ? 'toolIds'`.
