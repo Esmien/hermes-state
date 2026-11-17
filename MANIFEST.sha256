@@ -57,7 +57,7 @@ f27913f7775915d8065b2dea782197907ff90cf37f07b865135c7f61aee98e83  ./hermes/skill
 4442c7bbd1e68b4b55292d0b455505ad0733883dc8acebd3188a6b6bdf089b2b  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/slash-commands.md
 8f3c9bc95c750ca99de2c8b9978c6e1ba5be0eb6e1f6a3129ab555d1bab33f32  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/telegram-topics-and-groups.md
 f5a8269a7312173f0caa6736156a3f76d32e56b4e15511e84dc2e902f48e8157  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/themes.md
-ddf2040f7c57010410908cd28d40ec69ec47e4d3312d5b103cf0975e851e59a0  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/troubleshooting.md
+7262042893c322ff7bd14f12835ab15adfcbecf49b513cf6604e29d412a4c22d  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/troubleshooting.md
 20e21aabb757a9d3c7d895db8f05a3782fe8b28feef3768ac5550c8860b4a3db  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/tui-widgets.md
 f668c57d1900e249cb4b54e5d624e9aacb399ecf1452f9b258a1bf857ffa8a42  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/webhooks.md
 4af2c0907983376f1b21d2164de17f1229faeb0609c61762cfc026b806bc5501  ./hermes/skills/autonomous-ai-agents/hermes-agent/references/windows-quirks.md
@@ -81,7 +81,7 @@ ecc402cd42a6a9ccd745000760037f593830f378f7f5418036d534fc8d8bd43b  ./hermes/skill
 90b8a71678109031496db5cd4045b79e3e8cebda94a515cb9ba558b14efb52d5  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
 2a582b3672f5b0386d65be35292afadaacffe3573583d8fcc726964c35cc8f37  ./hermes/skills/devops/ai-stack/references/chatgpt-subscription.md
-45d3b61b57f8c5e4e1d02b2c426584b8c19b45723437abf07064de943549c69b  ./hermes/skills/devops/ai-stack/references/cloudflare-proxy.md
+15e1102111897b7e5ac703c13805d649f79b89c1428b18d353388514b9afe5f0  ./hermes/skills/devops/ai-stack/references/cloudflare-proxy.md
 0590d911f2d2cc3846ef7abd555ddf152d41028a91720b9436fbe7a87348afd8  ./hermes/skills/devops/ai-stack/references/coupling-hermes.md
 1631d5de3e30a05c47427029babb09c1d567473dc80250fb05fefd8798fc127d  ./hermes/skills/devops/ai-stack/references/cross-cutting-rules.md
 dc14bc0c6422327a0aecf02277be289b131fdb80a0fa650071ff49b3d95eb90c  ./hermes/skills/devops/ai-stack/references/disk-and-memory.md
@@ -167,8 +167,9 @@ bd492812ca6826885dd392d6d7105700d80f72c15ac6d5e13147e70f9be0734d  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 a11cea480af1ecd7fb72bb1210d03d7ee0b71ee57e82a0b4e587da117ce8e444  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-1fcb99fbd47e324933702c011981da603b000db144e1be6d93da5bbdeb4f9cca  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+794bf2d80dcbfca097cc143998b970b1c69920e373382082ea36467dcc60b39b  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skills/devops/vpn-entry-stack/references/admin-api.md
+36d12f0320888a5986219159c28e25d03e6fa2324dcb786421733801c38ed5f3  ./hermes/skills/devops/vpn-entry-stack/references/blocking-risk.md
 8d6e84f7bc3ee1e4ffae4d75bfea06dc398e87cfcf83725a0aed1c33e74518d8  ./hermes/skills/devops/vpn-entry-stack/references/blue-green.md
 20859ca9bf377ff32d54c18825d8938183bb7938e3a394bb2670005f8c12aacb  ./hermes/skills/devops/vpn-entry-stack/references/borrowed-exit.md
 66782c01771fe6055c8277ce12ec71d0a0401e8fdf8e45f08dc827d1700eb9e0  ./hermes/skills/devops/vpn-entry-stack/references/certificates.md

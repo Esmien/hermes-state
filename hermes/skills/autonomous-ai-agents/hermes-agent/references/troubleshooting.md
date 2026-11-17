@@ -99,6 +99,17 @@ Text-first fallback that actually works on phone photos of a monitor: install `t
 - Say that the reading came from OCR, and that vision itself is still broken, so the user can judge how much to trust the detail.
 - OCR recovers text only: it cannot tell you which element the user means by «вот этот артефакт». When the reading is ambiguous, name what you see and ask which element is meant instead of guessing.
 
+### Telegram media «could not be downloaded (TimedOut)»
+Text arrives, photos and attachments fail with «The user attempted to send a photo but it could not be downloaded (TimedOut)». The adapter caches media via `getFile` + download; the log line is `[Telegram] Failed to cache photo: Timed out` with `httpcore.ReadTimeout` inside `msg.photo[-1].get_file()` — the request left, no response headers came back within the read timeout. Short calls (`getUpdates`, `sendMessage`) ride the same host and keep working, so «Telegram is up, curl answers» proves nothing about the media path.
+
+1. **Read the surrounding log first:** `grep -E "Timed out|sticky path|transport recovered|Dual-stack" ~/.hermes/logs/gateway.log | tail -20`. Episodic `ConnectError('')` / «sticky path … failed → recovered» in the same minutes = the path to `api.telegram.org` is flapping; a config change would be guessing.
+2. **Measure the path, don't assume:** TLS timing to `api.telegram.org`, a 20-iteration connect loop (want 20/20), and `ping -c 20 -s 1200` to the API IP for loss.
+3. **Rule out an MTU blackhole with TCP, not ICMP:** a 2 MB POST (`curl --data-binary @big.bin https://api.telegram.org/bot0:0/getMe`) that completes in ~1 s means large packets flow; `ping -M do` failing above 1400 is NOT evidence of anything — ICMP is filtered on many paths.
+4. **Time an authenticated call:** read the token from `~/.hermes/.env` inside the script and print timings only — never the token, never `cat` that file. A bogus `file_id` that returns `400 invalid file_id` in ~0.1 s means the method itself answers.
+5. **Never test with `getUpdates`:** the running gateway owns the offset and your call steals updates from the live session.
+
+One failure inside a flapping window needs no code change — ask for a resend and verify on the spot. For recurring stalls, raise the media read budget (`HERMES_TELEGRAM_HTTP_READ_TIMEOUT`, default 20 s) and retry `get_file` 2–3 times so a single dropped socket does not lose the file; propose that as a concrete change, not a lecture about the network.
+
 ### "Reset permissions" / auto-approving everything
 See `references/security-privacy.md` — wipe the "Always allow" stores, don't touch yolo mode.
 

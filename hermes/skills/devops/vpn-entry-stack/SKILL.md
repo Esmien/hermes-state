@@ -10,7 +10,7 @@ license: MIT
 
 ## When to Use
 
-Load this before touching anything that serves VPN clients: adding or removing a route, moving the public host or certificate, regenerating subscriptions, or answering a "VPN keeps dropping / no internet" report. Not for the AI services on the same host — that is `ai-stack`.
+Load this before touching anything that serves VPN clients: adding or removing a route, moving the public host or certificate, regenerating subscriptions, or answering a "VPN keeps dropping / no internet" report. Also load it for «нас РКН забанят?» / «что делать, если заблокируют» — `references/blocking-risk.md`. Not for the AI services on the same host — that is `ai-stack`.
 
 The owner's home ISP (MTS, Krasnodar) drops **port 443** and kills **fake-TLS/MTProto** to this server's IP. What works is a *real* TLS handshake on a non-standard port. That single fact drives the whole design — verify it before debugging anything else.
 
@@ -110,6 +110,7 @@ Full text → [references/subscription-shapes.md](references/subscription-shapes
 - **Borrowed exit** — a third-party subscription used as an exit → `references/borrowed-exit.md`
 - **Routing watchdog** — a timer rewrites routing every minute; edits must survive it → `references/routing-watchdog.md`
 - **«Нас не съели ли VPN-клиенты?»** — three measurements instead of guesses → `references/client-share-measurements.md`
+- **Блокировка РКН** — четыре реальные ручки (IP/SNI/диапазон/whitelist), триаж, переезд на новый IP, цена домена и общий IP с AI-стеком → `references/blocking-risk.md`
 - **Pitfalls** — the full list of expensive mistakes → `references/pitfalls.md`
 
 ## Certificates
