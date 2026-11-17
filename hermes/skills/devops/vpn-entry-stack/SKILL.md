@@ -22,7 +22,7 @@ He runs this stack himself and treats reports as noise unless they answer the qu
 - Do not replay the checks you ran, list the files you touched, or volunteer «две оговорки» nobody asked for. A long report earns «да как же ты достал», an invented label earns «не приши лишнее» — the fix is fewer words, not more explanation of the words.
 - When he corrects a name or a label, use his string verbatim and change nothing else in that pass: «просто — Саша. И всё» means exactly that, not «Главный ключ (мой + Саша)».
 - A destructive request stated plainly («снеси нахуй X») is a work order: do it, then say in one line what died with it and how it would come back. Do not re-ask and do not lecture about the risk first.
-- He asks «почему» to get a cause, not a plan: explain the mechanism in two or three lines and stop. Offer the fix as one short question, or just make it when it is obviously what he asked for.
+- He asks «почему» to get a cause, not a plan: explain the mechanism in two or three lines and stop. Make the obvious fix instead of offering it. **No closing tail** — a volunteered «делать?» / «скинуть?» in every message is what he calls «хвост рассуждений»; ask only when a real branch needs his decision, then exactly one question (style rules live in `telegram-gate-and-bots`).
 - When he argues with a model of his own («это целый сервис, его не положат»), first name the half he is right about, then dismantle the wrong half with the mechanism and a number. If the number contradicts something you said earlier, correct yourself in one line and replace it with the measured fact — he checks arguments against data, and a retracted figure costs less than a defended one.
 
 ## Layout

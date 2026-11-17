@@ -2203,6 +2203,9 @@ display:
   pet:
     enabled: true
     scale: 0.4
+  platforms:
+    telegram:
+      show_reasoning: false
 telemetry:
   shared_metrics:
     enabled: false

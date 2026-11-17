@@ -38,6 +38,11 @@ When a message arrives from an id other than the owner's, the ssh-only gate misb
 - Ретраи не лечат `502`: если file-сервис лёг, все три попытки упираются в ту же ошибку — так и сказать, а не выдавать патч за исправление.
 - **Файловые пробы уходят в чат владельца, даже когда запрос упал по таймауту.** `sendDocument` в его DM клиент считает неудачным, а Telegram тело всё равно обрабатывает и доставляет: в чате всплывают `p.bin`/`up.bin`/`p5000.bin`, и владелец спрашивает «нас взломали?». Правило: предупредить до пробы, что в чат прилетят тестовые файлы (5–200 КБ, нули или `urandom`), держать их мелкими и названными `probe-*`, а после — одной строкой объяснить, что это были пробы, и подтвердить, что содержимое инертно (`not any(data)` в Python). Проверка «что это за файлы» — `python3 -c` по путям из `~/.hermes/cache/documents/`, а не пересказ по памяти.
 
+## «Рассуждения» в Telegram и хвост в конце сообщения
+
+- Владелец не хочет видеть блок `💭 Рассуждения` в чате. Выключается настройкой **`display.platforms.telegram.show_reasoning`** — ключ именно `display.platforms.<platform>.<key>`, а не `platforms.telegram.*` (`hermes config get` назовёт правильный путь). Глобальный выключатель — `display.show_reasoning`; из чата то же делает `/reasoning hide [--global]`. Гейтвей перечитывает конфиг на ходе, поэтому следующий ответ уже без блока.
+- **Не заканчивать сообщение предложением или вопросом, которого он не задавал** («делать?», «скинуть памятку?»). Он называет это хвостом и просил выключить. Вопрос уместен, только когда есть настоящая развилка и от его ответа зависит следующий шаг, — и тогда один, а не меню.
+
 ## Chat topology on this host
 
 One gateway process serves both the owner's DM and the `Esmien VPS` supergroup, so the agent answers in both with the same tools and the same rights. Sessions are keyed per chat: `agent:main:telegram:dm:214062001` for the DM, `agent:main:telegram:group:<chat_id>:<thread_id>` for every forum topic — separate history, context and `/new` per topic, shared memory, skills, files and root access. The DM stays the home channel for the agent's own cron deliveries, so archiving notifier bots never touches it. When the owner asks «сессии раздельные?», answer with that split (context isolated, agent identical) — not a flat yes.
