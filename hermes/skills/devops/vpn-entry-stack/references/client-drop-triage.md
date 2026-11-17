@@ -101,6 +101,11 @@ all following curls answer through the *previous* config — which is how a heal
 route gets reported as exiting through EE. Symptom to recognise: the measured exit IP belongs
 to a different route than the path you just configured.
 
+Same trap in shell form: `pkill -f "<pattern>"` / `pgrep -f "<pattern>"` also match the shell
+running the command, because the pattern sits in its own command line. The call kills itself with
+SIGTERM and everything after it in the chain never runs. Build the pattern so it does not appear
+literally (`p=$(printf 'hy2-test%s' '-client.yaml')`) or kill a PID you already know.
+
 ## 4. Count the client's reconnects
 
 ```bash
@@ -180,6 +185,26 @@ seconds to minutes. If they do not, the next split is by exit: dial `/general` (
   край, а не туннель: Cloudflare режет пачку подресурсов с адресов датацентров, см. skill `ai-stack`,
   `references/cloudflare-proxy.md`. Симптом у пользователя: HTML приходит (`200`), DevTools показывает
   ~85 запросов при 4.7 kB transferred, красных строк нет, приложение пустое.
+
+## 4e. UDP-узел (hysteria2) — свой порядок, логов nginx нет
+
+У этого входа нет ни `access.log`, ни WebSocket-upgrade, поэтому привычные шаги 2 и 4 не работают.
+Единственные следы — `journalctl -u hysteria-server` (`client connected {"id": "<name>"}`) и счётчики
+xray `inbound>>>udp-in>>>traffic`.
+
+- **Первым делом — пришёл ли хоть один пакет**, и только потом конфиг:
+  `tcpdump -n -i <iface> 'udp and dst port 443'`. Фильтр по порту ловит и исходящие потоки к чужим
+  CDN (любой QUIC к `:443`), а `-c` обрывает дамп на них, не дойдя до клиента — смотри источник в
+  строке, а не только счётчик пакетов.
+- **Локальный тест ничего не доказывает про внешнюю достижимость.** Клиент на том же хосте,
+  целящийся в свой публичный IP, уходит через loopback: протокол и авторизация проверяются, но
+  проходит ли UDP через провайдера — нет.
+- **«Узел умер сразу после смены авторизации»** (единый пароль → `userpass`, ротация паролей) — это
+  почти всегда устаревшая подписка, а не сервер. Симптом: приложение показывает мёртвый узел,
+  сервер жив, в логах либо пусто, либо `client connected` с прежним `id`. Лечится переимпортом
+  подписки у клиента; правка сервера тут только добавляет шума.
+- Если пакеты приходят, id верный, а трафика нет — проверь хоп в xray: `ss -tn state established
+  '( sport = :10809 )'` (релей) и рост `inbound>>>udp-in>>>traffic` после запроса.
 
 ## 5. Verdict
 

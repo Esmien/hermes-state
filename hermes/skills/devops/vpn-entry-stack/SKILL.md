@@ -138,6 +138,8 @@ Per-token roll-out, never global: `python3 /root/vpn-router/hy2_users.py --apply
 
 **Never print the auth block when checking it.** `grep -A12 ^auth:` dumps every password into the transcript — read the state file in Python and print usernames only. If one leaks, delete the state file and re-run: rotation costs one restart and one subscription refresh.
 
+**After any auth change, the symptom is a dead node, not a broken server.** Single password → per-user `userpass`, or a rotation, leaves every already-imported node holding a stale credential; the app reports timeout, the server is fine. Say «обнови подписку» before touching anything, and prove it with `journalctl -u hysteria-server` (`client connected {id: ...}`) plus xray's `inbound>>>udp-in>>>traffic` counters — a growing counter means the tunnel carries traffic. Triage order for this entry, including the tcpdump recipe and what a local loopback test does *not* prove: `references/client-drop-triage.md` §4e.
+
 `build_meta` appends the extra to `list.txt` and to clash `proxies`, so every file outside `extra_nodes.json`/`list.txt`/`clash.yaml` stays byte-identical — verify with a `diff -rq` against a backup before claiming nothing broke. Link shape: `hysteria2://<user>:<pw>@<host>:443/?sni=<host>&obfs=salamander&obfs-password=<obfs>#name`. v2rayNG cannot read hy2 and just will not import that node; Hiddify, NekoBox, sing-box and Clash Meta can. `singbox.json` is not extended by extras — a sing-box user gets the TCP node only. The clash group is `type: select` on purpose: do not turn it into url-test without saying so, a silent path change is what makes «connected, but Gemini says no» invisible.
 
 ## Failover — off, deliberately
