@@ -9,8 +9,8 @@ d75dd1ee52402a6083768919d8784b6fe79f9c7f647105d2f0e1be40acc30d92  ./hermes/docs/
 6624bae8326a2b7845ffeb7b1f88c78d6724d3e49c6317697054717bd4472c19  ./hermes/docs/proposals/sandbox-per-user.md
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
 a31955db4f59ab409e7ce3ecf6fbf8f27a3812e6119cea8cfd27ee62aef4ae53  ./hermes/docs/server-study-and-portfolio-outline.md
-1a1562c0b9672871040890aa498730ba064a1e9f2238bf2d52a2443d533d7a84  ./hermes/docs/skill-format-specification.md
-6dd119cdab7f06b6552376ce1f696e9c9c4c9b8a4edca97affa69b44b6e18fc4  ./hermes/docs/skill-system-implementation-plan.md
+66738faedfd829e01006049e7ef59ccb1177db797c332a0e81ed4ff3204aad93  ./hermes/docs/skill-format-specification.md
+4543160b06e49df4f231987980e180e306d36c5983b9de52f6cc9fa2de9e77ad  ./hermes/docs/skill-system-implementation-plan.md
 101f73fdd745da0b7924ad7ea248920883cb65f2a0d7694d5fa950c28d5c9014  ./hermes/docs/skill-system-stage-1-audit.md
 82312f44f0cd8e9ad57e2d607428f121c207cbfa36f5a36bb1be78559438eb5b  ./hermes/docs/vpn-runbook.md
 510781153fd8c7eabbfc319e2dd76aafa2158b9cf67cb45cfac2c28f2c630fb9  ./hermes/memories/MEMORY.md
@@ -303,6 +303,8 @@ ad44f69882dd8fd3aa9f6ec31dcc4e67bcccfdb084cbe55ff53115aa9e96ac08  ./hermes/tasks
 58a82ec1225fa1b7feaceaa47755d9516137ab70487b2bdff78abf2f6ed76c73  ./hermes/tasks/file-memory-step3/test_soft_limit.py
 3090fefaafa3273b4933331d7cf5c102c29ee00b13233758a1768a8e502c555f  ./hermes/tasks/file-memory-step3/test_stream_formats.py
 1f64984fe5e3e24817cf7d3fb35d61763e193bb8d79cc44439066eb00799ded2  ./hermes/tasks/file-memory-step3/test_stream_guard.py
+b27dcb611a1689058ae06ef753a537ebba97fe70496c0b5d22b14d2e80979358  ./hermes/tasks/skills-stage3/skill_catalog.py
+a22ee7e4187f72f387920df281c842125b8375373ec033b797489bf9517c0559  ./hermes/tasks/skills-stage3/test_skill_catalog.py
 9a8a4f9270a64de4ca700bb4fe574eeb100a1283facb50dc828d318d6551729c  ./host/ai-stack/backup-databases.sh
 d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md
 846efb23aba0d86ee3b1086edc19cb47f2cb07426875cfeaaca852f62c8a811f  ./host/ai-stack/runbook.md
