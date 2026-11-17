@@ -96,6 +96,26 @@ class PersonalTests(unittest.TestCase):
                 personal_catalog.scan_user({'id': UID_A}, self.memory)
         self.assertTrue(changed)
 
+    def test_read_holds_shared_lock_against_cooperating_writer(self):
+        import fcntl
+        real_scan = personal_catalog.scan
+        agents = self.root / 'users' / 'user-a' / '.agents'
+        def verify_lock(fd):
+            other = os.open(agents, os.O_RDONLY | os.O_DIRECTORY)
+            try:
+                with self.assertRaises(BlockingIOError):
+                    fcntl.flock(other, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            finally:
+                os.close(other)
+            return real_scan(fd)
+        with patch.object(personal_catalog, 'scan', side_effect=verify_lock):
+            self.assertEqual(len(personal_catalog.scan_user({'id': UID_A}, self.memory)), 1)
+        other = os.open(agents, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            fcntl.flock(other, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        finally:
+            os.close(other)
+
     def test_missing_skills_is_empty(self):
         self.state[UID_A]['slug'] = 'empty-user'
         self.state[UID_A]['dir'] = '/test-host/users/empty-user'

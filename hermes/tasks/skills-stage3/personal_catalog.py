@@ -1,4 +1,5 @@
 """Staged adapter to the existing file-memory identity binding; not deployed."""
+import fcntl
 import os
 
 from skill_catalog import CatalogError, _directory, _fingerprint, _trusted, scan
@@ -15,6 +16,9 @@ def scan_user(user, memory):
     except Exception as exc:
         raise CatalogError('Личная память недоступна или пользователь не подтверждён') from exc
     try:
+        # Future writes must take LOCK_EX on this very directory descriptor.
+        # flock is advisory: non-cooperating writers are not blocked.
+        fcntl.flock(agents, fcntl.LOCK_SH)
         before = os.fstat(agents)
         _trusted(before, '.agents', True)
         try:

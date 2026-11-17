@@ -9,8 +9,8 @@ d75dd1ee52402a6083768919d8784b6fe79f9c7f647105d2f0e1be40acc30d92  ./hermes/docs/
 6624bae8326a2b7845ffeb7b1f88c78d6724d3e49c6317697054717bd4472c19  ./hermes/docs/proposals/sandbox-per-user.md
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
 a31955db4f59ab409e7ce3ecf6fbf8f27a3812e6119cea8cfd27ee62aef4ae53  ./hermes/docs/server-study-and-portfolio-outline.md
-e94c68ad23319e55a8026468c097fe0f4e5afdf862dd4f73d9b6c7ac24b81ea4  ./hermes/docs/skill-format-specification.md
-f8b28843b3e8ceba850def876f5e7a94cd61dd9817aaf97a7ab49a4aa2d545ff  ./hermes/docs/skill-system-implementation-plan.md
+ccbedce0e9bc422dc004c53007ec5d55ee309cdcea2393edd3d6f85db0936476  ./hermes/docs/skill-format-specification.md
+8cdc33bf8477892ec536ce5825aa543e931bd621d19984fdbc35177a826829f9  ./hermes/docs/skill-system-implementation-plan.md
 101f73fdd745da0b7924ad7ea248920883cb65f2a0d7694d5fa950c28d5c9014  ./hermes/docs/skill-system-stage-1-audit.md
 82312f44f0cd8e9ad57e2d607428f121c207cbfa36f5a36bb1be78559438eb5b  ./hermes/docs/vpn-runbook.md
 510781153fd8c7eabbfc319e2dd76aafa2158b9cf67cb45cfac2c28f2c630fb9  ./hermes/memories/MEMORY.md
@@ -303,9 +303,10 @@ ad44f69882dd8fd3aa9f6ec31dcc4e67bcccfdb084cbe55ff53115aa9e96ac08  ./hermes/tasks
 58a82ec1225fa1b7feaceaa47755d9516137ab70487b2bdff78abf2f6ed76c73  ./hermes/tasks/file-memory-step3/test_soft_limit.py
 3090fefaafa3273b4933331d7cf5c102c29ee00b13233758a1768a8e502c555f  ./hermes/tasks/file-memory-step3/test_stream_formats.py
 1f64984fe5e3e24817cf7d3fb35d61763e193bb8d79cc44439066eb00799ded2  ./hermes/tasks/file-memory-step3/test_stream_guard.py
-142f37abdb475b1ec3f7e10fac21e50cb57e545ab0bf0553437399f90eafcc0f  ./hermes/tasks/skills-stage3/personal_catalog.py
+8be50da40ff35468741072f71847530d0b2829a3cc863e6a64e9ddc29879423c  ./hermes/tasks/skills-stage3/create_test_fixture.py
+d6666dbbc7ea3d1f42cdf956675b663a32b08179eaec86a5f292ecd96ffb37f6  ./hermes/tasks/skills-stage3/personal_catalog.py
 f640362c66ef0a9cac57fc04b8207bdb7a8c5bb722bed0a74427228d0ec37a6e  ./hermes/tasks/skills-stage3/skill_catalog.py
-4627550766ad8936740d1c59eaf63b59a87a1246bfc58383c82f92257ef452ad  ./hermes/tasks/skills-stage3/test_personal_catalog.py
+a05bf7dcc06d913ca3134c868395bb9530a29c454c71cebeb553512daa1f219e  ./hermes/tasks/skills-stage3/test_personal_catalog.py
 a22ee7e4187f72f387920df281c842125b8375373ec033b797489bf9517c0559  ./hermes/tasks/skills-stage3/test_skill_catalog.py
 9a8a4f9270a64de4ca700bb4fe574eeb100a1283facb50dc828d318d6551729c  ./host/ai-stack/backup-databases.sh
 d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md
