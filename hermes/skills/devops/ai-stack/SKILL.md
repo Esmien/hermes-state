@@ -82,6 +82,11 @@ vpn.esmien.ru:8443 (VPN entry)                    | vpn.esmien.qd.je:8443
 - Vhost edits: `write_file` refuses `/etc/nginx` (stage in scratch, `cp`); after `systemctl reload nginx` the first `curl` may still hit the old worker — repeat it, don't roll back.
 - New name: grey A record answering from two resolvers (orange ⇒ HTTP-01 `530`), cert via port-80 ACME stub + `certbot certonly --webroot`, then a vhost copied from an existing one, verify `200 cert=0`. Procedures and rollback → [references/cloudflare-proxy.md](references/cloudflare-proxy.md).
 
+## Личные скиллы Open WebUI
+
+- При работе с проектом скиллов для файловой памяти сохраняй персональную изоляцию: каждый пользователь имеет собственный `.agents/skills/`, общей библиотеки нет. Чтение, создание и изменение выполняет контролируемый инструмент по доверенному пользовательскому контексту; модель предлагает действия и содержимое, но не работает с файлами напрямую. Это согласованная целевая архитектура, не доказательство внедрения: перед работой сверяй план `/root/.hermes/docs/skill-system-implementation-plan.md` и спецификацию `/root/.hermes/docs/skill-format-specification.md` с живым состоянием.
+- При изменении фильтра файловой памяти сначала проверь сборку: `/root/.hermes/tasks/file-memory-step3/build_plugins.py` встраивает код инструмента в фильтр для Open WebUI. Сравнивай собранный результат с функцией в базе, а не импортирующий исходник; сборщик сам по себе не выполняет деплой. Не подменяй активный фильтр одним исходным модулем.
+
 ## Cross-cutting rules and the expensive traps
 
 Full text → [references/cross-cutting-rules.md](references/cross-cutting-rules.md)
