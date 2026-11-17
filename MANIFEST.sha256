@@ -170,14 +170,14 @@ bd492812ca6826885dd392d6d7105700d80f72c15ac6d5e13147e70f9be0734d  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 4bd9e023bc1d473018f30c44ca92afc4e6525e29da19087a60397347cd4df28e  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-883632be5a9fc103263fbc3e361676dc713ad59ae16062c7439e59c0339ddbae  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+9ac727099e1a03a01d2f070bc9520b629402824485b40f059cf6b1f64562e47b  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skills/devops/vpn-entry-stack/references/admin-api.md
-6732a55a6e5b90b59ff3def4272cb060b2046e0acec0df10a08de79d3ffce39f  ./hermes/skills/devops/vpn-entry-stack/references/blocking-risk.md
+c179b4a872f41c1cefcdadaac4cea93e6a5c078acd357a31957ce4beff90fad5  ./hermes/skills/devops/vpn-entry-stack/references/blocking-risk.md
 8d6e84f7bc3ee1e4ffae4d75bfea06dc398e87cfcf83725a0aed1c33e74518d8  ./hermes/skills/devops/vpn-entry-stack/references/blue-green.md
 20859ca9bf377ff32d54c18825d8938183bb7938e3a394bb2670005f8c12aacb  ./hermes/skills/devops/vpn-entry-stack/references/borrowed-exit.md
 66782c01771fe6055c8277ce12ec71d0a0401e8fdf8e45f08dc827d1700eb9e0  ./hermes/skills/devops/vpn-entry-stack/references/certificates.md
 402d56b78b0bbbf0a2966cf8de11732e88ef075ab35373acdab7117cb7541696  ./hermes/skills/devops/vpn-entry-stack/references/changing-public-host.md
-b34c841cd939f5e9f74f8432270ba57f489216627b3bf64242b9b08370bae8aa  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
+7095fd85e86f86594ca7d700c8d004b46f45b98bcf261319d612de30f782c1cb  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
 012b6285aead9f08565e65ae14b3dc5dc0e950e833460534ff73f2b8e8a4ca52  ./hermes/skills/devops/vpn-entry-stack/references/client-share-measurements.md
 a2b65c124a21a5df8a743621ef32883ecad026a2d99dbeeb1dbdfb8a01f7343f  ./hermes/skills/devops/vpn-entry-stack/references/control-plane.md
 a3f06494b3e1e1204e708de39de0800fabf9d4534af45a60f20396a567141475  ./hermes/skills/devops/vpn-entry-stack/references/desktop-mihomo-tun.md

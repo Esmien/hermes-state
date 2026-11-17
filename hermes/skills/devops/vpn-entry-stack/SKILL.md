@@ -77,7 +77,9 @@ Full text → [references/changing-public-host.md](references/changing-public-ho
 Server-side scenarios (Google→FR/FI, RU→Moscow or an owned RU box; YouTube deliberately rides the
 Estonian exit) plus a subscription that exposes **one** node, and the jittered watchdog that falls
 a dead scenario group back to Estonia: `references/scenario-routes.md`. Do not offer a user a
-second node to tap — that is provider traffic and ban risk, not a feature.
+second node to tap **from a provider subscription** — that is provider traffic and ban risk, not a
+feature. A second node that is our own transport (the UDP/hysteria2 fallback) is the exception and
+ships to everyone: see the Hysteria2 section below for how it is rolled out.
 
 Two rules apply to every scenario edit: a balancer tag must also be listed in
 `observatory.subjectSelector` (otherwise `leastPing` has no data for it and the matching requests
@@ -111,7 +113,7 @@ Full text → [references/subscription-shapes.md](references/subscription-shapes
 - **Borrowed exit** — a third-party subscription used as an exit → `references/borrowed-exit.md`
 - **Routing watchdog** — a timer rewrites routing every minute; edits must survive it → `references/routing-watchdog.md`
 - **«Нас не съели ли VPN-клиенты?»** — three measurements instead of guesses → `references/client-share-measurements.md`
-- **Блокировка РКН** — четыре реальные ручки (IP/SNI/диапазон/whitelist), триаж, переезд на новый IP, цена домена и общий IP с AI-стеком, проверка ASN/префиксов и спам-листов, почему CF перед VPN не защита и что даёт REALITY → `references/blocking-risk.md`
+- **Блокировка РКН** — пять ручек (IP/SNI/диапазон/whitelist/**заморозка по пакетам**), замеры по 435 точкам и какие сети заморожены, триаж, переезд на новый IP, цена домена и общий IP с AI-стеком, проверка ASN/префиксов и спам-листов, почему CF перед VPN не защита, что даёт REALITY и почему сейчас не Hetzner/OVH → `references/blocking-risk.md`
 - **Pitfalls** — the full list of expensive mistakes → `references/pitfalls.md`
 
 ## Certificates
@@ -144,7 +146,7 @@ Per-token roll-out, never global: `python3 /root/vpn-router/hy2_users.py --apply
 
 ## Домен как точка отказа — доставку отделить от туннеля
 
-Владелец считает так: адрес — расходник (DNS TTL 300, пять минут), а имя хуже, потому что вшито в профили; SNI-блок `esmien.ru` убьёт и вход, и `/sub/`, и потребует ручной раздачи. Сейчас оба висят на `vpn.esmien.ru` — это одна точка отказа. Цель: подписки на **отдельном регистрируемом домене** (не поддомене: правила матчатся по корню, `sub.esmien.ru` умрёт с апексом), тогда туннельное имя становится расходником, а клиенты подтягивают новый узел сами (`profile-update-interval 12` уже стоит). Выбор зоны: `.com`/`.org` (Cloudflare Registrar — продление = регистрация, ~$10–11); `.us` отпадает (nexus: нужно присутствие в США), `.рф`/`.su` — та же юрисдикция, от которой страхуемся, промо-зоны (`.online`, `.shop`, `.tech`) дают вилку «−98% на год → втрое на продлении». Reality тут — бонус (убирает имя из SNI), не основа: от TCP-заморозки и блока подсети не спасает.
+Владелец считает так: адрес — расходник (DNS TTL 300, пять минут), а имя хуже, потому что вшито в профили; SNI-блок `esmien.ru` убьёт и вход, и `/sub/`, и потребует ручной раздачи. Сейчас оба висят на `vpn.esmien.ru` — это одна точка отказа. Цель: подписки на **отдельном регистрируемом домене** (не поддомене: правила матчатся по корню, `sub.esmien.ru` умрёт с апексом), тогда туннельное имя становится расходником, а клиенты подтягивают новый узел сами (`profile-update-interval 12` уже стоит). Выбор зоны: `.com`/`.org` (Cloudflare Registrar — продление = регистрация, ~$10–11); `.us` отпадает (nexus: нужно присутствие в США), `.рф`/`.su` — та же юрисдикция, от которой страхуемся, промо-зоны (`.online`, `.shop`, `.tech`) дают вилку «−98% на год → втрое на продлении». **Юрисдикция регистратора важнее цены:** российский регистратор (nic.ru, Beget, Рег.ру) работает по требованиям РКН напрямую — страховка, выданная той же стороной, от которой страхуемся; Cloudflare и Porkbun клиентов из РФ принимают, оплата иностранной картой проходит, а часть западных (Namecheap, GoDaddy) после 2022 РФ не обслуживает — проверять у конкретного до оплаты. Брать сразу на 2–3 года: скачок продления в неудачный момент — более вероятная авария, чем бан. Reality тут — бонус (убирает имя из SNI), не основа: от TCP-заморозки и блока подсети не спасает.
 
 ## Failover — off, deliberately
 
