@@ -108,7 +108,24 @@ Text arrives, photos and attachments fail with «The user attempted to send a ph
 4. **Time an authenticated call:** read the token from `~/.hermes/.env` inside the script and print timings only — never the token, never `cat` that file. A bogus `file_id` that returns `400 invalid file_id` in ~0.1 s means the method itself answers.
 5. **Never test with `getUpdates`:** the running gateway owns the offset and your call steals updates from the live session.
 
-One failure inside a flapping window needs no code change — ask for a resend and verify on the spot. For recurring stalls, raise the media read budget (`HERMES_TELEGRAM_HTTP_READ_TIMEOUT`, default 20 s) and retry `get_file` 2–3 times so a single dropped socket does not lose the file; propose that as a concrete change, not a lecture about the network.
+One failure inside a flapping window needs no code change — ask for a resend and verify on the spot. For recurring stalls, raise the media read budget and retry `get_file` 2–3 times so a single dropped socket does not lose the file; propose that as a concrete change, not a lecture about the network.
+
+Implementing it: **patch the live adapter, not a workspace copy.** The traceback's `File "…/adapter.py", line N` frame names the file actually imported (on this host `/root/.hermes/hermes-agent/plugins/platforms/telegram/adapter.py`); `~/.hermes/installs/*/environments/*/workspace/` holds stale duplicates of the same module and editing those changes nothing. Add one helper and route every download site through it:
+
+```python
+async def _download_telegram_file(self, source, *, label="file", attempts=3):
+    for attempt in range(1, attempts + 1):
+        try:
+            file_obj = await source.get_file()
+            return file_obj, bytes(await file_obj.download_as_bytearray())
+        except Exception as exc:
+            if attempt >= attempts:
+                raise
+            logger.warning("[Telegram] %s fetch attempt %d/%d failed: %s", label, attempt, attempts, _redact_telegram_error_text(exc))
+            await asyncio.sleep(1.5 * attempt)
+```
+
+Five call sites use it: photo, image-document, video-document, generic document, voice/video. Raise the read deadline default in `_build_ptb_requests` (`HERMES_TELEGRAM_HTTP_READ_TIMEOUT`, 20 s → 60 s) in the same pass — a slower failure matters far less than a lost attachment, and normal API calls still answer in ~0.1 s. Compile with the runtime interpreter (`~/.hermes/tools/python-3.14*/bin/python3 -m py_compile <file>`) before reporting it done, and hand the owner `hermes gateway restart`: plugin code is only read at gateway start.
 
 ### "Reset permissions" / auto-approving everything
 See `references/security-privacy.md` — wipe the "Always allow" stores, don't touch yolo mode.

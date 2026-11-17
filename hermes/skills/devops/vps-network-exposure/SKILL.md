@@ -244,6 +244,25 @@ credential, но запрос пришёл вообще без ключа — э
 Полная процедура (3x-ui API, диагностика Docker-подключений, MTProto, тесты с двух внешних
 IP, перенос в recovery-репо) — [references/vpn-and-https-ingress.md](references/vpn-and-https-ingress.md).
 
+## Публикация внутреннего сервиса за токеном (когда у него нет своих ключей)
+
+Просят «открыть <сервис> наружу и дать апи-ключ», а у сервиса авторизации нет вообще (SearXNG: `/search?format=json` открыт всем). Ключ делается на nginx — сервис не трогаем:
+
+```nginx
+# /etc/nginx/conf.d/02-<svc>-api-key.conf, 0640 root:root — этот файл в git не попадает
+map $http_x_api_key $svc_key_hdr { default 0; "<KEY>" 1; }
+map $arg_key        $svc_key_arg { default 0; "" 0; "<KEY>" 1; }
+map "$svc_key_hdr$svc_key_arg" $svc_key_ok { default 0; "10" 1; "01" 1; "11" 1; }
+limit_req_zone $client_ip zone=<svc>_api:10m rate=5r/s;
+```
+
+Во вхосте — `if ($svc_key_ok = 0) { return 401; }` (закрывает и UI, и API), свой `limit_req`, отдельный access-лог.
+
+- **Длина ключа ограничена `map_hash_bucket_size` (64 по умолчанию):** 32 hex-символа влезают, 48 уже дают `could not build map_hash` и `nginx -t` падает — либо ключ короче, либо `map_hash_bucket_size 128` в `http`.
+- Живой ключ хранить вне git (`/root/.secrets/<name>.txt`, 0600), в recovery-репо класть только `.example` с плейсхолдером — вхост без этого include не запустится, и это надо написать в шапке шаблона.
+- Гейт нужен не только формально: публичный адрес без него = чужие запросы с нашего IP жгут квоты апстримов и ломают сервис для самого владельца.
+- Проверка: без ключа и с неверным — `401`; `-H "X-API-Key: <key>"` и `?key=<key>` — `200`; имя и серт: `curl -o /dev/null -w '%{http_code} cert=%{ssl_verify_result}' https://<name>/`.
+
 ## Related
 
 - Which services exist, their ports and domains: `ai-stack` skill.
