@@ -9,7 +9,7 @@ d75dd1ee52402a6083768919d8784b6fe79f9c7f647105d2f0e1be40acc30d92  ./hermes/docs/
 6624bae8326a2b7845ffeb7b1f88c78d6724d3e49c6317697054717bd4472c19  ./hermes/docs/proposals/sandbox-per-user.md
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
 a31955db4f59ab409e7ce3ecf6fbf8f27a3812e6119cea8cfd27ee62aef4ae53  ./hermes/docs/server-study-and-portfolio-outline.md
-dd83aa0739334af6f036a5f8cabc65a1cde88db12dce272fbefac8dce8a152bc  ./hermes/docs/vpn-runbook.md
+82312f44f0cd8e9ad57e2d607428f121c207cbfa36f5a36bb1be78559438eb5b  ./hermes/docs/vpn-runbook.md
 510781153fd8c7eabbfc319e2dd76aafa2158b9cf67cb45cfac2c28f2c630fb9  ./hermes/memories/MEMORY.md
 60387c4cc3407ef9658a6923ef9a22993342bf11f5e474edac0eb58667575401  ./hermes/memories/USER.md
 2a9ea9f557ebcea079797dc1936912eb255d454874ddea7eace192e2334d21f4  ./hermes/plugins/codex-persona/__init__.py
@@ -167,7 +167,7 @@ bd492812ca6826885dd392d6d7105700d80f72c15ac6d5e13147e70f9be0734d  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 4bd9e023bc1d473018f30c44ca92afc4e6525e29da19087a60397347cd4df28e  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-c1637ac81323d5fa267dc03840ccebb1f18d50ef0caf232f014fb1367a384774  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+f7f9c840c7ad32b033d510b4140d7ac7d0c12698695b2305a1ef5a4a1bdb4d37  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skills/devops/vpn-entry-stack/references/admin-api.md
 6732a55a6e5b90b59ff3def4272cb060b2046e0acec0df10a08de79d3ffce39f  ./hermes/skills/devops/vpn-entry-stack/references/blocking-risk.md
 8d6e84f7bc3ee1e4ffae4d75bfea06dc398e87cfcf83725a0aed1c33e74518d8  ./hermes/skills/devops/vpn-entry-stack/references/blue-green.md
