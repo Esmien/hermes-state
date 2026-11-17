@@ -65,6 +65,16 @@ import json,sys; d=json.load(sys.stdin); print(len(d['results']), d.get('unrespo
 - Confirm the consumer path once from inside OWUI (`docker exec open-webui python3` + `requests.get("http://searxng:8080/search", params={"q":..., "format":"json"})`).
 - A burst probe (8 threads) creates its own 429s and false "dead engine" verdicts; probe sequentially with ~1 s gaps.
 
+## Публичный вход `search.esmien.ru` (с 17.11.2026)
+
+SearXNG больше не только внутренний: `https://search.esmien.ru` → nginx → `127.0.0.1:8081`, запись в зоне CF **серая**, сертификат — wildcard `*.esmien.ru` (ACME не нужен).
+
+- У SearXNG **нет своих API-ключей** (JSON-эндпоинт `/search?format=json` открыт всем) — ключ сделан на nginx: `/etc/nginx/conf.d/02-search-api-key.conf` (0640) держит `map` на `X-API-Key` **или** `?key=`, вхосте `if ($search_key_ok = 0) { return 401; }`. В git этот файл не попадает — в репозитории только `.example` с плейсхолдером; живой ключ — `/root/.secrets/searxng-public-key.txt` (0600). Гейт закрывает и UI, и JSON.
+- Зачем гейт: запросы идут с нашего датацентрового IP, публичная инсталляция без ключа = чужие запросы жгут квоты движков (brave/google cse 429) и ломают поиск всей семье.
+- Длина ключа ограничена `map_hash_bucket_size` (64 по умолчанию): 32 hex-символа влезает, 48 — уже `could not build map_hash`. Ставить 48-символьный только вместе с `map_hash_bucket_size 128` в `http`.
+- Лимит `zone=search_api` 5 r/s + `conn_per_ip_cf 30`; лог отдельный: `/var/log/nginx/search.access.log` (формат `cfkomb`).
+- Проверка: без ключа/с неверным — `401`; `curl -H "X-API-Key: <key>" https://search.esmien.ru/search?q=test\&format=json` → JSON с `results`.
+
 ## Tor (not used by searxng any more, still running for other purposes)
 
 All working engines go out **direct**; `outgoing.proxies` is intentionally absent. Tor stays installed and must stay healthy because the owner keeps it for other work.

@@ -76,7 +76,7 @@ ffc3d455a8097e27856ca875bd66f8e7e0fc9a89bf99805972c7a9fd9f61f11e  ./hermes/skill
 1ea50fe11e32a4dc16e2f99de0ba87a29006f05b6449611445fb600fae664887  ./hermes/skills/career/job-application-review/references/resume-review.md
 6dab18cda7745a3f411c0883ccf3a9113cf6340211bd97ba8f3654ffb05d3aa4  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-36ff47a912ed69e265cdfaccbd785b3dcc03bd56fb39f4c7d52b831f4fd70b48  ./hermes/skills/devops/ai-stack/SKILL.md
+0058954e60da2cef89d6ef4a12fe7cee106fe1b297ddd2099fcad1474ffefba3  ./hermes/skills/devops/ai-stack/SKILL.md
 ecc402cd42a6a9ccd745000760037f593830f378f7f5418036d534fc8d8bd43b  ./hermes/skills/devops/ai-stack/references/answering-the-owner.md
 90b8a71678109031496db5cd4045b79e3e8cebda94a515cb9ba558b14efb52d5  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
@@ -107,7 +107,7 @@ ac748903dd3fab6673926b5bfab429273e7e8b370d0347fae27ab62f2a27cf2a  ./hermes/skill
 8a69bfb96ab3f785ae029f371d7492a5862c46c4f4ec66e53d9546c385fc1977  ./hermes/skills/devops/ai-stack/references/pitfalls.md
 7e6a9417891e69766d9816809ec46c8eea9273a50306f296c975f7ddc4b652c1  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
 89a3e6bd586214bde920b0a189b98d251149cb5ac92627e7f9b7bf4ac166db48  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
-255f0977a8801e5f17f9a6a7c3b0c207a5a5cd7f72a1b6032a6ed790b31e3f33  ./hermes/skills/devops/ai-stack/references/searxng.md
+a341ffb5b9df1da10f40419886c2b6361b580674242201b57653c392af95d1b8  ./hermes/skills/devops/ai-stack/references/searxng.md
 23e8a449e6f4133e8f331862152a5ada1e7d65c4a0f67cf25d39d467db12521e  ./hermes/skills/devops/ai-stack/references/signup-approval.md
 593822ca298eabae09dedabc28e4d3239a127a9301a803ad1f32eda49ea5661b  ./hermes/skills/devops/ai-stack/references/ui-latency.md
 147b623dbc447e784f7fadde9b2ce380fbf199664b200a57fac13dbce57b0004  ./hermes/skills/devops/ai-stack/references/updates.md

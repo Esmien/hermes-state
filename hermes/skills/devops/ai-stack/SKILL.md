@@ -73,6 +73,7 @@ app.esmien.ru   -> 301 на ai.esmien.ru (не второй вход)          |
 llm.esmien.ru   -> 127.0.0.1:4000  (litellm)      | llm.esmien.qd.je
 bot.esmien.ru   -> 127.0.0.1:8000  (music bot)    | bot.esmien.qd.je
 mon.esmien.ru   -> 127.0.0.1:8090  (beszel hub)      | mon.esmien.qd.je
+search.esmien.ru -> 127.0.0.1:8081 (SearXNG, только с API-ключом) | —
 vpn.esmien.ru:8443 (VPN entry)                    | vpn.esmien.qd.je:8443
 ```
 
