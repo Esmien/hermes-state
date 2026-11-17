@@ -10,6 +10,7 @@ d75dd1ee52402a6083768919d8784b6fe79f9c7f647105d2f0e1be40acc30d92  ./hermes/docs/
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
 a31955db4f59ab409e7ce3ecf6fbf8f27a3812e6119cea8cfd27ee62aef4ae53  ./hermes/docs/server-study-and-portfolio-outline.md
 8f9acb85fd4f4410cf97e02f50aff5fc69cd71f91e86cd669e85694e0533159b  ./hermes/docs/skill-system-implementation-plan.md
+a4a8d37853ce05a135933cc171f2fbb0c968be73c2aa1be93157fd145fea5689  ./hermes/docs/skill-system-stage-1-audit.md
 82312f44f0cd8e9ad57e2d607428f121c207cbfa36f5a36bb1be78559438eb5b  ./hermes/docs/vpn-runbook.md
 510781153fd8c7eabbfc319e2dd76aafa2158b9cf67cb45cfac2c28f2c630fb9  ./hermes/memories/MEMORY.md
 60387c4cc3407ef9658a6923ef9a22993342bf11f5e474edac0eb58667575401  ./hermes/memories/USER.md
@@ -107,7 +108,7 @@ ac748903dd3fab6673926b5bfab429273e7e8b370d0347fae27ab62f2a27cf2a  ./hermes/skill
 5c33219e84e4b7f5d04b079bf8e1d45595cabf3bfa59c234c28801061dc84864  ./hermes/skills/devops/ai-stack/references/owui-task-models.md
 8a69bfb96ab3f785ae029f371d7492a5862c46c4f4ec66e53d9546c385fc1977  ./hermes/skills/devops/ai-stack/references/pitfalls.md
 7e6a9417891e69766d9816809ec46c8eea9273a50306f296c975f7ddc4b652c1  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
-89a3e6bd586214bde920b0a189b98d251149cb5ac92627e7f9b7bf4ac166db48  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
+f751d5bef7b580c4ced136f28baa8aedc86886c2043b57dc0e6314683eae4da9  ./hermes/skills/devops/ai-stack/references/sandbox-terminal.md
 8012b40460f7d54c854d419579f701482554a54ea23d41e513f21abb758db543  ./hermes/skills/devops/ai-stack/references/searxng.md
 23e8a449e6f4133e8f331862152a5ada1e7d65c4a0f67cf25d39d467db12521e  ./hermes/skills/devops/ai-stack/references/signup-approval.md
 593822ca298eabae09dedabc28e4d3239a127a9301a803ad1f32eda49ea5661b  ./hermes/skills/devops/ai-stack/references/ui-latency.md
@@ -258,7 +259,7 @@ b48f44d04e51a3b4223d62fa39ae10be999caccbb046e940bc2cca52cf367bfc  ./hermes/skill
 09cca2d18af5c50fb67f783aec072525e83487c6ba4e41427bf8aa754014e1f5  ./hermes/skills/research/ru-local-price-research/references/city-traffic-ru.md
 940c24a4ad377299b89f8469ca49427e569ba8ca39e9df62b9d481d25a23a6fe  ./hermes/skills/research/ru-local-price-research/references/gold-scrap-ru.md
 cfa6128ed67a0224981a2c384ce188bd037e898a95c432465873306b6edb7349  ./hermes/skills/research/ru-local-price-research/references/jewelry-retail-ru.md
-bfdaa698dca9b5eda6ce0daa879c3a75e737a01c2fec919e91bb1bf1286a2720  ./hermes/skills/skill-library-maintenance/SKILL.md
+3aa97566927f613728581a89a39cf4e2fc2198d9d3899b432c28ae08df66f690  ./hermes/skills/skill-library-maintenance/SKILL.md
 2ea0d50444337de4809a62dc618d6d9c35bd2ba30f17ec6a138a20f53f9974a7  ./hermes/skills/social-media/DESCRIPTION.md
 051cfd884a995f8ee3f10f75adf53b620976d0936e9e7c6eaae368e8a9b31849  ./hermes/skills/vps-cleanup-audit/SKILL.md
 352093bd5d4183591deb13fe0b115f3d561fe7610d63253797f5f603723c2403  ./hermes/skills/vps-cleanup-audit/references/recon-commands.md
