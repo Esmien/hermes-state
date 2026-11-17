@@ -37,18 +37,39 @@ def _fail(path: str, message: str) -> None:
     raise CatalogError(f"{path}: {message}")
 
 
+def _fingerprint(info: os.stat_result) -> tuple[int, ...]:
+    return (info.st_dev, info.st_ino, info.st_mode, info.st_uid, info.st_gid,
+            info.st_nlink, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+
+
+def _trusted(info: os.stat_result, path: str, directory: bool) -> None:
+    kind_ok = stat.S_ISDIR(info.st_mode) if directory else stat.S_ISREG(info.st_mode)
+    if not kind_ok or info.st_uid != 0 or info.st_mode & 0o022 or (not directory and info.st_nlink != 1):
+        _fail(path, "небезопасный владелец, права или тип")
+
+
 def _directory(parent: int, name: str) -> int:
-    return os.open(name, DIR_FLAGS, dir_fd=parent)
+    fd = os.open(name, DIR_FLAGS, dir_fd=parent)
+    try:
+        _trusted(os.fstat(fd), name, True)
+        return fd
+    except BaseException:
+        os.close(fd)
+        raise
 
 
 def _file(parent: int, name: str, path: str) -> str:
     fd = os.open(name, FILE_FLAGS, dir_fd=parent)
     try:
-        info = os.fstat(fd)
-        if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
-            _fail(path, "ожидается обычный файл без жёстких ссылок")
+        before = os.fstat(fd)
+        _trusted(before, path, False)
         with os.fdopen(fd, "r", encoding="utf-8", closefd=False, newline="") as stream:
-            return stream.read()
+            text = stream.read()
+        after = os.fstat(fd)
+        linked = os.stat(name, dir_fd=parent, follow_symlinks=False)
+        if _fingerprint(before) != _fingerprint(after) or _fingerprint(after) != _fingerprint(linked):
+            _fail(path, "файл изменён при чтении")
+        return text
     finally:
         os.close(fd)
 
@@ -188,8 +209,9 @@ def _links(skillfd: int, rel: str, text: str) -> None:
             fd = os.open(all_parts[-1], FILE_FLAGS, dir_fd=current)
             try:
                 st = os.fstat(fd)
-                if not stat.S_ISREG(st.st_mode) or st.st_nlink != 1:
-                    _fail(rel, "цель ссылки не является безопасным файлом")
+                _trusted(st, rel, False)
+                if _fingerprint(st) != _fingerprint(os.stat(all_parts[-1], dir_fd=current, follow_symlinks=False)):
+                    _fail(rel, "цель ссылки изменена при проверке")
             finally:
                 os.close(fd)
         finally:
@@ -200,6 +222,8 @@ def scan(skills_fd: int) -> list[Entry]:
     """Return catalogue only if every entry validates. Missing root is caller policy."""
     result: list[Entry] = []
     try:
+        initial = os.fstat(skills_fd)
+        _trusted(initial, "skills/", True)
         names = sorted(os.listdir(skills_fd))
     except OSError as exc:
         raise CatalogError(f"skills/: ошибка чтения каталога ({type(exc).__name__})") from exc
@@ -209,6 +233,7 @@ def scan(skills_fd: int) -> list[Entry]:
         try:
             skillfd = _directory(skills_fd, name)
             try:
+                skill_start = os.fstat(skillfd)
                 files = os.listdir(skillfd)
                 if any(item not in ("SKILL.md", "references") for item in files):
                     _fail(name, "неизвестный элемент каталога")
@@ -218,6 +243,7 @@ def scan(skills_fd: int) -> list[Entry]:
                 if "references" in files:
                     ref_fd = _directory(skillfd, "references")
                     try:
+                        ref_start = os.fstat(ref_fd)
                         for ref in sorted(os.listdir(ref_fd)):
                             rel = f"references/{ref}"
                             if not re.fullmatch(r"[a-z0-9][a-z0-9-]*\.md", ref):
@@ -225,11 +251,19 @@ def scan(skills_fd: int) -> list[Entry]:
                             text = _file(ref_fd, ref, f"{name}/{rel}")
                             _reference(text, f"{name}/{rel}")
                             _links(skillfd, rel, text)
+                        if (_fingerprint(ref_start) != _fingerprint(os.fstat(ref_fd)) or
+                                _fingerprint(ref_start) != _fingerprint(os.stat('references', dir_fd=skillfd, follow_symlinks=False))):
+                            _fail(name, "каталог references изменён при проверке")
                     finally:
                         os.close(ref_fd)
+                if (_fingerprint(skill_start) != _fingerprint(os.fstat(skillfd)) or
+                        _fingerprint(skill_start) != _fingerprint(os.stat(name, dir_fd=skills_fd, follow_symlinks=False))):
+                    _fail(name, "каталог скилла изменён при проверке")
                 result.append(entry)
             finally:
                 os.close(skillfd)
         except (OSError, UnicodeError, ValueError) as exc:
             raise CatalogError(f"{name}: ошибка доступа или кодировки ({type(exc).__name__})") from exc
+    if _fingerprint(initial) != _fingerprint(os.fstat(skills_fd)):
+        _fail('skills/', 'каталог изменён при проверке')
     return result
