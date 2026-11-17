@@ -10,7 +10,7 @@ d75dd1ee52402a6083768919d8784b6fe79f9c7f647105d2f0e1be40acc30d92  ./hermes/docs/
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
 a31955db4f59ab409e7ce3ecf6fbf8f27a3812e6119cea8cfd27ee62aef4ae53  ./hermes/docs/server-study-and-portfolio-outline.md
 7f6cf36d8ba0e3563226734701f888705d69fcd23a27789580cf690d8b41c0fc  ./hermes/docs/skill-format-specification.md
-cdbbb2fcddda960e0ce693894521ed711ceecaf8bf7ee72a49dfb757f42fea33  ./hermes/docs/skill-system-implementation-plan.md
+f26bcb0d03d3c42fd04cda265464faaa72bfa3335409dd42fdf3c6cc170f7b8b  ./hermes/docs/skill-system-implementation-plan.md
 101f73fdd745da0b7924ad7ea248920883cb65f2a0d7694d5fa950c28d5c9014  ./hermes/docs/skill-system-stage-1-audit.md
 82312f44f0cd8e9ad57e2d607428f121c207cbfa36f5a36bb1be78559438eb5b  ./hermes/docs/vpn-runbook.md
 510781153fd8c7eabbfc319e2dd76aafa2158b9cf67cb45cfac2c28f2c630fb9  ./hermes/memories/MEMORY.md
@@ -79,7 +79,7 @@ ffc3d455a8097e27856ca875bd66f8e7e0fc9a89bf99805972c7a9fd9f61f11e  ./hermes/skill
 1ea50fe11e32a4dc16e2f99de0ba87a29006f05b6449611445fb600fae664887  ./hermes/skills/career/job-application-review/references/resume-review.md
 6dab18cda7745a3f411c0883ccf3a9113cf6340211bd97ba8f3654ffb05d3aa4  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-877dc3933fb1e5afd0d709e5946752e298bc23289f6de26e9a8dd04cc023e61a  ./hermes/skills/devops/ai-stack/SKILL.md
+fbf81b90384062c07edd3f5d2026e7d2d343fe4227995f1b333d5f4208ddf065  ./hermes/skills/devops/ai-stack/SKILL.md
 ced365d1375826998970c3b662216b5c1641584a89cfff0fb5d09a58cd334c0c  ./hermes/skills/devops/ai-stack/references/answering-the-owner.md
 90b8a71678109031496db5cd4045b79e3e8cebda94a515cb9ba558b14efb52d5  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
@@ -105,7 +105,7 @@ ac748903dd3fab6673926b5bfab429273e7e8b370d0347fae27ab62f2a27cf2a  ./hermes/skill
 3e3de999564ce2910af13cc065e73fd827b7dd7b0996f9b3d7e19d46424c5e9b  ./hermes/skills/devops/ai-stack/references/owui-chat-forensics.md
 62cbdf3ac170ad9694a277b30e44709c9a9370c4658542306597ea815d231ba3  ./hermes/skills/devops/ai-stack/references/owui-chat-search.md
 77b1f88f7278bb71d2530b305b2dd4f3186b82f7a51bcadc8345d425a44adc31  ./hermes/skills/devops/ai-stack/references/owui-data-purge.md
-9d28f7925a1efd0220ec201a1f066b87aad1d2411f4447de9f8474291151c518  ./hermes/skills/devops/ai-stack/references/owui-internals.md
+5c181f5025720b81bc0d2d71ea5fd1cbad85aec437cdb529e8902f00929796c7  ./hermes/skills/devops/ai-stack/references/owui-internals.md
 5c33219e84e4b7f5d04b079bf8e1d45595cabf3bfa59c234c28801061dc84864  ./hermes/skills/devops/ai-stack/references/owui-task-models.md
 8a69bfb96ab3f785ae029f371d7492a5862c46c4f4ec66e53d9546c385fc1977  ./hermes/skills/devops/ai-stack/references/pitfalls.md
 7e6a9417891e69766d9816809ec46c8eea9273a50306f296c975f7ddc4b652c1  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
@@ -308,6 +308,7 @@ ad44f69882dd8fd3aa9f6ec31dcc4e67bcccfdb084cbe55ff53115aa9e96ac08  ./hermes/tasks
 f983181f9e8a218008abc5de6a7b66ceaa07851b7a9e48b17d42f9424cfd522c  ./hermes/tasks/skills-stage3/install_test_pilot.py
 d6666dbbc7ea3d1f42cdf956675b663a32b08179eaec86a5f292ecd96ffb37f6  ./hermes/tasks/skills-stage3/personal_catalog.py
 1428bbb22fe2df9f1ec9bb60caaa835050d6168522ca0585c3ebae2010acb507  ./hermes/tasks/skills-stage3/pilot_tool.py
+3f0b068f6dd73a413c313071cb795dfaf2d30a61bd5ed44cea5a1a1644ee88bd  ./hermes/tasks/skills-stage3/probe_browser.py
 e39c63acb50e9e1fcb4ea71d63be49d4d113e8c69f7db3425426333af0e3a2a7  ./hermes/tasks/skills-stage3/probe_chat_e2e.py
 368538052daa9448966cf551e88c3fac500d41bbb7b2c94c88fc29225037456a  ./hermes/tasks/skills-stage3/probe_owui_resolver.py
 f640362c66ef0a9cac57fc04b8207bdb7a8c5bb722bed0a74427228d0ec37a6e  ./hermes/tasks/skills-stage3/skill_catalog.py
