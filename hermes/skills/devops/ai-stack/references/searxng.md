@@ -73,6 +73,7 @@ SearXNG больше не только внутренний: `https://search.esm
 - Зачем гейт: запросы идут с нашего датацентрового IP, публичная инсталляция без ключа = чужие запросы жгут квоты движков (brave/google cse 429) и ломают поиск всей семье.
 - Длина ключа ограничена `map_hash_bucket_size` (64 по умолчанию): 32 hex-символа влезает, 48 — уже `could not build map_hash`. Ставить 48-символьный только вместе с `map_hash_bucket_size 128` в `http`.
 - Лимит `zone=search_api` 5 r/s + `conn_per_ip_cf 30`; лог отдельный: `/var/log/nginx/search.access.log` (формат `cfkomb`).
+- **Восстановление из репо: сначала ключ, потом reload.** В `vps-infra/assets/host/etc/nginx/conf.d/` лежит сам вхосте `search.esmien.ru.conf`, а ключ — только `.example`: вхосте ссылается на `$search_key_ok`, и без созданного `02-search-api-key.conf` `nginx -t` падает с `unknown variable`. Порядок — инстанцировать пример с новым `openssl rand -hex 16`, затем тест и reload.
 - Проверка: без ключа/с неверным — `401`; `curl -H "X-API-Key: <key>" https://search.esmien.ru/search?q=test\&format=json` → JSON с `results`.
 
 ## Tor (not used by searxng any more, still running for other purposes)

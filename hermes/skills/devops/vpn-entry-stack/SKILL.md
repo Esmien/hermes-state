@@ -23,6 +23,7 @@ He runs this stack himself and treats reports as noise unless they answer the qu
 - When he corrects a name or a label, use his string verbatim and change nothing else in that pass: «просто — Саша. И всё» means exactly that, not «Главный ключ (мой + Саша)».
 - A destructive request stated plainly («снеси нахуй X») is a work order: do it, then say in one line what died with it and how it would come back. Do not re-ask and do not lecture about the risk first.
 - He asks «почему» to get a cause, not a plan: explain the mechanism in two or three lines and stop. Offer the fix as one short question, or just make it when it is obviously what he asked for.
+- When he argues with a model of his own («это целый сервис, его не положат»), first name the half he is right about, then dismantle the wrong half with the mechanism and a number. If the number contradicts something you said earlier, correct yourself in one line and replace it with the measured fact — he checks arguments against data, and a retracted figure costs less than a defended one.
 
 ## Layout
 
@@ -110,7 +111,7 @@ Full text → [references/subscription-shapes.md](references/subscription-shapes
 - **Borrowed exit** — a third-party subscription used as an exit → `references/borrowed-exit.md`
 - **Routing watchdog** — a timer rewrites routing every minute; edits must survive it → `references/routing-watchdog.md`
 - **«Нас не съели ли VPN-клиенты?»** — three measurements instead of guesses → `references/client-share-measurements.md`
-- **Блокировка РКН** — четыре реальные ручки (IP/SNI/диапазон/whitelist), триаж, переезд на новый IP, цена домена и общий IP с AI-стеком → `references/blocking-risk.md`
+- **Блокировка РКН** — четыре реальные ручки (IP/SNI/диапазон/whitelist), триаж, переезд на новый IP, цена домена и общий IP с AI-стеком, проверка ASN/префиксов и спам-листов, почему CF перед VPN не защита и что даёт REALITY → `references/blocking-risk.md`
 - **Pitfalls** — the full list of expensive mistakes → `references/pitfalls.md`
 
 ## Certificates
