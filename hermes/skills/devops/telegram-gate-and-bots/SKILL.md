@@ -26,6 +26,17 @@ When a message arrives from an id other than the owner's, the ssh-only gate misb
 - **A registered hook is not a working gate.** Hook payloads carry Hermes' internal task id, never the platform session key, so an id-matching hook can silently allow everyone. Prove any restriction against a payload captured from the live gateway and re-verify after Hermes upgrades (the `hermes-agent` skill has the per-user access control reference).
 - The gate is **fail-closed**: if it errors, everything including ssh/scp/sftp is refused. Fix the hook, never the policy.
 
+## «Фото/голосовое не скачивается (TimedOut)»
+
+Симптом: в `gateway.log` — `[Telegram] Failed to cache photo|document|voice: Timed out`, при этом обычный текст ходит нормально. Ошибка прилетает из `msg.photo[-1].get_file()` / `download_as_bytearray()`.
+
+- **Диагностика снизу вверх, а не с кода.** (1) `getMe` и `sendMessage` через `TELEGRAM_BOT_TOKEN` (печатать только `ok`) — ответ за 0.1 s ⇒ транспорт и токен живы. (2) `curl -F chat_id=… -F document=@file https://api.telegram.org/bot$TOK/sendDocument` и запрос к `/file/bot$TOK/<path>`: `502 Bad Gateway` или зависание при живых коротких JSON-вызовах = **сломан file-сервис Telegram**, а не наш код, не MTU и не сеть. (3) повторить загрузку против 3–5 адресов API через `--resolve` — одинаковый результат на всех снимает версию «наш IP / один edge».
+- **Тест ручки без чужих данных:** `getFile` с заведомо неверным `file_id` отвечает `400` за 0.1 s — ручка жива, ломается передача тела/файла.
+- **Бьёт первым `read_timeout` (env `HERMES_TELEGRAM_HTTP_READ_TIMEOUT`, было 20 s), а не `media_write_timeout`.** Пинг и TLS при этом чистые — «сеть в порядке» ничего не опровергает.
+- **На этом хосте adapter пропатчен:** `_download_telegram_file()` в `/root/.hermes/hermes-agent/plugins/platforms/telegram/adapter.py` — 3 попытки с паузой 1.5/3 s, подключён к фото, image-документу, видео-документу, обычному документу и voice/video; `read_timeout` поднят 20 → 60 s. Живой именно этот файл — копия в `installs/*/workspace/` не исполняется (проверять по `File "…adapter.py", line N` в трейсбеке).
+- **Рестарт только снаружи:** из процесса гейтвея `hermes gateway restart`/`systemctl --user restart hermes-gateway` и даже `systemd-run --on-active=…` блокируются guard-ом — отдать владельцу одну строку `hermes gateway restart` в ssh-сессии. Признак невступившего патча: `systemctl --user show hermes-gateway -p MainPID -p ActiveEnterTimestamp` показывает старый процесс, а в логе таймауты без строк `fetch attempt 1/3`.
+- Ретраи не лечат `502`: если file-сервис лёг, все три попытки упираются в ту же ошибку — так и сказать, а не выдавать патч за исправление.
+
 ## Chat topology on this host
 
 One gateway process serves both the owner's DM and the `Esmien VPS` supergroup, so the agent answers in both with the same tools and the same rights. Sessions are keyed per chat: `agent:main:telegram:dm:214062001` for the DM, `agent:main:telegram:group:<chat_id>:<thread_id>` for every forum topic — separate history, context and `/new` per topic, shared memory, skills, files and root access. The DM stays the home channel for the agent's own cron deliveries, so archiving notifier bots never touches it. When the owner asks «сессии раздельные?», answer with that split (context isolated, agent identical) — not a flat yes.
