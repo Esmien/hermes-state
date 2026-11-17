@@ -134,7 +134,11 @@ Live shape: `hysteria-server.service` → `/usr/local/bin/hysteria server -c /et
 
 Pitfalls that cost a restart loop each: v2.14 replaced ACL with expressions (`acl.rules: [{outbound: name, match: expr}]`) — `proxy(name)` legacy syntax dies with «outbound proxy not found»; and with no ACL at all the **first outbound in the list** takes everything, so a single `xray` outbound needs no rule. `vpn-bluegreen.py`'s linter demands `settings.clients` on every non-dokodemo inbound, so a noauth loopback socks inbound is rejected until `socks` joins that exemption.
 
-Per-token roll-out, never global: put `{"name", "link", "clash"}` into `/var/www/esmien-sub/<token>/extra_nodes.json`, then `python3 make_sub.py`. `build_meta` appends them to `list.txt` and to clash `proxies`, so other users' files stay byte-identical — verify with a `diff -rq` against a backup before claiming nothing broke. Link shape: `hysteria2://<pw>@<host>:443/?sni=<host>&obfs=salamander&obfs-password=<obfs>#name`. v2rayNG cannot read hy2; Hiddify, NekoBox, sing-box and Clash Meta can. `singbox.json` is not extended by extras — a sing-box user gets the TCP node only.
+Per-token roll-out, never global: `python3 /root/vpn-router/hy2_users.py --apply` does the whole thing — `/root/.secrets/hysteria-users.json` is the source of truth (one password per person, `auth.type: userpass`, usernames transliterated), it rewrites every `meta` token's `extra_nodes.json`, rebuilds subs and restarts hysteria.
+
+**Never print the auth block when checking it.** `grep -A12 ^auth:` dumps every password into the transcript — read the state file in Python and print usernames only. If one leaks, delete the state file and re-run: rotation costs one restart and one subscription refresh.
+
+`build_meta` appends the extra to `list.txt` and to clash `proxies`, so every file outside `extra_nodes.json`/`list.txt`/`clash.yaml` stays byte-identical — verify with a `diff -rq` against a backup before claiming nothing broke. Link shape: `hysteria2://<user>:<pw>@<host>:443/?sni=<host>&obfs=salamander&obfs-password=<obfs>#name`. v2rayNG cannot read hy2 and just will not import that node; Hiddify, NekoBox, sing-box and Clash Meta can. `singbox.json` is not extended by extras — a sing-box user gets the TCP node only. The clash group is `type: select` on purpose: do not turn it into url-test without saying so, a silent path change is what makes «connected, but Gemini says no» invisible.
 
 ## Failover — off, deliberately
 
