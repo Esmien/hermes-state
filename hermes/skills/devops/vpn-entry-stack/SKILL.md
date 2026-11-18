@@ -6,7 +6,7 @@ author: VPS Admin
 license: MIT
 ---
 
-# VPN entry stack (VLESS: Vision+TLS / WS / hysteria2)
+# VPN entry stack (VLESS: WS+TLS / hysteria2 — Vision и REALITY сняты)
 
 ## When to Use
 
@@ -54,7 +54,7 @@ with `vpn-cfg status` instead of trusting a number from a report.
 
 Adding a route means four coordinated edits, in this order: append an inbound (`tag`, 127.0.0.1, next free port, same client id, `wsSettings.path`) to `config.json`, add the outbound and a routing rule keyed on `inboundTag` **before** the catch-all `tcp,udp → direct` rule, add `paths` + `upstreams` entries to `brand.json`, then `apply_brand.py && nginx -t && systemctl reload nginx && vpn-cfg apply` (not a bare `docker restart` — `apply` proves the routes answer and reverts a broken config). Verify by dialling the new path through the tunnel and checking the egress with ipinfo — not by reading the config back.
 
-Files: `/root/vpn-router/{config.json,brand.json,apply_brand.py,make_sub.py,make_template.py,import_sub.py,users.py,probe_sub.py,test_whitelist.py,gemini_geo_check.py,sub_expiry.py,route_ru.py,subs.json,users.json,failover.py,certbot_retry.py,provision_vpn_host.py}`, subscriptions in `/var/www/esmien-sub/<token>/`. Editing, applying and rolling back: `vpn-cfg` (`references/router-ops.md`). Per-user/route traffic counters and «кто пользуется подписками»: `references/usage-stats.md`. When a client reports that the VPN "keeps dropping": `references/client-drop-triage.md` — probe the server end to end before touching anything, and start with DNS: an entry whose name no longer resolves looks exactly like a dead VPN (app can't ping any node, browser still works from cache).
+Files: `/root/vpn-router/{config.json,brand.json,apply_brand.py,make_sub.py,make_template.py,import_sub.py,users.py,probe_sub.py,test_whitelist.py,gemini_geo_check.py,sub_expiry.py,route_ru.py,subs.json,users.json,failover.py,certbot_retry.py,provision_vpn_host.py}`, subscriptions in `/var/www/esmien-sub/<token>/`. Editing, applying and rolling back: `vpn-cfg` (`references/router-ops.md`). Per-user/route traffic counters and «кто пользуется подписками»: `references/usage-stats.md`. When a client reports that the VPN "keeps dropping": `references/client-drop-triage.md` — probe the server end to end before touching anything, and start with DNS: an entry whose name no longer resolves looks exactly like a dead VPN (app can't ping any node, browser still works from cache). **Один мёртвый вход ≠ мёртвый адрес:** прежде чем говорить «режут IP», сверить все входы в одном окне — если WS и UDP несут трафик, душат конкретный транспорт, а не адрес.
 
 ## Deploy / rebuild
 
@@ -76,6 +76,16 @@ Move host, port, cert and subscriptions in one pass: nginx server blocks, `brand
 Full text → [references/changing-public-host.md](references/changing-public-host.md)
 
 ## Scenario routing / one-node subscription
+
+**Правило «всё остальное» смотрит в `direct`, а не в релей.** Пока catch-all указывал на `fr`, каждый
+сбой французского релея валил пачками весь неразобранный трафик — читается как «интернет не работает»,
+а виноват один outbound. И наоборот: в правило Google класть **только Gemini** (`gemini.google.com`,
+`aistudio`, `generativelanguage.googleapis.com`, бэкенды `*-pa.googleapis.com`, хосты картинок), а не
+весь google/gstatic/googlevideo — владелец это отдельно требует.
+
+**Sniffing обязателен на каждом инбаунде, включая `udp-in`.** Без него домены не парсятся, ни одно
+правило не совпадает и всё падает в catch-all: на UDP-узле Gemini не мог работать в принципе, а
+выглядело как «сервер не пускает». Симптом в логах — соединения по `tcp:<ip>:443` без домена.
 
 Server-side scenarios (Google→FR/FI, RU→Moscow or an owned RU box; YouTube deliberately rides the
 Estonian exit) plus a subscription that exposes **one** node, and the jittered watchdog that falls
@@ -104,7 +114,20 @@ box before wiring it, and the exit-node pitfalls — `references/ru-exit-node.md
 
 Full text → [references/subscription-shapes.md](references/subscription-shapes.md)
 
-## Вход на 443/4443 — nginx stream + Vision
+## Вход на 443/4443 — снят (Vision удалён 18.11.2026)
+
+**Сейчас у VPN на этом хосте нет входа на 443/4443 вообще.** Ниже — исторический слой и то, что
+осталось в файлах; новые входы сюда не добавлять без нового замера.
+
+Почему Vision снят: у владельца после рукопожатия туннель не принимался (сервер отдавал TLS и молчал:
+`in≈4KB out≈10KB`, 0.3 s, в `access.log` ноль строк `vision-in`) — та же заморозка, что у камо, только
+на своём домене. Плюс отдельная ловушка: клиент **без `flow` на Vision-инбаунде не аутентифицируется
+вовсе** (проверено: `с flow` → 200, `без flow` → `000`), а часть клиентов поле `flow` из ссылки
+выбрасывает. Симптом «узел подключается и молчит» неотличим от блокировки.
+
+**Остаток, который надо убрать при следующей правке:** `apply_brand.py` всё ещё пишет в карту строку
+`cdn.jsdelivr.net -> 127.0.0.1:11043` (от снятого REALITY). Порт мёртв, но карта заявляет чужой SNI на
+нашем адресе — то есть ровно та подпись «SNI↔IP не совпадает», из-за которой камо и снимали.
 
 **Фронт остался у nginx.** Xray не забирает 443: `stream`+`ssl_preread` просто маршрутизирует
 по SNI, поэтому живой `stream-443.log` (реальный IP + SNI) сохраняется, а откат — это правка
@@ -112,9 +135,7 @@ Full text → [references/subscription-shapes.md](references/subscription-shapes
 `include` внутри `stream {}`:
 
 ```
-www.cloudflare.com -> 127.0.0.1:10445   # mtg, proxy_protocol
-edge.esmien.ru     -> 127.0.0.1:10055   # VLESS+Vision+TLS (свой домен), +1000 для b
-default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
+default -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol; unknown SNI -> reject
 ```
 
 Одна карта обслуживает **два** stream-сервера — `listen 443` и `listen 4443`: TCP/443 у части
@@ -193,12 +214,11 @@ default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
   ошибка конфига; валидацию делает `vpn-cfg apply` внутри контейнера.
 - **Логи:** пути в `config.json` ведут внутрь контейнера, `/var/log/xray` — docker-volume. Симлинк
   `/var/log/xray -> /var/lib/docker/volumes/<id>/_data` даёт хвост и logrotate на хосте (14 дней,
-  `copytruncate`). В access-логе видно `[reality-in -> direct] email: …` — этого хватает для разбора.
-  **Симлинк смотрит в volume цвета `a`, а трафик часто несёт `b`:** тогда `access.log` молчит сколько
-  угодно долго, и вывод «клиент ничего не присылал» оказывается ложью — у него в это время 700 живых
-  запросов. Перед любым разбором брать путь по активному цвету: `docker inspect vpn-router$([ $(cat
-  /root/vpn-router/vpn-color) = b ] && echo -b) --format '{{range .Mounts}}{{if eq .Destination
-  "/var/log/xray"}}{{.Source}}{{end}}{{end}}'` и читать уже оттуда (или перевесить симлинк).
+  `copytruncate`). **Симлинк долго смотрел в volume цвета `a`, а трафик нёс `b`:** `access.log` молчал
+  сколько угодно долго, и вывод «клиент ничего не присылал» был ложью — у него в это время 700 живых
+  запросов, а я успел на этом основании нагородить неверную диагностику. Теперь `_repoint_logs()` в
+  `vpn-bluegreen.py` перевешивает симлинк после каждого flip. Для старых логов путь брать через
+  `docker inspect vpn-router$([ $(cat /root/vpn-router/vpn-color) = b ] && echo -b) --format '{{range .Mounts}}{{if eq .Destination "/var/log/xray"}}{{.Source}}{{end}}{{end}}'`.
 - **Один мёртвый вход ≠ блок адреса.** Прежде чем объявить «режут IP целиком», сверить с входами из
   того же окна времени: если WS на 8443 и hysteria несут трафик — адрес жив, душат конкретный класс
   транспорта (голый TLS с Vision), и лечится это выбором другого входа, а не переездом. Обобщение
@@ -207,10 +227,10 @@ default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
   `grpc/encoding: failed to fetch hunk … RST_STREAM PROTOCOL_ERROR`; всё, что на него маршрутизировано,
   умирало пачками. Судить выход только пачкой реальных HTTPS через него (6–10 запросов, нужно 6/6), а
   не пробой `generate_204` и не ICMP.
-- **Подписка несёт три узла, и все — всем токенам** (решение владельца: это разные эшелоны,
-  каждый страхует остальные). Порядок: `Vision` (VLESS+TLS на своём домене, адрес — **IP, а не
-  домен**: DNS не нужен и не светится), `совместимость` (WS 8443), `UDP резерв` (hysteria2 8443/udp).
-  Гейтинг маркерами `compat`/`udp` снят — не возвращать без просьбы; REALITY-узла в списке нет.
+- **Подписка несёт два узла, и оба — всем токенам** (решение владельца: разные эшелоны, каждый
+  страхует другой): `совместимость` (WS 8443) и `UDP резерв` (hysteria2 8443/udp). Vision-узел снят
+  18.11.2026 («вообще убирай»), REALITY — раньше; обратно не добавлять без просьбы. Гейтинг маркерами
+  `compat`/`udp` тоже снят.
   «Клиент говорит, что VPN мёртв, а сервер жив» — читать `stream-443.log` по его IP: нет ни одного
   входа с нужным SNI ⇒ клиент к этому узлу не ходил вообще (устаревший профиль), а пустой `sni=` с
   `bytes_in=0` и `time=30.000` — это открытый сокет без ClientHello, тоже клиент.
@@ -251,7 +271,13 @@ default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
 - **Subscription expiry** — read it from the provider's `subscription-userinfo` header, not the panel; daily 07:00 UTC timer warns at 3/2/1 days → `references/subscription-expiry.md`
 - **Upstream subscriptions** — relaying third-party nodes as exits → `references/upstream-subscriptions.md`
 - **RU split** — banks / gosuslugi / VK / OZON / WB direct or via the RU exit → `references/ru-split.md`
-- **Gemini / geo** — the country is Google's own lookup of the connection IP; measure with `scripts/gemini_geo_check.py` → `references/gemini-geo.md`
+- **Gemini / geo** — «Gemini пока не поддерживается в вашей стране» — это **страна аккаунта Google**, а
+  не наш выход: 18.11.2026 страница рендерилась нормально через EE, FR, FI и даже через RU-релеи
+  (`p15`/`p17` к тому же выходят из РФ), а плашки в HTML нет вообще — её рисует JS по ответу API.
+  Значит grep по HTML ничего не доказывает, и перебор выходов её не снимает; лечится сменой страны
+  аккаунта (`myaccount.google.com`) или аккаунтом, созданным в поддерживаемой стране. Инструмент
+  (`scripts/gemini_geo_check.py`, `references/gemini-geo.md`) годится для проверки IP-гео, не для этой
+  плашки.
 - **Whitelist mode** — the LTE whitelist list goes to the client as links, never through this server → `references/whitelist-mode.md`
 - **Borrowed exit** — a third-party subscription used as an exit → `references/borrowed-exit.md`
 - **Routing watchdog** — a timer rewrites routing every minute; edits must survive it → `references/routing-watchdog.md`
