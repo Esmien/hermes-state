@@ -25,7 +25,7 @@ b900857a741b20fdc37399ed8eb71191eccec8b0013ed0f2c37a8827342e8fd8  ./hermes/plugi
 c5971330405dc8b92bf017f57b6a7e720568be1cc1270248bae29ee4c5b3044e  ./hermes/profiles/reader/SOUL.md
 f6ade3b6b9958181b5dc6dec990aa057d7b5a3d58a509c3459a428889c295472  ./hermes/profiles/reader/config.yaml
 71d05f1be385d2bb4d31649cb979d9f2815b2598a12de74a560b379d4c34499c  ./hermes/scripts/_probe_delivery_test.py
-9547927170b127aac36ed4d208fbc6e6149ad4cc52457a018f16471f8161297e  ./hermes/scripts/backup-verify.sh
+74361a2c86e2f41191ca00b6742efed7716de823fa0799eec799432b1eeba1e2  ./hermes/scripts/backup-verify.sh
 df39344d8dc403f096daccb5b23686b3644e65e85af53c8926aa36118bba5bd2  ./hermes/scripts/watch_ru1.py
 49a899583a852d558603d43b969fbdf788e372a70cb6ec86c73c4af08dd22049  ./hermes/skills/.bundled_manifest
 1288166a59f8b79625e604f0ba32d28f1232adbbe46c55c5a0a49009b81838be  ./hermes/skills/.curator_state

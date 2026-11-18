@@ -25,10 +25,12 @@ rc=$?
     [ -n "$out" ] && printf '[%s] %s\n' "$stamp" "$out"
 } >> "$LOG" 2>/dev/null
 
-if [ "$rc" -ne 0 ]; then
+if [ "$rc" -ne 0 ] && [ "$rc" -ne 2 ]; then
     /usr/bin/python3 "$MONITOR" send \
         "⚠️ Проверка ночного бэкапа завершилась ошибкой (exit $rc). Смотри: journalctl -u postgres-backup.service -n 50 --no-pager и $LOG" \
         >/dev/null 2>&1
 fi
 
 echo "verify выполнен (exit=$rc); отчёт отправлен в бот уведомлений"
+# exit=2 — отчёт уже ушёл, но в нём есть проблемы; строку читает агент в промпте.
+printf '%s\n' "$out" | grep '^verify: PROBLEMS' || true
