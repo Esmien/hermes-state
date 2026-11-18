@@ -137,4 +137,5 @@ One topic per file, all in `references/`. The annotated index (what each answers
 - **Open WebUI:** `owui-admin-auth.md`, `owui-internals.md`, `owui-chat-search.md`, `owui-chat-forensics.md`, `owui-data-purge.md`, `owui-task-models.md`, `ui-latency.md`, `signup-approval.md`, `branding.md`
 - **Search / media / bots:** `searxng.md`, `web-search-architecture.md`, `media-pipeline.md`, `music-bot-lyria.md`, `enricher-system.md`, `enricher-system-legacy.md`, `sandbox-terminal.md`
 - **Host hygiene:** `operations.md`, `disk-and-memory.md`, `memory-troubleshooting.md`, `repo-hygiene.md`, `coupling-hermes.md`, `backups-notifications.md`, `cloudflare-proxy.md`, `kb-sync.md`, `pitfalls.md`
+- **Probes (run, don't retype):** `scripts/probe-restore.py` — восстановление свежих дампов в временные БД без сообщений в Telegram (`verify` и `/backups` шлют отчёт сами, отлаживать восстановление ими нельзя); `scripts/check-notification-bots.py` — здоровье ботов по `getMe`.
 - **Working with the owner:** `answering-the-owner.md`, `cross-cutting-rules.md`
