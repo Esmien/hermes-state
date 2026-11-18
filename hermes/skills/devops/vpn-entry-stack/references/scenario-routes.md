@@ -218,8 +218,31 @@ through the relay (fine), 1 MB POST upload through it (fine), TCP stats on the e
 no retransmits), nginx `rt`/bytes per session (long sessions, megabytes). All clean → stop looking
 at the network and look at the protocol on the wire.
 
+## Google scope: one country for the whole frontend
+
+A Gemini-only host list does not hold. The web app loads from the relay and then calls a moving
+set of service hosts (`geminiweb-pa`, `signaler-pa`, `ogads-pa` on `clients6.google.com`,
+`www/ssl/fonts.gstatic.com`, `ogs.google.com`), which fall through to the Estonian default — the
+page renders, and the send returns a generic error because the two halves of one session left from
+two countries. Chasing those hosts one at a time is whack-a-mole: the list is not enumerable and
+every round costs the owner a test.
+
+The shape that holds: **all Google frontends on one balancer** (`google.com`, `googleapis.com`,
+`gstatic.com`, `googleusercontent.com`, `withgoogle.com`, `google.dev`) with the heavy media rule
+placed **before** it — `googlevideo.com`, `ytimg.com`, `ggpht.com`, `gvt1/gvt2.com`, `youtube.com`
+→ `direct`. Video is the expensive part and stays off the relay; the frontend is light and must not
+be split.
+
+Do not pick the exit by the `this.gbar_` country marker. Estonia answers `ru` while Gemini serves
+the owner perfectly well from it — the marker reflects Google's own bookkeeping, not whether the
+exit works. Judge an exit by a real send from a client, and treat a country marker as a hint only.
+
 ## Pitfalls
 
+- `bal-google` lines that read `gemini.google.com:443 … -> blocked` in the access log mean the
+  balancer had **no live node** and blackholed the traffic — that is config, not Google. It appears
+  in bursts right after a selector change (one dead tag + `fallbackTag: blocked`), so read the
+  log timeline before hunting for a network fault.
 - `scenario_override.json` outranks the code and is easy to forget. `install()` reads it into
   `PREFERENCE`, while the balancer's selector comes from `GROUPS` — two sources feeding one script.
   A stale pin left from an earlier manual test (`{"bal-ru": ["ru1","direct"]}`) therefore keeps the
