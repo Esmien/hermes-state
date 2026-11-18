@@ -101,31 +101,42 @@ box before wiring it, and the exit-node pitfalls — `references/ru-exit-node.md
 
 Full text → [references/subscription-shapes.md](references/subscription-shapes.md)
 
-## Переход входа на REALITY / 443 (согласовано, не построено)
+## REALITY / 443 (построено 18.11.2026)
 
-- **Подписка не переезжает.** Пока эндпоинт `https://<host>:8443/sub/<token>` и токен те же, клиентам
-  менять нечего: в том же файле приезжают ссылки `security=reality` с `pbk`/`sni`/`fp` и
-  `flow=xtls-rprx-vision`, клиент подтягивает сам (`profile-update-interval 12`) или по кнопке. UUID
-  остаются — доступы не перевыпускаются, статистика не рвётся. URL меняется только если двигаем
-  сам эндпоинт подписки (другой порт/домен/CF) — это отдельный, куда более дорогой шаг.
+**Фронт остался у nginx.** Xray не забирает 443: `stream`+`ssl_preread` просто маршрутизирует
+по SNI, поэтому живой `stream-443.log` (реальный IP + SNI) сохраняется, а откат — это правка
+двух файлов. Карта вынесена в `/etc/nginx/stream.d/443-map.conf`, `nginx.conf` подключает её
+`include` внутри `stream {}`:
+
+```
+www.cloudflare.com -> 127.0.0.1:10445   # mtg, proxy_protocol
+www.microsoft.com  -> 127.0.0.1:10043   # REALITY, активный цвет (+1000 для b)
+default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
+```
+
+- **Карту перегенерирует `apply_brand.py` (`write_stream_map`) при каждом flip.** Если этого не
+  делать, после blue/green-переключения reality-порт указывает на мёртвый цвет: WS работает,
+  reality висит — самый коварный симптом.
+- **Инбаунд `reality-in`**: `127.0.0.1:10043`, `security=reality`, `dest/serverNames=www.microsoft.com`,
+  `flow=xtls-rprx-vision`, клиенты клонированы из `ws-in` (те же UUID/email).
+  `sockopt.acceptProxyProtocol: true` — nginx отдаёт PROXY-префикс, Xray его парсит (проверено
+  сквозным тестом через :443); `xray x25519` ключи лежат в `/root/.secrets/reality.key`.
+- **`probe_direct` в `vpn-bluegreen.py` должен пропускать reality-инбаунды**: HTTP-GET там получает
+  закрытие соединения, и apply навсегда остаётся с «N-1 из N отвечают». Для reality health = TCP connect.
+- **`xray -test` на хосте падает на `geoip:private` (`geoip.dat` лежит внутри контейнера)** — это не
+  ошибка конфига; валидацию делает `vpn-cfg apply` внутри контейнера.
+- **Логи:** пути в `config.json` ведут внутрь контейнера, `/var/log/xray` — docker-volume. Симлинк
+  `/var/log/xray -> /var/lib/docker/volumes/<id>/_data` даёт хвост и logrotate на хосте (14 дней,
+  `copytruncate`). В access-логе видно `[reality-in -> direct] email: …` — этого хватает для разбора.
+- **Подписка:** REALITY-узел идёт первым, адрес — **IP, а не домен** (никакого DNS для ISP),
+  старый WS остаётся вторым узлом «…(совместимость)». `make_sub.py` берёт pbk/sid/camo из
+  `/root/.secrets/reality.key` и не выпускает узел, если файла нет.
+- **Откат:** `scripts/rollback-443-reality.sh` (снимок `pre-reality-*`: config, apply_brand,
+  vpn-bluegreen, nginx.conf; отдельный снимок подписок; затем `apply` + `reload` + проверка).
+  Проверка входов после любой правки фронта — `scripts/verify-443.sh`.
 - **Клиенты:** REALITY умеют v2rayNG, Hiddify, Streisand, Shadowrocket, NekoBox, mihomo/sing-box;
-  старые Clash — нет (нода просто не подключится). Отсюда первый заход: в подписке живут и новые
-  reality-узлы, и старые WS, старые снимаются после того, как люди обновились.
-- **443 сейчас держит nginx stream** (`ssl_preread`: SNI `www.cloudflare.com` → `127.0.0.1:10445`
-  (mtg), default → `127.0.0.1:9443`, оба с `proxy_protocol`). Если 443 забирает Xray, вhost'ы не
-  меняются вовсе: им достаточно fallback `{dest: 127.0.0.1:9443, xver: 1}`, потому что они уже
-  слушают `listen 127.0.0.1:9443 proxy_protocol ssl http2`. TLS остаётся у nginx, серты те же.
-- **В fallbacks переносим две вещи:** SNI-маршрут mtg (`{name: "www.cloudflare.com", dest:
-  127.0.0.1:10445, xver: 1}`) и лог `stream-443.log` (если на него что-то смотрит). `serverNames`
-  REALITY не должны содержать `www.cloudflare.com`, иначе Reality перехватит рукопожатие и mtg умрёт.
-- **Порядок:** снять stream-блок с 443 → поднять inbound (иначе `address already in use`) → проверить
-  `9443` со всеми vhost'ами и ботом, mtg и живым клиентом. `xver` не 1 → nginx отвечает `400` или в
-  логах `000.0.0.0`. Откат — вернуть stream-блок и снять inbound.
-- **Цена:** Xray становится фронтом всего публичного веба — ошибка в его конфиге валит WebUI, админку
-  LiteLLM, бота и мониторинг сразу, поэтому `vpn-cfg apply` должен проверять `9443` через fallback, а
-  не только туннель.
-- Бонус: снаружи IP перестаёт отдавать наш серт на 443 — привязка «этот IP = esmien» в пассивных
-  базах слабеет, а сканер видит чужой домен.
+  старые Clash — нет. Подписка не переезжает: тот же `https://<host>:8443/sub/<token>`, тот же токен,
+  те же UUID — клиент подтягивает сам (`profile-update-interval 12`).
 
 Как это мерить снаружи и что реально скрытнее (Vision против WS+TLS, маска Apple, DDNS, панель) —
 `ip-reputation-and-ban-risk` → `references/vpn-entry-stealth.md`.

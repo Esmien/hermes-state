@@ -199,7 +199,14 @@ credential, но запрос пришёл вообще без ключа — э
 `/root/vpn-router/config.json`, правка через `/usr/local/bin/vpn-cfg`:
 `status`/`edit`/`apply`/`rollback`, `apply` сам делает health-check и откат).
 3x-ui снесён целиком: панель не умеет описывать цепочки «вход → конкретный выход»,
-а публичная админка — лишняя дверь. Туннель проверяется настоящим клиентом (HTTPS
+а публичная админка — лишняя дверь.
+
+**`:443` — это nginx stream, а не Xray** (с 18.11.2026): `ssl_preread` + карта в
+`/etc/nginx/stream.d/443-map.conf` (`www.cloudflare.com` → mtg, `www.microsoft.com` →
+REALITY-инбаунд активного цвета, default → `127.0.0.1:9443` со всеми vhost'ами). Карту
+перегенерирует `apply_brand.py` при каждом blue/green flip — править её руками бессмысленно.
+Проверка всех входов: `scripts/verify-443.sh`; полный откат REALITY:
+`scripts/rollback-443-reality.sh`. Детали и ловушки — скилл `vpn-entry-stack`. Туннель проверяется настоящим клиентом (HTTPS
 через SOCKS), а `stream`/`ssl_preread` на 443 требует PROXY protocol на обеих
 сторонах, иначе backend видит loopback. Подробности —
 [references/ru-dpi-vpn-ingress.md](references/ru-dpi-vpn-ingress.md).
