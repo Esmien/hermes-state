@@ -16,6 +16,8 @@ The owner's home ISP (MTS, Krasnodar) drops **port 443** and kills **fake-TLS/MT
 
 ## Reporting to the owner
 
+**Инструкции, ранбуки и планы — лесенкой, без жаргона.** Он прямо просил: «пиши такие вещи как дебилу, всегда». Значит: нумерованные шаги, в каждом — одно действие, затем что ты увидишь после него. Никаких «поднять nginx stream на прослойке» — «взять дешёвый сервер в другой стране, поставить туда nginx, который переливает пакеты на наш». Термин можно, но сразу с переводом в скобках. Аналогии допустимы и приветствуются («съёмная входная дверь», «киоск с бумажками»). Скомканный текст с пятью терминами в строке он считает бесполезным, даже если всё в нём верно.
+
 He runs this stack himself and treats reports as noise unless they answer the question he asked:
 
 - Answer in one line, then at most three or four bullets of substance. The payload — a new subscription URL, a login, a number — goes at the top, bare, without a lead-in.
