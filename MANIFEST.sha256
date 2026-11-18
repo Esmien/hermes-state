@@ -80,7 +80,7 @@ ffc3d455a8097e27856ca875bd66f8e7e0fc9a89bf99805972c7a9fd9f61f11e  ./hermes/skill
 1ea50fe11e32a4dc16e2f99de0ba87a29006f05b6449611445fb600fae664887  ./hermes/skills/career/job-application-review/references/resume-review.md
 6dab18cda7745a3f411c0883ccf3a9113cf6340211bd97ba8f3654ffb05d3aa4  ./hermes/skills/career/job-application-review/references/test-assignment-review.md
 e890a87ac49fed98df4e1fc72fb9c548dd2ba66efa9f15dd1ba65935a1a60eed  ./hermes/skills/creative/DESCRIPTION.md
-fbf81b90384062c07edd3f5d2026e7d2d343fe4227995f1b333d5f4208ddf065  ./hermes/skills/devops/ai-stack/SKILL.md
+0a9c7478c45c1f0bf1787486ee3c586d7e21094318a98775f8d9244134d06dd1  ./hermes/skills/devops/ai-stack/SKILL.md
 ced365d1375826998970c3b662216b5c1641584a89cfff0fb5d09a58cd334c0c  ./hermes/skills/devops/ai-stack/references/answering-the-owner.md
 90b8a71678109031496db5cd4045b79e3e8cebda94a515cb9ba558b14efb52d5  ./hermes/skills/devops/ai-stack/references/backups-notifications.md
 751ab9058ec370971c43ef7a8c47b4a86803fc22f92eb001221be947aafd1dac  ./hermes/skills/devops/ai-stack/references/branding.md
@@ -106,7 +106,7 @@ ac748903dd3fab6673926b5bfab429273e7e8b370d0347fae27ab62f2a27cf2a  ./hermes/skill
 3e3de999564ce2910af13cc065e73fd827b7dd7b0996f9b3d7e19d46424c5e9b  ./hermes/skills/devops/ai-stack/references/owui-chat-forensics.md
 62cbdf3ac170ad9694a277b30e44709c9a9370c4658542306597ea815d231ba3  ./hermes/skills/devops/ai-stack/references/owui-chat-search.md
 77b1f88f7278bb71d2530b305b2dd4f3186b82f7a51bcadc8345d425a44adc31  ./hermes/skills/devops/ai-stack/references/owui-data-purge.md
-5c181f5025720b81bc0d2d71ea5fd1cbad85aec437cdb529e8902f00929796c7  ./hermes/skills/devops/ai-stack/references/owui-internals.md
+24d0c460019ff831ce20b3602410f40417d151755652e28f40d439efeb7473de  ./hermes/skills/devops/ai-stack/references/owui-internals.md
 5c33219e84e4b7f5d04b079bf8e1d45595cabf3bfa59c234c28801061dc84864  ./hermes/skills/devops/ai-stack/references/owui-task-models.md
 8a69bfb96ab3f785ae029f371d7492a5862c46c4f4ec66e53d9546c385fc1977  ./hermes/skills/devops/ai-stack/references/pitfalls.md
 7e6a9417891e69766d9816809ec46c8eea9273a50306f296c975f7ddc4b652c1  ./hermes/skills/devops/ai-stack/references/repo-hygiene.md
