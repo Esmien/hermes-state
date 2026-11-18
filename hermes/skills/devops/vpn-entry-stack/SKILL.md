@@ -97,9 +97,38 @@ box before wiring it, and the exit-node pitfalls — `references/ru-exit-node.md
 
 ## Subscription
 
-`make_sub.py` renders three formats and nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. URL shape: `https://<host>:8443/sub/<token>` — the port must be in the URL, plain 443 is blocked for the owner's ISP. The layout comes from the `kind` file in the token dir (`meta` = one node, `whitelist` = provider list, `full` = legacy 25-node list).
+`make_sub.py` renders three formats and nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. URL shape: `https://<host>:8443/sub/<token>` — the port must be in the URL, plain 443 is blocked for the owner's ISP. The layout comes from the `kind` file in the token dir (`meta` = one node, `whitelist` = provider list, `full` = legacy 25-node list). **Только TLS:** подписка по `http://<IP>/sub/<token>` на :80 снята и заводить её заново нельзя — открытый текст отдаёт токен и весь список узлов любому на пути, а точечный блок 80-го убивает этот путь вслепую. Любой новый эндпоинт подписки/лендинга — только https на 8443.
 
 Full text → [references/subscription-shapes.md](references/subscription-shapes.md)
+
+## Переход входа на REALITY / 443 (согласовано, не построено)
+
+- **Подписка не переезжает.** Пока эндпоинт `https://<host>:8443/sub/<token>` и токен те же, клиентам
+  менять нечего: в том же файле приезжают ссылки `security=reality` с `pbk`/`sni`/`fp` и
+  `flow=xtls-rprx-vision`, клиент подтягивает сам (`profile-update-interval 12`) или по кнопке. UUID
+  остаются — доступы не перевыпускаются, статистика не рвётся. URL меняется только если двигаем
+  сам эндпоинт подписки (другой порт/домен/CF) — это отдельный, куда более дорогой шаг.
+- **Клиенты:** REALITY умеют v2rayNG, Hiddify, Streisand, Shadowrocket, NekoBox, mihomo/sing-box;
+  старые Clash — нет (нода просто не подключится). Отсюда первый заход: в подписке живут и новые
+  reality-узлы, и старые WS, старые снимаются после того, как люди обновились.
+- **443 сейчас держит nginx stream** (`ssl_preread`: SNI `www.cloudflare.com` → `127.0.0.1:10445`
+  (mtg), default → `127.0.0.1:9443`, оба с `proxy_protocol`). Если 443 забирает Xray, вhost'ы не
+  меняются вовсе: им достаточно fallback `{dest: 127.0.0.1:9443, xver: 1}`, потому что они уже
+  слушают `listen 127.0.0.1:9443 proxy_protocol ssl http2`. TLS остаётся у nginx, серты те же.
+- **В fallbacks переносим две вещи:** SNI-маршрут mtg (`{name: "www.cloudflare.com", dest:
+  127.0.0.1:10445, xver: 1}`) и лог `stream-443.log` (если на него что-то смотрит). `serverNames`
+  REALITY не должны содержать `www.cloudflare.com`, иначе Reality перехватит рукопожатие и mtg умрёт.
+- **Порядок:** снять stream-блок с 443 → поднять inbound (иначе `address already in use`) → проверить
+  `9443` со всеми vhost'ами и ботом, mtg и живым клиентом. `xver` не 1 → nginx отвечает `400` или в
+  логах `000.0.0.0`. Откат — вернуть stream-блок и снять inbound.
+- **Цена:** Xray становится фронтом всего публичного веба — ошибка в его конфиге валит WebUI, админку
+  LiteLLM, бота и мониторинг сразу, поэтому `vpn-cfg apply` должен проверять `9443` через fallback, а
+  не только туннель.
+- Бонус: снаружи IP перестаёт отдавать наш серт на 443 — привязка «этот IP = esmien» в пассивных
+  базах слабеет, а сканер видит чужой домен.
+
+Как это мерить снаружи и что реально скрытнее (Vision против WS+TLS, маска Apple, DDNS, панель) —
+`ip-reputation-and-ban-risk` → `references/vpn-entry-stealth.md`.
 
 ## Deep dives (references)
 
