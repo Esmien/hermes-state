@@ -6,7 +6,7 @@ author: VPS Admin
 license: MIT
 ---
 
-# VPN entry stack (VLESS: REALITY / Vision+TLS / WS / hysteria2)
+# VPN entry stack (VLESS: Vision+TLS / WS / hysteria2)
 
 ## When to Use
 
@@ -104,7 +104,7 @@ box before wiring it, and the exit-node pitfalls — `references/ru-exit-node.md
 
 Full text → [references/subscription-shapes.md](references/subscription-shapes.md)
 
-## REALITY / 443 (построено 18.11.2026)
+## Вход на 443/4443 — nginx stream + Vision
 
 **Фронт остался у nginx.** Xray не забирает 443: `stream`+`ssl_preread` просто маршрутизирует
 по SNI, поэтому живой `stream-443.log` (реальный IP + SNI) сохраняется, а откат — это правка
@@ -113,21 +113,36 @@ Full text → [references/subscription-shapes.md](references/subscription-shapes
 
 ```
 www.cloudflare.com -> 127.0.0.1:10445   # mtg, proxy_protocol
-cdn.jsdelivr.net   -> 127.0.0.1:10043   # REALITY, активный цвет (+1000 для b)
-vpn.esmien.ru      -> 127.0.0.1:10055   # VLESS+Vision+TLS (свой домен), +1000 для b
+edge.esmien.ru     -> 127.0.0.1:10055   # VLESS+Vision+TLS (свой домен), +1000 для b
 default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
 ```
 
-- **Камо-SNI — это несовпадение SNI и IP, и его ловят первыми.** Симптом: узел один раз
-  поднимается (в `access.log` одна строка `reality-in -> fr`), через минуту все новые коннекты
-  приходят с `bytes_in=0` и висят 30 с — оператор заморозил поток. Решение — второй вход
-  `vision-in`: VLESS+**XTLS-Vision+TLS** на своём домене (`SNI vpn.esmien.ru` реально указывает на
-  наш IP, серт свой), TCP-порт 4443; nginx stream разводит `vpn.esmien.ru` → 11055 (иначе
-  `default` → vhost'ы). Подписка отдаёт порядок: REALITY, Vision, WS, UDP.
+Одна карта обслуживает **два** stream-сервера — `listen 443` и `listen 4443`: TCP/443 у части
+операторов режется молча, и такому клиенту выдаётся вход на 4443.
+
+- **Один вход на IP, и он не врёт про домен.** Два входа на одном адресе, из которых один
+  заявляет чужой SNI, хуже одного честного: несовпадение SNI↔IP — готовая подпись подмены, она
+  маркирует адрес, а блок по IP:порт убивает заодно чистый вход. Поэтому камо-REALITY с этого IP
+  снят: `reality-in` удалён из `config.json`, камo-SNI из карты, узел из подписки. Маскарад под
+  чужой домен возвращать **только на отдельном IP**; свой домен + свой серт + фолбэк-страница
+  дают тот же эффект без подписи.
+- **У Vision своё имя, а не то, на котором висят vhost'ы.** `vpn.esmien.ru` на 443 обязан уходить
+  в `default` — иначе отваливается legacy WS `/general`, которым ходят консольные клиенты.
+  Поэтому SNI для Vision — отдельный поддомен (`edge.esmien.ru`, A-запись на наш IP через CF API).
+  После любой правки карты проверять оба: `curl -o /dev/null -w '%{http_code}' --resolve
+  vpn.esmien.ru:8443:<ip> https://vpn.esmien.ru:8443/ws` (и `/general`) → `400`, плюс Vision
+  сквозным клиентом через `edge.esmien.ru:4443`.
 - **TLS внутри Xray требует серта в контейнере.** Серты копируются в data-volume каждого цвета
   (`/usr/local/etc/xray/vision.crt|key`) хуком `certbot renew`; `validate()` в `vpn-bluegreen.py`
   обязан монтировать этот volume, иначе `xray -test` падает `no such file` и apply не переключает
   трафик. Проба здоровья: `security=tls` без `wsSettings` = TCP-connect, иначе HTTP-код 400.
+- **На одном IP — один вход, и SNI должен совпадать с ним.** Чужой SNI (камо REALITY, mtg-подмена
+  `www.cloudflare.com`) маркирует *адрес*, а не отдельный поток: заморозка бьёт по IP:порту и
+  убивает заодно чистый вход. Итог на этой VPS: единственный маршрут в карте —
+  `edge.esmien.ru → vision-in` (443 и 4443), всё остальное — vhost'ы или reject. mtg
+  (MTProto-прокси) удалён: контейнеры `mtproto-faketls*` остановлены с `restart=no`, мост
+  `127.0.0.1:10445 → 10443` убран из nginx stream. Его UUID переехал в
+  `/root/.secrets/ws-client-uuid` (его читают `mkcli.py` и `make_sub.py`).
 - **`:443` — не святое.** У части операторов TCP/443 к конкретному IP режется молча: клиент
   показывает `timeout`, а в `stream-443.log` трафик падает с 157 к 11 коннектов за 10 мин. Диагноз
   ставится сравнением: тот же хост на 8443 отвечает (303 ms) → это не сервер. Проверять
@@ -137,25 +152,16 @@ default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
   на **443 и 4443**; REALITY-узел в подписке смотрит на 4443, hysteria слушает UDP/8443.
   `v2rayNG` показывает `timeout` у hysteria-узла всегда — он не умеет пинговать QUIC, это не
   диагностика.
-- **Камо-SNI выбирается замером, а не вкусом.** REALITY пересылает ClientHello в `dest`, и этот RTT
-  платится на **каждом новом соединении**. `www.microsoft.com` отсюда давал connect 0.27 s и TLS
-  0.73 s — туннель «работал», но ощущался сломанным. `mts.ru` — быстро (0.04 s), НО за ним WAF:
-  relayed-хендшейк умирает, в `error.log` — `REALITY: processed invalid connection … handshake did
-  not complete successfully`, у клиента «ничего не работает» (симптом: `stream-443.log` показывает
-  `sni=` и `in≈4KB out≈9.5KB`, а в `access.log` ни одной строки `reality-in`). Рабочий выбор —
-  `cdn.jsdelivr.net` (anycast, 5/5, ~0.15 s сквозь туннель). **Критерий отбора: не популярность, а
-  отсутствие бот-защиты.** Проверять харнессом: `scripts/reality-camo-probe.py <кандидаты> --fp chrome,safari,ios`
-  (временный REALITY-сервер на каждого кандидата + клиент + 5 запросов через SOCKS; живой вход не трогает);
-  5/5 — годится, 4/5 — нет. Перед сменой также TLS1.3 + `ALPN h2` +
-  `X25519` (`openssl s_client -tls1_3 -alpn h2`); `mail.ru`, `gosuslugi.ru`, `rt.ru`, `megafon.ru`
-  на TLS1.3 не отвечают. Менять камо = правка `/root/.secrets/reality.key` (`camo=`),
-  `realitySettings.dest` и `REALITY_CAMO` в `apply_brand.py`, затем `vpn-cfg apply` — ключи и UUID
-  не меняются, но подписку клиентам надо обновить (в ссылке меняется `sni`).
-- **`fp` клиента решает, пройдёт ли аутентификация.** Харнесс по отпечаткам на REALITY-входе:
-  `chrome` 3/3, `safari` 3/3, **`ios` 0/3** — сервер видит невалидный hello и уходит в fallback на
-  камо-сайт, клиент показывает «подключено, интернета нет». В ссылке всегда `fp=chrome`; если
-  приложение навязывает свой отпечаток и переключателя в нём нет — это лечится сменой приложения,
-  а не сервера.
+- **Как это выглядело с камо (если его когда-нибудь вернут — только на отдельном IP).** Симптом
+  заморозки: узел один раз поднимается (`access.log`: одна строка `reality-in -> fr`), через минуту
+  все новые коннекты приходят с `bytes_in=0` и висят 30 с. REALITY платит RTT до `dest` на каждом
+  рукопожатии, за `mts.ru` сидит WAF и рвёт relayed-хендшейк (`REALITY: processed invalid
+  connection … handshake did not complete successfully`; в `stream-443.log` при этом `sni=` и
+  `in≈4KB out≈9.5KB`, в `access.log` ноль строк `reality-in`), `www.microsoft.com` даёт 0.7 s на
+  рукопожатие, а клиентский `fp=ios` не проходит аутентификацию (0/3 против 3/3 у `chrome` и
+  `safari`). Отбирать только харнессом `scripts/reality-camo-probe.py <кандидаты> --fp
+  chrome,safari,ios` (временный сервер на каждого кандидата, живой вход не трогает); годится 5/5,
+  4/5 — брак.
 - **«Я обновил подписку» ≠ профиль обновился.** iOS-клиенты мержат узлы, а не перезаписывают их:
   после смены камо клиент продолжал стучаться со старым `sni=`, а в его списке новый узел висел с
   `latency n/a`. Проверять надо не дату в приложении и не слова, а `stream-443.log` его IP: с каким
@@ -170,12 +176,17 @@ default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
   Сверять тело/размер ответа (`size=181` у заглушки), а не только статус.
 
 - **Карту перегенерирует `apply_brand.py` (`write_stream_map`) при каждом flip.** Если этого не
-  делать, после blue/green-переключения reality-порт указывает на мёртвый цвет: WS работает,
-  reality висит — самый коварный симптом.
-- **Инбаунд `reality-in`**: `127.0.0.1:10043`, `security=reality`, `dest/serverNames=cdn.jsdelivr.net`,
-  `flow=xtls-rprx-vision`, клиенты клонированы из `ws-in` (те же UUID/email).
-  `sockopt.acceptProxyProtocol: true` — nginx отдаёт PROXY-префикс, Xray его парсит (проверено
-  сквозным тестом через :443); `xray x25519` ключи лежат в `/root/.secrets/reality.key`.
+  делать, после blue/green-переключения карта указывает на мёртвый цвет: WS работает, Vision висит —
+  самый коварный симптом.
+- **Инбаунд `vision-in`**: `127.0.0.1:10055` (+1000 для цвета b), `security=tls`, серт из
+  `/usr/local/etc/xray/vision.{crt,key}`, клиенты клонированы из `ws-in` с `flow=xtls-rprx-vision`,
+  `sockopt.acceptProxyProtocol: true` (nginx отдаёт PROXY-префикс), `fallbacks` → локальный стаб.
+  `xray x25519`-ключи REALITY остались в `/root/.secrets/reality.key`, но входом не используются.
+- **Удалённый узел обязан исчезнуть из всех генераторов.** `build_meta` собирал список
+  `[r_link, v_link, ws_link]` и падал `TypeError: expected str instance, NoneType found` на первом же
+  `None`: собирать пары `(link, name)` и фильтровать пустые, а не полагаться на порядок `if`-веток;
+  то же для clash `proxies` и sing-box `outbounds`. `make_sub.py` запускать без `>/dev/null` и смотреть
+  exit-код — при падении он оставляет старые файлы, и подписка выглядит «нетронутой».
 - **`probe_direct` в `vpn-bluegreen.py` должен пропускать reality-инбаунды**: HTTP-GET там получает
   закрытие соединения, и apply навсегда остаётся с «N-1 из N отвечают». Для reality health = TCP connect.
 - **`xray -test` на хосте падает на `geoip:private` (`geoip.dat` лежит внутри контейнера)** — это не
@@ -183,15 +194,19 @@ default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
 - **Логи:** пути в `config.json` ведут внутрь контейнера, `/var/log/xray` — docker-volume. Симлинк
   `/var/log/xray -> /var/lib/docker/volumes/<id>/_data` даёт хвост и logrotate на хосте (14 дней,
   `copytruncate`). В access-логе видно `[reality-in -> direct] email: …` — этого хватает для разбора.
-- **Подписка несёт четыре узла, и все — всем токенам** (решение владельца: это разные эшелоны,
-  каждый страхует остальные). Порядок: `REALITY` (адрес — **IP, а не домен**: DNS не нужен и не
-  светится), `Vision` (VLESS+TLS на своём домене), `совместимость` (WS 8443), `UDP резерв`
-  (hysteria2 8443/udp). Гейтинг маркерами `compat`/`udp` снят — не возвращать его без просьбы.
-  `make_sub.py` берёт pbk/sid/camo из `/root/.secrets/reality.key` и не выпускает узел, если
-  файла нет. «Клиент говорит, что VPN мёртв, а сервер жив» — читать `stream-443.log` по его IP:
-  нет ни одного входа с камо-SNI ⇒ клиент к этому узлу не ходил вообще (устаревший профиль), а
-  пустой `sni=` с `bytes_in=0` и `time=30.000` — это открытый сокет без ClientHello, тоже клиент.
+- **Подписка несёт три узла, и все — всем токенам** (решение владельца: это разные эшелоны,
+  каждый страхует остальные). Порядок: `Vision` (VLESS+TLS на своём домене, адрес — **IP, а не
+  домен**: DNS не нужен и не светится), `совместимость` (WS 8443), `UDP резерв` (hysteria2 8443/udp).
+  Гейтинг маркерами `compat`/`udp` снят — не возвращать без просьбы; REALITY-узла в списке нет.
+  «Клиент говорит, что VPN мёртв, а сервер жив» — читать `stream-443.log` по его IP: нет ни одного
+  входа с нужным SNI ⇒ клиент к этому узлу не ходил вообще (устаревший профиль), а пустой `sni=` с
+  `bytes_in=0` и `time=30.000` — это открытый сокет без ClientHello, тоже клиент.
   Порядок разбора — `references/client-drop-triage.md` → 4g.
+- **Консольные конфиги под рукой:** `/root/vpn-router/cli/vision-10860.json` (SOCKS 10860, Vision) и
+  `ws-10861.json` (SOCKS 10861, WS `/general`) — заново не генерировать, клиент забирает `scp`-ом.
+  UUID в них — `ws-client-uuid`, и он обязан совпадать с инбаундом, к которому ведёт путь:
+  `/ws` → `ws-in`, `/general` → `in-general`; чужой UUID даёт `000` на живом входе и выглядит как
+  «WS сломался».
 - **Откат:** `scripts/rollback-443-reality.sh` (снимок `pre-reality-*`: config, apply_brand,
   vpn-bluegreen, nginx.conf; отдельный снимок подписок; затем `apply` + `reload` + проверка).
   Проверка входов после любой правки фронта — `scripts/verify-443.sh`.
