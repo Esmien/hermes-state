@@ -79,9 +79,22 @@ Full text → [references/changing-public-host.md](references/changing-public-ho
 
 **Правило «всё остальное» смотрит в `direct`, а не в релей.** Пока catch-all указывал на `fr`, каждый
 сбой французского релея валил пачками весь неразобранный трафик — читается как «интернет не работает»,
-а виноват один outbound. И наоборот: в правило Google класть **только Gemini** (`gemini.google.com`,
-`aistudio`, `generativelanguage.googleapis.com`, бэкенды `*-pa.googleapis.com`, хосты картинок), а не
-весь google/gstatic/googlevideo — владелец это отдельно требует.
+а виноват один outbound.
+
+**Google не делить между странами.** Весь Google-фронтенд (`google.com`, `googleapis.com`, `gstatic.com`,
+`googleusercontent.com`, `withgoogle.com`, `google.dev`) идёт через **один** выход, а тяжёлое видео
+(`googlevideo.com`, `ytimg.com`, `ggpht.com`, `gvt1/2`, `youtube.com`) — отдельным правилом **выше** него
+на `direct`. Узкий список «только Gemini-хосты» (проверено, стоило полдня) ломает отправку сообщения:
+веб-клиент тянет ещё `accounts.google.com`, `www/ssl/fonts.gstatic.com`, `ogads-pa`/`signaler-pa`/
+`geminiweb-pa.clients6.google.com`, `ogs.google.com`; страница приходит с FR, а API уходит с EE — Google
+отвечает `200` с ошибкой в теле, и UI показывает общий «ошибка 1» без адреса. Догонять список по одному
+хосту бессмысленно: набор меняется, а цена одного промаха — тот же отказ.
+
+**Trojan не несёт UDP — QUIC надо отбивать правилом.** `{"network": "udp", "port": 443,
+"outboundTag": "blocked"}` ставится **до** доменных правил. Иначе HTTP/3 умирает на выходе молча:
+страница грузится по TCP, а POST-запрос приложения уходит в никуда, и пользователь видит общий «ошибка 1»
+без адреса. Диагноз — по логу клиента (`journalctl -u mihomo -n 25`): строки `[UDP] … --> *.google.com:443`
+означают QUIC. Транспорт самого UDP-узла (hysteria2 на UDP/8443) это правило не задевает.
 
 **Sniffing обязателен на каждом инбаунде, включая `udp-in`.** Без него домены не парсятся, ни одно
 правило не совпадает и всё падает в catch-all: на UDP-узле Gemini не мог работать в принципе, а
