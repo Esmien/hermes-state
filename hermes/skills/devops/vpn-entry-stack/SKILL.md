@@ -87,6 +87,13 @@ Full text → [references/changing-public-host.md](references/changing-public-ho
 правило не совпадает и всё падает в catch-all: на UDP-узле Gemini не мог работать в принципе, а
 выглядело как «сервер не пускает». Симптом в логах — соединения по `tcp:<ip>:443` без домена.
 
+**Прежде чем менять маршрут — прочитать, каким он был, когда работало.**
+`git -C /root/vpn-service log --oneline -- router/scenario_routes.py`, `git show <sha>^:router/scenario_routes.py`
+и снимки в `/root/vpn-router/backups/`. Память подводит: «утренняя рабочая» схема в одном разборе гнала
+через релей **весь** Google, а не только Gemini, и первый откат «к рабочему» сделал хуже. Один
+эксперимент с маршрутом на гипотезу, со снимком, и возврат до следующего — каждый флип стоит владельцу
+ручной проверки.
+
 Server-side scenarios (Google→FR/FI, RU→Moscow or an owned RU box; YouTube deliberately rides the
 Estonian exit) plus a subscription that exposes **one** node, and the jittered watchdog that falls
 a dead scenario group back to Estonia: `references/scenario-routes.md`. Do not offer a user a
@@ -271,7 +278,12 @@ default -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol; unknown SNI -> r
 - **Subscription expiry** — read it from the provider's `subscription-userinfo` header, not the panel; daily 07:00 UTC timer warns at 3/2/1 days → `references/subscription-expiry.md`
 - **Upstream subscriptions** — relaying third-party nodes as exits → `references/upstream-subscriptions.md`
 - **RU split** — banks / gosuslugi / VK / OZON / WB direct or via the RU exit → `references/ru-split.md`
-- **Gemini / geo** — плашка о неподдерживаемой стране не доказывает ни проблему аккаунта, ни причину в IP: отдельно проверяй путь конкретного клиента и выходы. HTTP 200, текст сырого HTML и неавторизованный браузер не доказывают работу авторизованного Gemini. Маркер `this.gbar_` в теле — полезная эвристика, но не доказательство работы промптов. Проверка всех локально сохранённых узлов: `python3 /root/vpn-router/probe_gemini_pool.py --snapshot <снимок Xray>`; сверять полноту с актуальной подпиской, старый снимок может устареть. FR сейчас закреплён за Gemini, fallback `blocked`: если FR упадёт, Gemini не уходит незаметно в FI/direct. Пользователь требует не направлять весь Google через релей; общие домены невозможно отделить по приложению только по имени.
+- **Gemini / geo** — плашка о неподдерживаемой стране не доказывает ни проблему аккаунта, ни причину в IP: отдельно проверяй путь конкретного клиента и выходы. HTTP 200, текст сырого HTML и неавторизованный браузер не доказывают работу авторизованного Gemini. Маркер `this.gbar_` в теле — полезная эвристика, но не доказательство работы промптов. Проверка всех локально сохранённых узлов: `python3 /root/vpn-router/probe_gemini_pool.py --snapshot <снимок Xray>`; сверять полноту с актуальной подпиской, старый снимок может устареть. **`fallbackTag: blocked` на пользовательском сценарии — запрещён.** Проверено: пока селектор смотрел
+на мёртвый узел, observatory выключал балансер и всё уходило в `blocked` — 16 строк
+`gemini.google.com:443 [in-general -> blocked]` за минуту, то есть чёрная дыра вместо ошибки, а
+клиент видит «ошибка при отправке» и винит аккаунт. Фолбэк сценария — всегда реальный выход (`fi`,
+`direct`); «падать громко» даёт сам клиент, а не молчание. Пользователь требует не направлять весь
+Google через релей; общие домены невозможно отделить по приложению только по имени.
 - **Whitelist mode** — the LTE whitelist list goes to the client as links, never through this server → `references/whitelist-mode.md`
 - **Borrowed exit** — a third-party subscription used as an exit → `references/borrowed-exit.md`
 - **Routing watchdog** — a timer rewrites routing every minute; edits must survive it → `references/routing-watchdog.md`
