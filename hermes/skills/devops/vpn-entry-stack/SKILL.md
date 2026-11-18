@@ -194,6 +194,19 @@ default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
 - **Логи:** пути в `config.json` ведут внутрь контейнера, `/var/log/xray` — docker-volume. Симлинк
   `/var/log/xray -> /var/lib/docker/volumes/<id>/_data` даёт хвост и logrotate на хосте (14 дней,
   `copytruncate`). В access-логе видно `[reality-in -> direct] email: …` — этого хватает для разбора.
+  **Симлинк смотрит в volume цвета `a`, а трафик часто несёт `b`:** тогда `access.log` молчит сколько
+  угодно долго, и вывод «клиент ничего не присылал» оказывается ложью — у него в это время 700 живых
+  запросов. Перед любым разбором брать путь по активному цвету: `docker inspect vpn-router$([ $(cat
+  /root/vpn-router/vpn-color) = b ] && echo -b) --format '{{range .Mounts}}{{if eq .Destination
+  "/var/log/xray"}}{{.Source}}{{end}}{{end}}'` и читать уже оттуда (или перевесить симлинк).
+- **Один мёртвый вход ≠ блок адреса.** Прежде чем объявить «режут IP целиком», сверить с входами из
+  того же окна времени: если WS на 8443 и hysteria несут трафик — адрес жив, душат конкретный класс
+  транспорта (голый TLS с Vision), и лечится это выбором другого входа, а не переездом. Обобщение
+  «раз три входа подряд умерли, значит адрес» уже стоило неверного вывода при живых WS и UDP.
+- **Релей, живой по пингу, может рвать поток.** `fr` отвечал 53 ms и одновременно сыпал
+  `grpc/encoding: failed to fetch hunk … RST_STREAM PROTOCOL_ERROR`; всё, что на него маршрутизировано,
+  умирало пачками. Судить выход только пачкой реальных HTTPS через него (6–10 запросов, нужно 6/6), а
+  не пробой `generate_204` и не ICMP.
 - **Подписка несёт три узла, и все — всем токенам** (решение владельца: это разные эшелоны,
   каждый страхует остальные). Порядок: `Vision` (VLESS+TLS на своём домене, адрес — **IP, а не
   домен**: DNS не нужен и не светится), `совместимость` (WS 8443), `UDP резерв` (hysteria2 8443/udp).
@@ -269,7 +282,7 @@ Pitfalls that cost a restart loop each: v2.14 replaced ACL with expressions (`ac
 
 Per-token roll-out, never global: `python3 /root/vpn-router/hy2_users.py --apply` does the whole thing — `/root/.secrets/hysteria-users.json` is the source of truth (one password per person, `auth.type: userpass`, usernames transliterated), it rewrites every `meta` token's `extra_nodes.json`, rebuilds subs and restarts hysteria.
 
-**Never print the auth block when checking it.** `grep -A12 ^auth:` dumps every password into the transcript — read the state file in Python and print usernames only. If one leaks, delete the state file and re-run: rotation costs one restart and one subscription refresh.
+**Never print the auth block when checking it.** `grep -A12 ^auth:` dumps every password into the transcript — read the state file in Python and print usernames only. **Маскировать по имени ключа, а не по слову `password`:** блок устроен как `auth: → userpass: → <имя>: "<пароль>"`, поэтому регулярка вида `password\s*:` его не ловит и «структура без секретов» печатает пароли всех пользователей. Печатать только имена ключей, длины значений или `True`/`False`. If one leaks, delete the state file and re-run: rotation costs one restart and one subscription refresh.
 
 **After any auth change, the symptom is a dead node, not a broken server.** Single password → per-user `userpass`, or a rotation, leaves every already-imported node holding a stale credential; the app reports timeout, the server is fine. Say «обнови подписку» before touching anything, and prove it with `journalctl -u hysteria-server` (`client connected {id: ...}`) plus xray's `inbound>>>udp-in>>>traffic` counters — a growing counter means the tunnel carries traffic. Triage order for this entry, including the tcpdump recipe and what a local loopback test does *not* prove: `references/client-drop-triage.md` §4e.
 
