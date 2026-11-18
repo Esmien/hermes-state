@@ -193,6 +193,31 @@ it into a number.
 Old direct node links keep working after the switch (the inbounds still exist), so nobody drops
 mid-refresh — say that out loud when the family is asked to update their subscription.
 
+## QUIC is the silent killer on trojan relays
+
+Trojan (and trojan-over-gRPC) carries **no UDP at all**, so a client that prefers HTTP/3 dies
+silently: the page loads fine over TCP, then the app's own API call goes out on UDP/443, gets
+nothing back and the UI shows a generic error (Gemini web says only «ошибка 1») after its own
+timeout. Nothing appears in the server logs, because the flow never leaves the relay.
+
+- Keep a rule `{"network": "udp", "port": 443, "outboundTag": "blocked"}` **before** the domain
+  rules. Refusing QUIC makes browsers fall back to TCP immediately instead of hanging; this single
+  rule fixed Gemini sending for every client at once.
+- Symptom that points here: one client works, another fails on the *same* account, exit and
+  profile. Before blaming the client's protocol support, check what it actually sends. The owner's
+desktop CLI (`esmien-vpn` .deb: mihomo + TUN `esmien0`, `sudo vpn on|off|status`) logs every flow
+  as `[UDP] 198.18.0.1:port --> geminiweb-pa.clients6.google.com:443 match Match using …` — UDP/443
+  to Google endpoints is QUIC. Newer FlClash simply does not send those, which is why it worked.
+- `journalctl -u mihomo -n 25` also answers «is the profile sane»: fake-ip `198.18.0.1` as the
+  source and lowercase hostnames in the match line mean DNS and domain routing are fine, so a
+  failing send is transport, not name resolution. Do not "fix" the DNS block or `merge_profile.py`
+  on the strength of a page that loads.
+
+Cheap checks that ruled the transport *in* and everything else out, in order: 96 s low-rate stream
+through the relay (fine), 1 MB POST upload through it (fine), TCP stats on the entry (`mss 1440`,
+no retransmits), nginx `rt`/bytes per session (long sessions, megabytes). All clean → stop looking
+at the network and look at the protocol on the wire.
+
 ## Pitfalls
 
 - `scenario_override.json` outranks the code and is easy to forget. `install()` reads it into
