@@ -110,14 +110,23 @@ Full text → [references/subscription-shapes.md](references/subscription-shapes
 
 ```
 www.cloudflare.com -> 127.0.0.1:10445   # mtg, proxy_protocol
-www.microsoft.com  -> 127.0.0.1:10043   # REALITY, активный цвет (+1000 для b)
+mts.ru             -> 127.0.0.1:10043   # REALITY, активный цвет (+1000 для b)
 default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
 ```
+
+- **Камо-SNI выбирается замером, а не вкусом.** REALITY пересылает ClientHello в `dest`, и этот RTT
+  платится на **каждом новом соединении**. `www.microsoft.com` отсюда давал connect 0.27 s и TLS
+  0.73 s — туннель «работал», но ощущался сломанным (0.7 s до первого байта на каждое соединение).
+  `mts.ru` — 0.037 s / 0.076 s, и .ru-SNI для русского клиента выглядит естественно. Перед сменой
+  проверять у кандидата TLS1.3 + `ALPN h2` + `X25519` (`openssl s_client -tls1_3 -alpn h2`) и
+  `curl -w '%{time_appconnect}'`; `mail.ru`, `gosuslugi.ru`, `rt.ru`, `megafon.ru` на TLS1.3 не
+  отвечают. Менять камо = правка `/root/.secrets/reality.key` (`camo=`), `realitySettings.dest` и
+  `REALITY_CAMO` в `apply_brand.py`, затем `vpn-cfg apply` — ключи и UUID при этом не меняются.
 
 - **Карту перегенерирует `apply_brand.py` (`write_stream_map`) при каждом flip.** Если этого не
   делать, после blue/green-переключения reality-порт указывает на мёртвый цвет: WS работает,
   reality висит — самый коварный симптом.
-- **Инбаунд `reality-in`**: `127.0.0.1:10043`, `security=reality`, `dest/serverNames=www.microsoft.com`,
+- **Инбаунд `reality-in`**: `127.0.0.1:10043`, `security=reality`, `dest/serverNames=mts.ru`,
   `flow=xtls-rprx-vision`, клиенты клонированы из `ws-in` (те же UUID/email).
   `sockopt.acceptProxyProtocol: true` — nginx отдаёт PROXY-префикс, Xray его парсит (проверено
   сквозным тестом через :443); `xray x25519` ключи лежат в `/root/.secrets/reality.key`.
