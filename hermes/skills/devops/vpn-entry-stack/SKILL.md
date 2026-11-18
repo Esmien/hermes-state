@@ -134,6 +134,16 @@ default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
 - **Откат:** `scripts/rollback-443-reality.sh` (снимок `pre-reality-*`: config, apply_brand,
   vpn-bluegreen, nginx.conf; отдельный снимок подписок; затем `apply` + `reload` + проверка).
   Проверка входов после любой правки фронта — `scripts/verify-443.sh`.
+- **Голый IP не должен отвечать нами (18.11.2026).** Без явного `default_server` nginx отдавал
+  любой неизвестный SNI первому vhost'у: снаружи это был серт `*.esmien.ru` и логин Open WebUI.
+  Лечится `99-default-ssl-reject.conf`: `listen 127.0.0.1:9443 proxy_protocol ssl http2
+  default_server; ssl_reject_handshake on;`. **Ловушка:** если в `listen` не повторить
+  `proxy_protocol ssl http2` в точности как у остальных vhost'ов, nginx открывает второй,
+  недостижимый сокет — конфиг валиден, а default не срабатывает и unknown SNI снова отдаёт 200.
+  Симптом — `verify-443.sh` кажет `unknown SNI -> 200`. Плюс `server_tokens off` (в `http {}`).
+- **WS-узел в подписке — по маркеру.** По умолчанию в подписке один REALITY-узел; файл `compat`
+  в каталоге токена возвращает старый WS вторым узлом конкретному человеку (инбаунды 2087/8443 при
+  этом не гаснут — уже скачанные профили доживают без обрыва).
 - **Клиенты:** REALITY умеют v2rayNG, Hiddify, Streisand, Shadowrocket, NekoBox, mihomo/sing-box;
   старые Clash — нет. Подписка не переезжает: тот же `https://<host>:8443/sub/<token>`, тот же токен,
   те же UUID — клиент подтягивает сам (`profile-update-interval 12`).
