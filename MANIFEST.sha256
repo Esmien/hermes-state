@@ -170,7 +170,7 @@ bd492812ca6826885dd392d6d7105700d80f72c15ac6d5e13147e70f9be0734d  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 4bd9e023bc1d473018f30c44ca92afc4e6525e29da19087a60397347cd4df28e  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-e3962077a01e1d5fcdfc908b938b61ec02fc38b08d90f2f31d6aab9bb7d18de0  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+b176c9d3b27a3f0ec905e620351386cc2ee32f92a834b0c5cdfff2162f3c44be  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skills/devops/vpn-entry-stack/references/admin-api.md
 c179b4a872f41c1cefcdadaac4cea93e6a5c078acd357a31957ce4beff90fad5  ./hermes/skills/devops/vpn-entry-stack/references/blocking-risk.md
 8d6e84f7bc3ee1e4ffae4d75bfea06dc398e87cfcf83725a0aed1c33e74518d8  ./hermes/skills/devops/vpn-entry-stack/references/blue-green.md
@@ -180,6 +180,7 @@ c179b4a872f41c1cefcdadaac4cea93e6a5c078acd357a31957ce4beff90fad5  ./hermes/skill
 7095fd85e86f86594ca7d700c8d004b46f45b98bcf261319d612de30f782c1cb  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
 012b6285aead9f08565e65ae14b3dc5dc0e950e833460534ff73f2b8e8a4ca52  ./hermes/skills/devops/vpn-entry-stack/references/client-share-measurements.md
 a2b65c124a21a5df8a743621ef32883ecad026a2d99dbeeb1dbdfb8a01f7343f  ./hermes/skills/devops/vpn-entry-stack/references/control-plane.md
+5aefd97fc87ea563cb0f2aa4e3488200c9f77e2772e986d2a2749fe2cc268916  ./hermes/skills/devops/vpn-entry-stack/references/delivery-channel.md
 a3f06494b3e1e1204e708de39de0800fabf9d4534af45a60f20396a567141475  ./hermes/skills/devops/vpn-entry-stack/references/desktop-mihomo-tun.md
 4d3f6b023d09ef6d7c6e536e9ca4b53bfdcc2d6f7156fe89e761b2c5da924241  ./hermes/skills/devops/vpn-entry-stack/references/domain-and-tls.md
 e2c08037c993dae3a6235dc29d88572726392b8cda781253876013d2e2699bf3  ./hermes/skills/devops/vpn-entry-stack/references/gemini-geo.md
