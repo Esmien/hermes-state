@@ -176,14 +176,14 @@ bd492812ca6826885dd392d6d7105700d80f72c15ac6d5e13147e70f9be0734d  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 4bd9e023bc1d473018f30c44ca92afc4e6525e29da19087a60397347cd4df28e  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-58bae7e10695ed85971f7a57f6d1b4cd376f684affa5d45c0841977f4b8da4b3  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+37190351b3e8a7dacc82aa057736d822a86b33ac7e49b0583f295f94fea7b02e  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skills/devops/vpn-entry-stack/references/admin-api.md
 c179b4a872f41c1cefcdadaac4cea93e6a5c078acd357a31957ce4beff90fad5  ./hermes/skills/devops/vpn-entry-stack/references/blocking-risk.md
 8d6e84f7bc3ee1e4ffae4d75bfea06dc398e87cfcf83725a0aed1c33e74518d8  ./hermes/skills/devops/vpn-entry-stack/references/blue-green.md
 20859ca9bf377ff32d54c18825d8938183bb7938e3a394bb2670005f8c12aacb  ./hermes/skills/devops/vpn-entry-stack/references/borrowed-exit.md
 66782c01771fe6055c8277ce12ec71d0a0401e8fdf8e45f08dc827d1700eb9e0  ./hermes/skills/devops/vpn-entry-stack/references/certificates.md
 402d56b78b0bbbf0a2966cf8de11732e88ef075ab35373acdab7117cb7541696  ./hermes/skills/devops/vpn-entry-stack/references/changing-public-host.md
-f4f62b1eb94a9d3fbb1262be09cd2236b39fc1790f8d12507bb85e25ba9d5c52  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
+0a7eb33acb962b9fd25df835b43f9fc4d1933849657bf003150ed8b2380d929e  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
 012b6285aead9f08565e65ae14b3dc5dc0e950e833460534ff73f2b8e8a4ca52  ./hermes/skills/devops/vpn-entry-stack/references/client-share-measurements.md
 a2b65c124a21a5df8a743621ef32883ecad026a2d99dbeeb1dbdfb8a01f7343f  ./hermes/skills/devops/vpn-entry-stack/references/control-plane.md
 5aefd97fc87ea563cb0f2aa4e3488200c9f77e2772e986d2a2749fe2cc268916  ./hermes/skills/devops/vpn-entry-stack/references/delivery-channel.md
@@ -214,6 +214,7 @@ de3ee4cdeff0604ff300c1daf2b159f51b3a900ac3b9982d40d9a0a375082980  ./hermes/skill
 fe82d1a33902d887eca8a46dcc787385c04c79b332ce6134b47d4eb9d443c166  ./hermes/skills/devops/vpn-entry-stack/scripts/probe-exit-speed.py
 f5cf760b862da18ca4eb5f86f3a6bdecb4e1c9c8d02bb5406b082ecf6c7242c3  ./hermes/skills/devops/vpn-entry-stack/scripts/probe_sub.py
 cc039345637669b6e785ebdbef3fee92aa3003d04f527ccb0954d80baed50ae0  ./hermes/skills/devops/vpn-entry-stack/scripts/probe_user_key.py
+bd334e9c3a9595dd9562319c7f61eb7ae09b149f3986f46b4b1955b088eeafca  ./hermes/skills/devops/vpn-entry-stack/scripts/reality-camo-probe.py
 27d91d66ae5de17a9f664e9dba7b40ea012152f7147b71d994e9c957707dc7e3  ./hermes/skills/devops/vpn-entry-stack/scripts/test_whitelist.py
 e2e06d92a26070b4617c0489ef8d4bc404b6b78a62369773e11e56152c52971c  ./hermes/skills/devops/vpn-entry-stack/scripts/vpn-cfg.sh
 b636706c41c11c4315a183ec960de6928f79f9581c01fb26bbcc95d44a804a9e  ./hermes/skills/devops/vps-disk-reclamation/SKILL.md
@@ -232,7 +233,7 @@ e1ed8ff79c1e9637fbf09dd75c140ad434908d093d62148ebcd1b903832d9933  ./hermes/skill
 6a79dca0feee804a419b1f3e5271d51f769813b96239ed9314e7a2e49c601d7a  ./hermes/skills/devops/vps-infra-installer/references/restore-drill.md
 e8a8b0603b43ed8f24481a6fece6e26966273a410db41de0d0f2f7dec08cccac  ./hermes/skills/devops/vps-infra-installer/scripts/mock-botapi.py
 9322f6721bd100d46dccd4da500d4fcf25c02408fbf3bef2376803265fa5df94  ./hermes/skills/devops/vps-infra-installer/scripts/pty-screen-dump.py
-7b264af20eab2ef7f292187d969452db56527de437bcefbaca5b19453f9ba4c6  ./hermes/skills/devops/vps-network-exposure/SKILL.md
+536b9801d67739c4a68c220df2f2ba94aff34e8b6c682de3f14557c42b3ba5bb  ./hermes/skills/devops/vps-network-exposure/SKILL.md
 5c14899bdd8eb297fa5156aa5e70943a35b1c7e376f70308642ac315fedbc73e  ./hermes/skills/devops/vps-network-exposure/references/acme-and-cert-limits.md
 f2957146829d2a9cbfcc39fac184f38892ec20b8899a57700b2199d4d4627cf4  ./hermes/skills/devops/vps-network-exposure/references/domain-migration-and-dns.md
 b6b5f4ffb966873eaf4cf744f08b49b25720d6bc95fd8185bcf3350c948024b8  ./hermes/skills/devops/vps-network-exposure/references/fail2ban-and-rate-limits.md

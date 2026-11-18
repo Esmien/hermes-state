@@ -103,6 +103,28 @@ alone shows intent, not effect. Confirm the counter sits on the expected rule:
 if the DROP counter does not move while a foreign probe times out, the packet is
 stopped somewhere else and the reasoning is wrong.
 
+## Аудит адреса, а не только портов
+
+Вопрос «мы максимально защитили IP?» — не про открытые порты, а про то, что сам адрес выдаёт.
+Считать и называть отдельно:
+
+1. **Бинд ≠ доступность.** `ss -tlnp` с `0.0.0.0:5432 postgres` ещё не значит «наружу»: на этом
+   хосте порт слушается широко, но с 6 внешних узлов (`check-host`) — timeout, режет сеть хостера.
+   Докер-бридж (`172.17.0.1:9050`) — не публичный вообще, не писать его в список открытых.
+   Доказательства — внешняя проба + лог сервиса; одна строчка `ss` — лишь подозрение.
+2. **Что уже проиндексировано.** `https://internetdb.shodan.io/<ip>` отдаёт `hostnames` — по ним
+   видно, какие домены уже склеены с адресом (у нас: `ib.systems`, `vpn.esmien.qd.je`,
+   `ai.esmien.qd.je`), плюс `cpe`/`vulns` (старый nginx, EOL-тег).
+3. **CT-логи публичны.** Любой выпущенный сертификат публикует имена зоны; имена → адрес.
+4. **Совмещение сервисов.** Если на одном IP и VPN, и веб-стек (WebUI, админка LLM, бот, статистика,
+   поиск — восемь имён), то изоляции нет: блок адреса из-за VPN убивает всё, а интерес к любому
+   сервису раскрывает VPN. Максимум защиты — отдельный IP (или отдельная VPS в другом ASN) под VPN
+   и отдельный домен только под вход и подписку.
+5. **ASN.** `AS41745` (fineproxy) — класс «хостинг/VPN-продавец», снимается пассивно, без DPI.
+
+Вердикт владельцу в такой форме: «защищён протокол, а не адрес», затем что уже хорошо (голый IP и
+unknown SNI не отвечают, только ключи по SSH, `server_tokens off`), затем что светит адрес.
+
 ## SSH on this host
 
 `PasswordAuthentication` is **off**: `sshd -T | grep -i
@@ -202,8 +224,8 @@ credential, но запрос пришёл вообще без ключа — э
 а публичная админка — лишняя дверь.
 
 **`:443` — это nginx stream, а не Xray** (с 18.11.2026): `ssl_preread` + карта в
-`/etc/nginx/stream.d/443-map.conf` (`www.cloudflare.com` → mtg, `www.microsoft.com` →
-REALITY-инбаунд активного цвета, default → `127.0.0.1:9443` со всеми vhost'ами). Карту
+`/etc/nginx/stream.d/443-map.conf` (`www.cloudflare.com` → mtg, `cdn.jsdelivr.net` →
+REALITY-инбаунд активного цвета, `vpn.esmien.ru` → VLESS+Vision+TLS, default → `127.0.0.1:9443` со всеми vhost'ами). Карту
 перегенерирует `apply_brand.py` при каждом blue/green flip — править её руками бессмысленно.
 Проверка всех входов: `scripts/verify-443.sh`; полный откат REALITY:
 `scripts/rollback-443-reality.sh`. Детали и ловушки — скилл `vpn-entry-stack`. Туннель проверяется настоящим клиентом (HTTPS

@@ -6,7 +6,7 @@ author: VPS Admin
 license: MIT
 ---
 
-# VPN entry stack (VLESS over WebSocket + TLS)
+# VPN entry stack (VLESS: REALITY / Vision+TLS / WS / hysteria2)
 
 ## When to Use
 
@@ -113,7 +113,8 @@ Full text → [references/subscription-shapes.md](references/subscription-shapes
 
 ```
 www.cloudflare.com -> 127.0.0.1:10445   # mtg, proxy_protocol
-mts.ru             -> 127.0.0.1:10043   # REALITY, активный цвет (+1000 для b)
+cdn.jsdelivr.net   -> 127.0.0.1:10043   # REALITY, активный цвет (+1000 для b)
+vpn.esmien.ru      -> 127.0.0.1:10055   # VLESS+Vision+TLS (свой домен), +1000 для b
 default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
 ```
 
@@ -143,17 +144,35 @@ default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
   not complete successfully`, у клиента «ничего не работает» (симптом: `stream-443.log` показывает
   `sni=` и `in≈4KB out≈9.5KB`, а в `access.log` ни одной строки `reality-in`). Рабочий выбор —
   `cdn.jsdelivr.net` (anycast, 5/5, ~0.15 s сквозь туннель). **Критерий отбора: не популярность, а
-  отсутствие бот-защиты.** Проверять харнессом: временный REALITY-сервер с `dest=<кандидат>` + клиент
-  + 5 запросов через SOCKS; 5/5 — годится, 4/5 — нет. Перед сменой также TLS1.3 + `ALPN h2` +
+  отсутствие бот-защиты.** Проверять харнессом: `scripts/reality-camo-probe.py <кандидаты> --fp chrome,safari,ios`
+  (временный REALITY-сервер на каждого кандидата + клиент + 5 запросов через SOCKS; живой вход не трогает);
+  5/5 — годится, 4/5 — нет. Перед сменой также TLS1.3 + `ALPN h2` +
   `X25519` (`openssl s_client -tls1_3 -alpn h2`); `mail.ru`, `gosuslugi.ru`, `rt.ru`, `megafon.ru`
   на TLS1.3 не отвечают. Менять камо = правка `/root/.secrets/reality.key` (`camo=`),
   `realitySettings.dest` и `REALITY_CAMO` в `apply_brand.py`, затем `vpn-cfg apply` — ключи и UUID
   не меняются, но подписку клиентам надо обновить (в ссылке меняется `sni`).
+- **`fp` клиента решает, пройдёт ли аутентификация.** Харнесс по отпечаткам на REALITY-входе:
+  `chrome` 3/3, `safari` 3/3, **`ios` 0/3** — сервер видит невалидный hello и уходит в fallback на
+  камо-сайт, клиент показывает «подключено, интернета нет». В ссылке всегда `fp=chrome`; если
+  приложение навязывает свой отпечаток и переключателя в нём нет — это лечится сменой приложения,
+  а не сервера.
+- **«Я обновил подписку» ≠ профиль обновился.** iOS-клиенты мержат узлы, а не перезаписывают их:
+  после смены камо клиент продолжал стучаться со старым `sni=`, а в его списке новый узел висел с
+  `latency n/a`. Проверять надо не дату в приложении и не слова, а `stream-443.log` его IP: с каким
+  SNI стучится и сколько байт приходит; совпадение с камо - единственное доказательство, что клиент
+  доехал до нового узла.
+- **Vision-фолбэк обязателен.** TLS-сервер, который завершает рукопожатие и молчит, — сам по себе
+  отпечаток. `vision-in` отдаёт всё, что не VLESS, в локальный nginx-стаб:
+  `"fallbacks": [{"dest": "127.0.0.1:8091"}]` + `root /var/www/vpn-stub`, и браузер на
+  `vpn.esmien.ru:443` получает валидный серт и обычную 200-страницу.
+- **Порт для фолбэка выбирать по `ss -tlnp`, а не по памяти.** `127.0.0.1:8081` был занят SearXNG:
+  фолбэк отдавал `200`, но это была чужая страница, и проверка «код 200» ничего не заметила.
+  Сверять тело/размер ответа (`size=181` у заглушки), а не только статус.
 
 - **Карту перегенерирует `apply_brand.py` (`write_stream_map`) при каждом flip.** Если этого не
   делать, после blue/green-переключения reality-порт указывает на мёртвый цвет: WS работает,
   reality висит — самый коварный симптом.
-- **Инбаунд `reality-in`**: `127.0.0.1:10043`, `security=reality`, `dest/serverNames=mts.ru`,
+- **Инбаунд `reality-in`**: `127.0.0.1:10043`, `security=reality`, `dest/serverNames=cdn.jsdelivr.net`,
   `flow=xtls-rprx-vision`, клиенты клонированы из `ws-in` (те же UUID/email).
   `sockopt.acceptProxyProtocol: true` — nginx отдаёт PROXY-префикс, Xray его парсит (проверено
   сквозным тестом через :443); `xray x25519` ключи лежат в `/root/.secrets/reality.key`.
@@ -164,8 +183,10 @@ default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
 - **Логи:** пути в `config.json` ведут внутрь контейнера, `/var/log/xray` — docker-volume. Симлинк
   `/var/log/xray -> /var/lib/docker/volumes/<id>/_data` даёт хвост и logrotate на хосте (14 дней,
   `copytruncate`). В access-логе видно `[reality-in -> direct] email: …` — этого хватает для разбора.
-- **Подписка:** REALITY-узел — единственный по умолчанию, адрес — **IP, а не домен** (никакого DNS
-  для ISP). Старый WS и UDP-резерв выдаются только токенам с маркером `compat`.
+- **Подписка несёт четыре узла, и все — всем токенам** (решение владельца: это разные эшелоны,
+  каждый страхует остальные). Порядок: `REALITY` (адрес — **IP, а не домен**: DNS не нужен и не
+  светится), `Vision` (VLESS+TLS на своём домене), `совместимость` (WS 8443), `UDP резерв`
+  (hysteria2 8443/udp). Гейтинг маркерами `compat`/`udp` снят — не возвращать его без просьбы.
   `make_sub.py` берёт pbk/sid/camo из `/root/.secrets/reality.key` и не выпускает узел, если
   файла нет. «Клиент говорит, что VPN мёртв, а сервер жив» — читать `stream-443.log` по его IP:
   нет ни одного входа с камо-SNI ⇒ клиент к этому узлу не ходил вообще (устаревший профиль), а
@@ -181,9 +202,10 @@ default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
   `proxy_protocol ssl http2` в точности как у остальных vhost'ов, nginx открывает второй,
   недостижимый сокет — конфиг валиден, а default не срабатывает и unknown SNI снова отдаёт 200.
   Симптом — `verify-443.sh` кажет `unknown SNI -> 200`. Плюс `server_tokens off` (в `http {}`).
-- **WS-узел в подписке — по маркеру.** По умолчанию в подписке один REALITY-узел; файл `compat`
-  в каталоге токена возвращает старый WS вторым узлом конкретному человеку (инбаунды 2087/8443 при
-  этом не гаснут — уже скачанные профили доживают без обрыва).
+- **Лишний узел в списке — это класс жалоб «ничего не работает».** Клиент выбирает нерабочий узел
+  (замороженный UDP, устаревший WS, старый SNI) и делает вывод про весь VPN, хотя сервер жив.
+  Поэтому у каждого узла в названии видно, что это запасной вход, а жалобу проверяют по
+  `stream-443.log`/`access.log` его IP, а не по словам «обновил подписку».
 - **Клиенты:** REALITY умеют v2rayNG, Hiddify, Streisand, Shadowrocket, NekoBox, mihomo/sing-box;
   старые Clash — нет. Подписка не переезжает: тот же `https://<host>:8443/sub/<token>`, тот же токен,
   те же UUID — клиент подтягивает сам (`profile-update-interval 12`).
@@ -220,11 +242,11 @@ The GNOME «Добавить VPN» dialog offers only OpenVPN / PPTP / WireGuard
 
 When the owner says he does not want to keep a client window open, the shape is a **daemon in TUN mode**, not a GUI app (Hiddify/v2rayA need the window; a local proxy on `127.0.0.1` only reaches apps that honour a system proxy). mihomo over the `clash.yaml` subscription is the cheapest base: that profile is already a complete config, so only a `tun:` block plus `dns.listen` get injected and can be re-injected on every refresh. Full recipe, systemd units, verification and pitfalls: `references/linux-always-on-client.md`; the GUI-free desktop variant (merge script, unit files, FlClash/`add route 0: file exists` trap) — `references/desktop-mihomo-tun.md`.
 
-## UDP backup entry — Hysteria2 (UDP/443)
+## UDP backup entry — Hysteria2 (UDP/8443)
 
 TSPU freeze counts **packets in one TCP connection** (~25 packets / ~16 KB, ~8 on mobile) and hangs it in both directions; the connection does not reset, the app just waits. UDP is untouched by that rule, so a UDP transport is the only thing that survives once a network is frozen. Measured 10.11.2026 over 435 endpoints / 154 hosters: 87% pass from RU, the rest freeze — and the freeze is per **network/AS**, whole companies at once (OVH, Hetzner incl. US/SG, DigitalOcean, Vultr, BuyVM, Scaleway, Gcore-type nets frozen; HostHatch, FlokiNET, Psychz, Time4VPS, Serverius pass). Check the ASN before recommending any hoster, and never promise UDP as immunity: blocking all UDP is a one-line rule, they just have not paid the collateral cost yet.
 
-Live shape: `hysteria-server.service` → `/usr/local/bin/hysteria server -c /etc/hysteria/config.yaml`, listen `:443` **UDP**, wildcard cert, `obfs: salamander`, masquerade proxied to `http://127.0.0.1` (a probe without the obfs password lands on nginx and sees a normal page). Secrets in `/root/.secrets/hysteria-owner.txt` (0600); repo carries `hysteria/config.example.yaml`, both units and `scripts/install-hysteria.sh` — a rebuild is `bash scripts/install-hysteria.sh` and it keeps existing secrets.
+Live shape: `hysteria-server.service` → `/usr/local/bin/hysteria server -c /etc/hysteria/config.yaml`, listen `:8443` **UDP** (было `:443` — у части операторов этот порт к нашему IP режется так же, как TCP), wildcard cert, `obfs: salamander`, masquerade proxied to `http://127.0.0.1` (a probe without the obfs password lands on nginx and sees a normal page). Secrets in `/root/.secrets/hysteria-owner.txt` (0600); repo carries `hysteria/config.example.yaml`, both units and `scripts/install-hysteria.sh` — a rebuild is `bash scripts/install-hysteria.sh` and it keeps existing secrets.
 
 **Hysteria must not dial the internet itself.** A bare UDP entry puts every user in Estonia: Gemini refuses and Gosuslugi 403s, which reads as «UDP не работает». The fix is one hop: Xray gets a loopback SOCKS inbound (`tag: udp-in`, port 10089, `udp: true`) and hysteria's only outbound is `type: socks5 → 127.0.0.1:10809`. That 10809 is `vpn-socks-relay.py`, which re-reads `/root/vpn-router/vpn-color` on every connection and dials 10089/11089 — because `derive_b` shifts *every* inbound port by +1000, so a static socks port breaks silently on the next blue/green flip. With the relay, server-side routing is shared: Google → FR, `.ru` → Moscow, rest → EE. Verify by resetting xray outbound counters, pulling Gosuslugi and `generate_204` through the hysteria client, and reading `p15`/`fr` deltas — not by trusting the config.
 
@@ -236,7 +258,7 @@ Per-token roll-out, never global: `python3 /root/vpn-router/hy2_users.py --apply
 
 **After any auth change, the symptom is a dead node, not a broken server.** Single password → per-user `userpass`, or a rotation, leaves every already-imported node holding a stale credential; the app reports timeout, the server is fine. Say «обнови подписку» before touching anything, and prove it with `journalctl -u hysteria-server` (`client connected {id: ...}`) plus xray's `inbound>>>udp-in>>>traffic` counters — a growing counter means the tunnel carries traffic. Triage order for this entry, including the tcpdump recipe and what a local loopback test does *not* prove: `references/client-drop-triage.md` §4e.
 
-`build_meta` appends the extra to `list.txt` and to clash `proxies`, so every file outside `extra_nodes.json`/`list.txt`/`clash.yaml` stays byte-identical — verify with a `diff -rq` against a backup before claiming nothing broke. Link shape: `hysteria2://<user>:<pw>@<host>:443/?sni=<host>&obfs=salamander&obfs-password=<obfs>#name`. v2rayNG cannot read hy2 and just will not import that node; Hiddify, NekoBox, sing-box and Clash Meta can. `singbox.json` is not extended by extras — a sing-box user gets the TCP node only. The clash group is `type: select` on purpose: do not turn it into url-test without saying so, a silent path change is what makes «connected, but Gemini says no» invisible.
+`build_meta` appends the extra to `list.txt` and to clash `proxies`, so every file outside `extra_nodes.json`/`list.txt`/`clash.yaml` stays byte-identical — verify with a `diff -rq` against a backup before claiming nothing broke. Link shape: `hysteria2://<user>:<pw>@<host>:8443/?sni=<host>&obfs=salamander&obfs-password=<obfs>#name`. v2rayNG cannot read hy2 and just will not import that node; Hiddify, NekoBox, sing-box and Clash Meta can. `singbox.json` is not extended by extras — a sing-box user gets the TCP node only. The clash group is `type: select` on purpose: do not turn it into url-test without saying so, a silent path change is what makes «connected, but Gemini says no» invisible.
 
 ## Домен как точка отказа — доставку отделить от туннеля
 
