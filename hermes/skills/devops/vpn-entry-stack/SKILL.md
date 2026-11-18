@@ -167,7 +167,13 @@ The owner removed automatic failover: `vpn-failover.timer` is `disabled`/`inacti
 
 ## Traps worth memorising
 
-The three that cost the most, verbatim from `references/pitfalls.md`:
+The four that cost the most, verbatim from `references/pitfalls.md`:
+
+- **Правка nginx, сделанная только в `/etc/nginx/conf.d/vpn-*.conf`, живёт до следующего `vpn-cfg apply`.**
+  Тот запускает `apply_brand.py`, а он перегенерирует эти vhosts из своего шаблона — вместе с `location = /`.
+  Ручная заглушка молча откатывается: ответ на `/` вернулся к прежнему короткому `ok` уже после проверки,
+  и это увидел владелец, а не я. Любую правку этих двух vhosts вносить в шаблон `apply_brand.py` (и в копию
+  `vpn-service/router/apply_brand.py`), затем `python3 apply_brand.py && nginx -t && systemctl reload nginx`.
 
 - **Never dump an outbound as JSON.** Trojan credentials live in `settings.servers[].password`, VLESS in
   `settings.vnext[].users[].id` — a "show me the outbound" print leaks the provider's shared keys and a
