@@ -119,12 +119,17 @@ default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
 
 - **Камо-SNI выбирается замером, а не вкусом.** REALITY пересылает ClientHello в `dest`, и этот RTT
   платится на **каждом новом соединении**. `www.microsoft.com` отсюда давал connect 0.27 s и TLS
-  0.73 s — туннель «работал», но ощущался сломанным (0.7 s до первого байта на каждое соединение).
-  `mts.ru` — 0.037 s / 0.076 s, и .ru-SNI для русского клиента выглядит естественно. Перед сменой
-  проверять у кандидата TLS1.3 + `ALPN h2` + `X25519` (`openssl s_client -tls1_3 -alpn h2`) и
-  `curl -w '%{time_appconnect}'`; `mail.ru`, `gosuslugi.ru`, `rt.ru`, `megafon.ru` на TLS1.3 не
-  отвечают. Менять камо = правка `/root/.secrets/reality.key` (`camo=`), `realitySettings.dest` и
-  `REALITY_CAMO` в `apply_brand.py`, затем `vpn-cfg apply` — ключи и UUID при этом не меняются.
+  0.73 s — туннель «работал», но ощущался сломанным. `mts.ru` — быстро (0.04 s), НО за ним WAF:
+  relayed-хендшейк умирает, в `error.log` — `REALITY: processed invalid connection … handshake did
+  not complete successfully`, у клиента «ничего не работает» (симптом: `stream-443.log` показывает
+  `sni=` и `in≈4KB out≈9.5KB`, а в `access.log` ни одной строки `reality-in`). Рабочий выбор —
+  `cdn.jsdelivr.net` (anycast, 5/5, ~0.15 s сквозь туннель). **Критерий отбора: не популярность, а
+  отсутствие бот-защиты.** Проверять харнессом: временный REALITY-сервер с `dest=<кандидат>` + клиент
+  + 5 запросов через SOCKS; 5/5 — годится, 4/5 — нет. Перед сменой также TLS1.3 + `ALPN h2` +
+  `X25519` (`openssl s_client -tls1_3 -alpn h2`); `mail.ru`, `gosuslugi.ru`, `rt.ru`, `megafon.ru`
+  на TLS1.3 не отвечают. Менять камо = правка `/root/.secrets/reality.key` (`camo=`),
+  `realitySettings.dest` и `REALITY_CAMO` в `apply_brand.py`, затем `vpn-cfg apply` — ключи и UUID
+  не меняются, но подписку клиентам надо обновить (в ссылке меняется `sni`).
 
 - **Карту перегенерирует `apply_brand.py` (`write_stream_map`) при каждом flip.** Если этого не
   делать, после blue/green-переключения reality-порт указывает на мёртвый цвет: WS работает,
