@@ -267,3 +267,5 @@ limit_req_zone $client_ip zone=<svc>_api:10m rate=5r/s;
 
 - Which services exist, their ports and domains: `ai-stack` skill.
 - Removing a container/image and reclaiming its disk: `vps-disk-reclamation` skill.
+- Репутация адреса в листах, «как быстро уйдёт в бан», разбор чужой VPN-подписки:
+  `ip-reputation-and-ban-risk` skill.
