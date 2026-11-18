@@ -271,13 +271,7 @@ default -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol; unknown SNI -> r
 - **Subscription expiry** — read it from the provider's `subscription-userinfo` header, not the panel; daily 07:00 UTC timer warns at 3/2/1 days → `references/subscription-expiry.md`
 - **Upstream subscriptions** — relaying third-party nodes as exits → `references/upstream-subscriptions.md`
 - **RU split** — banks / gosuslugi / VK / OZON / WB direct or via the RU exit → `references/ru-split.md`
-- **Gemini / geo** — «Gemini пока не поддерживается в вашей стране» — это **страна аккаунта Google**, а
-  не наш выход: 18.11.2026 страница рендерилась нормально через EE, FR, FI и даже через RU-релеи
-  (`p15`/`p17` к тому же выходят из РФ), а плашки в HTML нет вообще — её рисует JS по ответу API.
-  Значит grep по HTML ничего не доказывает, и перебор выходов её не снимает; лечится сменой страны
-  аккаунта (`myaccount.google.com`) или аккаунтом, созданным в поддерживаемой стране. Инструмент
-  (`scripts/gemini_geo_check.py`, `references/gemini-geo.md`) годится для проверки IP-гео, не для этой
-  плашки.
+- **Gemini / geo** — плашка о неподдерживаемой стране не доказывает ни проблему аккаунта, ни причину в IP: отдельно проверяй путь конкретного клиента и выходы. HTTP 200, текст сырого HTML и неавторизованный браузер не доказывают работу авторизованного Gemini. Не утверждай, что Google сверяет страны разных запросов: это не подтверждено. Гео-маркер в `gemini_geo_check.py` — диагностическая эвристика, а не доказанное решение Google о доступности.
 - **Whitelist mode** — the LTE whitelist list goes to the client as links, never through this server → `references/whitelist-mode.md`
 - **Borrowed exit** — a third-party subscription used as an exit → `references/borrowed-exit.md`
 - **Routing watchdog** — a timer rewrites routing every minute; edits must survive it → `references/routing-watchdog.md`
