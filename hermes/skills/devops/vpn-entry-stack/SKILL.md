@@ -81,8 +81,11 @@ Server-side scenarios (Google→FR/FI, RU→Moscow or an owned RU box; YouTube d
 Estonian exit) plus a subscription that exposes **one** node, and the jittered watchdog that falls
 a dead scenario group back to Estonia: `references/scenario-routes.md`. Do not offer a user a
 second node to tap **from a provider subscription** — that is provider traffic and ban risk, not a
-feature. A second node that is our own transport (the UDP/hysteria2 fallback) is the exception and
-ships to everyone: see the Hysteria2 section below for how it is rolled out.
+feature. A second node that is our own transport (the UDP/hysteria2 fallback) or the legacy WS entry
+is **not** shipped by default either: it appears only for token dirs carrying a `compat` marker, and
+the default bundle carries exactly one node. Reason: a client that selects a throttled UDP node
+concludes the whole VPN is dead and reports «не работает», while the server is fine — one node removes
+that class of report entirely.
 
 Two rules apply to every scenario edit: a balancer tag must also be listed in
 `observatory.subjectSelector` (otherwise `leastPing` has no data for it and the matching requests
@@ -137,9 +140,13 @@ default            -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol
 - **Логи:** пути в `config.json` ведут внутрь контейнера, `/var/log/xray` — docker-volume. Симлинк
   `/var/log/xray -> /var/lib/docker/volumes/<id>/_data` даёт хвост и logrotate на хосте (14 дней,
   `copytruncate`). В access-логе видно `[reality-in -> direct] email: …` — этого хватает для разбора.
-- **Подписка:** REALITY-узел идёт первым, адрес — **IP, а не домен** (никакого DNS для ISP),
-  старый WS остаётся вторым узлом «…(совместимость)». `make_sub.py` берёт pbk/sid/camo из
-  `/root/.secrets/reality.key` и не выпускает узел, если файла нет.
+- **Подписка:** REALITY-узел — единственный по умолчанию, адрес — **IP, а не домен** (никакого DNS
+  для ISP). Старый WS и UDP-резерв выдаются только токенам с маркером `compat`.
+  `make_sub.py` берёт pbk/sid/camo из `/root/.secrets/reality.key` и не выпускает узел, если
+  файла нет. «Клиент говорит, что VPN мёртв, а сервер жив» — читать `stream-443.log` по его IP:
+  нет ни одного входа с камо-SNI ⇒ клиент к этому узлу не ходил вообще (устаревший профиль), а
+  пустой `sni=` с `bytes_in=0` и `time=30.000` — это открытый сокет без ClientHello, тоже клиент.
+  Порядок разбора — `references/client-drop-triage.md` → 4g.
 - **Откат:** `scripts/rollback-443-reality.sh` (снимок `pre-reality-*`: config, apply_brand,
   vpn-bluegreen, nginx.conf; отдельный снимок подписок; затем `apply` + `reload` + проверка).
   Проверка входов после любой правки фронта — `scripts/verify-443.sh`.

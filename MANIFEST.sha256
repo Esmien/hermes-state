@@ -147,7 +147,7 @@ a223c712bda9db0f991543d01db394a809e6a98336198fa0cbf9dbbe729b1df3  ./hermes/skill
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
 4a95b29900098971248d1f4d1a9cf40ea4f785ae5d1b72e7488f14e11d2ef1e9  ./hermes/skills/devops/ip-reputation-and-ban-risk/SKILL.md
 2b9819f24334d6bbe543d04ddb58754bff94a09d56e6bb64c3db209b7d86db58  ./hermes/skills/devops/ip-reputation-and-ban-risk/references/blacklist-and-classifier-semantics.md
-6993875289b7bc67bc5b32f100449d6182eba76bdb961a5293d2e7142ec85af1  ./hermes/skills/devops/ip-reputation-and-ban-risk/references/vpn-entry-stealth.md
+cbabf3f35abc466e8efe93c048c9e8b807f00b985af034dd5a608e6c5fc9d0a6  ./hermes/skills/devops/ip-reputation-and-ban-risk/references/vpn-entry-stealth.md
 45af66b811359dc7c8a378b8d92c7fa67d1a2fa72338d7295591910f61918b1b  ./hermes/skills/devops/ip-reputation-and-ban-risk/references/vpn-subscription-triage.md
 12b6eb0d33b4091bb0e4768b5cb5370bbf63ef3a7ef705e8942ad05807236125  ./hermes/skills/devops/ip-reputation-and-ban-risk/scripts/ip-reputation.py
 95cfaed0ab99a7851e7417043e2a4571d0a13a06b6202378af02551b7c2abf82  ./hermes/skills/devops/litellm-fallout-triage/SKILL.md
@@ -176,14 +176,14 @@ bd492812ca6826885dd392d6d7105700d80f72c15ac6d5e13147e70f9be0734d  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 4bd9e023bc1d473018f30c44ca92afc4e6525e29da19087a60397347cd4df28e  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-33a8b666f50435e59c0e91404635a481b29901490450f3c0e03f88875c498397  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+36f1af9a25affd803ff5b5aae5cf8bea07d2587770782452e67266d6ecfaed99  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skills/devops/vpn-entry-stack/references/admin-api.md
 c179b4a872f41c1cefcdadaac4cea93e6a5c078acd357a31957ce4beff90fad5  ./hermes/skills/devops/vpn-entry-stack/references/blocking-risk.md
 8d6e84f7bc3ee1e4ffae4d75bfea06dc398e87cfcf83725a0aed1c33e74518d8  ./hermes/skills/devops/vpn-entry-stack/references/blue-green.md
 20859ca9bf377ff32d54c18825d8938183bb7938e3a394bb2670005f8c12aacb  ./hermes/skills/devops/vpn-entry-stack/references/borrowed-exit.md
 66782c01771fe6055c8277ce12ec71d0a0401e8fdf8e45f08dc827d1700eb9e0  ./hermes/skills/devops/vpn-entry-stack/references/certificates.md
 402d56b78b0bbbf0a2966cf8de11732e88ef075ab35373acdab7117cb7541696  ./hermes/skills/devops/vpn-entry-stack/references/changing-public-host.md
-7095fd85e86f86594ca7d700c8d004b46f45b98bcf261319d612de30f782c1cb  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
+f4f62b1eb94a9d3fbb1262be09cd2236b39fc1790f8d12507bb85e25ba9d5c52  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
 012b6285aead9f08565e65ae14b3dc5dc0e950e833460534ff73f2b8e8a4ca52  ./hermes/skills/devops/vpn-entry-stack/references/client-share-measurements.md
 a2b65c124a21a5df8a743621ef32883ecad026a2d99dbeeb1dbdfb8a01f7343f  ./hermes/skills/devops/vpn-entry-stack/references/control-plane.md
 5aefd97fc87ea563cb0f2aa4e3488200c9f77e2772e986d2a2749fe2cc268916  ./hermes/skills/devops/vpn-entry-stack/references/delivery-channel.md
