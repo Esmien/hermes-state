@@ -96,6 +96,10 @@ Updater reads the URL from that file, so a new token is one command, no editing 
 
 ## Pitfalls
 
+- **Два клиента на одной машине — сначала спросить, какой именно «не работает».** У владельца на ПК стоят и наш `esmien-vpn` (mihomo + TUN `esmien0`), и FlClash; после обновления FlClash Gemini там заработал, а CLI-клиент — нет. Фраза «VPN не работает с ПК» без имени клиента ведёт к раскопкам маршрутов на сервере, хотя выход общий и сервер в этот момент исправен. Разделять так: `sudo vpn engine status` (версия движка) и `journalctl -u mihomo -n 25 --no-pager` (ошибка разбора профиля), и только потом трогать сервер.
+- **`dns-hijack` без `dns:`-блока — перехват в пустоту.** `merge_profile.py` добавляет `tun` с `dns-hijack: any:53` и вставляет `listen: 0.0.0.0:1053` только если блок `dns:` уже есть; в нашей подписке его нет, поэтому слушать 1053 нечему. В итоге CLI-клиент резолвит системным резолвером и отдаёт в туннель «сырые» IP, а FlClash со своими fake-ip/DNS ведёт себя иначе — два клиента на одном сервере дают разный результат, и это читается как «протокол не поддерживается». Правильно: если `dns:` отсутствует — дописывать его целиком (`enable`, `listen`, `enhanced-mode: fake-ip`, `nameserver`), а не только `listen`.
+- **Поле `username` в hysteria2 есть только в свежих сборках mihomo.** Старое ядро может отбросить весь профиль на незнакомом ключе, и узел просто не появится. `vpn engine install` качает latest с GitHub API — из РФ этот вызов может не пройти, так что версию проверять, а не предполагать.
+
 - **The owner pastes the info-page URL, not the subscription URL.** Our link sheet shows
   `…/u/<token>` (the human page) more prominently than `…/sub/<token>`, so `vpn edit` gets `/u/` and
   answers «200, но это не clash.yaml». The editor must therefore fetch the URL as given, and on
