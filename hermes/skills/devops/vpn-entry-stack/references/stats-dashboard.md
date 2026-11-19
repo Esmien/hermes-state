@@ -40,6 +40,15 @@ Fix: put a fresh `uuid.uuid4()` into `users.json`, re-run `users.py sync` (it no
 
 Row names are the owner's to dictate: he names the shared row after the guest holding it («Саша») and keeps his own («Владислав (главный)»). Use his strings verbatim — a descriptive invention like «Главный ключ (мой + Саша)» reads as noise and gets rejected. Labels carry no explanation inside them.
 
+## Счётчики не зависят от адресов
+
+«Трафик из нового входа/выхода в статистику попал?» решается механизмом, а не сверкой адресов:
+счётчики живут на `user>>>` (кто, по инбаунду) и `outbound>>>` (куда, по тегу). Смена IP входа
+или `sendThrough` у выхода не меняет ни одного ключа — цифры продолжают идти в те же строки.
+Меняется только смысл подписи: строка «Эстония (основной)» — это тег `direct`, и после
+`direct.sendThrough: <edge>` она означает «выход через edge», а не «выход с brand». Доказательство
+— рост счётчика между двумя ручными запусками `stats_collect.py`, а не дата в `data.json`.
+
 ## Dashboard
 
 - Collector: `/root/vpn-router/stats_collect.py`, run by `vpn-stats.timer` every 5 min (state `/var/lib/vpn-stats/state.json`, page data `/var/www/vpn-stats/data.json`).
@@ -70,7 +79,20 @@ A block on the same page creates profiles: input name → POST `api/new` → thr
 - **State keys must be the raw identity, never the display label.** With `state["users"]`/`counters` keyed by the label, every rename (and the owner renames labels) missed the old counter key, took `prev = 0` and added the whole counter again — the row doubled. Keep state keyed by `email.split(":")[-1]` with a `@legacy` sentinel for the bare-tag key and map to the display name (`LABELS`) only at render time; renames then cost nothing.
 - Route totals must be **aggregated by human label**, not by tag: tags `p1…p23` all map to one "Подписка (узлы провайдера)" row, otherwise the page shows a dozen identical rows with "—".
 - `/etc/nginx/vpn-stats.htpasswd` must be `root:www-data 0640`; plain `0640 root:root` gives **500** (nginx workers are www-data), not 401.
-- No emoji flags in generated HTML: they render as tofu in headless Chromium and show up in screenshots.
+- **Иконки рисует страница, данные остаются текстом.** Флаги — инлайновые SVG (три `<rect>`),
+  лого Gemini — инлайновый SVG с их градиентом; в `data.json` подпись простая
+  («Нидерланды (Gemini)»). Эмодзи в данных — источник рассинхрона: часть устройств отдаёт tofu,
+  у эмодзи-флагов на разных ОС разная ширина, а клиенты VPN вообще превращают в аватарку только
+  флаг, остальные эмодзи рисуют в строке рядом с серой заглушкой.
+- **Скриншот — не измерительный прибор.** Headless Chromium держит минимальную ширину окна
+  (~500 px): `--window-size=390,1100` рендерит на 500, поэтому «мобильный» скриншот показывает
+  не тот экран, что у владельца, а `vision_analyze` по такому PNG уверенно «не находит» числа,
+  которые в DOM есть (и наоборот — видит флаг Эстонии там, где нарисован нидерландский).
+  Разметку проверять измерением: временная копия `_debug.html` со скриптом, который через
+  ~2.5 с пишет в `document.title` JSON `{clientWidth, scrollWidth, rects .rows .v}`, и
+  `chrome --headless=new --dump-dom … | grep -o '<title>.*</title>'`. `clientWidth == scrollWidth`
+  = горизонтального переполнения нет; наличие и текст значений — тем же `--dump-dom` с разбором
+  HTML в Python. Глазами по картинке проверять только косметику.
 - Routes with zero traffic are filtered out of the page; an empty `routes` list is legitimate right after a state reset.
 - **A 5-minute timer is too slow for an admin page.** Every load must refresh on demand: the page `POST`s `api/refresh` (which runs `stats_collect.py` synchronously, 90 s timeout) and only then reads `data.json`, and create/reissue call the same `load()` instead of leaving a stale table until the next tick. Wrap the collector body in `fcntl.flock(..., LOCK_EX | LOCK_NB)` on `/var/lib/vpn-stats/lock` and exit 0 when the lock is taken — otherwise the timer and a manual refresh can compute the same delta twice.
 - Retired `/u/` pages must be pruned by the page generator, not just left on disk: after a delete or a reissue the old token's file keeps answering 200 with dead links. Check both ways after the operation — retired → 404, live → 200 — and keep the page count equal to tokens × kinds (two per person).

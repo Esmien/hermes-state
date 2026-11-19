@@ -64,7 +64,8 @@ with `vpn-cfg status` instead of trusting a number from a report.
 
 Adding a route means four coordinated edits, in this order: append an inbound (`tag`, 127.0.0.1, next free port, same client id, `wsSettings.path`) to `config.json`, add the outbound and a routing rule keyed on `inboundTag` **before** the catch-all `tcp,udp → direct` rule, add `paths` + `upstreams` entries to `brand.json`, then `apply_brand.py && nginx -t && systemctl reload nginx && vpn-cfg apply` (not a bare `docker restart` — `apply` proves the routes answer and reverts a broken config). Verify by dialling the new path through the tunnel and checking the egress with ipinfo — not by reading the config back.
 
-Files: `/root/vpn-router/{config.json,brand.json,apply_brand.py,make_sub.py,make_template.py,import_sub.py,users.py,probe_sub.py,test_whitelist.py,gemini_geo_check.py,sub_expiry.py,route_ru.py,subs.json,users.json,failover.py,certbot_retry.py,provision_vpn_host.py}`, subscriptions in `/var/www/esmien-sub/<token>/`. Editing, applying and rolling back: `vpn-cfg` (`references/router-ops.md`). Per-user/route traffic counters and «кто пользуется подписками»: `references/usage-stats.md`. When a client reports that the VPN "keeps dropping": `references/client-drop-triage.md` — probe the server end to end before touching anything, and start with DNS: an entry whose name no longer resolves looks exactly like a dead VPN (app can't ping any node, browser still works from cache). **Один мёртвый вход ≠ мёртвый адрес:** прежде чем говорить «режут IP», сверить все входы в одном окне — если WS и UDP несут трафик, душат конкретный транспорт, а не адрес.
+Files: `/root/vpn-router/{config.json,brand.json,apply_brand.py,make_sub.py,make_template.py,import_sub.py,users.py,probe_sub.py,test_whitelist.py,gemini_geo_check.py,sub_expiry.py,route_ru.py,subs.json,users.json,failover.py,certbot_retry.py,provision_vpn_host.py}`, subscriptions in `/var/www/esmien-sub/<token>/`. Editing, applying and rolling back: `vpn-cfg` (`references/router-ops.md`). Per-user/route traffic counters and «кто пользуется подписками»: `references/usage-stats.md`;
+сама панель (иконки/вёрстка, счётчики и смена адресов, генератор профилей) — `references/stats-dashboard.md`. **Счётчики не зависят от адресов**: они живут на `user>>>` и `outbound>>>`, поэтому смена входа или `sendThrough` ни одной строки не сбрасывает — меняется только смысл подписи («Эстония (основной)» = тег `direct`). Вёрстку панели проверять измерением (`--dump-dom` + метрики в `document.title`), а не скриншотом: headless Chromium держит ширину окна ~500 px и картинка врёт про обрезания. When a client reports that the VPN "keeps dropping": `references/client-drop-triage.md` — probe the server end to end before touching anything, and start with DNS: an entry whose name no longer resolves looks exactly like a dead VPN (app can't ping any node, browser still works from cache). **Один мёртвый вход ≠ мёртвый адрес:** прежде чем говорить «режут IP», сверить все входы в одном окне — если WS и UDP несут трафик, душат конкретный транспорт, а не адрес.
 
 ## Deploy / rebuild
 
@@ -457,6 +458,18 @@ Per-token roll-out, never global: `python3 /root/vpn-router/hy2_users.py --apply
 **Пул — один `/24` = одна судьба.** Адрес из того же блока, где живёт gate, нельзя грузить
 общим трафиком: листинг блока (UCEPROTECT L2) притащит гейт. Запасной вход просить из
 другого префикса.
+
+**Вход без выхода — половина изоляции.** Пока `direct` ходит в мир с brand, «brand чист»
+означает только «не принимает входы»: бан сайта по адресу уносит и выход всех клиентов.
+Выход привязывается одной строкой в аутбаунде — `"direct": {"protocol": "freedom",
+"sendThrough": "<edge>"}`; `domainStrategy` при этом обязан жить в
+`streamSettings.sockopt.domainStrategy`, иначе привязка молча не работает. Полный рецепт и две
+ловушки — `references/address-roles.md` §«Выход обычного трафика на edge».
+
+**После любой смены биндов проходить по всем пробам.** Health-check, который стучится в
+`127.0.0.1:8443`, после сужения на `listen <edge>:8443` видит мёртвый порт, и `vpn-cfg apply`
+откатывает рабочий конфиг без единой ошибки — правка выглядит как «не применилась». Проба
+берёт адрес из `addresses.json[edge].ip`.
 
 Полный разбор (переезд входа, один серт на пул, имя без DNS, вторая машина как dumb edge с
 туннелем и direct-фолбэком, чего схема не лечит) — [references/address-roles.md](references/address-roles.md).
