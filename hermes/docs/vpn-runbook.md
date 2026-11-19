@@ -27,6 +27,21 @@
 
 ---
 
+## 0.1 Вход на 443 (тест, 19.11.2026)
+
+Порт `443` на `edge` тоже пускает в VPN — но только по SNI `vpn.esmien.ru`. Три шага, всё
+генерируется `apply_brand.py` (руками не править — перезапишет):
+
+1. `nginx stream` (`/etc/nginx/stream.d/443-map.conf`): SNI `vpn.esmien.ru` → `127.0.0.1:18443`,
+   всё остальное → `127.0.0.1:9443` (сайты, как было).
+2. `/etc/nginx/conf.d/vpn-443-in.conf`: слушает `127.0.0.1:18443 ssl proxy_protocol` — принимает
+   PROXY-заголовок от stream (у того сервера `proxy_protocol on`), терминирует TLS нашим wildcard
+   и проксирует `location /ws` в xray активного цвета (`10081` для `a`, `11081` для `b`).
+3. Дальше — обычный `ws-in`, тот же, что обслуживает 8443. Клиентская ссылка отличается только портом.
+
+Удалить: убрать `VPN_443_SNI` и `write_443_vhost()` из `apply_brand.py`, перегенерить, убрать файл
+`/etc/nginx/conf.d/vpn-443-in.conf`, `nginx -t && systemctl reload nginx`.
+
 ## 1. Коротко
 
 Один сервер, три адреса. Клиенты входят на `edge` (`vpn.esmien.ru`, VLESS+WS+TLS 8443,

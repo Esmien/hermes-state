@@ -13,7 +13,7 @@ a31955db4f59ab409e7ce3ecf6fbf8f27a3812e6119cea8cfd27ee62aef4ae53  ./hermes/docs/
 f26bcb0d03d3c42fd04cda265464faaa72bfa3335409dd42fdf3c6cc170f7b8b  ./hermes/docs/skill-system-implementation-plan.md
 101f73fdd745da0b7924ad7ea248920883cb65f2a0d7694d5fa950c28d5c9014  ./hermes/docs/skill-system-stage-1-audit.md
 38617f96ce240c4c0078badbdeaec2fc2c997b24a54445ff05e7377e5027527b  ./hermes/docs/vpn-incident-cards.md
-44def84376fccfc18fed685d27bf38dca283fabd5ef547370823d92ca1af7e34  ./hermes/docs/vpn-runbook.md
+8244836f80fd83bc62f311e46d67a34fd42b7d179ac1a38fc98f5de0626dee9f  ./hermes/docs/vpn-runbook.md
 510781153fd8c7eabbfc319e2dd76aafa2158b9cf67cb45cfac2c28f2c630fb9  ./hermes/memories/MEMORY.md
 60387c4cc3407ef9658a6923ef9a22993342bf11f5e474edac0eb58667575401  ./hermes/memories/USER.md
 2a9ea9f557ebcea079797dc1936912eb255d454874ddea7eace192e2334d21f4  ./hermes/plugins/codex-persona/__init__.py
@@ -193,7 +193,7 @@ a2b65c124a21a5df8a743621ef32883ecad026a2d99dbeeb1dbdfb8a01f7343f  ./hermes/skill
 5aefd97fc87ea563cb0f2aa4e3488200c9f77e2772e986d2a2749fe2cc268916  ./hermes/skills/devops/vpn-entry-stack/references/delivery-channel.md
 0e81575ee54871bbfd4dc9ce20cebe81dbb54ef356a095a3667e13049d23e404  ./hermes/skills/devops/vpn-entry-stack/references/desktop-mihomo-tun.md
 4d3f6b023d09ef6d7c6e536e9ca4b53bfdcc2d6f7156fe89e761b2c5da924241  ./hermes/skills/devops/vpn-entry-stack/references/domain-and-tls.md
-1fdcf59ff8ddaef49b016853b3171aee7b6ea14c029968fabe2fa4a2d00c3b52  ./hermes/skills/devops/vpn-entry-stack/references/gemini-gate.md
+da14c97aeb759e9452e9d3887e9e4d601442efa1e2764aeadcdc5a693e1eb4a4  ./hermes/skills/devops/vpn-entry-stack/references/gemini-gate.md
 3b531b4c3891c172a2a82d6fdcaa506f444f91986351fa3f58064cde9c0699b8  ./hermes/skills/devops/vpn-entry-stack/references/gemini-geo.md
 78c0fd7b5f5dae2315ecb547e1bef9ad636e1706018f315ab5f23f57d514474b  ./hermes/skills/devops/vpn-entry-stack/references/landing-pages.md
 866861e1d39f3106729b0297caad96af736a33173bcb5ce1eba3c07143ff1f1f  ./hermes/skills/devops/vpn-entry-stack/references/linux-always-on-client.md
