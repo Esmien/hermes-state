@@ -179,7 +179,7 @@ bd492812ca6826885dd392d6d7105700d80f72c15ac6d5e13147e70f9be0734d  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 4bd9e023bc1d473018f30c44ca92afc4e6525e29da19087a60397347cd4df28e  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-08747eabbbb0b3c358659b8ee1d975a045984dfe73d9cb748582b95be00ed77c  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+1abc2f70639dd21c6d83fb99577521b787b11f4ae9b81673aed2911d1cd05422  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 274da48823a8e884e0bac6fbb513d9ad885ec9fef082375c4a00d29aa2ee9f59  ./hermes/skills/devops/vpn-entry-stack/references/address-roles.md
 f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skills/devops/vpn-entry-stack/references/admin-api.md
 646f30ec5f6344aa94617b91a370080cbbd61656ebe4d017bf9a9218d9214148  ./hermes/skills/devops/vpn-entry-stack/references/blocking-risk.md
