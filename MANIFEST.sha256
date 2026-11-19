@@ -3,7 +3,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 03b3093643b9cdb20aa43444f1c0e41e71dbae9a63294c372c2d860eb886e73f  ./hermes/SOUL.md
 683646459f25cdbbebebf48b674e0be4d96218b4032f7ab129bf0497bcf3f613  ./hermes/agent-hooks/ssh-only-gate.py
 8de8aafe34757fdff3e165704d4803a5a054618d11243cad6401fd4cc5483159  ./hermes/bin/read-untrusted
-6b1ffecf850eea48f38f2f22e83a3dea75a6f77c4d4693ebe55165ae8714e018  ./hermes/config.yaml
+f172d8a0b27ebead35d178bc19a627acb3e8e8162d25197d22282caf1aae3eb3  ./hermes/config.yaml
 d580476815af37dd63ad9080fa1667a82edd82f104a149e786cbb02d640bb99a  ./hermes/cron/jobs.json
 d75dd1ee52402a6083768919d8784b6fe79f9c7f647105d2f0e1be40acc30d92  ./hermes/docs/ai-memory-sandbox-architecture-2026-11-14.md
 6624bae8326a2b7845ffeb7b1f88c78d6724d3e49c6317697054717bd4472c19  ./hermes/docs/proposals/sandbox-per-user.md
