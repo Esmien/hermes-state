@@ -93,6 +93,11 @@ A block on the same page creates profiles: input name → POST `api/new` → thr
   `chrome --headless=new --dump-dom … | grep -o '<title>.*</title>'`. `clientWidth == scrollWidth`
   = горизонтального переполнения нет; наличие и текст значений — тем же `--dump-dom` с разбором
   HTML в Python. Глазами по картинке проверять только косметику.
+- **Маршруты — грид-строки, не таблица.** Таблица с `white-space: nowrap` в двух колонках на
+  телефонной ширине выезжает за экран, и число оказывается ровно за краем кадра — выглядит как
+  «строки без значений». Список `.rows .row { display:grid; grid-template-columns: 1.5em minmax(0,1fr) auto }`
+  даёт фиксированный слот под иконку, эллипсис на названии и число, прижатое вправо; в таблице
+  людей на узкой ширине лишняя колонка скрывается через `nth-child`, а не через прокрутку.
 - Routes with zero traffic are filtered out of the page; an empty `routes` list is legitimate right after a state reset.
 - **A 5-minute timer is too slow for an admin page.** Every load must refresh on demand: the page `POST`s `api/refresh` (which runs `stats_collect.py` synchronously, 90 s timeout) and only then reads `data.json`, and create/reissue call the same `load()` instead of leaving a stale table until the next tick. Wrap the collector body in `fcntl.flock(..., LOCK_EX | LOCK_NB)` on `/var/lib/vpn-stats/lock` and exit 0 when the lock is taken — otherwise the timer and a manual refresh can compute the same delta twice.
 - Retired `/u/` pages must be pruned by the page generator, not just left on disk: after a delete or a reissue the old token's file keeps answering 200 with dead links. Check both ways after the operation — retired → 404, live → 200 — and keep the page count equal to tokens × kinds (two per person).

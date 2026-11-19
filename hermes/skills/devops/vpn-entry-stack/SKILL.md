@@ -12,7 +12,7 @@ license: MIT
 
 Load this before touching anything that serves VPN clients: adding or removing a route, moving the public host or certificate, regenerating subscriptions, or answering a "VPN keeps dropping / no internet" report. Also load it for «нас РКН забанят?» / «что делать, если заблокируют» — `references/blocking-risk.md`. Not for the AI services on the same host — that is `ai-stack`.
 
-The owner's home ISP (MTS, Krasnodar) drops **port 443** and kills **fake-TLS/MTProto** to this server's IP. What works is a *real* TLS handshake on a non-standard port. That single fact drives the whole design — verify it before debugging anything else.
+The owner's home ISP has been recorded dropping **fake-TLS/MTProto** to this server's IP, and «443 не работает» is a claim he repeats. Treat it as a **per-network hypothesis, not a fact**: a real VLESS attempt on 443 from his own device reached us over valid TLS, and the failure turned out to be a wrong WS path in the client. What works everywhere is a *real* TLS handshake; the port is negotiable — measure before designing around it (`stream-443.log` + the vhost log, see «Вход на 443 по SNI»).
 
 ## Reporting to the owner
 
@@ -198,10 +198,39 @@ box before wiring it, and the exit-node pitfalls — `references/ru-exit-node.md
 
 Full text → [references/subscription-shapes.md](references/subscription-shapes.md)
 
-## Вход на 443/4443 — снят (Vision удалён 18.11.2026)
+## Вход на 443 по SNI — рабочий (Vision снят)
 
-**Сейчас у VPN на этом хосте нет входа на 443/4443 вообще.** Ниже — исторический слой и то, что
-осталось в файлах; новые входы сюда не добавлять без нового замера.
+**Порт 443 на `edge` пускает в VLESS обычным TLS, без Vision.** Схема в три шага, вся живёт
+в `apply_brand.py` (руками файлы не править — генератор перезапишет):
+
+1. `nginx stream` (`/etc/nginx/stream.d/443-map.conf`) читает SNI: `vpn.esmien.ru` →
+   `127.0.0.1:18443`, всё остальное → `127.0.0.1:9443` (сайты, как было).
+2. `/etc/nginx/conf.d/vpn-443-in.conf` — `listen 127.0.0.1:18443 ssl proxy_protocol`:
+   принимает PROXY-заголовок, терминирует TLS нашим wildcard и проксирует **оба входных пути**
+   (`/ws` → `ws-in`, `/general` → `in-general`) в порт активного цвета. Корень `/` отдаёт
+   `443 ok` — проверка из браузера без клиента.
+3. Клиенту достаточно того же узла с портом `443`: путь, SNI, UUID и серт не меняются.
+
+Три ловушки, каждая съедает заход:
+
+- **TLS внутри xray не поднимется: в контейнере нет `/etc/letsencrypt`.** Инбаунд с
+  `security: tls` и путём хоста падает `failed to parse certificate … no such file`, а лечить это
+  копированием серта в анонимные volume обоих цветов — лишняя работа, которая теряется при
+  пересоздании контейнеров. Терминировать TLS в nginx (наш случай) или монтировать серт явно.
+- **`proxy_protocol on` есть у всего stream-сервера, поэтому просто вернуть соединение в
+  `edge:8443` нельзя** — тот vhost PROXY-строку не ждёт и отвечает `tls: first record does not
+  look like a TLS handshake`. Принимающая сторона обязана объявить `ssl proxy_protocol`.
+- **Генератор пишет карту и vhost'ы заново на каждом apply.** Строка SNI и файл vhost живут
+  только в `apply_brand.py`; правка в `/etc/nginx` умирает на следующем `vpn-cfg apply`.
+
+**Диагноз «443 не работает» начинается с лога, не с вывода о блокировке.** `stream-443.log`
+даёт по IP клиента `sni=`, `bytes_in/out` и время; `vpn-443.log` — сам запрос (`GET /general`).
+Запрос дошёл, TLS прошёл, а в vhost'е `404` ⇒ дело в пути/конфиге клиента; ни одной строки с его
+IP ⇒ он вообще не ходил на этот вход (старый профиль) или его сеть режет порт — тогда проверять
+браузером `https://<host>/` на `443 ok`.
+
+Ниже — исторический слой Vision и то, что осталось в файлах; новые входы по этой схеме не
+возвращать без замера.
 
 Почему Vision снят: у владельца после рукопожатия туннель не принимался (сервер отдавал TLS и молчал:
 `in≈4KB out≈10KB`, 0.3 s, в `access.log` ноль строк `vision-in`) — та же заморозка, что у камо, только
@@ -409,6 +438,14 @@ Live shape: `hysteria-server.service` → `/usr/local/bin/hysteria server -c /et
 
 Pitfalls that cost a restart loop each: v2.14 replaced ACL with expressions (`acl.rules: [{outbound: name, match: expr}]`) — `proxy(name)` legacy syntax dies with «outbound proxy not found»; and with no ACL at all the **first outbound in the list** takes everything, so a single `xray` outbound needs no rule. `vpn-bluegreen.py`'s linter demands `settings.clients` on every non-dokodemo inbound, so a noauth loopback socks inbound is rejected until `socks` joins that exemption.
 
+**Узел «только мне» — это `extra_nodes.json` в каталоге его токена, а не общая подписка.**
+Запись = `{name, link, clash}`: `link` — строка основного узла с заменённым портом, `clash` —
+полный YAML-блок прокси. Собирать `clash` **литеральным шаблоном** (name/port/uuid/ws-opts),
+а не вырезанием строк из `clash.yaml`: при вырезании легко оставить старое `name`, и в проксиях
+оказываются две ноды с одним именем и разными портами, а в списке групп — одна. `list.txt`
+хранится в base64 (Clash-клиенту отдаётся `clash.yaml`), поэтому перед правкой декодировать.
+Проверка: у его токена узлов на один больше, у чужого — столько же, сколько было.
+
 Per-token roll-out, never global: `python3 /root/vpn-router/hy2_users.py --apply` does the whole thing — `/root/.secrets/hysteria-users.json` is the source of truth (one password per person, `auth.type: userpass`, usernames transliterated), it rewrites every `meta` token's `extra_nodes.json`, rebuilds subs and restarts hysteria.
 
 **Never print the auth block when checking it.** `grep -A12 ^auth:` dumps every password into the transcript — read the state file in Python and print usernames only. **Маскировать по имени ключа, а не по слову `password`:** блок устроен как `auth: → userpass: → <имя>: "<пароль>"`, поэтому регулярка вида `password\s*:` его не ловит и «структура без секретов» печатает пароли всех пользователей. Печатать только имена ключей, длины значений или `True`/`False`. **То же в `extra_nodes.json`:** узел хранится тремя ключами, и пароль живёт внутри YAML-блока под ключом `clash` (`password:`, `obfs-password:`), поэтому обход «печатать структуру по ключам и маскировать по имени» его не ловит и выдаёт пароль в чат. Этот файл читать счётчиками (`len(data)`, имена узлов, `bool(link)`), а содержимое `clash` не печатать никогда; если засветился — перевыпуск (`hy2_users.py --apply` после удаления записи), это один рестарт и одно обновление подписки.
@@ -515,3 +552,8 @@ The four that cost the most, verbatim from `references/pitfalls.md`:
   Cloudflare ушёл в чат именно так, без единой явной печати. Секреты доставать построчной
   регуляркой из текста, а любое исключение выводить одной строкой (`parse failed`), без
   `str(exc)` от чужого парсера. Засветилось — перевыпуск токена, а не «он же зонный».
+- **Временный тестовый клиент гасить по порту, а не `pkill -f <имя конфига>`.** Шаблон совпадает
+  с командной строкой собственного шелла (в ней тот же путь), и `pkill` убивает вызов вместе
+  с ним: `exit -15`, вывод теряется, клиент остаётся жить. Правильно —
+  `ss -lntp 'sport = :10895'` → вытащить `pid=` → `kill`; и поднимать его через
+  `(nohup xray run -c ./c443.json > ./c443.log 2>&1 &)`, читая потом лог, а не wait-for-exit.
