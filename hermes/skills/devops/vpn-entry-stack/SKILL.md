@@ -17,7 +17,7 @@ Treat claims that a port or protocol is blocked as hypotheses: correlate client 
 ## Safe rollout and scope
 
 - Preserve the owner's manual nodes, names, links, routing and functioning UDP backup; do not treat copied descriptions of failure as current evidence when the owner corrects them. Verify the live state before changing anything.
-- When the owner requests private-first testing, stage the change separately and test with his actual subscription; a localhost tunnel using his key is useful but is not his device/network test. Deploy shared routing, ports or subscription changes only after the agreed owner validation; if an explicit later instruction authorizes an immediate shared switch, follow that narrower override and report its blast radius.
+- When the owner requests private-first testing, stage the change separately and test with his actual subscription; a localhost tunnel using his key is useful but is not his device/network test. Deploy shared routing, ports or subscription changes only after the agreed owner validation; if an explicit later instruction authorizes an immediate shared switch, follow that narrower override and report its blast radius. For a phone test without changing other subscriptions, run a temporary separate nginx stream listener on an unused edge port, forward the expected SNI with PROXY protocol to the existing loopback TLS vhost, and let the owner duplicate his node with only the port changed. Verify end-to-end locally first, disclose that other valid keys also work unless actually restricted, then stop the listener and verify the port is closed after the test. A different port validates the staged route, not reachability or identical behavior on the eventual production port.
 - For an audit constrained to the present server/ASN, work within that constraint and don't repeatedly offer excluded migrations. Do not re-open a risk the owner explicitly accepted as an action item without new evidence.
 - Report what was actually applied, independently tested and still unverified; inspect the real failure behavior of RU relays before promising per-request `000` failover, since a balancer's health/fallback settings alone do not establish that behavior.
 
@@ -192,7 +192,7 @@ box before wiring it, and the exit-node pitfalls — `references/ru-exit-node.md
 
 ## Subscription
 
-`make_sub.py` renders three formats and nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. URL shape: `https://<host>:8443/sub/<token>` — the port must be in the URL, plain 443 is blocked for the owner's ISP. The layout comes from the `kind` file in the token dir (`meta` = one node, `whitelist` = provider list, `full` = legacy 25-node list). **Только TLS:** подписка по `http://<IP>/sub/<token>` на :80 снята и заводить её заново нельзя — открытый текст отдаёт токен и весь список узлов любому на пути, а точечный блок 80-го убивает этот путь вслепую. Любой новый эндпоинт подписки/лендинга — только https на 8443.
+`make_sub.py` renders three formats and nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. URL shape: `https://<host>:8443/sub/<token>` — preserve the configured subscription port; an independently working VPN tunnel on 443 does not establish that subscription delivery is configured there. The layout comes from the `kind` file in the token dir (`meta` = one node, `whitelist` = provider list, `full` = legacy 25-node list). **Только TLS:** подписка по `http://<IP>/sub/<token>` на :80 снята и заводить её заново нельзя — открытый текст отдаёт токен и весь список узлов любому на пути, а точечный блок 80-го убивает этот путь вслепую. Любой новый эндпоинт подписки/лендинга — только https на 8443.
 
 Full text → [references/subscription-shapes.md](references/subscription-shapes.md)
 
@@ -222,6 +222,7 @@ Full text → [references/subscription-shapes.md](references/subscription-shapes
   look like a TLS handshake`. Принимающая сторона обязана объявить `ssl proxy_protocol`.
 - **Генератор пишет карту и vhost'ы заново на каждом apply.** Строка SNI и файл vhost живут
   только в `apply_brand.py`; правка в `/etc/nginx` умирает на следующем `vpn-cfg apply`.
+- **Проверяй и неизвестный, и отсутствующий SNI до и после ужесточения TLS:** на VPN-портах default vhost с `ssl_reject_handshake on` не выдаёт сертификат чужому имени. Сначала проверь корректный SNI в опубликованных профилях и владельческий туннель; старые импортированные профили всё равно могут отличаться. Сохраняй default vhost в генераторе и recovery-репозитории, а не только в `/etc/nginx`.
 
 **Диагноз «443 не работает» начинается с лога, не с вывода о блокировке.** `stream-443.log`
 даёт по IP клиента `sni=`, `bytes_in/out` и время; `vpn-443.log` — сам запрос (`GET /general`).
@@ -238,9 +239,7 @@ IP ⇒ он вообще не ходил на этот вход (старый п
 вовсе** (проверено: `с flow` → 200, `без flow` → `000`), а часть клиентов поле `flow` из ссылки
 выбрасывает. Симптом «узел подключается и молчит» неотличим от блокировки.
 
-**Остаток, который надо убрать при следующей правке:** `apply_brand.py` всё ещё пишет в карту строку
-`cdn.jsdelivr.net -> 127.0.0.1:11043` (от снятого REALITY). Порт мёртв, но карта заявляет чужой SNI на
-нашем адресе — то есть ровно та подпись «SNI↔IP не совпадает», из-за которой камо и снимали.
+Проверяй фактическую сгенерированную карту после изменений и при каждом flip: исторические сообщения генератора о REALITY не доказывают, что такой маршрут действительно существует.
 
 **Фронт остался у nginx.** Xray не забирает 443: `stream`+`ssl_preread` просто маршрутизирует
 по SNI, поэтому живой `stream-443.log` (реальный IP + SNI) сохраняется, а откат — это правка
