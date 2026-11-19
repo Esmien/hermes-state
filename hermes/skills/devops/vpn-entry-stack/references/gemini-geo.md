@@ -52,11 +52,35 @@ stack itself cannot leak. The remaining vector is a client that bypasses the tun
 diagnose on the device with `test-ipv6.com` and switch IPv6 off in that client rather than hunting
 the server.
 
-# Gemini / geo
+## Вердикт — свойство адреса, а не хоста
 
-## Gemini / geo
+Один и тот же сервер может отдавать два разных `cc`: основной `141.98.166.213` → `ru`, второй
+публичный адрес той же ВМ → `nl`. Значит второй адрес того же хоста сам по себе годится в гейт для
+Google; переносить вердикт с одного адреса на другой нельзя, каждый меряется отдельно.
 
-Gemini's country is Google's own lookup of the **connection IP** — not the hoster's brand, not DNS, not the city in ipinfo. Measure with `scripts/gemini_geo_check.py [socks5-host:port]`; `fr`/`fi`/`de` work, `ru` is the stub. Our own Tallinn IP reads `ru` because Google follows the address registration, not the machine's location; a reseller's Paris IP can read `ru` for the same reason. "Smart DNS" cannot move the verdict — the verdict follows the IP that carries the flow, so route Google domains *and* IP ranges through the good exit with `sniffing` on. IPv6 is the only leak that flips it; this host has none and the generated profiles set `ipv6: false`, so look at the client, not the server. Full evidence, whois reasoning and exit-buying rules: `references/gemini-geo.md`.
+Мерка без клиента, прямо с машины:
+
+```bash
+curl -s --interface <IP> -H 'Accept-Language: en' -A '<обычный Chrome UA>' \
+     https://gemini.google.com/app \
+  | grep -oE 'this\.gbar_=\{CONFIG:\[\[\[0,"www\.gstatic\.com","[^"]*","[a-z.]+"'
+```
+
+Прогнать три раза подряд — вердикт должен совпасть трижды. Страница `200` и отсутствие строки «not
+available in your country» сами по себе ничего не доказывают: ту же страницу видит и аноним,
+а отказ по стране проявляется в логин-цепочке.
+
+## Привязка исходящего трафика к конкретному адресу
+
+`curl --interface <IP>` годится только для разовой проверки. В Xray `sendThrough` работает **на
+уровне аутбаунда**: `{"tag":"direct-ip2","protocol":"freedom","sendThrough":"<IP>",
+"settings":{...}}`. Внутри `settings` поле принимается молча и игнорируется — egress остаётся
+прежним, и это читается как «правило на Google есть, а cc не меняется».
+
+Проверка механизма: SOCKS-инбаунд на одноразовом порту → этот аутбаунд →
+`curl --socks5-hostname 127.0.0.1:<port> https://ipinfo.io/ip` должен вернуть новый адрес. И только
+потом правило `domain:google.com` со всей цепочкой логина ниже; `.ru` при этом остаётся на
+московском выходе — с иностранного адреса госуслуги отдают `000`.
 
 Client rules are not a guarantee — only Clash-family subscribers receive them, and Happ gets none, so a verdict that must hold in every app has to be enforced **on the server**. Xray evaluates top-down: a `domain:… → fr` rule placed *after* the `inboundTag` rules never fires, because every request from those inbounds already left through its own outbound. Put the Google rule first, right after the block rules.
 
