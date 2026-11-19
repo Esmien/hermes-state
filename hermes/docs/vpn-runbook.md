@@ -32,8 +32,10 @@
 Порт `443` на `edge` тоже пускает в VPN — но только по SNI `vpn.esmien.ru`. Три шага, всё
 генерируется `apply_brand.py` (руками не править — перезапишет):
 
-1. `nginx stream` (`/etc/nginx/stream.d/443-map.conf`): SNI `vpn.esmien.ru` → `127.0.0.1:18443`,
-   всё остальное → `127.0.0.1:9443` (сайты, как было).
+1. `nginx stream` (`/etc/nginx/stream.d/443-map.conf`) выбирает по адресу назначения и SNI:
+   только `edge` + `vpn.esmien.ru` → `127.0.0.1:18443`; прочие SNI на edge и все SNI на
+   `gemini` отклоняются; на `brand` остаётся обработчик сайтов `127.0.0.1:9443`. Карта общая
+   для 443 и 4443. Сокет остаётся wildcard, поэтому это отказ на уровне stream, не закрытый порт.
 2. `/etc/nginx/conf.d/vpn-443-in.conf`: слушает `127.0.0.1:18443 ssl proxy_protocol` — принимает
    PROXY-заголовок от stream (у того сервера `proxy_protocol on`), терминирует TLS нашим wildcard
    и проксирует **оба входных пути** — `/ws` (`ws-in`) и `/general` (`in-general`, основной узел),
