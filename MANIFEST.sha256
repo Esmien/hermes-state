@@ -146,11 +146,12 @@ c0ecb8227f1460b4674c82762ab1df0deb77e55ad6d09da3bc6db8924fddbbf6  ./hermes/skill
 3c44c0cf146ec8c5aff9552355488c98e4d986eca11c9d645cb6fd379129fe06  ./hermes/skills/devops/docker-compose-traps/SKILL.md
 a223c712bda9db0f991543d01db394a809e6a98336198fa0cbf9dbbe729b1df3  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
-a3013e50a5bcd8c48638b6953f9bfdd47bb26374c0cc4997bfbe0cc837f705c8  ./hermes/skills/devops/ip-reputation-and-ban-risk/SKILL.md
+ddd3b6817d690d6ece006029ffee231de802058af06d0fab162552a0f1024059  ./hermes/skills/devops/ip-reputation-and-ban-risk/SKILL.md
 260a52b11b6d0c14eadcf4fdf238975426303e6d5322c42c56864b4355347de8  ./hermes/skills/devops/ip-reputation-and-ban-risk/references/blacklist-and-classifier-semantics.md
 4621be4160031c6b034d42f3ea3b08b01876bdffade248a66ce04d627f57111f  ./hermes/skills/devops/ip-reputation-and-ban-risk/references/vpn-entry-stealth.md
 45af66b811359dc7c8a378b8d92c7fa67d1a2fa72338d7295591910f61918b1b  ./hermes/skills/devops/ip-reputation-and-ban-risk/references/vpn-subscription-triage.md
 ab6c2557c508f692baa6abd92159562ca1fdd7f32a3ab5124d3fb09496cf6d6e  ./hermes/skills/devops/ip-reputation-and-ban-risk/scripts/asn-map.sh
+68f24d948c2da2044d4848c4db31adfe7baa6b952bd1fc3d794ed68fa9fff35c  ./hermes/skills/devops/ip-reputation-and-ban-risk/scripts/fleet-portscan.py
 f394ae3bf2207478e1f13be3c9ef57f34c155eee8d5a3a8099a7229b046f0076  ./hermes/skills/devops/ip-reputation-and-ban-risk/scripts/ip-reputation.py
 95cfaed0ab99a7851e7417043e2a4571d0a13a06b6202378af02551b7c2abf82  ./hermes/skills/devops/litellm-fallout-triage/SKILL.md
 81970c54e32ced498a1b55b0e6b6798c473deabcfc86f878a86ebd5d6884fb4a  ./hermes/skills/devops/llm-route-bench/SKILL.md
@@ -203,7 +204,7 @@ f3bde384942d6e7d3b9396d406b14dd82cef9b2681a0691c36ab4027edfddac6  ./hermes/skill
 7854f9c7041a2bb113131ecc17d8827861ec7ba00a71217f226ca09c955889a1  ./hermes/skills/devops/vpn-entry-stack/references/ru-exit-node.md
 6fa3857c42864fcb85f324478061af9f3144e292b3d6419664dab11138856487  ./hermes/skills/devops/vpn-entry-stack/references/ru-split.md
 cc637c32414552f1f704f77748ce062facbd79cb09ad8723dfd1169af456fa05  ./hermes/skills/devops/vpn-entry-stack/references/scenario-routes.md
-3b1467d252d1f818be4c0fbe0dda112e15ded59ad645d84c5198da793f9397dd  ./hermes/skills/devops/vpn-entry-stack/references/second-public-ip.md
+d64656eb3ef1b91d4ff2a8acf52871f6087cdf233e2454b6753e3fe76245420f  ./hermes/skills/devops/vpn-entry-stack/references/second-public-ip.md
 ec35279cc4d2555185979240669ca140d494d78dd0d9d2d940806f40ea4281fb  ./hermes/skills/devops/vpn-entry-stack/references/stats-dashboard.md
 b32186db214e958f13c43c6f48bf5a2b8325d304d2ba3a0a051c7d73e518a4a7  ./hermes/skills/devops/vpn-entry-stack/references/subscription-expiry.md
 611c04d53f4614083b556457257c14073b39b30f6c50330ea79119c5c9583a2e  ./hermes/skills/devops/vpn-entry-stack/references/subscription-shapes.md
