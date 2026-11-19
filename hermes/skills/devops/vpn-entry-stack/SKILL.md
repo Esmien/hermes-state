@@ -29,6 +29,13 @@ He runs this stack himself and treats reports as noise unless they answer the qu
 - Short is the default, but an explicit «подробно, по-человечески, для дебилов» is a different order and wins: then give the long version — analogy first (electronics/repair lands well), then the chain of steps, then what we gain, what we do not, and what it costs. Do not answer a request for depth with a summary; equally, do not turn a one-line question into that essay.
 - When he argues with a model of his own («это целый сервис, его не положат»), first name the half he is right about, then dismantle the wrong half with the mechanism and a number. If the number contradicts something you said earlier, correct yourself in one line and replace it with the measured fact — he checks arguments against data, and a retracted figure costs less than a defended one.
 
+- **«Напиши сообщение, чтобы я переслал» — это отдельный артефакт, а не выжимка отчёта.**
+  Адресат не видел наш контекст: каждый пункт = «что видно снаружи» + «что сделать», без
+  ссылок на наши скиллы, порты и договорённости; термины только с переводом в скобках;
+  один пункт — одно действие; без оценок и морали. Сначала — что не так и почему это опасно
+  (в одном предложении), потом список действий по важности. Владелец пересылает текст
+  дословно, поэтому он должен быть самодостаточным.
+
 ## Layout
 
 ```
@@ -376,6 +383,7 @@ Google через релей; общие домены невозможно от�
 - **Блокировка РКН** — пять ручек РКН (IP/SNI/диапазон/whitelist/**заморозка по пакетам**), замеры по 435 точкам и какие сети заморожены, триаж, переезд на новый IP, цена домена и общий IP с AI-стеком, проверка ASN/префиксов и спам-листов, почему CF перед VPN не защита, что даёт REALITY и почему сейчас не Hetzner/OVH → `references/blocking-risk.md`
 - **Домен и доставка** — почему подписки надо вынести на отдельный регистрируемый домен, выбор зоны и регистратора, канал восстановления (бот + CF Pages + deep links), Cloudflare Tunnel для WebUI → `references/delivery-channel.md`
 - **Второй публичный IP** — `/32` отдельным netplan-файлом, проверка снаружи, привязка egress к адресу (`sendThrough`) → `references/second-public-ip.md`
+- **Адреса и роли** — brand / edge / gate, переезд входа, один серт на пул, вторая машина как edge → `references/address-roles.md`
 - **Pitfalls** — the full list of expensive mistakes → `references/pitfalls.md`
 
 ## Certificates
@@ -405,6 +413,26 @@ Per-token roll-out, never global: `python3 /root/vpn-router/hy2_users.py --apply
 **After any auth change, the symptom is a dead node, not a broken server.** Single password → per-user `userpass`, or a rotation, leaves every already-imported node holding a stale credential; the app reports timeout, the server is fine. Say «обнови подписку» before touching anything, and prove it with `journalctl -u hysteria-server` (`client connected {id: ...}`) plus xray's `inbound>>>udp-in>>>traffic` counters — a growing counter means the tunnel carries traffic. Triage order for this entry, including the tcpdump recipe and what a local loopback test does *not* prove: `references/client-drop-triage.md` §4e.
 
 `build_meta` appends the extra to `list.txt` and to clash `proxies`, so every file outside `extra_nodes.json`/`list.txt`/`clash.yaml` stays byte-identical — verify with a `diff -rq` against a backup before claiming nothing broke. Link shape: `hysteria2://<user>:<pw>@<host>:8443/?sni=<host>&obfs=salamander&obfs-password=<obfs>#name`. v2rayNG cannot read hy2 and just will not import that node; Hiddify, NekoBox, sing-box and Clash Meta can. `singbox.json` is not extended by extras — a sing-box user gets the TCP node only. The clash group is `type: select` on purpose: do not turn it into url-test without saying so, a silent path change is what makes «connected, but Gemini says no» invisible.
+
+## Адреса и роли: brand / edge / gate
+
+Один хост — несколько адресов, и у каждого своя работа. Алиасы фиксированы, ими пользуемся в
+чате, ранбуке и правилах:
+
+- **brand** `141.98.166.213` — сайт, WebUI, бот, LLM-гейт, SSH из РФ. **Ни одного VPN-входа.**
+- **edge** — адрес из пула, единственная точка входа VPN (nginx + hysteria). Расходник.
+- **gate** `85.92.158.226` — только исходящий NL для Gemini, **ни одного слушающего сокета**.
+
+**Ловушка, обнуляющая схему:** `listen 8443 ssl` и `listen: :8443` слушают *все* адреса
+машины, то есть gate сегодня тоже принимает входы — и бан входа по адресу уносит Gemini.
+Проверять `ss -lntu` и сужать бинды до `listen <edge>:8443` / `listen: <edge>:8443`.
+
+**Пул — один `/24` = одна судьба.** Адрес из того же блока, где живёт gate, нельзя грузить
+общим трафиком: листинг блока (UCEPROTECT L2) притащит гейт. Запасной вход просить из
+другого префикса.
+
+Полный разбор (переезд входа, один серт на пул, имя без DNS, вторая машина как dumb edge с
+туннелем и direct-фолбэком, чего схема не лечит) — [references/address-roles.md](references/address-roles.md).
 
 ## Домен как точка отказа — доставку отделить от туннеля
 
