@@ -1,0 +1,106 @@
+# Gemini-гейт: адреса, домены, сторож
+
+Одна страница, чтобы не гадать. Всё, что здесь написано, проверено на живой машине
+19.11.2026.
+
+## Термины (говорим одинаково)
+
+- **UI VPN** — провайдерская подписка, откуда приходят релеи `fr`, `fi`, `p15`, `p17`.
+  Не «левая подписка» и не «группа»: в разговоре и в файлах — UI VPN.
+- **Gemini-relay** — аутбаунд-группа `bal-google` (селектор `fr`). Страна выхода у неё
+  плавает: на 19.11.2026 это Сингапур (`com.sg`/`SGP`), не Франция. Поэтому «французский»
+  говорить не надо.
+- **NL-адрес** — второй публичный IPv4 нашего же сервера, `85.92.158.226`, аутбаунд `nl`.
+- **Основной адрес** — `141.98.166.213`, аутбаунд `direct`, выход Эстонии.
+
+## Адреса и аутбаунды
+
+| тег | что это | как проверять |
+|---|---|---|
+| `direct` | freedom, обычный выход Эстонии, `141.98.166.213` | `curl --interface 141.98.166.213 https://ipinfo.io/ip` |
+| `nl` | freedom + `sendThrough: 85.92.158.226` | то же с `--interface 85.92.158.226` |
+| `bal-google` | балансер: селектор `fr`, `fallbackTag: fi` | — |
+| `bal-ru` | балансер: `p15`, `p17` (UI VPN), `fallbackTag: direct` | — |
+
+Ловушка: `sendThrough` работает **только на уровне аутбаунда** (`{"tag":"nl","protocol":
+"freedom","sendThrough":"85.92.158.226"}`). Внутри `settings` Xray 26.x его молча
+игнорирует — egress остаётся прежним, и это выглядит как «IP не работает».
+
+## Что заворачиваем на NL (точный набор)
+
+     domain:google.com        # покрывает все поддомены: gemini.*, accounts.*, www.*
+     domain:googleapis.com
+     domain:gstatic.com
+     domain:googleusercontent.com
+     domain:withgoogle.com
+     domain:google.dev
+
+Остаётся на эстонском выходе (специально, чтобы не жечь трафик провайдера и не рвать видео):
+
+     domain:googlevideo.com  domain:ytimg.com  domain:ggpht.com
+     domain:gvt1.com  domain:gvt2.com  domain:youtube.com
+
+Всё прочее — `direct`. `.ru/.su/.рф` + список (vk, ozon, wb, sber, tinkoff, max…) — `bal-ru`,
+взаимная подмена `p15`↔`p17` по `leastPing`, без TG-уведомлений.
+
+**Правило «не сужать список».** Узкий набор «только gemini.google.com» ломает отправку:
+`accounts.google.com`, `gstatic`, `ogs`, `ogs.google.com` и прочие хопы логина уезжают другим
+выходом, Google видит две страны — и отвечает 200 с ошибкой в теле, а UI показывает
+безликое «ошибка 1».
+
+## Порядок правил (важен)
+
+     [0] api-in -> api
+     [1] geoip:private -> blocked
+     [2] bittorrent -> blocked
+     [3] udp:443 -> blocked          # QUIC: trojan его не несёт
+     [4] googlevideo/ytimg/… -> direct
+     [5] inboundTag: in-france + google -> bal-google   # гвоздь владельца
+     [6] inboundTag: in-test   + google -> nl           # гвоздь владельца
+     [7] google -> nl                                   # ← это переключает сторож
+     [8] ru-домены -> bal-ru
+     [9] catch-all -> direct
+
+Гвозди [5] и [6] стоят **выше** [7]: узлы «🌍 Gemini (UI VPN)» и «🇳🇱 Нидерланды (Gemini)»
+держат свои выходы независимо от автоматики — это ручные кнопки, их не трогать.
+
+## Сторож `gemini_gate.py`
+
+- Юнит `vpn-gemini-gate.service`, таймер `vpn-gemini-gate.timer`: `OnUnitActiveSec=150min`,
+  `RandomizedDelaySec=600` → раз в 2 ч 30 мин – 2 ч 40 мин.
+- **Gemini всегда отдаёт 200 и ~960 КБ**, поэтому «жив/мёртв» не работает. Маркер страны:
+  в `this.gbar_={CONFIG:…}` есть двухбуквенный код (`nl` / `ru`) и ISO-3 (`NLD` / `RUS`).
+  Здоровый NL — `nl`/`NLD`; заглушка — `ru`/`RUS`. Оба кода читаются регулярками
+  `CC_RE` и `ISO_RE`, здоровым считается ISO-3 вне `BLOCKED3` и cc вне `BLOCKED2`.
+- Проверка идёт **с привязкой к адресу**, а не через туннель: `curl --interface 85.92.158.226`.
+  Это тот же путь, которым ходит аутбаунд `nl`.
+- Заглушка/ошибка/нет маркера → правило [7] → `bal-google`, затем `vpn-cfg apply`
+  (blue-green, простой нулевой); в TG уходит сообщение. Возврат на `nl` — после `RETURN_OK=2`
+  здоровых проверок подряд.
+- Состояние: `/root/vpn-router/gemini_gate.json` (`gate`, `ok_streak`, `last_cc`, `last_iso`),
+  лог: `/var/log/vpn-gemini-gate.log`.
+- Ручные режимы: `--dry-run` (только решение), `--pretend-stub` (форсирует `RUS`, чтобы
+  прогнать переключение туда-обратно без поломки; уведомления в этом режиме не шлются).
+- `vpn-cfg apply` берёт `/var/lock/vpn-config.lock`; сторож берёт тот же лок только на время
+  правки файла и отпускает до apply — иначе он залочится сам с собой, как было у
+  `scenario_fallback.py`.
+
+## Политика расходования NL-адреса
+
+Старый `141.*` уже засвечен и работает «пока не умрёт». NL, наоборот, бережём: он должен ходить
+в минимум сервисов и нести минимум трафика — фактически только Gemini-набор. Через него
+нельзя гонять общий интернет, тяжёлое видео и чужие сервисы. Основным он станет **только**
+после смерти `141.98.166.213`.
+
+## Быстрые проверки
+
+```bash
+python3 /root/vpn-router/gemini_gate.py --dry-run        # что видит сторож
+vpn-cfg status | tail -8                                  # цвет, инбаунды, правила
+tail -5 /var/log/vpn-gemini-gate.log
+curl -s --interface 85.92.158.226 -A 'Mozilla/5.0 Chrome/141' \
+  https://gemini.google.com/app | grep -oE '"(NLD|RUS)",null,null,' | head -1
+```
+
+Сквозная проверка через клиента — три socks-аутбаунда на пути `/general`, `/france`,
+`/gemini` и вывод ISO-кода у каждого; должно быть `NLD`, `SGP`, `NLD`.
