@@ -12,7 +12,14 @@ license: MIT
 
 Load this before touching anything that serves VPN clients: adding or removing a route, moving the public host or certificate, regenerating subscriptions, or answering a "VPN keeps dropping / no internet" report. Also load it for «нас РКН забанят?» / «что делать, если заблокируют» — `references/blocking-risk.md`. Not for the AI services on the same host — that is `ai-stack`.
 
-The owner's home ISP has been recorded dropping **fake-TLS/MTProto** to this server's IP, and «443 не работает» is a claim he repeats. Treat it as a **per-network hypothesis, not a fact**: a real VLESS attempt on 443 from his own device reached us over valid TLS, and the failure turned out to be a wrong WS path in the client. What works everywhere is a *real* TLS handshake; the port is negotiable — measure before designing around it (`stream-443.log` + the vhost log, see «Вход на 443 по SNI»).
+Treat claims that a port or protocol is blocked as hypotheses: correlate client tests with `stream-443.log` and the vhost log, verify the WS path, then compare networks when relevant. A successful test from one device or operator proves neither universal reachability nor DPI invisibility; genuine TLS can also be blocked.
+
+## Safe rollout and scope
+
+- Preserve the owner's manual nodes, names, links, routing and functioning UDP backup; do not treat copied descriptions of failure as current evidence when the owner corrects them. Verify the live state before changing anything.
+- When the owner requests private-first testing, stage the change separately and test with his actual subscription; a localhost tunnel using his key is useful but is not his device/network test. Deploy shared routing, ports or subscription changes only after the agreed owner validation; if an explicit later instruction authorizes an immediate shared switch, follow that narrower override and report its blast radius.
+- For an audit constrained to the present server/ASN, work within that constraint and don't repeatedly offer excluded migrations. Do not re-open a risk the owner explicitly accepted as an action item without new evidence.
+- Report what was actually applied, independently tested and still unverified; inspect the real failure behavior of RU relays before promising per-request `000` failover, since a balancer's health/fallback settings alone do not establish that behavior.
 
 ## Reporting to the owner
 
@@ -45,22 +52,13 @@ client -> nginx TLS (8443 primary, 2087 backup) -> xray container `vpn-router` (
         -> outbound "fr" (external exit) | "direct" (this server)
 ```
 
-Paths (same nginx server blocks). **Only `/ws` and `/general` exist today** — the owner had every other entry
-pruned («нам от подписки нужны только маршруты до Gemini и до ру-сервисов»):
-
-- `/ws` — owner's profile, everything goes through the external FR exit.
-- `/general` — Estonia (direct exit), normal traffic; every published subscription points here.
-- `/france`, `/test`, `/fi` — **removed** (were unused; Gemini is reached by the `bal-google` rule from
-  `/general`, not by a separate entry). Re-adding one means inbound + nginx location + rule, in that order.
+Inspect the live inbounds, routing rules and generated subscriptions before editing paths; historical pruning notes can be stale. `/general` serves the main scenario; owner-only `/france` and `/gemini` are deliberate manual nodes and must remain intact. Do not infer current behavior from an old path name or outbound label.
 
 There is deliberately **no** RU-entry inbound: an earlier `/lte` route (`1.fan-video.study` → Selectel SPb → Helsinki, Google saw it as `ru`) was removed once it was clear the whitelist first hop has to be dialled by the client itself, never by this server. Whitelist entries ship as direct client links only — see `references/whitelist-mode.md`.
 
 3x-ui is **not** part of the stack: container, volume, `/panel/` route, credentials file, panel vhost, its rate-limit zone and fail2ban jail were all removed. It managed two idle inbounds and could not express "this entry -> that exit", which is the whole point of the routing, so it was one public admin surface for nothing. `references/xui-panel.md` keeps only the CSRF/login knowledge in case a UI is ever reintroduced — do not bring a panel back off your own initiative.
 
-Upstreams: 10081 `/ws`, 10082 `/general`; 10185 is the stats API. The 22 relayed `/p<i>` inbounds and the
-`in-france`/`in-test`/`in-fi` entries were **deleted** along with their passthrough outbounds — the
-subscription now serves only as exits (`fr`, `fi` for Gemini; `p15`, `p17` for `.ru`). Check the real ports
-with `vpn-cfg status` instead of trusting a number from a report.
+Upstreams and enabled inbounds can change with blue/green and manual nodes. Inspect live config and `vpn-cfg status` before asserting that a path or inbound was removed; `in-france` and `in-test` are used by the owner's manual nodes.
 
 Adding a route means four coordinated edits, in this order: append an inbound (`tag`, 127.0.0.1, next free port, same client id, `wsSettings.path`) to `config.json`, add the outbound and a routing rule keyed on `inboundTag` **before** the catch-all `tcp,udp → direct` rule, add `paths` + `upstreams` entries to `brand.json`, then `apply_brand.py && nginx -t && systemctl reload nginx && vpn-cfg apply` (not a bare `docker restart` — `apply` proves the routes answer and reverts a broken config). Verify by dialling the new path through the tunnel and checking the egress with ipinfo — not by reading the config back.
 
@@ -203,12 +201,14 @@ Full text → [references/subscription-shapes.md](references/subscription-shapes
 **Порт 443 на `edge` пускает в VLESS обычным TLS, без Vision.** Схема в три шага, вся живёт
 в `apply_brand.py` (руками файлы не править — генератор перезапишет):
 
-1. `nginx stream` (`/etc/nginx/stream.d/443-map.conf`) читает SNI: `vpn.esmien.ru` →
-   `127.0.0.1:18443`, всё остальное → `127.0.0.1:9443` (сайты, как было).
+1. `nginx stream` (`/etc/nginx/stream.d/443-map.conf`) выбирает по адресу назначения и SNI:
+   `edge` + `vpn.esmien.ru` → `127.0.0.1:18443`; `brand` → обработчик сайтов, другие имена
+   на edge и имена на gemini отклоняются. Карта общая для 443 и 4443. Wildcard-сокет при этом
+   остаётся слушать на gemini: отказ в stream — не закрытый TCP-порт.
 2. `/etc/nginx/conf.d/vpn-443-in.conf` — `listen 127.0.0.1:18443 ssl proxy_protocol`:
    принимает PROXY-заголовок, терминирует TLS нашим wildcard и проксирует **оба входных пути**
    (`/ws` → `ws-in`, `/general` → `in-general`) в порт активного цвета. Корень `/` отдаёт
-   `443 ok` — проверка из браузера без клиента.
+   нейтральную HTML-заглушку, как на 8443.
 3. Клиенту достаточно того же узла с портом `443`: путь, SNI, UUID и серт не меняются.
 
 Три ловушки, каждая съедает заход:
@@ -227,7 +227,7 @@ Full text → [references/subscription-shapes.md](references/subscription-shapes
 даёт по IP клиента `sni=`, `bytes_in/out` и время; `vpn-443.log` — сам запрос (`GET /general`).
 Запрос дошёл, TLS прошёл, а в vhost'е `404` ⇒ дело в пути/конфиге клиента; ни одной строки с его
 IP ⇒ он вообще не ходил на этот вход (старый профиль) или его сеть режет порт — тогда проверять
-браузером `https://<host>/` на `443 ok`.
+браузером `https://<host>/` на нейтральную HTML-заглушку; проверка с самого сервера не доказывает доступность из сети клиента.
 
 Ниже — исторический слой Vision и то, что осталось в файлах; новые входы по этой схеме не
 возвращать без замера.
@@ -471,7 +471,7 @@ Per-token roll-out, never global: `python3 /root/vpn-router/hy2_users.py --apply
 - **edge** `85.92.158.238` — адрес из пула, единственная точка входа VPN (nginx + hysteria).
   Расходник. Адреса и роли в машинном виде — `/root/vpn-router/addresses.json`, для человека —
   `## 0. Адреса и алиасы` в ранбуке; держать их равными, чтобы панель, чат и конфиги называли одно и то же.
-- **gate** `85.92.158.226` — только исходящий NL для Gemini, **ни одного слушающего сокета**.
+- **gemini / gate** `85.92.158.226` — исходящий NL для Gemini и ручного NL-узла; цель — без публичных входов. Проверяй фактические wildcard-сокеты и firewall: отклонение на уровне nginx не означает отсутствие TCP-listener.
 
 **Ловушка, обнуляющая схему:** `listen 8443 ssl` и `listen: :8443` слушают *все* адреса
 машины, то есть gate сегодня тоже принимает входы — и бан входа по адресу уносит Gemini.
