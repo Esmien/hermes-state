@@ -16,7 +16,7 @@ Treat claims that a port or protocol is blocked as hypotheses: correlate client 
 
 ## Safe rollout and scope
 
-- Preserve the owner's manual nodes, names, links, routing and functioning UDP backup; do not treat copied descriptions of failure as current evidence when the owner corrects them. Verify the live state before changing anything.
+- Preserve the owner's current subscription nodes, names, links, routing and functioning UDP backup unless he explicitly orders removal. He removed the two manual Gemini/NL nodes; do not restore their public routes or subscription entries. Verify the live state before changing anything.
 - When the owner requests private-first testing, stage the change separately and test only with his actual subscription and key; inspecting other profiles is fine, connecting with their keys is not. A localhost tunnel is not his device/network test. Deploy shared routing, ports or subscription changes only after his device validation unless he explicitly authorizes an immediate shared switch; report its blast radius. For a separate-port phone test, stage an isolated nginx listener and an owner-only subscription node, preserving his existing nodes and all other subscribers; verify local end-to-end first. Disclose if other valid keys also work, and after validation stop the listener, remove the temporary node and verify the port is closed. A different port validates the staged route, not actual production-port reachability or identical behavior.
 - Before retiring a listener, inspect current published profiles **and** recent use: refreshed subscriptions do not prove that every manually imported or stale client has migrated. Respect ports the owner explicitly excludes; state which legacy profiles stop connecting and preserve TCP and UDP independently. A broad request to reduce exposure is not proof that nobody depends on an old port.
 - For an audit constrained to the present server/ASN, work within that constraint and don't repeatedly offer excluded migrations. Do not re-open a risk the owner explicitly accepted as an action item without new evidence.
@@ -54,7 +54,7 @@ client -> nginx TLS on edge -> xray container (host network)
 ```
 Main WS profiles use 443; subscription delivery and UDP backup use 8443. Check live firewall and listeners before naming other ports as available: a socket may still exist while external ingress is filtered.
 
-Inspect the live inbounds, routing rules and generated subscriptions before editing paths; historical pruning notes can be stale. `/general` serves the main scenario; owner-only `/france` and `/gemini` are deliberate manual nodes and must remain intact. Do not infer current behavior from an old path name or outbound label.
+Inspect the live inbounds, routing rules and generated subscriptions before editing paths; historical pruning notes can be stale. `/general` remains the internal main inbound; the owner's former manual `/france` and `/gemini` public entries were retired at his request, while internal inbounds and automatic Gemini routing remain. Do not restore the public entries or infer current behavior from an old path name or outbound label.
 
 There is deliberately **no** RU-entry inbound: an earlier `/lte` route (`1.fan-video.study` → Selectel SPb → Helsinki, Google saw it as `ru`) was removed once it was clear the whitelist first hop has to be dialled by the client itself, never by this server. Whitelist entries ship as direct client links only — see `references/whitelist-mode.md`.
 
@@ -128,18 +128,14 @@ Full text → [references/changing-public-host.md](references/changing-public-ho
 возврат на `nl` — после **двух** здоровых проверок подряд. Тест логики без поломки:
 `--pretend-stub`.
 
-**Гвозди против автоматики.** У владельца два ручных узла: `/france` (правило
-`inboundTag: in-france → bal-google`) — «🌍 Gemini (UI VPN)», и `/gemini` (правило
-`inboundTag: in-test → nl`) — «🇳🇱 Нидерланды (Gemini)». У `/gemini` через NL идёт **весь**
-трафик узла (ручной выход «поработать из NL», поэтому `.ru` там отдаёт `000`), у `/france` —
-только Google-цепочка. Оба правила стоят **выше** глобального Google-правила и автоматикой не
-управляются: даже когда сторож увёл трафик на релей, эти узлы держат свои выходы.
+**Ручные узлы Gemini и NL удалены по просьбе владельца.** Публичные `/france` и `/gemini`
+отключены в генераторе nginx, записи удалены из подписки. Внутренние инбаунды и правила
+оставлены, чтобы не менять маршрутизацию основного узла. Не возвращать публичные пути без запроса.
 
 **Имена узлов — контракт, диктует владелец.** У всех: `🇪🇪 Эстония (основной)` (VLESS WS
 `/general`) и `🇪🇪 Эстония (запасной)` (hysteria2 UDP/8443; сам в интернет не ходит — отдаёт
 трафик в loopback-SOCKS `udp-in` через `vpn-socks-relay`, то есть едет по тем же сценариям).
-У владельца дополнительно `Gemini (UI VPN)` (без эмодзи — иначе «две планеты», см. ниже) и
-`🇳🇱 Нидерланды (Gemini)`. Сами строки не менять по своему вкусу.
+У владельца дополнительные ручные Gemini/NL-узлы удалены по его просьбе.
 
 **В имени узла — только флаг, иначе в списке «две планеты».** Клиенты (Happ/Hiddify-класс)
 делают аватарку строки из эмодзи, только если это **флаг**: любой другой эмодзи остаётся
@@ -194,7 +190,7 @@ box before wiring it, and the exit-node pitfalls — `references/ru-exit-node.md
 
 ## Subscription
 
-Main WS nodes in meta subscriptions use port 443 and `brand.json` paths.public_general; `apply_brand.py` maps the exact external path to Xray's internal /general on the active blue/green port. Legacy /general remains on 443/8443 for non-updated clients; owner manual nodes stay intact. Delivery and UDP remain on 8443. Check the active colour and generated nginx vhost on every flip, and test owner path end-to-end. Do not test other users' credentials when the owner limits testing to his subscription.
+Main WS nodes in meta subscriptions use port 443 and `brand.json` paths.public_general; `apply_brand.py` maps the exact external path to Xray's internal /general on the active blue/green port. Legacy /general remains on 443/8443 for non-updated clients. Owner manual /france and /gemini routes are retired. Delivery and UDP remain on 8443. Check the active colour and generated nginx vhost on every flip, and test owner path end-to-end. Do not test other users' credentials when the owner limits testing to his subscription.
 
 `make_sub.py` renders three formats and nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. URL shape: `https://<host>:8443/sub/<token>` — preserve the configured subscription port; an independently working VPN tunnel on 443 does not establish that subscription delivery is configured there. The layout comes from the `kind` file in the token dir (`meta` = one node, `whitelist` = provider list, `full` = legacy 25-node list). **Только TLS:** подписка по `http://<IP>/sub/<token>` на :80 снята и заводить её заново нельзя — открытый текст отдаёт токен и весь список узлов любому на пути, а точечный блок 80-го убивает этот путь вслепую. Любой новый эндпоинт подписки/лендинга — только https на 8443.
 
