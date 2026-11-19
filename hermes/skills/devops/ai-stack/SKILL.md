@@ -115,6 +115,10 @@ Removed in the `vps-infra` migration and **not** to be reintroduced: `DOMAIN`, `
 
 Full text → [references/answering-the-owner.md](references/answering-the-owner.md)
 
+## Замена модели без разрыва
+
+При замене рабочей модели сначала создай новую по согласованному маршруту, перенеси настройки и права, проверь реальный вызов через LiteLLM и пользовательский пресет WebUI; только после успешной проверки переключай зависимости и удаляй старую. Сохраняй стабильный ID пользовательского пресета, закрепления и дефолты; отдельно проверяй браузерное состояние и не обещай его автоматический перенос. Порядок, API и проверка → `references/owui-internals.md` § «Бесшовная замена модели».
+
 ## The traps that cost the most
 
 Verbatim from `references/cross-cutting-rules.md` — the full list of rules and traps lives there (plus the short rules added below).
