@@ -192,6 +192,8 @@ box before wiring it, and the exit-node pitfalls — `references/ru-exit-node.md
 
 ## Subscription
 
+Per-token main-port staging: a token directory marker `main-port-443` makes `build_meta` render its main WS node on 443 in list, Clash and sing-box; without the marker it preserves the brand-configured port. The subscription delivery URL stays on 8443. Stage and verify all formats, preserve extras and compare other tokens; wait for the owner's actual device validation before rollout to other users.
+
 `make_sub.py` renders three formats and nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. URL shape: `https://<host>:8443/sub/<token>` — preserve the configured subscription port; an independently working VPN tunnel on 443 does not establish that subscription delivery is configured there. The layout comes from the `kind` file in the token dir (`meta` = one node, `whitelist` = provider list, `full` = legacy 25-node list). **Только TLS:** подписка по `http://<IP>/sub/<token>` на :80 снята и заводить её заново нельзя — открытый текст отдаёт токен и весь список узлов любому на пути, а точечный блок 80-го убивает этот путь вслепую. Любой новый эндпоинт подписки/лендинга — только https на 8443.
 
 Full text → [references/subscription-shapes.md](references/subscription-shapes.md)
