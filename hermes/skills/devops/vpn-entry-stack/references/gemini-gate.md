@@ -19,13 +19,13 @@
 
 | алиас | IP | роль |
 |---|---|---|
-| `brand` | 141.98.166.213 | сайт, WebUI, бот, SSH. Слушает 80/443/4443/22, **VPN-портов не слушает** |
-| `edge` | 85.92.158.238 | единственный вход VPN: VLESS/WS 8443 и 2087, hysteria2 UDP 8443 |
+| `brand` | 141.98.166.213 | сайт, WebUI, бот, SSH. Слушает 80/443/4443/22, ни входа, ни выхода VPN |
+| `edge` | 85.92.158.238 | вход VPN (VLESS/WS 8443, 2087, hysteria2 UDP 8443) **и выход** обычного трафика |
 | `gemini` | 85.92.158.226 | исходящий NL (`freedom` + `sendThrough`), не слушает ничего |
 
 | тег xray | что это | как проверять |
 |---|---|---|
-| `direct` | freedom, обычный выход, `brand` | `curl --interface 141.98.166.213 https://ipinfo.io/ip` |
+| `direct` | freedom + `sendThrough: 85.92.158.238` (`edge`), выход обычного трафика | `curl --interface 85.92.158.238 https://ipinfo.io/ip` |
 | `nl` | freedom + `sendThrough: 85.92.158.226` | то же с `--interface 85.92.158.226` |
 | `bal-google` | балансер: селектор `fr`, `fallbackTag: fi` | — |
 | `bal-ru` | балансер: `p15`, `p17` (UI VPN), `fallbackTag: direct` | — |
@@ -33,6 +33,11 @@
 Ловушка 1: `sendThrough` работает **только на уровне аутбаунда** (`{"tag":"nl","protocol":
 "freedom","sendThrough":"85.92.158.226"}`). Внутри `settings` Xray 26.x его молча
 игнорирует — egress остаётся прежним, и это выглядит как «IP не работает».
+
+Ловушка 1б: если в `settings` задан `domainStrategy`, `sendThrough` тоже молча не применяется.
+Правильно: `settings: {}`, `sendThrough` на аутбаунде, а стратегия — в
+`streamSettings.sockopt.domainStrategy: UseIPv4`. Симптом ровно один: туннель поднят, а
+`ipinfo.io/ip` показывает старый адрес.
 
 Ловушка 2 — смена `listen` и reload: после сужения биндов нужен `systemctl restart nginx`,
 `reload` оставляет старые сокеты на всех адресах. Разбор — SKILL.md, «Адреса и роли».
