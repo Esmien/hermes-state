@@ -276,11 +276,7 @@ credential, но запрос пришёл вообще без ключа — э
 3x-ui снесён целиком: панель не умеет описывать цепочки «вход → конкретный выход»,
 а публичная админка — лишняя дверь.
 
-**`:443` — это nginx stream, а не Xray**: `ssl_preread` + карта в
-`/etc/nginx/stream.d/443-map.conf`, сейчас единственная запись `default 127.0.0.1:9443` (все vhost'ы,
-unknown SNI → `ssl_reject_handshake`). mtg и REALITY сняты, VPN на 443/4443 больше нет — входы живут
-на `8443`/`2087` и только на адресе `edge`, а `brand` слушает 443 исключительно для сайта.
-Карту перегенерирует `apply_brand.py` при каждом blue/green flip — править её руками бессмысленно.
+**`:443` — nginx stream с `ssl_preread`, а не Xray напрямую.** Карта в `/etc/nginx/stream.d/443-map.conf` учитывает адрес назначения и SNI: VPN на edge и сайты на brand обслуживаются раздельно. Сверяй текущую карту, firewall и реальные опубликованные порты: wildcard listener не доказывает внешнюю доступность, а старые описания 2087/4443 могут не учитывать фильтрацию. `apply_brand.py` перегенерирует карту при blue/green flip — править только сгенерированный файл бессмысленно.
 Проверка всех входов: `scripts/verify-443.sh`; полный откат REALITY:
 `scripts/rollback-443-reality.sh`. Детали и ловушки — скилл `vpn-entry-stack`. Туннель проверяется настоящим клиентом (HTTPS
 через SOCKS), а `stream`/`ssl_preread` на 443 требует PROXY protocol на обеих
@@ -302,9 +298,7 @@ unknown SNI → `ssl_reject_handshake`). mtg и REALITY сняты, VPN на 443
   настоящий TLS**, TLS снимает nginx на нестандартном порту. Рецепт, ловушки и механика
   fake-TLS (`scripts/faketls-probe.py`) —
   [references/vpn-and-https-ingress.md](references/vpn-and-https-ingress.md).
-- **Фолбэк и health-check владелец намеренно отключил**: «если упадёт — должно
-  отваливаться явно». Второй порт входа (2087) при этом остаётся — он дешёвый и
-  не маскирует падение выхода. Не возвращай `vpn-failover.timer` в строй сам.
+- **Не включай `vpn-failover.timer` по собственной инициативе.** Состояние входных портов и актуальные правила Gemini/RU проверяй в живых конфигурациях и скилле `vpn-entry-stack`, а не выводи из исторических настроек этого таймера.
 - **Гео-заглушка Gemini снимается маршрутизацией на сервере**, но список доменов должен
   быть полным (`www.google.com`, `accounts.google.com`, `gstatic.com`, `googleapis.com`,
   `googleusercontent.com`); `googlevideo.com`/`youtube.com` в список не берём. Проверять

@@ -17,7 +17,8 @@ Treat claims that a port or protocol is blocked as hypotheses: correlate client 
 ## Safe rollout and scope
 
 - Preserve the owner's manual nodes, names, links, routing and functioning UDP backup; do not treat copied descriptions of failure as current evidence when the owner corrects them. Verify the live state before changing anything.
-- When the owner requests private-first testing, stage the change separately and test with his actual subscription; a localhost tunnel using his key is useful but is not his device/network test. Deploy shared routing, ports or subscription changes only after the agreed owner validation; if an explicit later instruction authorizes an immediate shared switch, follow that narrower override and report its blast radius. For a phone test without changing other subscriptions, run a temporary separate nginx stream listener on an unused edge port, forward the expected SNI with PROXY protocol to the existing loopback TLS vhost, and let the owner duplicate his node with only the port changed. Verify end-to-end locally first, disclose that other valid keys also work unless actually restricted, then stop the listener and verify the port is closed after the test. A different port validates the staged route, not reachability or identical behavior on the eventual production port.
+- When the owner requests private-first testing, stage the change separately and test only with his actual subscription and key; inspecting other profiles is fine, connecting with their keys is not. A localhost tunnel is not his device/network test. Deploy shared routing, ports or subscription changes only after his device validation unless he explicitly authorizes an immediate shared switch; report its blast radius. For a separate-port phone test, stage an isolated nginx listener and an owner-only subscription node, preserving his existing nodes and all other subscribers; verify local end-to-end first. Disclose if other valid keys also work, and after validation stop the listener, remove the temporary node and verify the port is closed. A different port validates the staged route, not actual production-port reachability or identical behavior.
+- Before retiring a listener, inspect current published profiles **and** recent use: refreshed subscriptions do not prove that every manually imported or stale client has migrated. Respect ports the owner explicitly excludes; state which legacy profiles stop connecting and preserve TCP and UDP independently. A broad request to reduce exposure is not proof that nobody depends on an old port.
 - For an audit constrained to the present server/ASN, work within that constraint and don't repeatedly offer excluded migrations. Do not re-open a risk the owner explicitly accepted as an action item without new evidence.
 - Report what was actually applied, independently tested and still unverified; inspect the real failure behavior of RU relays before promising per-request `000` failover, since a balancer's health/fallback settings alone do not establish that behavior.
 
@@ -48,9 +49,10 @@ He runs this stack himself and treats reports as noise unless they answer the qu
 ## Layout
 
 ```
-client -> nginx TLS (8443 primary, 2087 backup) -> xray container `vpn-router` (host network)
-        -> outbound "fr" (external exit) | "direct" (this server)
+client -> nginx TLS on edge -> xray container (host network)
+       -> direct, Gemini NL / Gemini-relay, or RU relays according to routing
 ```
+Main WS profiles use 443; subscription delivery and UDP backup use 8443. Check live firewall and listeners before naming other ports as available: a socket may still exist while external ingress is filtered.
 
 Inspect the live inbounds, routing rules and generated subscriptions before editing paths; historical pruning notes can be stale. `/general` serves the main scenario; owner-only `/france` and `/gemini` are deliberate manual nodes and must remain intact. Do not infer current behavior from an old path name or outbound label.
 
