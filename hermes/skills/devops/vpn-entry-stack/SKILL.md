@@ -33,8 +33,10 @@ He runs this stack himself and treats reports as noise unless they answer the qu
   Адресат не видел наш контекст: каждый пункт = «что видно снаружи» + «что сделать», без
   ссылок на наши скиллы, порты и договорённости; термины только с переводом в скобках;
   один пункт — одно действие; без оценок и морали. Сначала — что не так и почему это опасно
-  (в одном предложении), потом список действий по важности. Владелец пересылает текст
-  дословно, поэтому он должен быть самодостаточным.
+ (в одном предложении), потом список действий по важности. Владелец пересылает текст
+ дословно, поэтому он должен быть самодостаточным. «Объясни простыми словами» — это ещё не
+ заказ письма: если после разбора терминов он просит «сообщение целиком, чтобы переслать»,
+ артефакт — письмо адресату, а не словарь определений.
 
 ## Layout
 
@@ -412,6 +414,14 @@ Per-token roll-out, never global: `python3 /root/vpn-router/hy2_users.py --apply
 
 **After any auth change, the symptom is a dead node, not a broken server.** Single password → per-user `userpass`, or a rotation, leaves every already-imported node holding a stale credential; the app reports timeout, the server is fine. Say «обнови подписку» before touching anything, and prove it with `journalctl -u hysteria-server` (`client connected {id: ...}`) plus xray's `inbound>>>udp-in>>>traffic` counters — a growing counter means the tunnel carries traffic. Triage order for this entry, including the tcpdump recipe and what a local loopback test does *not* prove: `references/client-drop-triage.md` §4e.
 
+**Тестовый клиент собирать из самой ссылки подписки, а не руками.** `hysteria client` принимает
+`server: hysteria2://user:pw@host:8443/?sni=…&obfs=salamander&obfs-password=…` — ровно тот разбор,
+что у телефона. Самодельный конфиг с отдельными `auth:`/`obfs:` из серверного файла даёт
+`failed to initialize client … authentication error, HTTP status code: 301`, и это не «сервер
+сломался»: 301 — это отказ авторизации, который сервер уводит в masquerade-прокси (а тот
+редиректит). Читать такой 301 как «креды или obfs не совпали», сверять хеши значений, а не
+строки, и переходить на конфиг из ссылки, как только он понадобился.
+
 `build_meta` appends the extra to `list.txt` and to clash `proxies`, so every file outside `extra_nodes.json`/`list.txt`/`clash.yaml` stays byte-identical — verify with a `diff -rq` against a backup before claiming nothing broke. Link shape: `hysteria2://<user>:<pw>@<host>:8443/?sni=<host>&obfs=salamander&obfs-password=<obfs>#name`. v2rayNG cannot read hy2 and just will not import that node; Hiddify, NekoBox, sing-box and Clash Meta can. `singbox.json` is not extended by extras — a sing-box user gets the TCP node only. The clash group is `type: select` on purpose: do not turn it into url-test without saying so, a silent path change is what makes «connected, but Gemini says no» invisible.
 
 ## Адреса и роли: brand / edge / gate
@@ -420,12 +430,29 @@ Per-token roll-out, never global: `python3 /root/vpn-router/hy2_users.py --apply
 чате, ранбуке и правилах:
 
 - **brand** `141.98.166.213` — сайт, WebUI, бот, LLM-гейт, SSH из РФ. **Ни одного VPN-входа.**
-- **edge** — адрес из пула, единственная точка входа VPN (nginx + hysteria). Расходник.
+- **edge** `85.92.158.238` — адрес из пула, единственная точка входа VPN (nginx + hysteria).
+  Расходник. Адреса и роли в машинном виде — `/root/vpn-router/addresses.json`, для человека —
+  `## 0. Адреса и алиасы` в ранбуке; держать их равными, чтобы панель, чат и конфиги называли одно и то же.
 - **gate** `85.92.158.226` — только исходящий NL для Gemini, **ни одного слушающего сокета**.
 
 **Ловушка, обнуляющая схему:** `listen 8443 ssl` и `listen: :8443` слушают *все* адреса
 машины, то есть gate сегодня тоже принимает входы — и бан входа по адресу уносит Gemini.
 Проверять `ss -lntu` и сужать бинды до `listen <edge>:8443` / `listen: <edge>:8443`.
+
+**Сузить бинд мало — нужен рестарт, а не reload.** `systemctl reload nginx` при переходе от
+`0.0.0.0:8443` к `listen <edge>:8443` не перебиндит сокет: в `error.log`
+`bind() failed (98: Address already in use)` → `still could not bind()`, reload возвращает success,
+старые воркеры продолжают принимать на всех адресах, а `nginx -T` уже показывает новый `listen` —
+конфиг врёт о реальности. Лечится `systemctl restart nginx` (секунда разрыва), и вот после него
+`ss -lntH | grep :8443` покажет только `<edge>:8443`. Доказательство сужения — не текст конфига,
+а отказ на старом адресе: `curl --resolve vpn.esmien.ru:8443:<brand>` → `000`, на `<edge>` → `200`.
+
+**Сужение биндов живёт до первого `vpn-cfg apply`, если не поправлен шаблон.** `vpn-8443.conf`
+и `vpn-2087.conf` генерирует `apply_brand.py` — правка только в `/etc/nginx/conf.d`
+молча откатится к `listen 8443 ssl` в следующий же apply или blue/green flip, и gate снова начнёт
+принимать входы. В том же заходе править шаблон (`grep -n 'listen' /root/vpn-router/apply_brand.py`)
+и копию в `vpn-service/router/`, а после любого `apply` перепроверять `ss -lntu`: на `<gate>` и
+`<brand>` не должно быть ни одного VPN-порта.
 
 **Пул — один `/24` = одна судьба.** Адрес из того же блока, где живёт gate, нельзя грузить
 общим трафиком: листинг блока (UCEPROTECT L2) притащит гейт. Запасной вход просить из
@@ -469,3 +496,9 @@ The four that cost the most, verbatim from `references/pitfalls.md`:
   mask anything whose key matches `pw|password|id|key|token`.
 - A user's "the site is down" on one host is rarely the tunnel: check whether the requests reached the app at all before rebuilding anything (`references/client-drop-triage.md`, section 4d). Also check that the name **exists**: under a fake-ip client a nonexistent host is handed a `198.18.x.x` and simply hangs, so the browser reports `ERR_TIMED_OUT` instead of "server not found" and the tunnel takes the blame for a bad URL — `dig +short @1.1.1.1 <host>` plus the zone's record list settles it in one step.
 - Writing nginx config through `printf`/heredoc mangles quotes and backslashes (`\"$request\"`, `\\S`), and `nginx -t` then fails on a file that looks fine on screen. Write generated snippets with Python `write_text` (staging under `/tmp` + `install -m 644` when a direct write to `/etc/nginx` is refused), test, then reload — the same trap bites fail2ban filter regexes. Same reason a python heredoc embedded in a compound `cmd1 && python3 - <<EOF` block can silently produce a truncated file (16 bytes, no error): put the generator in its own file and run it.
+- **Не читать секретный файл парсером, который эхом печатает строку.** `configparser.read()`
+  на `/root/.secrets/cf.ini` (там нет заголовка `[section]`, только `key = value`) падает
+  `MissingSectionHeaderError` и **цитирует первую строку файла в тексте исключения** — токен
+  Cloudflare ушёл в чат именно так, без единой явной печати. Секреты доставать построчной
+  регуляркой из текста, а любое исключение выводить одной строкой (`parse failed`), без
+  `str(exc)` от чужого парсера. Засветилось — перевыпуск токена, а не «он же зонный».
