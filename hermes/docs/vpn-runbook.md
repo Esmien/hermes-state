@@ -25,6 +25,14 @@
 
 Карта в машинном виде — `/root/vpn-router/addresses.json`.
 
+**Защита gemini от входящих:** `vpn-gemini-ingress-guard.service` добавляет в INPUT правило
+для `ens3` и `85.92.158.226`: `NEW,INVALID → DROP`. Ответы на исходящие соединения
+(`ESTABLISHED,RELATED`) не затрагиваются. Юнит хранится в `vpn-service/systemd/` и включён;
+после восстановления скопировать его в `/etc/systemd/system/`, выполнить `systemctl daemon-reload`
+и `systemctl enable --now vpn-gemini-ingress-guard.service`. При смене интерфейса или адреса
+перед установкой обновить юнит. `ss` по-прежнему видит wildcard-сокеты: защита работает на
+сетевом фильтре, не меняя bind. Проверять с внешнего источника и смотреть счётчик правила.
+
 ---
 
 ## 0.1 Вход на 443 (тест, 19.11.2026)
