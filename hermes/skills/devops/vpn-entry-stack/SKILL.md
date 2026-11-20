@@ -192,7 +192,7 @@ box before wiring it, and the exit-node pitfalls — `references/ru-exit-node.md
 
 ## Subscription
 
-Main WS nodes in meta subscriptions use port 443 and `brand.json` paths.public_general; `apply_brand.py` maps the exact external path to Xray's internal /general on the active blue/green port. Legacy /general remains on 443/8443 for non-updated clients. Owner manual /france and /gemini routes are retired. Delivery and UDP remain on 8443. Check the active colour and generated nginx vhost on every flip, and test owner path end-to-end. Do not test other users' credentials when the owner limits testing to his subscription.
+Main WS nodes in meta subscriptions use port 443 and `brand.json` paths.public_general; `apply_brand.py` maps the exact external path to Xray's internal /general on the active blue/green port. Legacy /general stays on 443 **and** 8443 and must stay: on 20.11.2026 four real clients were still tunnelling through it (≈1.1 GB that morning on 8443), so retiring it silently cuts people off. `/ws`, `/fi` and `/p1…/p23` were retired the same day (404 on 443/8443/2087; `/fi` and `/pN` had answered 502 for weeks because those inbounds no longer exist) via `RETIRED_PUBLIC` in `apply_brand.py`, with `brand.json` losing the dead paths. Owner manual /france and /gemini routes are retired. Delivery and UDP remain on 8443. Check the active colour and generated nginx vhost on every flip, and test owner path end-to-end. Do not test other users' credentials when the owner limits testing to his subscription.
 
 `make_sub.py` renders three formats and nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. URL shape: `https://<host>:8443/sub/<token>` — preserve the configured subscription port; an independently working VPN tunnel on 443 does not establish that subscription delivery is configured there. The layout comes from the `kind` file in the token dir (`meta` = one node, `whitelist` = provider list, `full` = legacy 25-node list). **Только TLS:** подписка по `http://<IP>/sub/<token>` на :80 снята и заводить её заново нельзя — открытый текст отдаёт токен и весь список узлов любому на пути, а точечный блок 80-го убивает этот путь вслепую. Любой новый эндпоинт подписки/лендинга — только https на 8443.
 
@@ -208,10 +208,14 @@ Full text → [references/subscription-shapes.md](references/subscription-shapes
    на edge и имена на gemini отклоняются. Карта общая для 443 и 4443. Wildcard-сокет при этом
    остаётся слушать на gemini: отказ в stream — не закрытый TCP-порт.
 2. `/etc/nginx/conf.d/vpn-443-in.conf` — `listen 127.0.0.1:18443 ssl proxy_protocol`:
-   принимает PROXY-заголовок, терминирует TLS нашим wildcard и проксирует **оба входных пути**
-   (`/ws` → `ws-in`, `/general` → `in-general`) в порт активного цвета. Корень `/` отдаёт
-   нейтральную HTML-заглушку, как на 8443.
+   принимает PROXY-заголовок, терминирует TLS нашим wildcard и проксирует `/general`
+   (`in-general`) плюс публичный alias подписки в порт активного цвета. Корень `/` отдаёт
+   нейтральную HTML-заглушку, как на 8443; всё прочее — `404`.
 3. Клиенту достаточно того же узла с портом `443`: путь, SNI, UUID и серт не меняются.
+
+**`/ws` снят с публичных входов 20.11.2026** (443, 8443, 2087 отдают `404`); инбаунд `ws-in`
+и `/ws` в `brand.json` остались только как адресная книга loopback. Не возвращать локацию без
+запроса: клиентов на этом пути не было, были только свои пробы.
 
 Три ловушки, каждая съедает заход:
 
@@ -538,6 +542,14 @@ The four that cost the most, verbatim from `references/pitfalls.md`:
   Ручная заглушка молча откатывается: ответ на `/` вернулся к прежнему короткому `ok` уже после проверки,
   и это увидел владелец, а не я. Любую правку этих двух vhosts вносить в шаблон `apply_brand.py` (и в копию
   `vpn-service/router/apply_brand.py`), затем `python3 apply_brand.py && nginx -t && systemctl reload nginx`.
+
+- **Снимаешь публичный путь — в том же заходе правь health-check.** `probe_nginx()` в
+  `vpn-bluegreen.py` проверял `/general` **и** `/ws`; после снятия `/ws` любой `vpn-cfg apply`
+  откатывал бы рабочий конфиг с «цвет не отвечает», и правка выглядела бы как «не применилась».
+  Теперь проверяются ровно опубликованные входы: `/general` на 8443 и публичный alias на 443,
+  оба должны дать `400`. Правило: health-check идёт по тому, что реально генерирует
+  `apply_brand.py`, и меняется вместе с ним. Плюс шаблон 8443/2087 получил `location / { return 404; }` —
+  иначе nginx на снятых путях лез в `/usr/share/nginx/html` и писал в error.log мусор.
 
 - **Never dump an outbound as JSON.** Trojan credentials live in `settings.servers[].password`, VLESS in
   `settings.vnext[].users[].id` — a "show me the outbound" print leaks the provider's shared keys and a

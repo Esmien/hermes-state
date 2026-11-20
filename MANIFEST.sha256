@@ -4,7 +4,7 @@ c5c72ccd28c35fbf84d8f7114a822342a56cf71213f94cf178c32cef4a813900  ./README.md
 683646459f25cdbbebebf48b674e0be4d96218b4032f7ab129bf0497bcf3f613  ./hermes/agent-hooks/ssh-only-gate.py
 8de8aafe34757fdff3e165704d4803a5a054618d11243cad6401fd4cc5483159  ./hermes/bin/read-untrusted
 f172d8a0b27ebead35d178bc19a627acb3e8e8162d25197d22282caf1aae3eb3  ./hermes/config.yaml
-0a498a02c061e8a35f2a96bd847dcace1b84b1a4d536462a67c8751bf40e332b  ./hermes/cron/jobs.json
+92b5629f73696c8167c0d099001d3419d3f8e80582c9841e6769242e2881e578  ./hermes/cron/jobs.json
 d75dd1ee52402a6083768919d8784b6fe79f9c7f647105d2f0e1be40acc30d92  ./hermes/docs/ai-memory-sandbox-architecture-2026-11-14.md
 6624bae8326a2b7845ffeb7b1f88c78d6724d3e49c6317697054717bd4472c19  ./hermes/docs/proposals/sandbox-per-user.md
 0bd3843e8ae44b77f2aaff68d6a78c2be84aeacb0f44e97a564b34f90493978f  ./hermes/docs/proposals/webui-chat-cache-proposal.md
@@ -13,7 +13,7 @@ a31955db4f59ab409e7ce3ecf6fbf8f27a3812e6119cea8cfd27ee62aef4ae53  ./hermes/docs/
 f26bcb0d03d3c42fd04cda265464faaa72bfa3335409dd42fdf3c6cc170f7b8b  ./hermes/docs/skill-system-implementation-plan.md
 101f73fdd745da0b7924ad7ea248920883cb65f2a0d7694d5fa950c28d5c9014  ./hermes/docs/skill-system-stage-1-audit.md
 38617f96ce240c4c0078badbdeaec2fc2c997b24a54445ff05e7377e5027527b  ./hermes/docs/vpn-incident-cards.md
-af460e4b05505e3a0ab85fe3c013257aaa738f48ba3dcfd61dd37440e7ffe326  ./hermes/docs/vpn-runbook.md
+2e1afa83b3c9c3d9f1d1a888fa83408950bad16dff332ece8dea1a63a57f0a3e  ./hermes/docs/vpn-runbook.md
 510781153fd8c7eabbfc319e2dd76aafa2158b9cf67cb45cfac2c28f2c630fb9  ./hermes/memories/MEMORY.md
 60387c4cc3407ef9658a6923ef9a22993342bf11f5e474edac0eb58667575401  ./hermes/memories/USER.md
 2a9ea9f557ebcea079797dc1936912eb255d454874ddea7eace192e2334d21f4  ./hermes/plugins/codex-persona/__init__.py
@@ -179,7 +179,7 @@ bd492812ca6826885dd392d6d7105700d80f72c15ac6d5e13147e70f9be0734d  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 4bd9e023bc1d473018f30c44ca92afc4e6525e29da19087a60397347cd4df28e  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-c12366d0db4bbb085d1f91927dc25c8c7354314f93d7186defaf921a6e0c792a  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+b6f5e00469dc8f659172645aef3ee1a324d0e3c4687f651c24b9e74c883e95f4  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 274da48823a8e884e0bac6fbb513d9ad885ec9fef082375c4a00d29aa2ee9f59  ./hermes/skills/devops/vpn-entry-stack/references/address-roles.md
 f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skills/devops/vpn-entry-stack/references/admin-api.md
 646f30ec5f6344aa94617b91a370080cbbd61656ebe4d017bf9a9218d9214148  ./hermes/skills/devops/vpn-entry-stack/references/blocking-risk.md
