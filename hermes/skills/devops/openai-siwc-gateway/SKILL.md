@@ -154,7 +154,8 @@ Full text → [references/quota-drill.md](references/quota-drill.md)
 Легальный маршрут зеркальный: не «подписка в наш шлюз», а **наш хост в их клиенте** — официальный
 CLI крутится на сервере с зарубежным адресом, владелец ходит в него по SSH. Механика входа, keyring,
 гео-гейт по IP, уровни квот и граница «свой клиент да / чужой прокси нет» →
-[references/google-plans.md](references/google-plans.md).
+[references/google-plans.md](references/google-plans.md); привязка egress отдельного юзера к нужному
+адресу — `scripts/pin-egress-uid.sh` (см. тот же файл).
 
 ## Pitfalls
 

@@ -37,11 +37,21 @@
 - **Вход по SSH решён вендором.** На удалённой сессии CLI печатает URL авторизации плюс одноразовый
   код: открываешь ссылку на своей машине, вставляешь код, handshake завершён. Браузер на сервере не
   нужен.
-- **Креды только в системном keyring.** На Linux это secret-service через D-Bus; файлового или
-  ENV-fallback для токена нет. На headless нужен живой D-Bus (`export $(dbus-launch)`) и
-  разблокированный gnome-keyring/KWallet под тем же пользователем. Симптом отсутствия — зависание,
-  D-Bus-предупреждения или `Error: failed to retrieve token: secret keyring is locked`. Это первая
-  техническая заноза, и проверять её надо до оплаты подписки.
+- **Креды — в системном keyring, но это не обязательно блокер.** На Linux CLI идёт в secret-service
+  через D-Bus; на headless нужно два условия: живой сессионный bus пользователя и
+  `XDG_RUNTIME_DIR` **этого** пользователя. Запуск через `runuser` наследует root'овский
+  `/run/user/0`, и тогда `dbus-launch` падает `Unable to set up transient service directory … owned by
+  uid 0, not our uid`, а keyring — `couldn't create socket directory: Permission denied`. Лечится
+  `loginctl enable-linger <user>` (создаёт `/run/user/<uid>` и его bus) плюс явные
+  `XDG_RUNTIME_DIR=/run/user/<uid> DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/<uid>/bus`.
+- **Коллекцию `login` на headless не создать — и не надо.** `secret-tool store` без неё отдаёт
+  `Object does not exist at path /org/freedesktop/secrets/collection/login`, а
+  `secretstorage.create_collection` требует интерактивного prompt и умирает
+  `PromptDismissedException: Prompt dismissed`. Подкладывать файл `~/.local/share/keyrings/login.keyring`
+  вручную тоже не помогает — демон её не монтирует. Проверять надо не наличие keyring, а факт
+  записи токена после входа: в бинарнике есть `keyring.fallbackServiceProvider`, то есть отсутствие
+  secret-service не обязательно фатально. Строить keyring «на всякий случай» до первой попытки
+  входа — потерянный час.
 - **`agy -p` (headless) работает на закэшированных кредах:** без входа падает `authentication
   required`, а не висит. Требующие подтверждения тулы soft-denied (exit 0 + строка в stderr),
   таймаут только через `--print-timeout`, неизвестная модель — non-zero без тихого фолбэка. Разрешения
@@ -50,12 +60,35 @@
   привязан к поддерживаемой стране». Живая проверка идёт по IP и отдаёт `400 User location is not
   supported` — её ловят даже пользователи с бытовым VPN, то есть это не бан аккаунта. Не выводить
   страну из «сервер в ЕС»: мерить, как Google читает конкретный адрес (`this.gbar_` / ipinfo).
-  Если адрес не проходит — привязать egress к нужному адресу policy routing'ом по uid
-  (`ip rule add uidrange <uid>-<uid> table <n>` + таблица с `src <ip>`), а не правкой VPN-стека.
+  Если адрес не проходит — привязать egress к нужному адресу policy routing'ом по uid: таблица с
+  `default via <gw> dev <iface> src <нужный ip>` плюс `ip rule add uidrange <uid>-<uid> lookup <n>`.
+  Три вещи, без которых это делается неправильно: маршрут в таблице обязан нести `src` (иначе
+  уходит прежний адрес), проверять egress **из-под целевого юзера** (`runuser -u <user> -- curl -s
+  https://ipinfo.io/ip`) и заодно убеждаться, что root не поехал, и помнить, что `ip rule`/`ip route`
+  живут до перезагрузки — переносить в unit после `network-online.target`.
+  Готовый прогон: `scripts/pin-egress-uid.sh [--apply] <user> <src-ip> [gw] [iface] [table]`.
+  VPN-стек для этого не трогать: его `sendThrough` живёт на аутбаунде Xray и к отдельному процессу
+  отношения не имеет.
 - **Квота.** Pro — квота каждые пять часов до недельного потолка; Ultra — highest плюс сторонние
   модели; free — недельная квота. Терминальный агент с длинными сессиями жжёт её заметно быстрее
   веб-чата, поэтому «в терминале» и «дёшево» — не про один и тот же план.
-- **Граница, которую нельзя переступать.** `agy` руками в терминале — штатное использование
+- **Установка — под отдельным пользователем, не под root.** `curl -fsSL
+  https://antigravity.google/cli/install.sh | bash` ставит `~/.local/bin/agy` (бинарник ~270 МБ,
+  чек-сумму проверяет сам, тянет пакет с единственного хоста
+  `antigravity-cli-auto-updater-*.run.app` — это ожидаемо, не признак подмены). Ставить от имени
+  будущего пользователя: `~/.gemini`, PATH и креды принадлежат ему. Установщик не правит PATH —
+  строку `export PATH="$HOME/.local/bin:$PATH"` в `~/.bashrc` добавлять самому, иначе каждый вызов
+  по SSH будет «command not found».
+- **Первый запуск — TUI-меню «Select login method»: `1. Google OAuth` / `2. Use a Google Cloud
+  project`.** Выбор подтверждается Enter; вариант 2 — это ADC-путь (`GOOGLE_APPLICATION_CREDENTIALS`),
+  то есть оплата проектом, а не подпиской. `ANTIGRAVITY_API_KEY` тоже существует, но это API-ключ:
+  он не заменяет подписку и не даёт её моделей.
+- **Ссылка авторизации живёт в том же процессе, что её выдал.** В ней PKCE `code_challenge` и
+  `state`, привязанные к запущенному экземпляру: перезапуск или второй экземпляр = новый URL и
+  мёртвая ссылка у владельца на руках. Ссылку брать из полного лога процесса (`process_manage
+  action=log`), а не из `poll`-превью: превью обрезает левую часть и переносит строки по 118
+  символов, склеивать вручную легко с ошибкой. Код владельца вставлять в тот же процесс (одна
+  строка + Enter) и не закрывать stdin до ответа. `agy` руками в терминале — штатное использование
   первого клиента. Тот же OAuth, подсунутый прокси вроде CLIProxyAPI или `gemini-cli-openai`, чтобы
   торчать из него в LiteLLM/OpenClaw — ровно тот паттерн, по которому вендор банит пачками.
   Прежде чем предлагать «мост», проверить, чей это OAuth.

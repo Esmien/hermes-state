@@ -166,11 +166,12 @@ f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skill
 a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skills/devops/llm-route-bench/scripts/code_bench_hard.py
 d0318bee8625a133365c1c251d116b090ee791a463fa9a925bde2dff16d7b7ed  ./hermes/skills/devops/lyria-music-bot/SKILL.md
 dfb7b3e56857f88530a34d972a369d597305ee5a9ac3e669b5a529fa504c65f0  ./hermes/skills/devops/lyria-music-bot/references/suno-provider.md
-c05f949e903ec9954c84cc88b522bf4ee94c34bec2d76200015088a09dbd6845  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
-eb5ce6b62a1221bb37e9888dd3e989ea1e785a457bbac3cd0da46231e83ad6f4  ./hermes/skills/devops/openai-siwc-gateway/references/google-plans.md
+17003911e1c02fbb8ac3a13323115e58558e5f581856f05e7bcda179e21a6a98  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
+59c066c9b107432b533298fa14f560a6080c777d643ca440fafe3a4094bf4168  ./hermes/skills/devops/openai-siwc-gateway/references/google-plans.md
 8014e8a6c167774ad66d33830091a74d61678ec6957b219c9a24de9e8571bc5c  ./hermes/skills/devops/openai-siwc-gateway/references/pitfalls.md
 dd48ba04036b01155d96e29e27e4c817940877f22e1000928633de0120490fbd  ./hermes/skills/devops/openai-siwc-gateway/references/quota-drill.md
 8fe098ce709aa55057d9737d3db8e3a9e0e54cfb06f51907b398137bc8eba77b  ./hermes/skills/devops/openai-siwc-gateway/references/siwc-facts.md
+4076ff3e284bee382fd3980d92e893d733455f9bfdbce70849111d2a05142b01  ./hermes/skills/devops/openai-siwc-gateway/scripts/pin-egress-uid.sh
 ab3a29f46fe195ba2e81bd46f2a43ed37ad9c16814812c630eb39e2bd2cb3511  ./hermes/skills/devops/ru-access-to-foreign-cloud/SKILL.md
 9863e40dd9c9afc73287285af5bd3aebf53410d153f77bd53859b23721d892a1  ./hermes/skills/devops/ru-access-to-foreign-cloud/references/oracle-cloud.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
