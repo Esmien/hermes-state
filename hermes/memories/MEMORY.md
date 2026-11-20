@@ -14,7 +14,7 @@ TG: 214062001 = Владислав (владелец); 917728475 = Игорь �
 §
 Браузер: lightpanda (JS, без скринов) + Chromium /root/.hermes/tools/chromium-1208/chrome-linux64/chrome (скрины); browser-тулсет в telegram.
 §
-ai.esmien.ru за CF-прокси (SSL strict): realip не работает, реальный IP — map $client_ip в /etc/nginx/conf.d/01-cf-client-ip.conf, лимиты/логи по нему. CF-токен /root/.secrets/cf.ini зонный.
+AI-домены (ai/llm/mon/stats) — прямые A на 141.98.166.213, без CF-прокси, origin открыт. VPN-вход 85.92.158.238 (IPbnb LLC) — другая сеть, тот же сервер. CF-токен /root/.secrets/cf.ini зонный.
 §
 Принятые риски владельца (НЕ считать недостатками): root-терминал с docker.sock (осознанно, вход только по 256-бит паролю), одна VM без кластера (бюджет, миграция ~1ч, RTO ≤1 сут), целевая атака исключена (приватный сервис), без лимитов на ключи и без алертов. Детали — скилл vps-posture-assessment.
 §
