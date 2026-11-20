@@ -211,8 +211,8 @@ Full text → [references/subscription-shapes.md](references/subscription-shapes
    остаётся слушать на gemini: отказ в stream — не закрытый TCP-порт.
 2. `/etc/nginx/conf.d/vpn-443-in.conf` — `listen 127.0.0.1:18443 ssl proxy_protocol`:
    принимает PROXY-заголовок, терминирует TLS нашим wildcard и проксирует `/general`
-   (`in-general`) плюс публичный alias подписки в порт активного цвета. Корень `/` отдаёт
-   нейтральную HTML-заглушку, как на 8443; всё прочее — `404`.
+   (`in-general`) плюс публичный alias подписки в порт активного цвета. Корень `/` редиректит
+   на страницу входа-прикрытие (`/ui/`), всё прочее — `404`.
 3. Клиенту достаточно того же узла с портом `443`: путь, SNI, UUID и серт не меняются.
 
 **`/ws` снят с публичных входов 20.11.2026** (443, 8443, 2087 отдают `404`); инбаунд `ws-in`
@@ -442,7 +442,7 @@ When the owner says he does not want to keep a client window open, the shape is 
 
 TSPU freeze counts **packets in one TCP connection** (~25 packets / ~16 KB, ~8 on mobile) and hangs it in both directions; the connection does not reset, the app just waits. UDP is untouched by that rule, so a UDP transport is the only thing that survives once a network is frozen. Measured 10.11.2026 over 435 endpoints / 154 hosters: 87% pass from RU, the rest freeze — and the freeze is per **network/AS**, whole companies at once (OVH, Hetzner incl. US/SG, DigitalOcean, Vultr, BuyVM, Scaleway, Gcore-type nets frozen; HostHatch, FlokiNET, Psychz, Time4VPS, Serverius pass). Check the ASN before recommending any hoster, and never promise UDP as immunity: blocking all UDP is a one-line rule, they just have not paid the collateral cost yet.
 
-Live shape: `hysteria-server.service` → `/usr/local/bin/hysteria server -c /etc/hysteria/config.yaml`, listen `:8443` **UDP** (было `:443` — у части операторов этот порт к нашему IP режется так же, как TCP), wildcard cert, `obfs: salamander`, masquerade proxied to `http://127.0.0.1` (a probe without the obfs password lands on nginx and sees a normal page). Secrets in `/root/.secrets/hysteria-owner.txt` (0600); repo carries `hysteria/config.example.yaml`, both units and `scripts/install-hysteria.sh` — a rebuild is `bash scripts/install-hysteria.sh` and it keeps existing secrets.
+Live shape: `hysteria-server.service` → `/usr/local/bin/hysteria server -c /etc/hysteria/config.yaml`, listen `:8443` **UDP** (было `:443` — у части операторов этот порт к нашему IP режется так же, как TCP), wildcard cert, `obfs: salamander`, masquerade proxied to the loopback decoy website (`http://127.0.0.1:8091` — the same login page a browser sees on 443), so a probe without the obfs password lands on a normal site instead of an empty response or a socks proxy. Secrets in `/root/.secrets/hysteria-owner.txt` (0600); repo carries `hysteria/config.example.yaml`, both units and `scripts/install-hysteria.sh` — a rebuild is `bash scripts/install-hysteria.sh` and it keeps existing secrets.
 
 **Hysteria must not dial the internet itself.** A bare UDP entry puts every user in Estonia: Gemini refuses and Gosuslugi 403s, which reads as «UDP не работает». The fix is one hop: Xray gets a loopback SOCKS inbound (`tag: udp-in`, port 10089, `udp: true`) and hysteria's only outbound is `type: socks5 → 127.0.0.1:10809`. That 10809 is `vpn-socks-relay.py`, which re-reads `/root/vpn-router/vpn-color` on every connection and dials 10089/11089 — because `derive_b` shifts *every* inbound port by +1000, so a static socks port breaks silently on the next blue/green flip. With the relay, server-side routing is shared: Google → FR, `.ru` → Moscow, rest → EE. Verify by resetting xray outbound counters, pulling Gosuslugi and `generate_204` through the hysteria client, and reading `p15`/`fr` deltas — not by trusting the config.
 

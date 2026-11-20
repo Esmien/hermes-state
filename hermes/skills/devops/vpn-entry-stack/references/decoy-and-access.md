@@ -14,7 +14,13 @@
 - Add `absolute_redirect off;` in the server block: nginx otherwise emits `Location: https://host:18443/ui/` and leaks the internal listener port (docs: `server_port` is the listening port, and 18443 is the loopback vhost behind the stream front).
 - `limit_except GET HEAD { deny all; }` on `/ui/` keeps the decoy read-only: a probe sees a login form, but no POST reaches the real admin API, so there is nothing to brute-force.
 - **Patch the generator, not the file:** `vpn-443-in.conf` is written by `apply_brand.py` on every apply. Both the main vhost and the parallel one share the template, and `parallel_vhost` is derived from `main_vhost`, so one edit covers `.ru` and `.com`.
+- **«Конфиг не применился» — сначала найди, какой server block отвечает.** Правка лежала в `vpn-443-in.conf`, а `/` отдавал старый `Welcome` из соседнего vhost'а-фолбэка на `127.0.0.1:8091`. Проверка за один шаг: `nginx -T | grep -n 'server_name <host>'` и лог именно того вhost'а (`vpn-443.log`); отсутствие запроса в нём означает, что ответил другой блок, а не что reload не сработал.
 - The vision fallback (`127.0.0.1:8091`, what a browser sees when TLS on 443 is terminated by Xray) must show the same page; its `location /` proxies to `http://127.0.0.1:4000/ui/` so unknown paths and hysteria auth probes also get the login page.
+
+## Not doing: ALPN `h2` on 443
+
+- A decoy that answers only `http/1.1` is slightly unlike a real site, but enabling `http2` on the 443 vhost is the wrong trade: a client that offers `h2` first negotiates it, and nginx cannot proxy a WebSocket upgrade over HTTP/2, so that user's tunnel dies. Our subscriptions pin `alpn=http/1.1`; saved/imported legacy configs do not.
+- If it is ever revisited, change it together with the generated `alpn` in every subscription format and accept that anyone on an old imported profile breaks — say that price out loud instead of shipping h2 quietly.
 
 ## Hysteria masquerade
 

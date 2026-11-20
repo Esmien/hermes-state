@@ -32,6 +32,19 @@ The owner's row is not deletable. In `subgen_api.py` keep a `PROTECTED = {"Вл�
 
 When the question becomes "should all of this live in one service instead of these scripts", see `references/control-plane.md`.
 
+## Client TLS fingerprint lives in every builder, not in one
+
+The transport is only half the fingerprint: a client that offers a default Go/`xray` ClientHello is visible to DPI without any SNI. Pin `chrome` in **all four** independent places `make_sub.py` builds nodes, because they do not share code:
+
+- raw `vless(...)` links (`list.txt`) — query params `fp=chrome`, `alpn=http/1.1`;
+- `clash_proxy` / `clash_proxy_from_link` — `client-fingerprint: chrome`;
+- `sb_link` and `sb_ours` (sing-box outbounds) — `tls.utls = {enabled: true, fingerprint: chrome}` plus `tls.alpn`;
+- the main `build()` out dict for the WS node — same `utls`, and this is the one that actually ships to most tokens.
+
+Patching one builder feels done and is not: the served `singbox.json` kept a bare `{"enabled": true, "server_name": …}` through two regeneration rounds. Verify in the **served files** after `python3 make_sub.py`, not in the source: decode `list.txt` for `fp=`, read `singbox.json` `outbounds[0].tls`, grep `clash.yaml` for `client-fingerprint`. `users.py sync` regenerates through `make_sub.py`, so a fix appears only after one of those runs.
+
+Tell the owner the one thing it costs: whoever uses a subscription just refreshes it; whoever saved a raw link by hand needs the new link.
+
 # Subscription
 
 ## Subscription
