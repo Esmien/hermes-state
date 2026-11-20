@@ -17,6 +17,7 @@ Treat claims that a port or protocol is blocked as hypotheses: correlate client 
 ## Safe rollout and scope
 
 - Preserve the owner's current subscription nodes, names, links, routing and functioning UDP backup unless he explicitly orders removal. He removed the two manual Gemini/NL nodes; do not restore their public routes or subscription entries. Verify the live state before changing anything.
+- При параллельном переезде домена сохраняй старые входы, ссылки подписок и страницы до отдельного решения владельца об отключении; создай вторую страницу-клон с новыми ссылками и проверь новую подписку и настоящий туннель, а не только сертификат. Не объявляй сертификат готовым VPN-входом и не завершай задачу на промежуточном результате без реального препятствия.
 - When the owner requests private-first testing, stage the change separately and test only with his actual subscription and key; inspecting other profiles is fine, connecting with their keys is not. A localhost tunnel is not his device/network test. Deploy shared routing, ports or subscription changes only after his device validation unless he explicitly authorizes an immediate shared switch; report its blast radius. For a separate-port phone test, stage an isolated nginx listener and an owner-only subscription node, preserving his existing nodes and all other subscribers; verify local end-to-end first. Disclose if other valid keys also work, and after validation stop the listener, remove the temporary node and verify the port is closed. A different port validates the staged route, not actual production-port reachability or identical behavior.
 - Before retiring a listener, inspect current published profiles **and** recent use: refreshed subscriptions do not prove that every manually imported or stale client has migrated. Respect ports the owner explicitly excludes; state which legacy profiles stop connecting and preserve TCP and UDP independently. A broad request to reduce exposure is not proof that nobody depends on an old port.
 - For an audit constrained to the present server/ASN, work within that constraint and don't repeatedly offer excluded migrations. Do not re-open a risk the owner explicitly accepted as an action item without new evidence.
@@ -84,7 +85,7 @@ The owner-facing counterpart is `/root/.hermes/docs/vpn-runbook.md`: scheme with
 
 ## Changing the public host
 
-Move host, port, cert and subscriptions in one pass: nginx server blocks, `brand.json` paths, regenerated subs, `vpn-cfg`'s own `HOST=` copy, then `apply_brand.py && nginx -t && reload && vpn-cfg apply` — a stale copy in `vpn-cfg` makes `apply` probe the old name and revert a good config.
+For an explicitly authorized full cutover, move host, port, cert and subscriptions together: nginx server blocks, `brand.json` paths, regenerated subs and `vpn-cfg`'s own `HOST=` copy, then `apply_brand.py && nginx -t && reload && vpn-cfg apply` — a stale host copy makes `apply` probe the old name and revert a good config. For a parallel migration, do not replace the single global `host`: retain the old entry and delivery while adding the new one, with separately correct page and subscription links.
 
 Full text → [references/changing-public-host.md](references/changing-public-host.md)
 

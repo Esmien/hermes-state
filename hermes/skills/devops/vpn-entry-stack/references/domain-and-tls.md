@@ -9,6 +9,8 @@ Host-wide, not VPN-only: the same zone and the same wildcard serve the AI servic
 
 ## Issuing the wildcard
 
+Check installed Certbot authenticators with `certbot plugins` before installing anything; an import using the shell's `python3` can miss a plugin installed in Certbot's own environment. A successful issuance alone does not prove scheduled renewal: verify the timer, deploy hook and a dry run separately.
+
 ```bash
 apt-get install -y python3-certbot-dns-cloudflare
 # /root/.secrets/cf.ini (0600, parent dir 0700):
