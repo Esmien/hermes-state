@@ -1,7 +1,7 @@
 ---
 name: openai-siwc-gateway
 description: "Use when a subscription plan feeds third-party tools."
-version: 1.0.0
+version: 1.1.0
 author: VPS Admin
 license: MIT
 metadata:
@@ -30,6 +30,20 @@ replacement. The documented path is SIWC for open-source / locally hosted apps.
   client; can be closed by upstream without notice.
 - **White (SIWC)**: dynamic client registration → PKCE → `POST https://api.openai.com/v1/responses`
   with the OAuth access token. Docs explicitly forbid pointing this flow at `backend-api`.
+
+## 2FA на аккаунте и что бывает с мостом
+
+- **Включение 2FA не отзывает OAuth-грант.** Мост не логинится, а продлевает: `/root/siwc/auth.json`
+  держит `refresh_token`, `client_id` (`oaiapp_…`), `expires_in`, `saved_at`, и в `gateway.log` каждый
+  час идёт `token refreshed`. Пока этот цикл жив, 2FA на схему не влияет — отвечать «ничего не
+  сломается», а не «надо перепроверить».
+- **Диагностика живости без траты квоты:** возраст `saved_at` в `auth.json` +
+  `grep "token refreshed" /root/siwc/gateway.log | tail -2` + `systemctl is-active siwc-gateway`.
+  Секреты при этом не печатать — только ключи, время и флаг.
+- **Кусается только повторный вход**, когда refresh перестал работать (смена пароля, «выйти на всех
+  устройствах», отзыв гранта): и белый PKCE-флоу, и серый device-code тогда просят код из
+  аутентификатора. Перед таким шагом проверить, что у плановых групп есть не-плановая нога (см. аудит
+  ниже): отозванный грант даёт 400 от моста, а 400 не ретраится — `order` и `fallbacks` его не обходят.
 
 ## SIWC facts that matter (verified Oct 2026)
 
@@ -117,6 +131,29 @@ For model inventory and cleanup, see `ai-stack` → `references/model-provenance
   `LiteLLM_ProxyModelTable`.
 - Проверка, что YAML реально применился: `/router/settings` отдаёт `fields[]`, и в нём
   `fallbacks` — а не значение верхнего уровня (верхний уровень `null` ничего не значит).
+
+### Аудит: у каждой ли плановой группы есть не-плановая нога
+
+- **План и не-план различаются по `api_base`/`model`, а не по имени группы.** Нога моста —
+  `api_base: http://host.docker.internal:4010/v1`; серая — `model: chatgpt/…` без `api_base`;
+  не-плановая — `openrouter/…` (credential `Openrouter LiteLLM`) или OpenCode. Судить надо по всей
+  группе: цепочка «мост → серая» выглядит здоровой, но обе ноги едят один грант и умирают вместе.
+- **Читать `/model/info`, а не таблицу `LiteLLM_ProxyModelTable`.** В таблице `litellm_params`
+  зашифрованы (непрозрачные строки), из них не достать ни `api_base`, ни `order`. Мастер-ключ —
+  `LITELLM_MASTER_KEY` в `.env` на уровне стека (`/home/ai_service/ai-stack/ai/.env`), не в каталоге
+  `ai/litellm/`; `/model/info` отдаёт параметры расшифрованными, поэтому печатать только
+  `model_name/order/blocked/model/api_base/credential` и никогда `api_key`.
+- **Клоны групп не наследуют правки.** `hermes.<group>` и `aider.<group>` — отдельные группы в БД:
+  нога, добавленная публичному имени, к ним не приезжает. Проверять каждое имя, которым реально ходят
+  клиенты, а не только «главное».
+- **`router_settings.fallbacks` покрывает не то, что кажется.** Отсутствие группы в `fallbacks`
+  нормально только когда порядок задан внутри неё; группа с единственной ногой — это не «порядок», а
+  тупик. Проверять обе стороны: ноги внутри группы и пары group→group в `config.yaml`.
+- **Наличие модели на OpenRouter проверять в публичном каталоге, до обещаний:**
+  `curl -s https://openrouter.ai/api/v1/models | grep -o '"id":"[^"]*<slug>[^"]*"'`. Каталог
+  отдаётся без ключа; если модели там нет, вариант «добавим `order=2` на OR» закрывается сразу.
+- Готовый проход по всем группам с плановой ногой → `scripts/siwc-route-audit.py` (только чтение:
+  печатает ноги с `order`/`blocked` и список групп, где все живые ноги плановые).
 
 ## Учебный прогон квоты (сквозной, без ожидания реального отказа)
 
