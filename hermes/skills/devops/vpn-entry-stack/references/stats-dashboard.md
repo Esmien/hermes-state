@@ -54,6 +54,37 @@ Row names are the owner's to dictate: he names the shared row after the guest ho
 - Collector: `/root/vpn-router/stats_collect.py`, run by `vpn-stats.timer` every 5 min (state `/var/lib/vpn-stats/state.json`, page data `/var/www/vpn-stats/data.json`).
 - Page: `/var/www/vpn-stats/index.html` (self-contained, inline CSS/JS, numbers only — the owner rejects progress bars/charts noise).
 - Vhosts `stats.esmien.com` and `stats.esmien.ru` operate in parallel, both DNS-only and behind `127.0.0.1:9443 proxy_protocol ssl http2`, using the same `/etc/nginx/vpn-stats.htpasswd`, data, API and collector. `.com` has a separate `stats-esmien-com` certificate. Keep `.ru` until the owner explicitly retires it. The collector measures user and outbound counters independent of the incoming DNS hostname; verify real traffic through both entries and increasing user totals. The dashboard stores traffic statistics, not monetary expenses; don't claim the latter were migrated without finding their real source.
+
+### Доступ только через VPN (решение владельца)
+
+Панель не должна открываться из интернета вообще: сервер для владельца не должен выглядеть
+личным сервисом. Закрывается на уровне nginx, а не авторизацией:
+
+```nginx
+allow 85.92.158.238;   # edge = адрес, с которого выходят наши же клиенты
+allow 127.0.0.1;
+deny all;
+error_page 403 = @drop;
+location @drop { return 444; }
+```
+
+Блок `deny` и `@drop` ставятся в **оба** серверных блока каждого vhost-а (`:80` и TLS-блок `:9443`);
+`444` вместо `403` — чтобы снаружи соединение просто рвалось, и сканер не видел даже факта
+существования адреса. Правило живёт в живых файлах `/etc/nginx/conf.d/stats.*.conf`, их копии —
+`vpn-service/nginx/stats.*.conf`; обновлять в одном заходе, `apply` их не перегенерирует.
+
+**Обязательное дополнение — правило маршрутизации.** Клиентский запрос к панели уходит с того
+выхода, куда его направил сервер; через NL/Gemini он придёт с чужого IP и получит `444`. Поэтому
+в `config.json` перед доменными правилами:
+`{"type":"field","domain":["domain:stats.esmien.com","domain:stats.esmien.ru"],"outboundTag":"direct"}`
+— тогда панель открывается с любого устройства внутри туннеля.
+
+Симптом «через VPN тоже не пускает» и его причина: TLS-рукопожатие проходит, а `curl` падает
+`HTTP/2 stream 1 was not closed cleanly: PROTOCOL_ERROR`, и в `stream-443.log` по этому соединению
+нет ни строки — значит запрос вышел не через edge. Проверять обе стороны одним замером:
+`curl --interface 85.92.158.238 https://stats.esmien.com/` (эмулирует источник-клиент) → `401`,
+снаружи → обрыв (`000`), и только потом браузером через туннель. Цена решения, которую надо озвучить:
+без живого VPN панель недоступна совсем, включая владельца.
 - Credentials are his to pick: write `user:$(openssl passwd -apr1 '<pw>')` into the htpasswd file, `chgrp www-data` it, then prove both sides — new login `200`, old login `401`.
 
 ### Subscription generator
@@ -114,6 +145,13 @@ A block on the same page creates profiles: input name → POST `api/new` → thr
 `scripts/probe_user_key.py` builds a throwaway xray client from one subscription (`--token`), or from the bare main key (`--legacy`), runs it as a local socks, downloads N bytes and prints the byte count plus the egress IP. Run it with the person's token, wait one collector tick, and their row must move by ~N bytes — the only proof that per-user counters are wired to the right key. (Don't confuse it with `scripts/probe_sub.py`, which probes the provider's nodes for exit geo and Google's country verdict.)
 
 Watch the returned `size_download`: the free speed endpoints cap the request and answer `1` byte for too big a `bytes=` value, which reads like a dead key. A few MB (2–8 MB) works; treat `1` byte as "ask smaller", not as a failure.
+
+**Свой тестовый клиент собирается из `users.json` + `brand.json`, а не из одного `users.json`.**
+В записи профиля только `uuid`, `token`, `token_lte`, `title`, `created` — ключа `path` там нет
+(`KeyError: 'path'`), путь берётся из `brand.json["paths"]["public_general"]`, а адрес/SNI — из
+`share.esmien.com` (тот же вход, что у людей на 443). Проверка такого клиента годится для «вход
+отвечает» и для source-IP-ограничений (см. доступ к панели), но не заменяет тест с устройства
+владельца.
 
 ## Reachable data, cheap
 

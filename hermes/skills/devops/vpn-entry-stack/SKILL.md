@@ -68,7 +68,8 @@ Upstreams and enabled inbounds can change with blue/green and manual nodes. Insp
 Adding a route means four coordinated edits, in this order: append an inbound (`tag`, 127.0.0.1, next free port, same client id, `wsSettings.path`) to `config.json`, add the outbound and a routing rule keyed on `inboundTag` **before** the catch-all `tcp,udp → direct` rule, add `paths` + `upstreams` entries to `brand.json`, then `apply_brand.py && nginx -t && systemctl reload nginx && vpn-cfg apply` (not a bare `docker restart` — `apply` proves the routes answer and reverts a broken config). Verify by dialling the new path through the tunnel and checking the egress with ipinfo — not by reading the config back.
 
 Files: `/root/vpn-router/{config.json,brand.json,apply_brand.py,make_sub.py,make_template.py,import_sub.py,users.py,probe_sub.py,test_whitelist.py,gemini_geo_check.py,sub_expiry.py,route_ru.py,subs.json,users.json,failover.py,certbot_retry.py,provision_vpn_host.py}`, subscriptions in `/var/www/esmien-sub/<token>/`. Editing, applying and rolling back: `vpn-cfg` (`references/router-ops.md`). Per-user/route traffic counters and «кто пользуется подписками»: `references/usage-stats.md`;
-сама панель (иконки/вёрстка, счётчики и смена адресов, генератор профилей) — `references/stats-dashboard.md`. **Счётчики не зависят от адресов**: они живут на `user>>>` и `outbound>>>`, поэтому смена входа или `sendThrough` ни одной строки не сбрасывает — меняется только смысл подписи («Эстония (основной)» = тег `direct`). Вёрстку панели проверять измерением (`--dump-dom` + метрики в `document.title`), а не скриншотом: headless Chromium держит ширину окна ~500 px и картинка врёт про обрезания. When a client reports that the VPN "keeps dropping": `references/client-drop-triage.md` — probe the server end to end before touching anything, and start with DNS: an entry whose name no longer resolves looks exactly like a dead VPN (app can't ping any node, browser still works from cache). **Один мёртвый вход ≠ мёртвый адрес:** прежде чем говорить «режут IP», сверить все входы в одном окне — если WS и UDP несут трафик, душат конкретный транспорт, а не адрес.
+сама панель (иконки/вёрстка, счётчики и смена адресов, генератор профилей) — `references/stats-dashboard.md`;
+панель закрыта по IP (allow edge+loopback, снаружи `444`) и требует правила `stats.esmien.* → direct`. **Счётчики не зависят от адресов**: они живут на `user>>>` и `outbound>>>`, поэтому смена входа или `sendThrough` ни одной строки не сбрасывает — меняется только смысл подписи («Эстония (основной)» = тег `direct`). Вёрстку панели проверять измерением (`--dump-dom` + метрики в `document.title`), а не скриншотом: headless Chromium держит ширину окна ~500 px и картинка врёт про обрезания. When a client reports that the VPN "keeps dropping": `references/client-drop-triage.md` — probe the server end to end before touching anything, and start with DNS: an entry whose name no longer resolves looks exactly like a dead VPN (app can't ping any node, browser still works from cache). **Один мёртвый вход ≠ мёртвый адрес:** прежде чем говорить «режут IP», сверить все входы в одном окне — если WS и UDP несут трафик, душат конкретный транспорт, а не адрес.
 
 ## Deploy / rebuild
 
@@ -265,7 +266,10 @@ default -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol; unknown SNI -> r
   маркирует адрес, а блок по IP:порт убивает заодно чистый вход. Поэтому камо-REALITY с этого IP
   снят: `reality-in` удалён из `config.json`, камo-SNI из карты, узел из подписки. Маскарад под
   чужой домен возвращать **только на отдельном IP**; свой домен + свой серт + фолбэк-страница
-  дают тот же эффект без подписи.
+  дают тот же эффект без подписи. **Решение владельца (20.11.2026): маска под чужой сайт — «лютое
+  палево», не предлагать её как средство скрытности вообще** (ни REALITY, ни camel-SNI). Скрытность
+  строим на своём имени, своём серте и честной заглушке; в отчётах о детектируемости REALITY не
+  всплывает как «радикальный вариант», даже с оговорками.
 - **У Vision своё имя, а не то, на котором висят vhost'ы.** `vpn.esmien.ru` на 443 обязан уходить
   в `default` — иначе отваливается legacy WS `/general`, которым ходят консольные клиенты.
   Поэтому SNI для Vision — отдельный поддомен (`edge.esmien.ru`, A-запись на наш IP через CF API).
