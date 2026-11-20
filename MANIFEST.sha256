@@ -13,7 +13,7 @@ a31955db4f59ab409e7ce3ecf6fbf8f27a3812e6119cea8cfd27ee62aef4ae53  ./hermes/docs/
 f26bcb0d03d3c42fd04cda265464faaa72bfa3335409dd42fdf3c6cc170f7b8b  ./hermes/docs/skill-system-implementation-plan.md
 101f73fdd745da0b7924ad7ea248920883cb65f2a0d7694d5fa950c28d5c9014  ./hermes/docs/skill-system-stage-1-audit.md
 38617f96ce240c4c0078badbdeaec2fc2c997b24a54445ff05e7377e5027527b  ./hermes/docs/vpn-incident-cards.md
-b619da62e8ccee5ac0d14c10d29866d26acf214bb1387cd97279f4677a1b063c  ./hermes/docs/vpn-runbook.md
+cb15819cb78e281ded6f205026f8a6a8d3efc9f29cdf715cb4e29547e20667d3  ./hermes/docs/vpn-runbook.md
 510781153fd8c7eabbfc319e2dd76aafa2158b9cf67cb45cfac2c28f2c630fb9  ./hermes/memories/MEMORY.md
 60387c4cc3407ef9658a6923ef9a22993342bf11f5e474edac0eb58667575401  ./hermes/memories/USER.md
 2a9ea9f557ebcea079797dc1936912eb255d454874ddea7eace192e2334d21f4  ./hermes/plugins/codex-persona/__init__.py
@@ -206,7 +206,7 @@ f3bde384942d6e7d3b9396d406b14dd82cef9b2681a0691c36ab4027edfddac6  ./hermes/skill
 6fa3857c42864fcb85f324478061af9f3144e292b3d6419664dab11138856487  ./hermes/skills/devops/vpn-entry-stack/references/ru-split.md
 cc637c32414552f1f704f77748ce062facbd79cb09ad8723dfd1169af456fa05  ./hermes/skills/devops/vpn-entry-stack/references/scenario-routes.md
 d64656eb3ef1b91d4ff2a8acf52871f6087cdf233e2454b6753e3fe76245420f  ./hermes/skills/devops/vpn-entry-stack/references/second-public-ip.md
-5a6b2c38689339595abd1aa7706b29c86bbd7ad2f141cd04dee25a4049a464b1  ./hermes/skills/devops/vpn-entry-stack/references/stats-dashboard.md
+936913c2249f77b4aff44ac678e3a316884b123b46cee552c42ff938e88e5505  ./hermes/skills/devops/vpn-entry-stack/references/stats-dashboard.md
 b32186db214e958f13c43c6f48bf5a2b8325d304d2ba3a0a051c7d73e518a4a7  ./hermes/skills/devops/vpn-entry-stack/references/subscription-expiry.md
 611c04d53f4614083b556457257c14073b39b30f6c50330ea79119c5c9583a2e  ./hermes/skills/devops/vpn-entry-stack/references/subscription-shapes.md
 c9cb657587253c8f9cf9c80d167452a97e5090503dd82869789cc0a6cc91cce4  ./hermes/skills/devops/vpn-entry-stack/references/upstream-subscriptions.md
