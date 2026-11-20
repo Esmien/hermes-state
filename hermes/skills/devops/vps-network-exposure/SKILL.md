@@ -211,9 +211,7 @@ Full detail (rule ordering, UFW, DNAT, netns drill, gated changes) —
   (a timeout alone may just mean «сеть сломана»). Block:
   [references/firewall-and-ssh.md](references/firewall-and-ssh.md#netns-drill).
 - **A SOCKS relay’s `connected` reply can precede the real TCP handshake.** If a relay probe contradicts the listener inventory, complete a TLS handshake or observe SYN/SYN-ACK versus SYN/RST on the public interface with a known-good control port.
-- **Never conclude reachability from a third-party port-checker or a local
-  `curl` to your own public IP** (exits via loopback, always succeeds). Shodan
-  once reported `9223` while `ss -tlnp` and `iptables -t nat -S` showed nothing.
+- **Не выдавай локальный `curl` на собственный публичный IP за внешнюю проверку:** он проходит локальный сетевой путь и не проверяет внешние фильтры. Проверяй с независимого источника и рабочим контрольным портом; внешние чекеры и индексы также могут ошибаться, поэтому подтверждай результат полным рукопожатием и сопоставляй с живыми сокетами и правилами.
 - **`PermitRootLogin yes` при `PasswordAuthentication no` — не дыра.** Вход по паролю выключен
   глобально, `sshd -T` показывает `publickey,password` только если пароль реально разрешён.
   Проверять связку двух параметров, а не один; иначе получаешь ложную тревогу и правишь рабочий конфиг.
