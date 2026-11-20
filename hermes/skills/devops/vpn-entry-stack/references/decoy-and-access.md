@@ -2,7 +2,7 @@
 
 ## Dashboard access limited to the tunnel
 
-- Put `allow 85.92.158.238; allow 127.0.0.1; deny all;` in **both** stats vhosts (`:80` and the TLS block) and add `error_page 403 = @drop; location @drop { return 444; }` — an outsider then gets a dropped connection instead of a 403 that confirms the host exists.
+- Put `allow 85.92.158.238; allow 127.0.0.1; deny all;` in the stats vhost (`:80` and the TLS block) and add `error_page 403 = @drop; location @drop { return 444; }` — an outsider then gets a dropped connection instead of a 403 that confirms the host exists.
 - The VPN edge is the only address a tunnel client appears from, so the allowlist doubles as «only through our VPN». Verify both directions: direct `curl` → `000`/dropped, through a local xray client → `401`.
 - **Add a routing rule `domain:stats.esmien.{com,ru} -> direct`** in `config.json`. Without it the request can leave through the NL/Gemini exit and arrive from a foreign IP, which the allowlist drops — the panel then «не открывается из туннеля» for no obvious reason.
 - Trade-off to state plainly: when the VPN is down the dashboard is unreachable, including for the owner.

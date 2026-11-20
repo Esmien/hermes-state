@@ -53,7 +53,7 @@ Row names are the owner's to dictate: he names the shared row after the guest ho
 
 - Collector: `/root/vpn-router/stats_collect.py`, run by `vpn-stats.timer` every 5 min (state `/var/lib/vpn-stats/state.json`, page data `/var/www/vpn-stats/data.json`).
 - Page: `/var/www/vpn-stats/index.html` (self-contained, inline CSS/JS, numbers only — the owner rejects progress bars/charts noise).
-- Vhosts `stats.esmien.com` and `stats.esmien.ru` operate in parallel, both DNS-only and behind `127.0.0.1:9443 proxy_protocol ssl http2`, using the same `/etc/nginx/vpn-stats.htpasswd`, data, API and collector. `.com` has a separate `stats-esmien-com` certificate. Keep `.ru` until the owner explicitly retires it. The collector measures user and outbound counters independent of the incoming DNS hostname; verify real traffic through both entries and increasing user totals. The dashboard stores traffic statistics, not monetary expenses; don't claim the latter were migrated without finding their real source.
+- Панель живёт **только** на `stats.esmien.com` (DNS-only, `127.0.0.1:9443 proxy_protocol ssl http2`, basic auth по `/etc/nginx/vpn-stats.htpasswd`, отдельный сертификат `stats-esmien-com`). Старая `stats.esmien.ru` уничтожена вместе с vhost и A-записью — не восстанавливать. Коллектор считает по людям и выходам независимо от имени входа; проверить реальным трафиком через вход и ростом счётчиков. Панель — это статистика трафика, не деньги: не заявлять о переносе расходов, не найдя их источник.
 
 ### Доступ только через VPN (решение владельца)
 
