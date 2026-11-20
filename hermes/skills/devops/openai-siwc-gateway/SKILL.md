@@ -1,12 +1,12 @@
 ---
 name: openai-siwc-gateway
-description: "Use when ChatGPT plan feeds third-party tools."
+description: "Use when a subscription plan feeds third-party tools."
 version: 1.0.0
 author: VPS Admin
 license: MIT
 metadata:
   hermes:
-    tags: [openai, oauth, litellm, gateway, siwc]
+    tags: [openai, google, oauth, litellm, gateway, siwc]
     related_skills: [ai-stack, llm-route-bench]
 ---
 
@@ -17,6 +17,10 @@ metadata:
 Owner asks whether a ChatGPT plan can drive a third-party agent «officially», or the grey
 `chatgpt/` LiteLLM provider (device flow + `chatgpt.com/backend-api/codex`) needs a lawful
 replacement. The documented path is SIWC for open-source / locally hosted apps.
+
+Первое, что решается в любом таком вопросе, — **есть ли у вендора белый OAuth для сторонних
+приложений**. У OpenAI есть (SIWC), поэтому серый провайдер меняется на белый. У Google нет —
+там вопрос закрывается, см. раздел ниже.
 
 ## Two routes, one plan
 
@@ -138,6 +142,19 @@ Full text → [references/quota-drill.md](references/quota-drill.md)
 - **Restarting the unit is enough for code changes** — but check both binds afterwards
   (`172.17.0.1:4010` and `127.0.0.1:4010`), and probe with a real PNG: `prompt_tokens` ~670 means the
   image arrived, 13–19 means it was dropped again.
+
+## Google (Gemini / Antigravity): подписка в API не проносится
+
+Белого OAuth-пути нет: официального способа кормить стороннее приложение квотой AI Pro/Ultra не
+существует. Поэтому «вытащим JWT и refresh, напишем скрипт» здесь не серяя зона, а прямо названное
+в ToS нарушение: Antigravity OAuth в чужом софте и harvest Gemini CLI OAuth караются до постоянного
+бана, а баны идут по общему бэкенду и задевают CLI и Code Assist заодно. Отвечать на такой запрос
+надо вердиктом «нет» с механизмом, а не планом реверса.
+
+Легальный маршрут зеркальный: не «подписка в наш шлюз», а **наш хост в их клиенте** — официальный
+CLI крутится на сервере с зарубежным адресом, владелец ходит в него по SSH. Механика входа, keyring,
+гео-гейт по IP, уровни квот и граница «свой клиент да / чужой прокси нет» →
+[references/google-plans.md](references/google-plans.md).
 
 ## Pitfalls
 
