@@ -166,7 +166,7 @@ f43a9a59597b6014010e17f818ec4688f9b60989de7c9b3d72a995dfb0b0a586  ./hermes/skill
 a810fc2c7ba9ddbe9c4a0397d799a8e3b734d49de67fdb72757c847503435716  ./hermes/skills/devops/llm-route-bench/scripts/code_bench_hard.py
 d0318bee8625a133365c1c251d116b090ee791a463fa9a925bde2dff16d7b7ed  ./hermes/skills/devops/lyria-music-bot/SKILL.md
 dfb7b3e56857f88530a34d972a369d597305ee5a9ac3e669b5a529fa504c65f0  ./hermes/skills/devops/lyria-music-bot/references/suno-provider.md
-17316cadee605f213b1143e73118f07940b56dcccaa4b692f64a3d851c4ba629  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
+49ae641d2d461d442fc3a51afbaeb813540b055377d72b825c44bd9369e45d4b  ./hermes/skills/devops/openai-siwc-gateway/SKILL.md
 59c066c9b107432b533298fa14f560a6080c777d643ca440fafe3a4094bf4168  ./hermes/skills/devops/openai-siwc-gateway/references/google-plans.md
 8014e8a6c167774ad66d33830091a74d61678ec6957b219c9a24de9e8571bc5c  ./hermes/skills/devops/openai-siwc-gateway/references/pitfalls.md
 dd48ba04036b01155d96e29e27e4c817940877f22e1000928633de0120490fbd  ./hermes/skills/devops/openai-siwc-gateway/references/quota-drill.md

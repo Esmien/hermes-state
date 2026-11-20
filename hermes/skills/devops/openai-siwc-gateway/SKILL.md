@@ -96,7 +96,11 @@ Revert: `POST /model/unblock {"model_id": ...}`.
 - **A group leg must be usable by the clients that will hit it.** An OpenCode-backed leg needs
   `x-opencode-session`; if it has to serve non-OpenCode clients, inject it in
   `litellm_params.extra_headers` when creating/updating that deployment — otherwise every call
-  lands on `400 MissingSessionID`.
+  lands on `400 MissingSessionID`. **Fixing the header is not enough while the leg is blocked**:`blocked: true` keeps it out of selection silently, so the sequence is `extra_headers` →
+  `/model/unblock` → read `model_info.blocked` back. A ready-made session value lives on a
+  working sibling (e.g. `opencode/<slug>`); copy that string, don't invent it. Prove the patched
+  leg with the temp-group trick (dead `api_base` at `order=1`, the real leg at `order=2`): the
+  reply carrying the slug means the leg itself served, not the plan primary.
 - **Prove which leg served from `LiteLLM_SpendLogs`, not from the log body.**
   `docker logs litellm | grep provider=` names the provider, never the deployment, and a group can
   hold two legs of the same provider. One query per group settles it:
