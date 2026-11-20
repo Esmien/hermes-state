@@ -511,6 +511,15 @@ Per-token roll-out, never global: `python3 /root/vpn-router/hy2_users.py --apply
 `streamSettings.sockopt.domainStrategy`, иначе привязка молча не работает. Полный рецепт и две
 ловушки — `references/address-roles.md` §«Выход обычного трафика на edge».
 
+**Плоский процесс на хосте (`sendThrough` к нему не относится) привязывается policy-маршрутизацией
+по uid.** Для сервиса, который ходит в мир сам, а не через xray: `ip route replace default via <gw>
+dev ens3 src <чужой-ip> table 200` + `ip rule add uidrange <uid>-<uid> lookup 200 priority 1000`,
+пережить ребут — oneshot-юнит с `After=network-online.target`. Проверять `runuser -u <user> --
+curl -s https://ipinfo.io/ip` (должен быть чужой адрес) **и** что root/остальные по-прежнему выходят
+с brand. `curl --interface` в пробе доказывает только пробу — приложению нужно правило. Для
+Google-сервисов адрес выбирать по маркеру `this.gbar_`, а не по ipinfo или Cloudflare trace: базы
+расходятся, тот же IP у Cloudflare `EE`, а Google читает его как `ru`.
+
 **После любой смены биндов проходить по всем пробам.** Health-check, который стучится в
 `127.0.0.1:8443`, после сужения на `listen <edge>:8443` видит мёртвый порт, и `vpn-cfg apply`
 откатывает рабочий конфиг без единой ошибки — правка выглядит как «не применилась». Проба

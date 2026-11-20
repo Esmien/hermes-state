@@ -172,8 +172,9 @@ dfb7b3e56857f88530a34d972a369d597305ee5a9ac3e669b5a529fa504c65f0  ./hermes/skill
 dd48ba04036b01155d96e29e27e4c817940877f22e1000928633de0120490fbd  ./hermes/skills/devops/openai-siwc-gateway/references/quota-drill.md
 8fe098ce709aa55057d9737d3db8e3a9e0e54cfb06f51907b398137bc8eba77b  ./hermes/skills/devops/openai-siwc-gateway/references/siwc-facts.md
 4076ff3e284bee382fd3980d92e893d733455f9bfdbce70849111d2a05142b01  ./hermes/skills/devops/openai-siwc-gateway/scripts/pin-egress-uid.sh
-ab3a29f46fe195ba2e81bd46f2a43ed37ad9c16814812c630eb39e2bd2cb3511  ./hermes/skills/devops/ru-access-to-foreign-cloud/SKILL.md
+15debd757383f257906e932849e460af695f7203a0d85f520d363346bf795145  ./hermes/skills/devops/ru-access-to-foreign-cloud/SKILL.md
 9863e40dd9c9afc73287285af5bd3aebf53410d153f77bd53859b23721d892a1  ./hermes/skills/devops/ru-access-to-foreign-cloud/references/oracle-cloud.md
+9b615a6f95e854bb3f5c3abc7b1a6068c051609421a8267591d4b1f5d686c739  ./hermes/skills/devops/ru-access-to-foreign-cloud/references/vendor-cli-on-host.md
 8f6b78161c33e28e144f998608f779dca5b65744da6c83808a0c0e4c258ebe84  ./hermes/skills/devops/server-connections/SKILL.md
 d98d0ba4cbc7caa3adae28434aa3aad513d87937efaa0e28b2ff6549c3eac5ae  ./hermes/skills/devops/server-connections/references/ssh-only-gate.md
 bd492812ca6826885dd392d6d7105700d80f72c15ac6d5e13147e70f9be0734d  ./hermes/skills/devops/shell-and-terminal-ux/SKILL.md
@@ -181,7 +182,7 @@ bd492812ca6826885dd392d6d7105700d80f72c15ac6d5e13147e70f9be0734d  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 4bd9e023bc1d473018f30c44ca92afc4e6525e29da19087a60397347cd4df28e  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-c10ef2ad4094883217f5d5ab7307966a6c136006e7f0c52e4916ba3ae55273c5  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+44571b0aa069bba7001a62eeb70e9b26845851ccadd21b5dc5096b35c5913cb1  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 274da48823a8e884e0bac6fbb513d9ad885ec9fef082375c4a00d29aa2ee9f59  ./hermes/skills/devops/vpn-entry-stack/references/address-roles.md
 f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skills/devops/vpn-entry-stack/references/admin-api.md
 8c5a41e1dbb2b6991f4099f2d1651dd61b308f0b91c5ce20aee87ccacd792355  ./hermes/skills/devops/vpn-entry-stack/references/blocking-risk.md
