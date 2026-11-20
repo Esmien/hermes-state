@@ -179,7 +179,7 @@ bd492812ca6826885dd392d6d7105700d80f72c15ac6d5e13147e70f9be0734d  ./hermes/skill
 6d239e2005692f3789e97e0c9452391d917e1bda3d2d5c944a33e32883aad962  ./hermes/skills/devops/shell-and-terminal-ux/templates/tmux.conf
 4bd9e023bc1d473018f30c44ca92afc4e6525e29da19087a60397347cd4df28e  ./hermes/skills/devops/telegram-gate-and-bots/SKILL.md
 9b430accdcb628b8dce2956b8769e394e531bb731f47f816eae5124f26730a2f  ./hermes/skills/devops/untrusted-content-reader/SKILL.md
-860e23f8968ade6585b497534d995071f480c8630a3527c749bf49b589578aad  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
+4fda8455e22c140b098e34e921e8c54754d2d927c035c2ff7bacc59920bd28be  ./hermes/skills/devops/vpn-entry-stack/SKILL.md
 274da48823a8e884e0bac6fbb513d9ad885ec9fef082375c4a00d29aa2ee9f59  ./hermes/skills/devops/vpn-entry-stack/references/address-roles.md
 f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skills/devops/vpn-entry-stack/references/admin-api.md
 8c5a41e1dbb2b6991f4099f2d1651dd61b308f0b91c5ce20aee87ccacd792355  ./hermes/skills/devops/vpn-entry-stack/references/blocking-risk.md
@@ -190,6 +190,7 @@ f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skill
 06131a1087ea5a31c0dd616e9c904447bea7348cd7de55a312a2df139a0f4cfa  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
 012b6285aead9f08565e65ae14b3dc5dc0e950e833460534ff73f2b8e8a4ca52  ./hermes/skills/devops/vpn-entry-stack/references/client-share-measurements.md
 a2b65c124a21a5df8a743621ef32883ecad026a2d99dbeeb1dbdfb8a01f7343f  ./hermes/skills/devops/vpn-entry-stack/references/control-plane.md
+ea2af33bc2b2207812ee65bbab46c846eeb6613d4530ec68aa69d08eb1373f90  ./hermes/skills/devops/vpn-entry-stack/references/decoy-and-access.md
 5aefd97fc87ea563cb0f2aa4e3488200c9f77e2772e986d2a2749fe2cc268916  ./hermes/skills/devops/vpn-entry-stack/references/delivery-channel.md
 0e81575ee54871bbfd4dc9ce20cebe81dbb54ef356a095a3667e13049d23e404  ./hermes/skills/devops/vpn-entry-stack/references/desktop-mihomo-tun.md
 b0f95e484552b4e969db0212206f37f44c14a6b54d157eaef639915766fa2b01  ./hermes/skills/devops/vpn-entry-stack/references/domain-and-tls.md
