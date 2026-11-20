@@ -123,6 +123,38 @@ Health-check blue/green (`probe_nginx()` в `vpn-bluegreen.py`) проверяе
 Удалить: убрать `VPN_443_SNI` и `write_443_vhost()` из `apply_brand.py`, перегенерить, убрать файл
 `/etc/nginx/conf.d/vpn-443-in.conf`, `nginx -t && systemctl reload nginx`.
 
+### Заглушка вместо панели и закрытая админка (20.11.2026)
+
+Что изменилось:
+
+1. **Публичная «панель LiteLLM» на входах — теперь копия, а не бэкенд.** Статика панели
+   скопирована из контейнера `litellm` в `/var/www/llm-decoy/ui` и отдаётся отдельным
+   nginx-сервером на `127.0.0.1:8092` (`/etc/nginx/conf.d/llm-decoy.conf`). Визуально это та же
+   панель, но в рабочий LiteLLM (`127.0.0.1:4000`) с публичных входов не уходит ни один запрос.
+2. **Любой вход отбивается так же, как настоящая панель:** `401` и тело
+   `{"error":{"message":"Invalid credentials used to access UI. Check the password set for your user","type":"auth_error","param":"invalid_credentials","code":"401"}}`.
+   Ни один пароль не может сработать — проверять нечего.
+3. **Куда смотрит каждый вход:** `/ui/`, `/litellm-asset-prefix/`, `/login`, `/sso/`, `/favicon.ico`
+   на 443/8443/2087 для `vpn.esmien.ru` и `share.esmien.com`, плюс `vision-fallback` на
+   `127.0.0.1:8091` (его же использует маскарад Hysteria). Все они проксируют в `:8092`.
+4. **Рабочая панель `llm.esmien.ru` наружу не отвечает** — как `stats`: пускаем только из туннеля
+   (клиенты выходят через `85.92.158.238`) и с самого хоста, остальным `444` без ответа.
+   Исключение одно: `= /webui-health` (публичный uptime-монитор), у него свой `allow all`.
+5. **После смены версии образа `litellm`** статику надо пересобрать:
+   `bash scripts/install-llm-decoy.sh` из репозитория `vpn-service`. Скрипт копирует свежую
+   сборку, ставит conf и перезагружает nginx.
+
+Проверка (три строки, любые из них — достаточное доказательство):
+
+```bash
+curl -s -o /dev/null -w '%{http_code}\n' -X POST --resolve vpn.esmien.ru:443:85.92.158.238 \
+  https://vpn.esmien.ru/login                        # 401 — отбивает заглушка
+curl -s -o /dev/null -w '%{http_code}\n' --resolve llm.esmien.ru:443:141.98.166.213 \
+  https://llm.esmien.ru/                             # 000 — снаружи обрыв
+curl -s -o /dev/null -w '%{http_code}\n' --interface 85.92.158.238 \
+  --resolve llm.esmien.ru:443:141.98.166.213 https://llm.esmien.ru/   # 200 — из туннеля
+```
+
 ## 1. Коротко
 
 Один сервер, три адреса. Клиенты входят на `edge` (`vpn.esmien.ru`, VLESS+WS+TLS 8443,

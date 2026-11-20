@@ -70,7 +70,7 @@ Both zones run in parallel until the owner moves the family, so old and new name
 ```
 ai.esmien.ru    -> 127.0.0.1:8080  (open-webui — единственный вход) | ai.esmien.qd.je
 app.esmien.ru   -> 301 на ai.esmien.ru (не второй вход)          | —
-llm.esmien.ru   -> 127.0.0.1:4000  (litellm)      | llm.esmien.qd.je
+llm.esmien.ru   -> 127.0.0.1:4000  (litellm)      | — **только через туннель**: allow edge+loopback, остальным 444; публичен лишь `= /webui-health` (uptime-монитор). Публичная «панель» на VPN-входах — статичная заглушка на 127.0.0.1:8092, не бэкенд
 bot.esmien.ru   -> 127.0.0.1:8000  (music bot)    | bot.esmien.qd.je
 mon.esmien.ru   -> 127.0.0.1:8090  (beszel hub)      | mon.esmien.qd.je
 search.esmien.ru -> 127.0.0.1:8081 (SearXNG, только с API-ключом) | —
