@@ -210,6 +210,7 @@ Full detail (rule ordering, UFW, DNAT, netns drill, gated changes) —
   real path, with the **packet counter** as witness plus an allowed control port
   (a timeout alone may just mean «сеть сломана»). Block:
   [references/firewall-and-ssh.md](references/firewall-and-ssh.md#netns-drill).
+- **A SOCKS relay’s `connected` reply can precede the real TCP handshake.** If a relay probe contradicts the listener inventory, complete a TLS handshake or observe SYN/SYN-ACK versus SYN/RST on the public interface with a known-good control port.
 - **Never conclude reachability from a third-party port-checker or a local
   `curl` to your own public IP** (exits via loopback, always succeeds). Shodan
   once reported `9223` while `ss -tlnp` and `iptables -t nat -S` showed nothing.
