@@ -149,7 +149,13 @@ abuse: fineproxy.org»). Забирай через `scripts/ip-reputation.py`; �
 `http://ip-api.com/json/<IP>?fields=country,isp,as,reverse,proxy,hosting,mobile`
 (бесплатно, http, 45 запросов/мин). `hosting=true` и `proxy=true` — разные режимы
 отказа, разбор — в
-[references/blacklist-and-classifier-semantics.md](references/blacklist-and-classifier-semantics.md). Censys-аналог (`labels`) требует API-ключ: без него
+[references/blacklist-and-classifier-semantics.md](references/blacklist-and-classifier-semantics.md).
+
+**Классифицируй тот адрес, который видит сервис, а не тот, о котором спрашивают.** Когда
+пользователь жалуется «приложение ругается на VPN», проверять надо **выход** правила, которым
+идёт его трафик (по логу xray — какой тег реально выбрал балансер), а не вход и не тот узел,
+который туда собирались поставить. Предупреждение — вердикт антифрода по ASN выхода: ресейлерские
+«VPN-ные» сети с `proxy`/`hosting` флагаются, обычный ДЦ без флагов — обычно нет. Censys-аналог (`labels`) требует API-ключ: без него
 `search.censys.io` и `platform.censys.io/api/v1` отдают 403 — предложи владельцу
 добавить free-ключ и не выдавай Shodan за Censys.
 

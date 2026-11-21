@@ -17,7 +17,7 @@ Treat claims that a port or protocol is blocked as hypotheses: correlate client 
 ## Safe rollout and scope
 
 - Preserve the owner's current subscription nodes, names, links, routing and functioning UDP backup unless he explicitly orders removal. He removed the two manual Gemini/NL nodes; do not restore their public routes or subscription entries. Verify the live state before changing anything.
-- При параллельном переезде сохраняй старые входы, ссылки и страницы до отдельного решения владельца. `share.esmien.com` работает параллельно `vpn.esmien.ru`: новый лендинг и подписка на TCP/443, старые на TCP/8443, UDP Hysteria обоих на 8443. `vpn-parallel-domain.service` (127.0.0.1:18744) динамически выдаёт актуальные страницы и три формата подписок с новым именем, перекодирует base64. Генератор `apply_brand.py` сохраняет оба SNI и раздельные nginx-сертификаты. Hysteria использует встроенный ACME DNS-01 и раздельные сертификаты по SNI; его конфиг содержит CF-токен и должен оставаться секретным. При изменении конфига сохраняй пустую строку после auth-блока — `hy2_users.py` ищет её как границу. Не прерывай тестовый DNS-01 посередине: временный TXT останется в Cloudflare и сорвёт повтор. Уже выпущенный общий сертификат навсегда остался в CT, хотя больше не обслуживает трафик. Проверяй страницы, три формата и реальные VLESS/Hysteria туннели на обоих доменах; локальный тест не доказывает доступность из сети клиента. Восстановление — README в vpn-service.
+- При параллельном переезде сохраняй старые входы, ссылки и страницы до отдельного решения владельца. `share.esmien.com` работает параллельно `vpn.esmien.ru`: новый лендинг и подписка на TCP/443, старые на TCP/8443, UDP Hysteria обоих на 8443. `vpn-parallel-domain.service` (127.0.0.1:18744) динамически выдаёт актуальные страницы и три формата подписок с новым именем, перекодирует base64. Генератор `apply_brand.py` сохраняет оба SNI и раздельные nginx-сертификаты. Hysteria использует встроенный ACME DNS-01 и раздельные сертификаты по SNI; его конфиг содержит CF-токен и должен оставаться секретным. При изменении конфига сохраняй пустую строку после auth-блока — `hy2_users.py` ищет её как границу. Не прерывай тестовый DNS-01 посередине: временный TXT останется в Cloudflare и сорвёт повтор. Уже выпущенный общий сертификат навсегда остался в CT, хотя больше не обслуживает трафик. Проверяй страницы, три формата и реальные VLESS/Hysteria туннели на обоих доменах; локальный тест не доказывает доступность из сети клиента. Восстановление — README в vpn-service. Пуш в приватный репо идёт через credential-helper, который читает токен из файла: `git -c credential.helper='!f(){ echo username=x-access-token; echo "password=$(cat /root/.secrets/gh-token)"; }; f' push origin HEAD`. Токен не вставлять в remote URL и не повторять в чате; засветился — перевыпуск.
 - When the owner requests private-first testing, stage the change separately and test only with his actual subscription and key; inspecting other profiles is fine, connecting with their keys is not. A localhost tunnel is not his device/network test. Deploy shared routing, ports or subscription changes only after his device validation unless he explicitly authorizes an immediate shared switch; report its blast radius. For a separate-port phone test, stage an isolated nginx listener and an owner-only subscription node, preserving his existing nodes and all other subscribers; verify local end-to-end first. Disclose if other valid keys also work, and after validation stop the listener, remove the temporary node and verify the port is closed. A different port validates the staged route, not actual production-port reachability or identical behavior.
 - Before retiring a listener, inspect current published profiles **and** recent use: refreshed subscriptions do not prove that every manually imported or stale client has migrated. Inspect every SNI/vhost sharing the socket: deleting one DNS record does not close a port or disable other names. Treat TCP and UDP on the same number independently; preserve the owner's UDP backup when discussing TCP closure. State which legacy subscriptions and clients would break; a broad request to reduce exposure is not permission to cut them off.
 - Before running `apply_brand.py`, inspect its actual side effects: it invokes subscription and page generators as well as rewriting nginx files. Disclose that scope, capture secret-safe before/after hashes when preservation matters, and suppress or sanitize generator output because it can contain subscription tokens. Report the script and outputs actually regenerated, not just «regenerated the template».
@@ -217,6 +217,12 @@ freedom-аутбаунд с `sendThrough` **молча ломает дозвон
 вход). Прокси в CF, а не серый A: иначе московский хост на каждом рукопожатии стучится в brand, и
 RU-хостер видит прямое плечо к нему. Цена — один RTT до `dest` на рукопожатие (Госуслуги 0.33-0.42 s).
 
+**Не предлагать покупку домена, пока есть своя зона.** `cf.ini` управляет зоной `esmien.ru`,
+wildcard `esmien-wildcard` покрывает любой поддомен, статика отдаётся vhost'ом на
+`127.0.0.1:9443` — прикрытие для плеча или вход-заглушка делаются поддоменом за пять минут,
+без регистратора, паспорта и оплаты. Покупку нового имени предлагать только когда домен нужен
+как отдельная точка отказа (подписки), а не как вывеска.
+
 **Правка маршрута в `config.json` живёт меньше минуты.** `vpn-scenarios.timer` раз в 60 с
 переписывает балансировщики из `scenario_override.json`, и он перекрывает `scenario_routes.py`.
 Менять надо override (и `scenario_routes.py` — для чистого деплоя), затем
@@ -229,16 +235,28 @@ dead ru1 exit», а хост при проверке 21.11 оказался жи
 видимо, лежал. Перед выводом «умер» смотреть `ssh … uptime` и `systemctl is-active xray`, а не
 только результат проб.
 
-**`ru1` already exists — do not provision it again.** `217.197.114.197` = `esmien-vds`, e-Style ISP
-Moscow (`ESTT-197114`), root over `/root/.ssh/id_ed25519_ru`, xray active on 443, UUIDs on both
-sides identical (compare hashes, never print the id). It was pulled from the rotation on 08.11.2026
-(`62198ff`, «drop the dead ru1 exit») as unreachable — but the box was simply down then and came back
-~11.11, so «мёртвый» was a verdict on a single measurement. Before re-wiring, measure `uptime` and
-TCP/443 instead of trusting the old conclusion. Its old config masked under `www.microsoft.com`,
-which the owner has since banned; for a server→server leg carrying only RU traffic use our own
-subdomain, own cert and an honest stub. Value of `ru1` is independence from `p15`/`p17` (Moscow /
-Novosibirsk reseller relays), not stealth: the RU zone already exits from Russian addresses today,
-so RU services never see our VPS — and `ru1` does nothing about the client→foreign-entry leg.
+**`leastPing` молча не выбирает свой узел, если рядом есть релей пошустрее.** Пул
+`["ru1","p15","p17"]` с `leastPing` держит в балансере самый быстрый: при 0.18 s у `p15` против
+0.34 s у `ru1` за окно лога через `p15` прошло 3037 запросов `.ru`, а через `ru1` — **один**.
+Конфиг при этом выглядит правильным, `vpn-cfg apply` зелёный, observatory пишет `alive`. Нужно,
+чтобы ру-зона шла своей железкой — селектор из одного тега (`["ru1"]`), а `fallbackTag` — на
+RU-релей (`p15`), **не** на `direct`: иначе смерть своего узла уводит `.ru` в Эстонию и ру-сервисы
+отвечают 403. Доказательство — только лог: `access.log`, строки
+`accepted tcp:<host>:<port> [in-general -> <tag>]`, счётчик по тегу за последние минуты; измеренный
+RTT по узлам — строки `app/observatory: the outbound <tag> is alive:<sec>` в `error.log`.
+
+**Жалобы приложений «вы используете VPN» при рабочем `.ru` — это репутация ASN выхода, а не поломка.**
+Банки и Госуслуги флагают датацентровые и «VPN-ные» сети: `p15` — `AS216246 Aeza Group` (гора
+VPN-узлов), `p17` — `AS57494 Adman` с `proxy:true, hosting:true` в базах, поэтому ру-зона через них
+открывается с предупреждением. Проверять выход, а не конфиг:
+`curl "http://ip-api.com/json/<ip>?fields=as,hosting,proxy"`. Свой ДЦ без флагов
+(`hosting=false, proxy=false`) предупреждения обычно снимает; если остались — банк флагает любой
+не-мобильный IP, и лечится это резидентским прокси, а не правилом маршрутизации.
+
+**`ru1` уже существует — не поднимать заново.** Хост `esmien-vds`, доступ
+`ssh -i /root/.ssh/id_ed25519_ru root@217.197.114.197`, xray активен на 443; UUID клиента и сервера
+сверять хешами (первые 8 символов `sha256`), сам id не печатать. Перед повторной проводкой мерить
+`uptime` и TCP/443, а не доверять прежнему вердикту.
 
 ## Subscription
 
