@@ -103,6 +103,25 @@ alone shows intent, not effect. Confirm the counter sits on the expected rule:
 if the DROP counter does not move while a foreign probe times out, the packet is
 stopped somewhere else and the reasoning is wrong.
 
+## Закрыл вход — перенеси внешние пробы
+
+Внешний монитор ходит по публичному пути, и `deny all` на вхосте ломает его
+молча: прогон падает, алерт летит с частотой cron (у нас — «🔴 VPS не
+отвечает» при живом хосте), а «починка» удалением пробы оставляет сервис без
+внешнего контура вообще.
+
+- Перед закрытием — грепнуть потребителей: `grep -rn 'https://<host>'
+  /root/vps-infra/.github/workflows` и `grep -rn '<host>' /usr/local/bin/deadman-ping.sh`.
+  Проба и запрет едут одним изменением.
+- Оставлять снаружи один дешёвый `location = /<svc>-health { allow all; }`
+  (200 = сервис жив, ничего не раскрывает) — это и есть новый адрес пробы;
+  закрытый наглухо сервис внешне проверяется только по соседнему пути.
+- Не добавлять новый `allow all` к самому закрытому сервису ради монитора: это
+  отменяет закрытие. Его живость сторожит локальный watchdog, а не GitHub.
+- После правки — прогнать воркфлоу `workflow_dispatch` и убедиться, что
+  зелёный прогон идёт на **новом** sha (рецепт без `gh` — `vps-infra-installer`,
+  `references/beszel-and-monitoring.md`).
+
 ## Аудит адреса, а не только портов
 
 Вопрос «мы максимально защитили IP?» — не про открытые порты, а про то, что сам адрес выдаёт.
@@ -212,6 +231,7 @@ Full detail (rule ordering, UFW, DNAT, netns drill, gated changes) —
   [references/firewall-and-ssh.md](references/firewall-and-ssh.md#netns-drill).
 - **A SOCKS relay’s `connected` reply can precede the real TCP handshake.** If a relay probe contradicts the listener inventory, complete a TLS handshake or observe SYN/SYN-ACK versus SYN/RST on the public interface with a known-good control port.
 - **Не выдавай локальный `curl` на собственный публичный IP за внешнюю проверку:** он проходит локальный сетевой путь и не проверяет внешние фильтры. Проверяй с независимого источника и рабочим контрольным портом; внешние чекеры и индексы также могут ошибаться, поэтому подтверждай результат полным рукопожатием и сопоставляй с живыми сокетами и правилами.
+ **Исключение — проверка правил доступа, а не доступности:** `curl --resolve <host>:443:<свой публичный IP>` с самого хоста идёт с адреса, которого нет в allow-листе, поэтому честно показывает, что получит посторонний (`deny all` + `error_page 403 = @drop` → `000`, открытый путь → `200`). Годится как проверка семантики nginx, не как доказательство внешней доступности.
 - **`PermitRootLogin yes` при `PasswordAuthentication no` — не дыра.** Вход по паролю выключен
   глобально, `sshd -T` показывает `publickey,password` только если пароль реально разрешён.
   Проверять связку двух параметров, а не один; иначе получаешь ложную тревогу и правишь рабочий конфиг.

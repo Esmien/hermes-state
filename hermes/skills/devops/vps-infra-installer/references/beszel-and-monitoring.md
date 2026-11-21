@@ -38,13 +38,66 @@ Hub+agent в Docker, `/home/ai_service/beszel`, вместе ~20 МБ RAM. Hub �
 
 Внутренний мониторинг умирает вместе с хостом, поэтому внешний контур — снаружи:
 
-- `.github/workflows/uptime.yml` в `vps-infra`: cron `*/10`, curl `https://ai.` и
-  `https://llm.` с раннеров GitHub, 3 попытки → при провале Telegram (secret
-  `TG_BOT_TOKEN`, чат владельца). Секрет ставится через API с libsodium sealed
-  box (`pynacl` в отдельном venv, не системный); токен в логи не попадает —
-  GitHub маскирует. Дрилл: `workflow_dispatch` с
-  `extra_url=https://httpbin.org/status/500`, сообщение приходит с префиксом
-  `[ТЕСТ]`.
+- `.github/workflows/uptime.yml` в `vps-infra`: cron `*/10`, с раннеров GitHub
+  3 попытки на адрес → при провале Telegram (secret `TG_BOT_TOKEN`, чат
+  владельца). Живые пробы: `https://llm.esmien.ru/webui-health` (origin: nginx →
+  WebUI) и `https://ai.esmien.ru/` (`200,403` — CF режет бота-раннера, это норма).
+  Секрет ставится через API с libsodium sealed box (`pynacl` в отдельном venv,
+  не системный); токен в логи не попадает — GitHub маскирует. Дрилл:
+  `workflow_dispatch` с `extra_url=https://httpbin.org/status/500`, сообщение
+  приходит с префиксом `[ТЕСТ]`.
+
+### Проба обязана совпадать с allow-листом вхоста
+
+Внешний вотчер стучится **тем же путём, который открыт снаружи**. Любая
+закрытая дверь ломает вотчер молча и шумно одновременно: прогон падает, а в
+Telegram летит «🔴 VPS не отвечает» каждые несколько часов — при живом хосте.
+
+- Закрыв вхост (`allow 85.92.158.238; allow 127.0.0.1; deny all` +
+  `error_page 403 = @drop` → `444`), сразу грепни, кто его щупает снаружи:
+  `grep -rn 'https://<host>' /root/vps-infra/.github/workflows` и
+  `grep -rn '<host>' /usr/local/bin/deadman-ping.sh /etc/deadman-ping.url`.
+  Пробы двигаются в тот же коммит, что и запрет.
+- Публичный путь у `llm.` — **только** `location = /webui-health { allow all; }`
+  (→ `127.0.0.1:8080/health`, отдаёт `{"status":true}`). LiteLLM снаружи не
+  виден вообще: его живость сторожит локальный `litellm-watchdog.timer`, поэтому
+  из вотчера пробу `/health/liveliness` убрали, а не «починили ключом».
+- **Добавлять новый `allow all` ради монитора — только по просьбе владельца:**
+  публичный `/litellm-health` сводит на нет смысл закрытого вхоста. Ответ
+  «мониторить LiteLLM снаружи нечем» честнее, чем тихо открыть дверь заново.
+- Проверка, что видит посторонний, без выхода в интернет: `curl -sS -o /dev/null
+  -w '%{http_code}' --resolve llm.esmien.ru:443:<свой публичный IP> https://llm.esmien.ru/health/liveliness`
+  → `000` (обрыв по 444), а `/webui-health` → `200`. Запрос идёт с публичного
+  адреса, которого нет в allow-листе, то есть проверяет именно правила nginx;
+  сетевую доступность это не доказывает (см. `vps-network-exposure`).
+
+### Прогнать и проверить воркфлоу без `gh`
+
+`gh` на хосте нет, а токен уже лежит: `GITHUB_KEY` в
+`/home/ai_service/ai-stack/ai/.env` (тот же, которым пушит
+`vps-infra-push.service`). Читать его в чат нельзя — только в переменную.
+
+```bash
+T=$(grep -m1 '^GITHUB_KEY=' /home/ai_service/ai-stack/ai/.env | cut -d= -f2- | tr -d '"')
+curl -sS -o /dev/null -w '%{http_code}\n' -X POST \
+  -H "Authorization: Bearer $T" -H 'Accept: application/vnd.github+json' \
+  https://api.github.com/repos/Esmien/vps-infra/actions/workflows/uptime.yml/dispatches \
+  -d '{"ref":"main"}'                       # 204 = принято
+sleep 30
+curl -sS -H "Authorization: Bearer $T" \
+  'https://api.github.com/repos/Esmien/vps-infra/actions/workflows/uptime.yml/runs?per_page=3'
+```
+
+Смотреть `status`/`conclusion`/`head_sha`: успех на **своём** коммите и есть
+доказательство починки; «зелёный» прогон на старом sha ничего не проверяет.
+
+- **`schedule` в GitHub не соблюдает `*/10`.** В реальности между плановыми
+  прогонами бывают часы (наблюдались разрывы ~5 ч), поэтому тревога приходит с
+  задержкой, а «проба падала каждый прогон» ≠ «каждые 10 минут». Для точного
+  контура — healthchecks.io/deadman, не чаще cron.
+- Новый файл воркфлоу начинает действовать только после пуша через
+  `vps-infra-push.service` (прямой `git push` в `/root/vps-infra` не пройдёт:
+  кредов в клоне нет) — и только если пуш прошёл по свежему `head_sha`.
 - **GitHub отключает `schedule` в публичных репо после 60 дней без активности** —
   `uptime-heartbeat.timer` (раз в месяц) дописывает строку в
   `maintainer/uptime-heartbeat.txt`, watcher коммитит. Без этого монитор молча
@@ -77,8 +130,10 @@ Hub+agent в Docker, `/home/ai_service/beszel`, вместе ~20 МБ RAM. Hub �
   `TOKEN` — UUID из `fingerprints` (без него агент вечно ловит 401), alerts
   (Status/CPU/Memory/Disk) создаются только вручную. Команды и грабли —
   [references/beszel-and-monitoring.md](references/beszel-and-monitoring.md).
-- **Внешний контур**: `.github/workflows/uptime.yml` (cron `*/10`, curl `ai.` и
-  `llm.`, 3 попытки → Telegram), дрилл через `workflow_dispatch` с
+- **Внешний контур**: `.github/workflows/uptime.yml` (cron `*/10`, curl
+  `https://ai.esmien.ru/` (`200,403`) и `https://llm.esmien.ru/webui-health`
+  (`200`), 3 попытки → Telegram; проба обязана жить на пути, открытом в
+  allow-листе вхоста), дрилл через `workflow_dispatch` с
   `extra_url=https://httpbin.org/status/500` (сообщение с префиксом `[ТЕСТ]`).
   GitHub гасит `schedule` в публичном репо после 60 дней без активности —
   поэтому `uptime-heartbeat.timer` раз в месяц дописывает
