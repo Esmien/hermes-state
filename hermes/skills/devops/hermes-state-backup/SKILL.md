@@ -110,6 +110,12 @@ git -C /var/lib/hermes-state/repo log --oneline -3    # что уже уехал
 ```
 Expected idle output in the backup log: `no changes since last snapshot — nothing to commit`.
 
+**Dry-run host scripts with `/usr/bin/python3`, not `python3`.** The units rely on systemd's PATH
+(`/usr/local/bin` → `/usr/bin`, python 3.12 with `dist-packages`), while the agent's shell resolves `python3` to
+Hermes's own 3.14 toolchain first — so `python3 secrets-offsite-backup.py --dry-run` dies with
+`ModuleNotFoundError: tenacity` on a script the service runs happily. Same class as the `PYTHONPATH` trap on
+`certbot`: call distro tooling through the explicit interpreter before declaring it broken.
+
 ## Adding a new runbook/script to the backup
 
 Append the filename to `HOST_BIN`, `HOST_UNITS` or `HOST_ETC` in the script (the stack runbooks are copied by a loop into `host/ai-stack/`). Missing files are skipped silently (`[[ -f ... ]] && ...`), so the arrays can list units that do not exist on every host. Foreign files that live outside those arrays (e.g. `/etc/hosts`, nginx configs) are **not** backed up — say so instead of promising a full-host snapshot.
@@ -119,7 +125,7 @@ Append the filename to `HOST_BIN`, `HOST_UNITS` or `HOST_ETC` in the script (the
 1. `rsync` строка в snapshot-скрипте (с `--exclude '.env'`, если внутри есть токен) — иначе каталога нет в репо;
    для профилей бери `--delete-excluded --prune-empty-dirs`, иначе исключённое остаётся, а пустые рантайм-каталоги уезжают в репо;
 2. путь в `WATCH` у `hermes-state-watch.sh` — иначе правки в нём не запускают снапшот и доезжают только с чужим изменением;
-3. `SOURCES` в `/usr/local/bin/secrets-offsite-backup.py`, если каталог держит `.env` — токен обязан пережить потерю хоста;
+3. `SOURCE_PATTERNS` в `/usr/local/bin/secrets-offsite-backup.py`, если каталог держит секрет — токен обязан пережить потерю хоста. Это **список глобов**, и в архив попадает только совпавшее (`.env`, `/etc/turnstile-gate.env`, `/root/.config/owui-signup-approver/env`, `/root/.secrets/*.ini`); секрет с другим расширением (`.key`, `.json`, `.txt`) не уедет, пока для него не добавлен свой глоб, а `offsite.key` исключён осознанно — пароль не должен ехать внутри своего же архива;
 4. изменённые хостовые скрипты — в `vps-infra/assets/host/bin/` (второй recovery-репозиторий), затем пуш.
 
 Проверка после добавления: `git -C /var/lib/hermes-state/repo ls-files <dir>/` показывает файлы, а `git ls-files | grep -c '<dir>/.env'` даёт **0**.

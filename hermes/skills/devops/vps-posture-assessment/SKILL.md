@@ -62,12 +62,17 @@ Companion skills: `ai-stack` (what is inside the AI stack, and the backup verifi
   calling access a gap. What remains is narrower: the archive's passphrase was delivered once into Telegram and
   exists nowhere else, and the list of where DNS/tokens/accounts come from still lives in the owner's head.
   **Coverage is an explicit pattern list, not «все секреты»:** `SOURCE_PATTERNS` in
-  `/usr/local/bin/secrets-offsite-backup.py` holds `.env` paths plus `/etc/turnstile-gate.env`;
-  `/root/.secrets/*.ini|*.key|*.json` (Cloudflare tokens, the offsite passphrase itself, reality/Hysteria keys)
-  are **not** in it, so those live in exactly one copy on the host. Read the list, then say which class is
-  covered and which is not — quoting the timer as «секреты уезжают» overstates it.
-  Also compare the timer's `LAST` against its own period (`systemctl show <unit>.timer -p LastTriggerUSec`):
-  a weekly job whose last run is six days old is overdue, not healthy.
+  `/usr/local/bin/secrets-offsite-backup.py` is a glob list and the archive holds only what matches it.
+  Current state: the `.env` files, `/etc/turnstile-gate.env`, `/root/.config/owui-signup-approver/env` and
+  `/root/.secrets/*.ini` (both Cloudflare tokens). Still outside: `/root/.secrets/*.key|*.json|*.txt` — the
+  reality key, the Hysteria users/keys, the subscription share pages. `offsite.key` is excluded deliberately:
+  the passphrase must not travel inside its own archive. Read the list, then name the classes covered and not —
+  quoting the timer as «секреты уезжают» overstates it.
+  Judge a timer by its **effective** schedule, never by elapsed time: read `systemctl cat <unit>.timer`
+  **including the `*.timer.d` drop-ins** (an override here rewrites `OnCalendar` from 04:10 to 00:25) and take
+  `NEXT` from `list-timers`. A weekly Sunday job whose `LAST` is six days old is on schedule; calling it stale is
+  a false alarm the owner should not have to hear. Overdue means `NEXT` is in the past or absent, or `LAST` is
+  older than one period **after** the effective calendar was read.
 
 - **A timer that runs is not a timer that does something.** `systemctl list-timers` proves scheduling only.
   Read `ExecStart`, then the script's config sources: `deadman-ping` ran every 5 min for weeks with no
@@ -127,8 +132,16 @@ or history) vs **потеряемо** (value exists only on the host).
    (`/etc/hysteria/config.yaml` is written once by `install-hysteria.sh` and keeps the token). That copy is in
    neither recovery repo — good for git, and the second place a host loss takes with it. Say both.
 5. **Verify which secret a service actually got, by value.** Skills document the canonical file; the running
-   service may hold a different token from a second file (two Cloudflare tokens coexist here). Comparing values
-   beats trusting the documentation.
+   service may hold a different token from a second file. Two Cloudflare tokens coexist here and the prefix tells
+   the scope apart: `cfut_…` = user token, zone-scoped, `/root/.secrets/cf.ini` (DNS-01 for `*.esmien.ru`);
+   `cfat_…` = account token with full access, `/root/.secrets/cf-esmien-com.ini`, and that is the value
+   `install-hysteria.sh` substitutes into `/etc/hysteria/config.yaml`. Comparing values inside the scanning
+   process beats trusting the documentation.
+6. **A coverage gap is closed with one glob, then proven by the inventory.** Add the pattern to
+   `SOURCE_PATTERNS`, run the script with `--dry-run` and read the generated `secrets_<stamp>.inventory.txt`:
+   it lists paths, sha256 and key names, never values, so it is safe to grep and is the proof of inclusion.
+   Then run it for real instead of waiting for the weekly tick (the owner wants the secret offsite now), and sync
+   the host copy in `vps-infra/assets/host/bin/` so the recovery repo still matches the host.
 
 ## Scope decisions (same rule: do not re-argue)
 

@@ -144,7 +144,7 @@ da534f6a39a52e99893e51906a79af0454b604cd7dc602ed35875210a1163fd1  ./hermes/skill
 c0ecb8227f1460b4674c82762ab1df0deb77e55ad6d09da3bc6db8924fddbbf6  ./hermes/skills/devops/credential-login-verification/scripts/probe-litellm-admin-view.py
 3af99e224dc91eff3c6f4906d0d145dbcd96229f4dcd9355fca5acce1ee62e02  ./hermes/skills/devops/credential-login-verification/scripts/reset-litellm-admin-password.py
 3c44c0cf146ec8c5aff9552355488c98e4d986eca11c9d645cb6fd379129fe06  ./hermes/skills/devops/docker-compose-traps/SKILL.md
-a223c712bda9db0f991543d01db394a809e6a98336198fa0cbf9dbbe729b1df3  ./hermes/skills/devops/hermes-state-backup/SKILL.md
+b78219f9e132a1a6ba537ae9e5abaff5bbad66832025f2e28a84597eac30c40f  ./hermes/skills/devops/hermes-state-backup/SKILL.md
 55668dd43d3603b88ece26004734233aaea37a1badd235218513f118ccc7b4ec  ./hermes/skills/devops/hermes-state-backup/references/push-outage-drill.md
 7b5ddb0d2fb9b972a7a46c66d8af234e7fabcfbc0a580471b9a67408de6afdeb  ./hermes/skills/devops/ip-reputation-and-ban-risk/SKILL.md
 260a52b11b6d0c14eadcf4fdf238975426303e6d5322c42c56864b4355347de8  ./hermes/skills/devops/ip-reputation-and-ban-risk/references/blacklist-and-classifier-semantics.md
@@ -256,7 +256,7 @@ d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skill
 6089d1d7d5f1cc59b77d4147ea1b2b404175cec3888f095d4bc6e049f2f8391d  ./hermes/skills/devops/vps-network-exposure/scripts/faketls-probe.py
 0e5f1c63bf4472424787ef541a9599ae2649380b3cfd4201f74049610b3607ed  ./hermes/skills/devops/vps-network-exposure/scripts/port-audit.py
 5e780432952150f90883eff45349e648ab6e3417334b171b7d4215fd1f798ff3  ./hermes/skills/devops/vps-network-exposure/templates/vpn-subscription-generator.py
-51744db9ec81119fc054e58d71ec2b54949dc5eb427f21609a28184e863b5b0e  ./hermes/skills/devops/vps-posture-assessment/SKILL.md
+74877fb0b1c105986a1a27fca57a49b0460c58ec9e16d94fa25c0c60144192ee  ./hermes/skills/devops/vps-posture-assessment/SKILL.md
 83bb952c9532373b508e3f534c4c7d75189eb6b628abeb91eab74ae8d0e4d83f  ./hermes/skills/devops/vps-posture-assessment/references/prompt-injection-defense.md
 d1a75067b4341cc720e209bb7494010cd07d291b625f9924e6240fdf9823e2af  ./hermes/skills/devops/vps-posture-assessment/references/recovery-rto.md
 2856b30507c028f7c59ee2e7c365e9140d5f76929ac16e5bd225f179d70cfb99  ./hermes/skills/devops/vps-posture-assessment/scripts/secret-leak-scan.py
