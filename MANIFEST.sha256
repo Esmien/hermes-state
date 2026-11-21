@@ -338,7 +338,7 @@ a22ee7e4187f72f387920df281c842125b8375373ec033b797489bf9517c0559  ./hermes/tasks
 9a8a4f9270a64de4ca700bb4fe574eeb100a1283facb50dc828d318d6551729c  ./host/ai-stack/backup-databases.sh
 d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md
 846efb23aba0d86ee3b1086edc19cb47f2cb07426875cfeaaca852f62c8a811f  ./host/ai-stack/runbook.md
-cf2a43940affbbd26ae6064f62c3a61e1981504e212800925e4855dd84f43d1f  ./host/backups/tg-registry.json
+f9007c1d7ab421bda6e6a885d4abde6581dda75ea6f4d007998f5c1d899e7122  ./host/backups/tg-registry.json
 601f3a6b2dcb7d4f6831141c84abd27b9a13d9c5ba989f7b7bb2a754d2d1bd56  ./host/bin/ai-memory-backup.sh
 3d999ff1ff6aaca44eea08c3683eca79b59a573ae5dc8bf9dba668e38a3e6d5f  ./host/bin/docker-detector-liveness.sh
 bb24baca67f479c8fb1ce9eb41fd9b3c4d1ba41f2bd03a2dda9d809074275eac  ./host/bin/docker-incident-agent.sh
