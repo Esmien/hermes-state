@@ -31,6 +31,15 @@ RU keeps every relay that passed the **purpose probes** below (сейчас `p15
 spreads across nodes that actually serve the sites the owner uses. «All equivalent» is an assumption,
 not a fact: probe before widening the selector.
 
+**Свой узел в пуле рядом с релеем не используется никогда.** `["ru1","p15","p17"]` с `leastPing`
+означает «самый быстрый из трёх»: при 0.18 s у релея против 0.34 s у своего узла за окно лога через
+релей прошло 3037 запросов `.ru`, через свой — один. При этом конфиг правильный, `vpn-cfg apply`
+зелёный, `observatory` пишет `alive` у всех — увидеть это можно только посчитав маршруты в
+`access.log`. Нужно, чтобы сценарий шёл своей железкой — селектор из одного тега, а `fallbackTag`
+на **RU-релей** (`p15`), не на `direct`: иначе смерть своего узла уводит `.ru` в Эстонию и ру-сервисы
+отвечают 403/предупреждениями. Проверка через 2–3 минуты после apply:
+`tail -n 4000 /var/log/xray/access.log | grep -oE '\[in-general -> [a-z0-9]+\]' | sort | uniq -c`.
+
 ## Health checks decide the route, so build them for the node's country
 
 - `observatory.subjectSelector` must list **every** tag a balancer can select. A balancer over a
@@ -249,6 +258,19 @@ exit works. Judge an exit by a real send from a client, and treat a country mark
   observatory selector and the watchdog on a node you just removed, while the balancer prints the
   new tags and everything looks right. Check (and rewrite) the override file in the same pass as the
   code edit; reading it is enough, and overwriting that JSON needs no separate confirmation.
+- **Сторож переписывает только `selector`, а `fallbackTag` — нет.** Правка резерва (например
+  `bal-ru: direct → p15`) в override и в `scenario_routes.py` не меняет живой конфиг: watchdog
+  выставляет селектор и оставляет старый `fallbackTag`. Порядок один — `python3
+  scenario_routes.py install` (балансировщики строятся из `FALLBACK`), затем `systemctl start
+  vpn-scenarios.service` (возвращает селектор из override), затем `vpn-cfg apply`. Проверять
+  оба поля сразу: `[b for b in cfg['routing']['balancers'] if b['tag']=='bal-ru']`.
+- **Похожее на дубль правило может быть привязано к инбаунду.** Два правила с одним и тем же
+  списком доменов — не всегда копия: посмотреть `inboundTag` целиком, прежде чем называть это
+  дублем и удалять. Правило вида `{"inboundTag":["in-france"],"domain":[…google…],
+  "balancerTag":"bal-google"}` обслуживает внутренний ручной узел и умирает вместе с ним, а не
+  отдельно от глобального правила; снос такого правила ломает сценарий, которого владелец не
+  просил трогать. Индекс правила при этом тоже плывёт — `gemini_gate.py` ищет своё правило
+  функцией `google_rule_pos()`, но любой ручной сдвиг списка проверять этим же вызовом.
 - Prove what the container actually loaded, not what is on disk: `docker cp
   vpn-router:/etc/xray/config.json /tmp/run.json` and compare with `config.json`. The file on disk
   can already carry the fix while the running pod still serves the previous generation, and every
