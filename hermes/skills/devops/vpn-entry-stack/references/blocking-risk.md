@@ -142,7 +142,7 @@ dig +short $rev.zen.spamhaus.org A; dig +short $rev.bl.spamcop.net A       # abu
 Страна решает меньше, чем кажется: важнее «шумность» корзины адресов (VPN-хостинг режут чаще безликого дЦ) и качество маршрута. Отвечать цифрами, а не «Япония далеко»:
 
 ```bash
-for h in www.yahoo.co.jp www.hurriyet.com.tr www.armenpress.am vpn.esmien.ru; do
+for h in www.yahoo.co.jp www.hurriyet.com.tr www.armenpress.am share.esmien.com; do
   printf "%-22s " "$h"
   curl -s -o /dev/null --max-time 8 -w "connect=%{time_connect}s tls=%{time_appconnect}s\n" "https://$h/"
 done

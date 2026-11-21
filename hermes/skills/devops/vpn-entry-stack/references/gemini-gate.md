@@ -51,7 +51,7 @@
 
 Входы 443 и 4443: карта stream проверяет пару `$server_addr:$ssl_preread_server_name`: только edge + VPN SNI направляется в VPN; все имена на gemini и прочие имена на edge отклоняются, brand остаётся для сайтов. Слушатель wildcard, поэтому порты на gemini не закрыты — соединение отвергается после приёма. Карта генерируется `apply_brand.py`.
 
-Вход на 443 (тест, только SNI `vpn.esmien.ru`): stream → `127.0.0.1:18443`, там vhost с
+Вход на 443 (тест, только SNI `share.esmien.com`): stream → `127.0.0.1:18443`, там vhost с
 `listen … ssl proxy_protocol` (stream шлёт PROXY-заголовок), TLS терминируется в nginx и **оба**
 входных пути уходят в xray своего цвета — `/ws` → `ws-in`, `/general` → `in-general`, плюс корень `/`
 отдаёт нейтральную HTML-заглушку. Пускай сразу оба пути: основной узел ходит на `/general`, и vhost только с `/ws`

@@ -17,7 +17,7 @@ Treat claims that a port or protocol is blocked as hypotheses: correlate client 
 ## Safe rollout and scope
 
 - Preserve the owner's current subscription nodes, names, links, routing and functioning UDP backup unless he explicitly orders removal. He removed the two manual Gemini/NL nodes; do not restore their public routes or subscription entries. Verify the live state before changing anything.
-- При параллельном переезде сохраняй старые входы, ссылки и страницы до отдельного решения владельца. `share.esmien.com` работает параллельно `vpn.esmien.ru`: новый лендинг и подписка на TCP/443, старые на TCP/8443, UDP Hysteria обоих на 8443. `vpn-parallel-domain.service` (127.0.0.1:18744) динамически выдаёт актуальные страницы и три формата подписок с новым именем, перекодирует base64. Генератор `apply_brand.py` сохраняет оба SNI и раздельные nginx-сертификаты. Hysteria использует встроенный ACME DNS-01 и раздельные сертификаты по SNI; его конфиг содержит CF-токен и должен оставаться секретным. При изменении конфига сохраняй пустую строку после auth-блока — `hy2_users.py` ищет её как границу. Не прерывай тестовый DNS-01 посередине: временный TXT останется в Cloudflare и сорвёт повтор. Уже выпущенный общий сертификат навсегда остался в CT, хотя больше не обслуживает трафик. Проверяй страницы, три формата и реальные VLESS/Hysteria туннели на обоих доменах; локальный тест не доказывает доступность из сети клиента. Восстановление — README в vpn-service. Пуш в приватный репо идёт через credential-helper, который читает токен из файла: `git -c credential.helper='!f(){ echo username=x-access-token; echo "password=$(cat /root/.secrets/gh-token)"; }; f' push origin HEAD`. Токен не вставлять в remote URL и не повторять в чате; засветился — перевыпуск.
+- После окончательного переезда `share.esmien.com` — единственный публичный хост. Nginx напрямую выдаёт подписки и страницы на TCP/443 по `brand.json` (`sub_port`), Hysteria2 остаётся на UDP/8443 с собственным DNS-01. Общие выходы не зависят от имени входа. При снятии адаптера сначала сохрани защищённый снимок и запиши контрольные суммы опубликованных страниц и всех трёх форматов. Материализуй на диске ровно те байты, что выдавал адаптер, включая декодирование и повторное кодирование base64; проверь совпадение и оба туннеля до удаления DNS. Hysteria хранит токен CF в конфиге; при редактировании сохраняй пустую строку после блока `auth`, которую использует `hy2_users.py`.
 - When the owner requests private-first testing, stage the change separately and test only with his actual subscription and key; inspecting other profiles is fine, connecting with their keys is not. A localhost tunnel is not his device/network test. Deploy shared routing, ports or subscription changes only after his device validation unless he explicitly authorizes an immediate shared switch; report its blast radius. For a separate-port phone test, stage an isolated nginx listener and an owner-only subscription node, preserving his existing nodes and all other subscribers; verify local end-to-end first. Disclose if other valid keys also work, and after validation stop the listener, remove the temporary node and verify the port is closed. A different port validates the staged route, not actual production-port reachability or identical behavior.
 - Before retiring a listener, inspect current published profiles **and** recent use: refreshed subscriptions do not prove that every manually imported or stale client has migrated. Inspect every SNI/vhost sharing the socket: deleting one DNS record does not close a port or disable other names. Treat TCP and UDP on the same number independently; preserve the owner's UDP backup when discussing TCP closure. State which legacy subscriptions and clients would break; a broad request to reduce exposure is not permission to cut them off.
 - Before running `apply_brand.py`, inspect its actual side effects: it invokes subscription and page generators as well as rewriting nginx files. Disclose that scope, capture secret-safe before/after hashes when preservation matters, and suppress or sanitize generator output because it can contain subscription tokens. Report the script and outputs actually regenerated, not just «regenerated the template».
@@ -55,7 +55,7 @@ He runs this stack himself and treats reports as noise unless they answer the qu
 client -> nginx TLS on edge -> xray container (host network)
        -> direct, Gemini NL / Gemini-relay, or RU relays according to routing
 ```
-Main WS profiles use 443; subscription delivery and UDP backup use 8443. Check live firewall and listeners before naming other ports as available: a socket may still exist while external ingress is filtered.
+Main WS profiles and subscription delivery use TCP/443; UDP backup uses UDP/8443. Check live firewall and listeners before naming other ports as available: a socket may still exist while external ingress is filtered.
 
 **Высокий случайный порт — не «палево», но и не защита.** Голый TLS на 10605/14308 не маркер: так выглядят миллионы игровых серверов, панелей и БД. Маркирует комбинация — TLS на высоком порту плюс сертификат бесплатного DDNS (`*.chickenkiller.com`, `*.mooo.com`) или чужого бренда (`*.google.com`, Apple EV на IP хостера): с 2026 автоматика сверяет «SNI ↔ владелец адреса». Что порт реально даёт — уход от волн, бьющих по TLS-хендшейку **именно на 443** (ноябрь 2025, февраль и май 2026). Чего не даёт — ничего против SNI-фильтра, детекта протокола по первым ~16 КБ и активного зондирования, которые порт не смотрят. Цена: часть сетей (корпоративные, гостиничные, иногда мобильные) пускает только 80/443, и «у клиента не подключается» там вероятнее, чем находка сканера. Решение владельца 19.11.2026: **443 остаётся основным**, 8443 и hysteria2 UDP — резерв; высокий порт допустим только как третий вариант в подписке, не вместо 443. От блока подсети/AS (волна с августа 2026) порт-диверсия не спасает вообще.
 
@@ -217,7 +217,7 @@ freedom-аутбаунд с `sendThrough` **молча ломает дозвон
 (`/var/www/tech-esmien-ru`, vhost `tech.esmien.ru.conf` на 9443, серт `esmien-wildcard`), запись в CF
 **проксирована** — рукопожатие `dest` завершает Cloudflare, и молчание по адресу не светит. Голый
 чужеземный бренд (`www.microsoft.com`) на этом плече был ошибкой: SNI ↔ владелец адреса больше не
-сверяется, а свой домен в SNI не связывает хосты так, как это делало `vpn.esmien.ru` (публичный
+сверяется, а свой домен в SNI не связывает хосты так, как это делало `старый .ru VPN-хост` (публичный
 вход). Прокси в CF, а не серый A: иначе московский хост на каждом рукопожатии стучится в brand, и
 RU-хостер видит прямое плечо к нему. Цена — один RTT до `dest` на рукопожатие (Госуслуги 0.33-0.42 s).
 
@@ -266,7 +266,7 @@ VPN-узлов), `p17` — `AS57494 Adman` с `proxy:true, hosting:true` в ба
 
 Main WS nodes in meta subscriptions use port 443 and `brand.json` paths.public_general; `apply_brand.py` maps the exact external path to Xray's internal /general on the active blue/green port. Legacy /general stays on 443 **and** 8443 and must stay: on 20.11.2026 four real clients were still tunnelling through it (≈1.1 GB that morning on 8443), so retiring it silently cuts people off. `/ws`, `/fi` and `/p1…/p23` were retired the same day (404 on 443/8443/2087; `/fi` and `/pN` had answered 502 for weeks because those inbounds no longer exist) via `RETIRED_PUBLIC` in `apply_brand.py`, with `brand.json` losing the dead paths. Owner manual /france and /gemini routes are retired. Delivery and UDP remain on 8443. Check the active colour and generated nginx vhost on every flip, and test owner path end-to-end. Do not test other users' credentials when the owner limits testing to his subscription.
 
-`make_sub.py` renders three formats and nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. URL shape: `https://<host>:8443/sub/<token>` — preserve the configured subscription port; an independently working VPN tunnel on 443 does not establish that subscription delivery is configured there. The layout comes from the `kind` file in the token dir (`meta` = one node, `whitelist` = provider list, `full` = legacy 25-node list). **Только TLS:** подписка по `http://<IP>/sub/<token>` на :80 снята и заводить её заново нельзя — открытый текст отдаёт токен и весь список узлов любому на пути, а точечный блок 80-го убивает этот путь вслепую. Любой новый эндпоинт подписки/лендинга — только https на 8443.
+`make_sub.py` renders three formats and nginx picks one by User-Agent (`00-esmien-sub-map.conf`): Clash/Mihomo → `clash.yaml`, sing-box → `singbox.json`, everything else → base64 `list.txt`. URL shape: `https://share.esmien.com/sub/<token>` — preserve the configured subscription port; an independently working VPN tunnel on 443 does not establish that subscription delivery is configured there. The layout comes from the `kind` file in the token dir (`meta` = one node, `whitelist` = provider list, `full` = legacy 25-node list). **Только TLS:** подписка по `http://<IP>/sub/<token>` на :80 снята и заводить её заново нельзя — открытый текст отдаёт токен и весь список узлов любому на пути, а точечный блок 80-го убивает этот путь вслепую. Любой новый эндпоинт подписки/лендинга — только https на 8443.
 
 Full text → [references/subscription-shapes.md](references/subscription-shapes.md)
 
@@ -276,7 +276,7 @@ Full text → [references/subscription-shapes.md](references/subscription-shapes
 в `apply_brand.py` (руками файлы не править — генератор перезапишет):
 
 1. `nginx stream` (`/etc/nginx/stream.d/443-map.conf`) выбирает по адресу назначения и SNI:
-   `edge` + `vpn.esmien.ru` → `127.0.0.1:18443`; `brand` → обработчик сайтов, другие имена
+   `edge` + `share.esmien.com` → `127.0.0.1:18443`; `brand` → обработчик сайтов, другие имена
    на edge и имена на gemini отклоняются. Карта общая для 443 и 4443. Wildcard-сокет при этом
    остаётся слушать на gemini: отказ в stream — не закрытый TCP-порт.
 2. `/etc/nginx/conf.d/vpn-443-in.conf` — `listen 127.0.0.1:18443 ssl proxy_protocol`:
@@ -340,11 +340,11 @@ default -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol; unknown SNI -> r
   палево», не предлагать её как средство скрытности вообще** (ни REALITY, ни camel-SNI). Скрытность
   строим на своём имени, своём серте и честной заглушке; в отчётах о детектируемости REALITY не
   всплывает как «радикальный вариант», даже с оговорками.
-- **У Vision своё имя, а не то, на котором висят vhost'ы.** `vpn.esmien.ru` на 443 обязан уходить
+- **У Vision своё имя, а не то, на котором висят vhost'ы.** `старый .ru VPN-хост` на 443 обязан уходить
   в `default` — иначе отваливается legacy WS `/general`, которым ходят консольные клиенты.
   Поэтому SNI для Vision — отдельный поддомен (`edge.esmien.ru`, A-запись на наш IP через CF API).
   После любой правки карты проверять оба: `curl -o /dev/null -w '%{http_code}' --resolve
-  vpn.esmien.ru:8443:<ip> https://vpn.esmien.ru:8443/ws` (и `/general`) → `400`, плюс Vision
+  старый .ru VPN-хост:8443:<ip> https://share.esmien.com:8443/ws` (и `/general`) → `400`, плюс Vision
   сквозным клиентом через `edge.esmien.ru:4443`.
 - **TLS внутри Xray требует серта в контейнере.** Серты копируются в data-volume каждого цвета
   (`/usr/local/etc/xray/vision.crt|key`) хуком `certbot renew`; `validate()` в `vpn-bluegreen.py`
@@ -384,7 +384,7 @@ default -> 127.0.0.1:9443    # все vhost'ы, proxy_protocol; unknown SNI -> r
 - **Vision-фолбэк обязателен.** TLS-сервер, который завершает рукопожатие и молчит, — сам по себе
   отпечаток. `vision-in` отдаёт всё, что не VLESS, в локальный nginx-стаб:
   `"fallbacks": [{"dest": "127.0.0.1:8091"}]` + `root /var/www/vpn-stub`, и браузер на
-  `vpn.esmien.ru:443` получает валидный серт и обычную 200-страницу.
+  `старый .ru VPN-хост:443` получает валидный серт и обычную 200-страницу.
 - **Порт для фолбэка выбирать по `ss -tlnp`, а не по памяти.** `127.0.0.1:8081` был занят SearXNG:
   фолбэк отдавал `200`, но это была чужая страница, и проверка «код 200» ничего не заметила.
   Сверять тело/размер ответа (`size=181` у заглушки), а не только статус.
@@ -563,7 +563,7 @@ Per-token roll-out, never global: `python3 /root/vpn-router/hy2_users.py --apply
 старые воркеры продолжают принимать на всех адресах, а `nginx -T` уже показывает новый `listen` —
 конфиг врёт о реальности. Лечится `systemctl restart nginx` (секунда разрыва), и вот после него
 `ss -lntH | grep :8443` покажет только `<edge>:8443`. Доказательство сужения — не текст конфига,
-а отказ на старом адресе: `curl --resolve vpn.esmien.ru:8443:<brand>` → `000`, на `<edge>` → `200`.
+а отказ на старом адресе: `curl --resolve share.esmien.com:8443:<brand>` → `000`, на `<edge>` → `200`.
 
 **Сужение биндов живёт до первого `vpn-cfg apply`, если не поправлен шаблон.** `vpn-8443.conf`
 и `vpn-2087.conf` генерирует `apply_brand.py` — правка только в `/etc/nginx/conf.d`
@@ -600,7 +600,7 @@ Google-сервисов адрес выбирать по маркеру `this.gb
 
 ## Домен как точка отказа — доставку отделить от туннеля
 
-Владелец считает так: адрес — расходник (DNS TTL 300, пять минут), а имя хуже, потому что вшито в профили; SNI-блок `esmien.ru` убьёт и вход, и `/sub/`, и потребует ручной раздачи. Сейчас оба висят на `vpn.esmien.ru` — одна точка отказа. Что из этого следует: подписки живут на **отдельном регистрируемом домене** (не поддомене — правила матчатся по корню), туннельное имя становится расходником, а клиенты сами подтягивают новый узел за `profile-update-interval 12`. Reality тут — бонус (убирает имя из SNI), не основа: от TCP-заморозки и блока ASN он не спасает. Выбор зоны: `.com`/`.org` (Cloudflare Registrar — продление = регистрация, ~$10–11); `.us` отпадает (nexus: нужно присутствие в США), `.рф`/`.su` — та же юрисдикция, от которой страхуемся, промо-зоны (`.online`, `.shop`, `.tech`) дают вилку «−98% на год → втрое на продлении». **Юрисдикция регистратора важнее цены:** российский регистратор (nic.ru, Beget, Рег.ру) работает по требованиям РКН напрямую — страховка, выданная той же стороной, от которой страхуемся; Cloudflare и Porkbun клиентов из РФ принимают, оплата иностранной картой проходит, а часть западных (Namecheap, GoDaddy) после 2022 РФ не обслуживает — проверять у конкретного до оплаты. Брать сразу на 2–3 года: скачок продления в неудачный момент — более вероятная авария, чем бан. Reality тут — бонус (убирает имя из SNI), не основа: от TCP-заморозки и блока подсети не спасает.
+Владелец считает так: адрес — расходник (DNS TTL 300, пять минут), а имя хуже, потому что вшито в профили; SNI-блок `esmien.ru` убьёт и вход, и `/sub/`, и потребует ручной раздачи. Сейчас оба висят на `старый .ru VPN-хост` — одна точка отказа. Что из этого следует: подписки живут на **отдельном регистрируемом домене** (не поддомене — правила матчатся по корню), туннельное имя становится расходником, а клиенты сами подтягивают новый узел за `profile-update-interval 12`. Reality тут — бонус (убирает имя из SNI), не основа: от TCP-заморозки и блока ASN он не спасает. Выбор зоны: `.com`/`.org` (Cloudflare Registrar — продление = регистрация, ~$10–11); `.us` отпадает (nexus: нужно присутствие в США), `.рф`/`.su` — та же юрисдикция, от которой страхуемся, промо-зоны (`.online`, `.shop`, `.tech`) дают вилку «−98% на год → втрое на продлении». **Юрисдикция регистратора важнее цены:** российский регистратор (nic.ru, Beget, Рег.ру) работает по требованиям РКН напрямую — страховка, выданная той же стороной, от которой страхуемся; Cloudflare и Porkbun клиентов из РФ принимают, оплата иностранной картой проходит, а часть западных (Namecheap, GoDaddy) после 2022 РФ не обслуживает — проверять у конкретного до оплаты. Брать сразу на 2–3 года: скачок продления в неудачный момент — более вероятная авария, чем бан. Reality тут — бонус (убирает имя из SNI), не основа: от TCP-заморозки и блока подсети не спасает.
 
 **Согласованная схема (пока не построена):** подписки раздаёт Cloudflare — R2 с теми же файлами + Worker, повторяющий логику nginx `/sub/` и его заголовки; узлы переезжают на `.com`; `.ru` остаётся авангардом-редиректором. Честные границы: **узлы переезжают бесшумно**, а **URL подписки без действия человека не переносится** (301 живёт только пока старое имя резолвится; сохранит ли клиент адрес после редиректа — зависит от реализации, для Happ не проверено). CF-канал туннель не прикрывает: он по-прежнему коннектится на наш IP напрямую, так что шанс бана по адресу не падает — падает время восстановления. Жёсткий дедлайн не про РКН: продление `esmien.ru`.
 

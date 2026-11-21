@@ -14,8 +14,8 @@
    меняется), но на интерфейсе его нет: снаружи адрес молчит, Shodan его не знает.
 2. Сначала **непостоянно**: `ip addr add <IP>/32 dev ens3`. Именно `/32` — при `/24` ядро ставит
    on-link маршрут на всю чужую подсеть, и трафик к «соседям» уходит в ARP вместо шлюза.
-3. Локальная проверка: `curl -s -o /dev/null -w '%{http_code}' --resolve vpn.esmien.ru:8443:<IP>
-   https://vpn.esmien.ru:8443/` → `200`.
+3. Локальная проверка: `curl -s -o /dev/null -w '%{http_code}' --resolve share.esmien.com:8443:<IP>
+   https://share.esmien.com:8443/` → `302`.
 4. Только после этого постоянно: **отдельный** файл `/etc/netplan/60-extra-ip.yaml` с
    `addresses: [<IP>/32]`. `50-cloud-init.yaml` перегенерируется cloud-init при загрузке — правка
    в нём не выживает.

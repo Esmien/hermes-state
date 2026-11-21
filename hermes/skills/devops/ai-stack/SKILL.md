@@ -74,7 +74,7 @@ llm.esmien.ru   -> 127.0.0.1:4000  (litellm)      | — **только чере�
 bot.esmien.ru   -> 127.0.0.1:8000  (music bot)    | bot.esmien.qd.je
 mon.esmien.ru   -> 127.0.0.1:8090  (beszel hub)      | mon.esmien.qd.je
 search.esmien.ru -> 127.0.0.1:8081 (SearXNG, только с API-ключом) | —
-vpn.esmien.ru:8443 (VPN entry)                    | vpn.esmien.qd.je:8443
+share.esmien.com:443  (VPN entry)                    | vpn.esmien.qd.je:8443
 ```
 
 - **`app.esmien.ru` is not a second entry, it is a `301`** to `ai` (path + query kept, no proxying, no limits) — two names for one WebUI = two cookie sessions.
