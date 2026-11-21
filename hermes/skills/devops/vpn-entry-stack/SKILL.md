@@ -194,6 +194,26 @@ VLESS+Reality inbound wired in as outbound `ru1` is the shape: provisioning, fir
 IP-reputation acceptance test and rollback in `references/owned-ru-exit.md`; what to check on the
 box before wiring it, and the exit-node pitfalls — `references/ru-exit-node.md`.
 
+**`ru1` жив с 21.11.2026:** `217.197.114.197` (e-Style, Москва), VLESS+Reality, `dest` и
+`serverName` — наш собственный `vpn.esmien.ru` (своё имя и серт вместо маски под
+`www.microsoft.com`, которую владелец запретил как палево). 443 на хосте открыт только с
+`141.98.166.213`; второй инбаунд `direct-client` на 8443 (публичный прокси с нашим UUID, без
+логов и счётчиков) удалён — не возвращать. Путь проверяется без клиента: временный
+`xray run -c` на хосте с socks-инбаундом и единственным outbound `ru1`, затем
+`curl --socks5-hostname … https://ipinfo.io/ip` должен вернуть адрес этого хоста.
+
+**Правка маршрута в `config.json` живёт меньше минуты.** `vpn-scenarios.timer` раз в 60 с
+переписывает балансировщики из `scenario_override.json`, и он перекрывает `scenario_routes.py`.
+Менять надо override (и `scenario_routes.py` — для чистого деплоя), затем
+`systemctl start vpn-scenarios.service` и `vpn-cfg apply`; иначе `bal-ru` молча вернётся к
+`['p15','p17']`, а `apply` отрапортует успех. Что узел реально несёт трафик, видно по счётчикам:
+`docker exec vpn-router xray api statsquery --server=127.0.0.1:10185 -pattern "outbound>>>ru1"`.
+
+**«Недоступный» узел может быть просто лежащей машиной.** `ru1` сняли 08.11.2026 коммитом «drop the
+dead ru1 exit», а хост при проверке 21.11 оказался живым с uptime 11 дней — в день снятия он,
+видимо, лежал. Перед выводом «умер» смотреть `ssh … uptime` и `systemctl is-active xray`, а не
+только результат проб.
+
 **`ru1` already exists — do not provision it again.** `217.197.114.197` = `esmien-vds`, e-Style ISP
 Moscow (`ESTT-197114`), root over `/root/.ssh/id_ed25519_ru`, xray active on 443, UUIDs on both
 sides identical (compare hashes, never print the id). It was pulled from the rotation on 08.11.2026
