@@ -194,13 +194,25 @@ VLESS+Reality inbound wired in as outbound `ru1` is the shape: provisioning, fir
 IP-reputation acceptance test and rollback in `references/owned-ru-exit.md`; what to check on the
 box before wiring it, and the exit-node pitfalls — `references/ru-exit-node.md`.
 
-**`ru1` жив с 21.11.2026:** `217.197.114.197` (e-Style, Москва), VLESS+Reality, `dest` и
-`serverName` — наш собственный `vpn.esmien.ru` (своё имя и серт вместо маски под
-`www.microsoft.com`, которую владелец запретил как палево). 443 на хосте открыт только с
-`141.98.166.213`; второй инбаунд `direct-client` на 8443 (публичный прокси с нашим UUID, без
-логов и счётчиков) удалён — не возвращать. Путь проверяется без клиента: временный
-`xray run -c` на хосте с socks-инбаундом и единственным outbound `ru1`, затем
-`curl --socks5-hostname … https://ipinfo.io/ip` должен вернуть адрес этого хоста.
+**`ru1` жив с 21.11.2026:** `217.197.114.197` (e-Style, Москва), VLESS+Reality. 443 на хосте открыт
+**только с `85.92.158.238` (edge)**, второй инбаунд `direct-client` на 8443 (публичный прокси с
+нашим UUID) удалён — не возвращать. Путь проверяется без клиента: временный `xray run -c` на
+хосте с socks-инбаундом и единственным outbound `ru1`, затем `curl --socks5-hostname …
+https://ipinfo.io/ip` должен вернуть `217.197.114.197`.
+
+**Выход к `ru1` идёт с edge, а не с brand, и делается это SNAT'ом.** `sendThrough` на vless-аутбаунде
+**молча игнорируется** (проверено: соединения шли с `141.98.166.213`), а `sockopt.dialerProxy` на
+freedom-аутбаунд с `sendThrough` **молча ломает дозвон** (клиент отвечал `000`). Рабочий способ:
+`iptables -t nat -A POSTROUTING -d 217.197.114.197 -p tcp --dport 443 -j SNAT --to-source
+85.92.158.238`, закреплённый oneshot-юнитом `vpn-snat-ru1.service` (в репо `systemd/`).
+Проверка — только измерением: `ss -tnH state established "( dport = :443 )"` на хосте даёт
+исходный адрес (`awk '{print $3}'`), на московском — пир (`$5`); после SNAT там только `85.92.158.238`.
+`ru1` не должен светить brand-адрес: `141.*` остаётся чистым для AI-стека.
+
+**`dest`/`serverName` у `ru1` — не наш домен.** Соблазн поставить `vpn.esmien.ru` ("своё имя
+вместо чужого бренда") делает плечо Москва→Эстония похожим на трафик к VPN-домену и связывает
+два хоста в одну подпись — на этом входе это хуже, чем нейтральный чужой сайт. Оставлен
+`www.microsoft.com`; правильный выбор делает харнесс `scripts/reality-camo-probe.py`, а не вкус.
 
 **Правка маршрута в `config.json` живёт меньше минуты.** `vpn-scenarios.timer` раз в 60 с
 переписывает балансировщики из `scenario_override.json`, и он перекрывает `scenario_routes.py`.
