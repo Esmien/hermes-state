@@ -194,6 +194,17 @@ VLESS+Reality inbound wired in as outbound `ru1` is the shape: provisioning, fir
 IP-reputation acceptance test and rollback in `references/owned-ru-exit.md`; what to check on the
 box before wiring it, and the exit-node pitfalls — `references/ru-exit-node.md`.
 
+**`ru1` already exists — do not provision it again.** `217.197.114.197` = `esmien-vds`, e-Style ISP
+Moscow (`ESTT-197114`), root over `/root/.ssh/id_ed25519_ru`, xray active on 443, UUIDs on both
+sides identical (compare hashes, never print the id). It was pulled from the rotation on 08.11.2026
+(`62198ff`, «drop the dead ru1 exit») as unreachable — but the box was simply down then and came back
+~11.11, so «мёртвый» was a verdict on a single measurement. Before re-wiring, measure `uptime` and
+TCP/443 instead of trusting the old conclusion. Its old config masked under `www.microsoft.com`,
+which the owner has since banned; for a server→server leg carrying only RU traffic use our own
+subdomain, own cert and an honest stub. Value of `ru1` is independence from `p15`/`p17` (Moscow /
+Novosibirsk reseller relays), not stealth: the RU zone already exits from Russian addresses today,
+so RU services never see our VPS — and `ru1` does nothing about the client→foreign-entry leg.
+
 ## Subscription
 
 Main WS nodes in meta subscriptions use port 443 and `brand.json` paths.public_general; `apply_brand.py` maps the exact external path to Xray's internal /general on the active blue/green port. Legacy /general stays on 443 **and** 8443 and must stay: on 20.11.2026 four real clients were still tunnelling through it (≈1.1 GB that morning on 8443), so retiring it silently cuts people off. `/ws`, `/fi` and `/p1…/p23` were retired the same day (404 on 443/8443/2087; `/fi` and `/pN` had answered 502 for weeks because those inbounds no longer exist) via `RETIRED_PUBLIC` in `apply_brand.py`, with `brand.json` losing the dead paths. Owner manual /france and /gemini routes are retired. Delivery and UDP remain on 8443. Check the active colour and generated nginx vhost on every flip, and test owner path end-to-end. Do not test other users' credentials when the owner limits testing to his subscription.
