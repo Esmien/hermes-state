@@ -189,7 +189,7 @@ f73b934195a71ab4a111a45ee90ea2f050405a851f4ac11d47478721e50934be  ./hermes/skill
 8c5a41e1dbb2b6991f4099f2d1651dd61b308f0b91c5ce20aee87ccacd792355  ./hermes/skills/devops/vpn-entry-stack/references/blocking-risk.md
 8d6e84f7bc3ee1e4ffae4d75bfea06dc398e87cfcf83725a0aed1c33e74518d8  ./hermes/skills/devops/vpn-entry-stack/references/blue-green.md
 20859ca9bf377ff32d54c18825d8938183bb7938e3a394bb2670005f8c12aacb  ./hermes/skills/devops/vpn-entry-stack/references/borrowed-exit.md
-66782c01771fe6055c8277ce12ec71d0a0401e8fdf8e45f08dc827d1700eb9e0  ./hermes/skills/devops/vpn-entry-stack/references/certificates.md
+4d82b04bb1eb0b5023e52fa7cf6b29cae5046e5d632be2c0f3f2cbe0acb0d058  ./hermes/skills/devops/vpn-entry-stack/references/certificates.md
 402d56b78b0bbbf0a2966cf8de11732e88ef075ab35373acdab7117cb7541696  ./hermes/skills/devops/vpn-entry-stack/references/changing-public-host.md
 06131a1087ea5a31c0dd616e9c904447bea7348cd7de55a312a2df139a0f4cfa  ./hermes/skills/devops/vpn-entry-stack/references/client-drop-triage.md
 012b6285aead9f08565e65ae14b3dc5dc0e950e833460534ff73f2b8e8a4ca52  ./hermes/skills/devops/vpn-entry-stack/references/client-share-measurements.md
@@ -256,9 +256,10 @@ d5e0fb0efc3a9cc204dce85c9c449721ff299831f274dedeba9642c6b19aa10f  ./hermes/skill
 6089d1d7d5f1cc59b77d4147ea1b2b404175cec3888f095d4bc6e049f2f8391d  ./hermes/skills/devops/vps-network-exposure/scripts/faketls-probe.py
 0e5f1c63bf4472424787ef541a9599ae2649380b3cfd4201f74049610b3607ed  ./hermes/skills/devops/vps-network-exposure/scripts/port-audit.py
 5e780432952150f90883eff45349e648ab6e3417334b171b7d4215fd1f798ff3  ./hermes/skills/devops/vps-network-exposure/templates/vpn-subscription-generator.py
-aa74880e9efb1f80b2b71f1c7d472d89b2c0723c4dd887403a069d9fbc8d8c0a  ./hermes/skills/devops/vps-posture-assessment/SKILL.md
+51744db9ec81119fc054e58d71ec2b54949dc5eb427f21609a28184e863b5b0e  ./hermes/skills/devops/vps-posture-assessment/SKILL.md
 83bb952c9532373b508e3f534c4c7d75189eb6b628abeb91eab74ae8d0e4d83f  ./hermes/skills/devops/vps-posture-assessment/references/prompt-injection-defense.md
 d1a75067b4341cc720e209bb7494010cd07d291b625f9924e6240fdf9823e2af  ./hermes/skills/devops/vps-posture-assessment/references/recovery-rto.md
+2856b30507c028f7c59ee2e7c365e9140d5f76929ac16e5bd225f179d70cfb99  ./hermes/skills/devops/vps-posture-assessment/scripts/secret-leak-scan.py
 ee4da44acd0fa13e9866411ecb0a8bcdbf1f810dd3971d07506d8738ecaf6856  ./hermes/skills/devops/webui-ios-icons/SKILL.md
 2f4b0a57151aedb6a04ee72943ca60525507c84605ff1c00fbb97eae364e3eaa  ./hermes/skills/devops/webui-rebranding/SKILL.md
 60f89f2d81d4d525bb5f939f1c7703ed3992516188739987606029035d442767  ./hermes/skills/devops/webui-rebranding/references/upstream-upgrade.md
@@ -338,7 +339,7 @@ a22ee7e4187f72f387920df281c842125b8375373ec033b797489bf9517c0559  ./hermes/tasks
 9a8a4f9270a64de4ca700bb4fe574eeb100a1283facb50dc828d318d6551729c  ./host/ai-stack/backup-databases.sh
 d96aa7a19c6f8cb9218e45621bdcf6000726739a3af6a02cfa74402d637f2a01  ./host/ai-stack/runbook-containers.md
 846efb23aba0d86ee3b1086edc19cb47f2cb07426875cfeaaca852f62c8a811f  ./host/ai-stack/runbook.md
-f9007c1d7ab421bda6e6a885d4abde6581dda75ea6f4d007998f5c1d899e7122  ./host/backups/tg-registry.json
+f2264bdc5c305c4daba6b939fc758e5e62b6bc1143f8022b45cedffb75efab5c  ./host/backups/tg-registry.json
 601f3a6b2dcb7d4f6831141c84abd27b9a13d9c5ba989f7b7bb2a754d2d1bd56  ./host/bin/ai-memory-backup.sh
 3d999ff1ff6aaca44eea08c3683eca79b59a573ae5dc8bf9dba668e38a3e6d5f  ./host/bin/docker-detector-liveness.sh
 bb24baca67f479c8fb1ce9eb41fd9b3c4d1ba41f2bd03a2dda9d809074275eac  ./host/bin/docker-incident-agent.sh
@@ -352,7 +353,7 @@ f5186d18965a4d78b34c28daa67c62501a4d3939855de570f95cf0bf77e58943  ./host/bin/her
 956f0f2f8ae83828267575d4ac6c653e804b4bcce80e75b64b06caf792997aa3  ./host/bin/litellm-watchdog.py
 764bc62ccd10c7a4b51e32012de64fdbe4d329904b2440d7b89019b50d9db979  ./host/bin/owui-signup-approver.py
 1dca5d32c47197b2f671f06d3f45f8ea6c3e756417fd27413e9e4fd509bb299c  ./host/bin/searxng-quality-check.py
-dddd1e9d4ddd41e3e3122f6f9bef6266953fc26a5650ec4c800b30c69fc6cb7a  ./host/bin/secrets-offsite-backup.py
+4e63d797261b4282aa1d6f5cd805bd2f73b9722dcab45b5a90bf9a439d7fd107  ./host/bin/secrets-offsite-backup.py
 42d76cebc17fefeb9e49a7b007e11aa7a538a359ffdbdcf08585a8c069c8dab6  ./host/bin/tor-rotate.sh
 20ff03e6cf44682eb7cad75deee62e4dc66fe8d981a3ee1d06d3800fab714e04  ./host/bin/webui-compact-images.sh
 d48070a0b5da6e9bba3bf6315495f7f62502f60e7e7b74d64b6009f8468a239c  ./host/bin/webui-data-backup.py

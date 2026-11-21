@@ -61,6 +61,13 @@ Companion skills: `ai-stack` (what is inside the AI stack, and the backup verifi
   offsite encrypted copy now (`secrets-offsite-backup.timer`, weekly, AES-256, file bot) — check it before
   calling access a gap. What remains is narrower: the archive's passphrase was delivered once into Telegram and
   exists nowhere else, and the list of where DNS/tokens/accounts come from still lives in the owner's head.
+  **Coverage is an explicit pattern list, not «все секреты»:** `SOURCE_PATTERNS` in
+  `/usr/local/bin/secrets-offsite-backup.py` holds `.env` paths plus `/etc/turnstile-gate.env`;
+  `/root/.secrets/*.ini|*.key|*.json` (Cloudflare tokens, the offsite passphrase itself, reality/Hysteria keys)
+  are **not** in it, so those live in exactly one copy on the host. Read the list, then say which class is
+  covered and which is not — quoting the timer as «секреты уезжают» overstates it.
+  Also compare the timer's `LAST` against its own period (`systemctl show <unit>.timer -p LastTriggerUSec`):
+  a weekly job whose last run is six days old is overdue, not healthy.
 
 - **A timer that runs is not a timer that does something.** `systemctl list-timers` proves scheduling only.
   Read `ExecStart`, then the script's config sources: `deadman-ping` ran every 5 min for weeks with no
@@ -101,6 +108,28 @@ Companion skills: `ai-stack` (what is inside the AI stack, and the backup verifi
   this host — `references/prompt-injection-defense.md`. Never let an LLM-judge or a "prompt that forbids
   following pages" be counted as a control.
 
+## Secret-leak audit («а токен не закоммичен?»)
+
+A standing question with two different answers that must not be merged: **утекло** (value is in a repo, worktree
+or history) vs **потеряемо** (value exists only on the host).
+
+1. **Never take the value through argv or chat.** Read it from the file inside the scanning process; the script
+   does this for you: `scripts/secret-leak-scan.py --source /root/.secrets/cf.ini` (or
+   `--source /etc/hysteria/config.yaml --key cloudflare_api_token`). It prints lengths, repo names, counts and
+   redacted context only, and exits 1 on a hit.
+2. **History matters as much as the worktree.** `git grep -F` proves the current tree is clean; only
+   `git log --all -S <value>` proves the value never travelled. A hit in history means rotate **and** decide about
+   the commit — do not force-push a recovery repo to hide it.
+3. **Audit every repo, including the harness snapshot.** Recovery repos and the hermes-state live clone
+   `/var/lib/hermes-state/repo` (not `/root/.hermes`, which is *not* a git repo). Plaintext placeholders
+   (`__CLOUDFLARE_API_TOKEN__`) in templates are the expected shape, not a finding.
+4. **Hunt the materialised copy too.** Installers substitute a placeholder from a secrets file into a live config
+   (`/etc/hysteria/config.yaml` is written once by `install-hysteria.sh` and keeps the token). That copy is in
+   neither recovery repo — good for git, and the second place a host loss takes with it. Say both.
+5. **Verify which secret a service actually got, by value.** Skills document the canonical file; the running
+   service may hold a different token from a second file (two Cloudflare tokens coexist here). Comparing values
+   beats trusting the documentation.
+
 ## Scope decisions (same rule: do not re-argue)
 
 - **Targeted attack is out of scope by design**: an unadvertised family service, no marketing, no public signup funnel worth attacking. Do not model APT-style scenarios and do not sell countermeasures against them.
@@ -132,6 +161,8 @@ re-argue it in the same answer.
 
 ## References
 
+- `scripts/secret-leak-scan.py` — checks a secret value against every recovery repo's worktree **and** history,
+  then lists secret-shaped literals on recently added lines (redacted). Use it instead of hand-written greps.
 - `references/prompt-injection-defense.md` — threat surface, the controls that actually hold (egress allowlist,
   pattern hooks, secret isolation, reader profile), what is theatre, and the honest ceiling with root +
   `docker.sock`.
